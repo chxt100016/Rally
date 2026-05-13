@@ -1,0 +1,18 @@
+spring:
+    datasource:
+        url: jdbc:mysql://192.168.1.10:3306/fan?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+        username: root
+        password: root
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+
+job:
+  tennis:
+    enabled: true
+    collect:
+      draws:
+        cron: "0 0 */1 * * ?"
+      matches:
+        cron: "0 0 */1 * * ?"
+      live:
+        cron: "0 */5 * * * ?"

@@ -1,0 +1,13 @@
+server:
+    port: 9482
+    servlet:
+        context-path: /api/rally
+spring:
+    application:
+        name: rally
+    profiles:
+        active: dev
+
+deepseek:
+    api-key: ${DEEPSEEK_API_KEY:your-key-here}
+    api-url: https://api.deepseek.com/chat/completions

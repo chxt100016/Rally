@@ -1,0 +1,23 @@
+<configuration>
+    <!-- 关闭 Logback 内部日志 -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <!-- 启用 JANSI 支持彩色输出 -->
+    <conversionRule conversionWord="highlight" converterClass="ch.qos.logback.classic.pattern.color.HighlightingCompositeConverter" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 启用 ANSI 颜色输出 -->
+        <withJansi>true</withJansi>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %logger{36} - %msg%n%red(%xException{full})</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- 设置根日志级别为INFO -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+    
+    <!-- 特别设置com.alibaba的日志级别为WARN -->
+    <logger name="com.alibaba" level="WARN" />
+</configuration>

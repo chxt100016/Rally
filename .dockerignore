@@ -1,0 +1,10 @@
+.git
+.idea
+*.iml
+.DS_Store
+.vscode
+docs
+sql
+utils
+README.md
+start/docker
