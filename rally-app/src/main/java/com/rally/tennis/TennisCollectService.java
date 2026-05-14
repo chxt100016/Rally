@@ -6,6 +6,7 @@ import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaDrawsResponse;
 import com.rally.client.wta.model.WtaMatchesResponse;
 import com.rally.db.tennis.entity.TennisTournamentPO;
+import com.rally.tennis.model.TourEnums;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -66,31 +67,38 @@ public class TennisCollectService {
      * 指定签表
      */
     public void draws(String tour, String tournamentId, int year) {
-        if (tour.equals("ATP")) {
-            AtpDrawsResponse response = tennisTvClient.getDraws(tournamentId, year);
-            if (response != null && response.getMS() != null && CollectionUtils.isNotEmpty(response.getMS().getRounds())) {
-                // 签表
-                Long drawId = this.drawCollectService.atp(response, tournamentId, year);
-                // 比赛
-                this.matchCollectService.atpFromDraw(response, tournamentId, drawId, year);
-                // 球员赛事登记
-                this.tournamentCollectService.atpTournamentEntry(response, tournamentId, year, drawId, "MS");
-                // 球员
-                this.playerCollectService.atpFromDraw(response);
-            }
-        } else if (tour.equals("WTA")) {
-            WtaDrawsResponse response = wtaClient.getDraws(tournamentId, year);
-            if (response != null && response.getData() != null
-                    && CollectionUtils.isNotEmpty(response.getData().getResults())) {
-                // 签表
-                Long drawId = this.drawCollectService.wta(response, tournamentId, year);
-                // 比赛
-                this.matchCollectService.wtaFromDraw(response, tournamentId, drawId, year);
-                // 球员赛事登记
-                this.tournamentCollectService.wtaTournamentEntry(response, tournamentId, year, drawId);
-                // 球员
-                this.playerCollectService.wtaFromDraw(response);
-            }
+        switch (TourEnums.valueOf(tour)) {
+            case ATP -> parseAtpDraw(tournamentId, year);
+            case WTA -> parseWtaDraw(tournamentId, year);
+        }
+    }
+
+    private void parseAtpDraw(String tournamentId, int year) {
+        AtpDrawsResponse response = tennisTvClient.getDraws(tournamentId, year);
+        if (response != null && response.getMS() != null && CollectionUtils.isNotEmpty(response.getMS().getRounds())) {
+            // 签表
+            Long drawId = this.drawCollectService.atp(response, tournamentId, year);
+            // 比赛
+            this.matchCollectService.atpFromDraw(response, tournamentId, drawId, year);
+            // 球员赛事登记
+            this.tournamentCollectService.atpTournamentEntry(response, tournamentId, year, drawId, "MS");
+            // 球员
+            this.playerCollectService.atpFromDraw(response);
+        }
+    }
+
+    private void parseWtaDraw(String tournamentId, int year) {
+        WtaDrawsResponse response = wtaClient.getDraws(tournamentId, year);
+        if (response != null && response.getData() != null
+                && CollectionUtils.isNotEmpty(response.getData().getResults())) {
+            // 签表
+            Long drawId = this.drawCollectService.wta(response, tournamentId, year);
+            // 比赛
+            this.matchCollectService.wtaFromDraw(response, tournamentId, drawId, year);
+            // 球员赛事登记
+            this.tournamentCollectService.wtaTournamentEntry(response, tournamentId, year, drawId);
+            // 球员
+            this.playerCollectService.wtaFromDraw(response);
         }
     }
 
