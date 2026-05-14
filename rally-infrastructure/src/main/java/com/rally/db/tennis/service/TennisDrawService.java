@@ -11,6 +11,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TennisDrawService extends ServiceImpl<TennisDrawMapper, TennisDrawPO> {
 
+    public Long findId(String tournamentId, Integer year, String drawType) {
+        TennisDrawPO po = this.lambdaQuery()
+                .eq(TennisDrawPO::getTournamentId, tournamentId)
+                .eq(TennisDrawPO::getYear, year)
+                .eq(TennisDrawPO::getDrawType, drawType)
+                .one();
+        return po != null ? po.getId() : null;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public Long saveOrUpdate(String tournamentId, Integer year, String drawType, Integer size, Integer totalRounds) {
         TennisDrawPO existing = this.lambdaQuery()

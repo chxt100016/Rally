@@ -31,16 +31,19 @@ public class TennisMatchService extends ServiceImpl<TennisMatchMapper, TennisMat
                 .in(TennisMatchPO::getMatchId, matchIds)
                 .list()
                 .stream()
-                .collect(Collectors.toMap(TennisMatchPO::getMatchId, m -> m, (a, b) -> a));
+                .collect(Collectors.toMap(
+                        m -> m.getMatchId() + "|" + m.getDrawId(),
+                        m -> m,
+                        (a, b) -> a));
 
         List<TennisMatchPO> toInsert = matches.stream()
-                .filter(m -> m.getMatchId() == null || !existMap.containsKey(m.getMatchId()))
+                .filter(m -> m.getMatchId() == null || !existMap.containsKey(m.getMatchId() + "|" + m.getDrawId()))
                 .toList();
 
         List<TennisMatchPO> toUpdate = matches.stream()
-                .filter(m -> m.getMatchId() != null && existMap.containsKey(m.getMatchId()))
+                .filter(m -> m.getMatchId() != null && existMap.containsKey(m.getMatchId() + "|" + m.getDrawId()))
                 .peek(m -> {
-                    TennisMatchPO po = existMap.get(m.getMatchId());
+                    TennisMatchPO po = existMap.get(m.getMatchId() + "|" + m.getDrawId());
                     m.setId(po.getId());
                 })
                 .toList();

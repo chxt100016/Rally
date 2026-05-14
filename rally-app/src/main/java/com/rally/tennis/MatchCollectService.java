@@ -9,6 +9,7 @@ import com.rally.client.wta.model.WtaDrawsResponse;
 import com.rally.client.wta.model.WtaMatchesResponse;
 import com.rally.db.tennis.entity.TennisMatchPO;
 import com.rally.db.tennis.entity.TennisSetScorePO;
+import com.rally.db.tennis.repository.TennisDrawRepository;
 import com.rally.db.tennis.repository.TennisMatchRepository;
 import com.rally.db.tennis.repository.TennisSetScoreRepository;
 import com.rally.domain.tennis.model.TennisRoundEnum;
@@ -42,6 +43,9 @@ public class MatchCollectService {
 
     @Resource
     private WtaClient wtaClient;
+
+    @Resource
+    private TennisDrawRepository tennisDrawRepository;
 
     public int collect(List<MatchesResponse.MatchInfo> matches) {
         if (CollectionUtils.isEmpty(matches)) {
@@ -162,6 +166,13 @@ public class MatchCollectService {
             if (CollectionUtils.isEmpty(tournament.getOop())) {
                 continue;
             }
+            String tournamentId = String.valueOf(tournament.getId());
+            Long drawId = tennisDrawRepository.findId(tournamentId, tournament.getYear(), "MS");
+            if (drawId == null) {
+                log.info("签表不存在，跳过OOP收集: tournamentId={}, year={}", tournamentId, tournament.getYear());
+                continue;
+            }
+
             for (AtpOopResponse.OopDay day : tournament.getOop()) {
                 if (day.getCourts() == null) {
                     continue;
@@ -178,15 +189,14 @@ public class MatchCollectService {
                             continue;
                         }
                         Match match = OopMatchAppConvertMapper.INSTANCE.toMatch(detail);
+                        match.setDrawId(drawId);
 
-                        // 处理 "Followed By" 的情况：使用上一场比赛时间 + 70分钟
                         if ("Followed By".equals(detail.getNotBeforeText()) && match.getScheduledAt() == null) {
                             if (lastMatchScheduledAt != null) {
                                 match.setScheduledAt(lastMatchScheduledAt.plusMinutes(70));
                             }
                         }
 
-                        // 更新上一场比赛的时间
                         if (match.getScheduledAt() != null) {
                             lastMatchScheduledAt = match.getScheduledAt();
                         }
@@ -219,7 +229,7 @@ public class MatchCollectService {
     /**
      * 更新进行中的比赛：时长、状态、盘分、场地、球员
      */
-    public void updateLiveMatches(List<MatchesResponse.MatchInfo> matches) {
+    public void updateLiveMatches(List<MatchesResponse.MatchInfo> matches, Map<String, Long> drawIdMap) {
         if (CollectionUtils.isEmpty(matches)) {
             return;
         }
@@ -230,7 +240,8 @@ public class MatchCollectService {
         for (MatchesResponse.MatchInfo info : matches) {
             Match match = new Match();
             match.setMatchId(info.getMatchId());
-            match.setTournamentId(info.getTournamentId() != null ? String.valueOf(info.getTournamentId()) : null);
+            String tournamentId = info.getTournamentId() != null ? String.valueOf(info.getTournamentId()) : null;
+            match.setTournamentId(tournamentId);
             match.setYear(info.getTournamentYear());
             match.setPlayer1Id(info.getPlayerTeam1() != null ? info.getPlayerTeam1().getPlayerId() : null);
             match.setPlayer2Id(info.getPlayerTeam2() != null ? info.getPlayerTeam2().getPlayerId() : null);
@@ -238,9 +249,11 @@ public class MatchCollectService {
             match.setCourt(info.getCourtName());
             match.setDurationMinutes(parseDuration(info.getMatchTime()));
             match.setCourtSeq(info.getCourtSeq());
+            if (tournamentId != null && info.getTournamentYear() != null) {
+                match.setDrawId(drawIdMap.get(tournamentId + "|" + info.getTournamentYear()));
+            }
             allMatches.add(match);
 
-            // 提取盘分：合并两个 PlayerTeam 同一 SetNumber 的数据
             allSetScores.addAll(buildSetScores(info, match.getTournamentId(), match.getYear()));
         }
 
@@ -302,7 +315,7 @@ public class MatchCollectService {
      * 业务唯一键：matchId + tournamentId + year，与 tennis_match 表的唯一索引保持一致
      */
     private static String uniqueKey(TennisMatchPO po) {
-        return po.getMatchId() + "|" + po.getTournamentId() + "|" + po.getYear();
+        return po.getMatchId() + "|" + po.getDrawId();
     }
 
     private void saveSetScores(List<Match> matches) {
@@ -401,11 +414,47 @@ public class MatchCollectService {
             log.info("无进行中的比赛");
             return;
         }
-        this.updateLiveMatches(response.getMatches());
+
+        Map<String, Long> drawIdMap = new HashMap<>();
+        for (MatchesResponse.MatchInfo info : response.getMatches()) {
+            String tournamentId = info.getTournamentId() != null ? String.valueOf(info.getTournamentId()) : null;
+            Integer year = info.getTournamentYear();
+            if (tournamentId == null || year == null) continue;
+            String key = tournamentId + "|" + year;
+            if (!drawIdMap.containsKey(key)) {
+                Long drawId = tennisDrawRepository.findId(tournamentId, year, "MS");
+                if (drawId == null) {
+                    log.info("签表不存在，跳过ATP进行中比赛收集: tournamentId={}, year={}", tournamentId, year);
+                    drawIdMap.put(key, -1L);
+                } else {
+                    drawIdMap.put(key, drawId);
+                }
+            }
+        }
+
+        List<MatchesResponse.MatchInfo> filtered = response.getMatches().stream()
+                .filter(info -> {
+                    String tid = info.getTournamentId() != null ? String.valueOf(info.getTournamentId()) : null;
+                    Integer yr = info.getTournamentYear();
+                    if (tid == null || yr == null) return false;
+                    Long drawId = drawIdMap.get(tid + "|" + yr);
+                    return drawId != null && drawId > 0;
+                })
+                .toList();
+
+        this.updateLiveMatches(filtered, drawIdMap);
     }
 
     public void wtaFromLive(List<WtaMatchesResponse.MatchItem> matches) {
         if (CollectionUtils.isEmpty(matches)) return;
+
+        String tournamentId = matches.get(0).getEventID();
+        Integer year = matches.get(0).getEventYear();
+        Long drawId = tennisDrawRepository.findId(tournamentId, year, "LS");
+        if (drawId == null) {
+            log.info("签表不存在，跳过WTA进行中比赛收集: tournamentId={}, year={}", tournamentId, year);
+            return;
+        }
 
         List<Match> allMatches = new ArrayList<>();
         for (WtaMatchesResponse.MatchItem m : matches) {
@@ -413,6 +462,7 @@ public class MatchCollectService {
             match.setMatchId(m.getMatchID());
             match.setTournamentId(m.getEventID());
             match.setYear(m.getEventYear());
+            match.setDrawId(drawId);
             match.setStatus(MatchStatus.toStatus(m.getMatchState()));
             match.setDurationMinutes(parseDuration(m.getMatchTimeTotal()));
             match.setWinnerId(resolveWtaWinner(m.getWinner(), m.getPlayerIDA(), m.getPlayerIDB()));
@@ -451,6 +501,12 @@ public class MatchCollectService {
     }
 
     public void wtaFromOop(String tournamentId, int year) {
+        Long drawId = tennisDrawRepository.findId(tournamentId, year, "LS");
+        if (drawId == null) {
+            log.info("签表不存在，跳过WTA OOP收集: tournamentId={}, year={}", tournamentId, year);
+            return;
+        }
+
         WtaMatchesResponse response = wtaClient.getMatches(tournamentId, year);
 
         List<WtaMatchesResponse.MatchItem> matches = response.getMatches().stream()
@@ -459,14 +515,13 @@ public class MatchCollectService {
 
         if (CollectionUtils.isEmpty(matches)) return;
 
-
         List<Match> allMatches = new ArrayList<>();
         for (WtaMatchesResponse.MatchItem m : matches) {
             Match match = new Match();
             match.setMatchId(m.getMatchID());
             match.setTournamentId(tournamentId);
             match.setYear(year);
-
+            match.setDrawId(drawId);
 
             match.setPlayer1Id(m.getPlayerIDA());
             match.setPlayer2Id(m.getPlayerIDB());
