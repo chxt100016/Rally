@@ -90,10 +90,10 @@ CREATE TABLE tennis_tournament_entry (
 DROP TABLE IF EXISTS tennis_match;
 CREATE TABLE tennis_match (
     id               BIGINT      NOT NULL AUTO_INCREMENT,
-    match_id         VARCHAR(50) COMMENT '外部API返回的比赛ID，如 MS008',
-    draw_id          BIGINT      COMMENT '签表ID',
-    tournament_id    VARCHAR(50) COMMENT '外部赛事ID，便于按赛事查询',
-    year             INT         COMMENT '赛事年份',
+    match_id         VARCHAR(50) NOT NULL COMMENT '外部API返回的比赛ID，如 MS008',
+    draw_id          BIGINT      NOT NULL COMMENT '签表ID',
+    tournament_id    VARCHAR(50) NOT NULL COMMENT '外部赛事ID，便于按赛事查询',
+    year             INT         NOT NULL COMMENT '赛事年份',
     round_number     TINYINT     COMMENT '轮次序号：1=首轮，7=决赛（128签）',
     round_name       VARCHAR(32) COMMENT 'R128 / R64 / R32 / R16 / QF / SF / F',
     player1_id       VARCHAR(50) COMMENT '外部球员ID，未确定对阵时允许为 NULL',
