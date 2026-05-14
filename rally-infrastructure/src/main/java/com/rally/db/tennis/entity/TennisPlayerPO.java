@@ -26,8 +26,9 @@ public class TennisPlayerPO {
     private String nationality;
     private LocalDate birthDate;
     private String gender;
-    @TableField("`ranking`")
-    private Integer ranking;
+    @TableField("`rank`")
+    private Integer rank;
+    private Integer points;
     private String hand;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

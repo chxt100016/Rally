@@ -3,52 +3,58 @@ package com.rally.domain.tennis.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/**
- * 国家代码枚举
- */
 @Getter
 @AllArgsConstructor
 public enum CountryEnum {
 
-    IT("IT", "意大利"),
-    ES("ES", "西班牙"),
-    RS("RS", "塞尔维亚"),
-    DE("DE", "德国"),
-    RU("RU", "俄罗斯"),
-    DK("DK", "丹麦"),
-    PL("PL", "波兰"),
-    US("US", "美国"),
-    BG("BG", "保加利亚"),
-    FR("FR", "法国"),
-    GB("GB", "英国"),
-    CH("CH", "瑞士"),
-    GR("GR", "希腊"),
-    HR("HR", "克罗地亚"),
-    AU("AU", "澳大利亚"),
-    CA("CA", "加拿大"),
-    JP("JP", "日本"),
-    CN("CN", "中国"),
-    AR("AR", "阿根廷"),
-    CL("CL", "智利"),
-    BE("BE", "比利时"),
-    NL("NL", "荷兰"),
-    SR("SR", "塞尔维亚"),
-    KZ("KZ", "哈萨克斯坦"),
-    CZ("CZ", "捷克"),
-    SK("SK", "斯洛伐克"),
-    NO("NO", "挪威"),
-    SE("SE", "瑞典"),
-    FI("FI", "芬兰"),
-    PT("PT", "葡萄牙");
+    ITA("ITA", "意大利"),
+    ESP("ESP", "西班牙"),
+    SRB("SRB", "塞尔维亚"),
+    GER("GER", "德国"),
+    RUS("RUS", "俄罗斯"),
+    DNK("DNK", "丹麦"),
+    POL("POL", "波兰"),
+    USA("USA", "美国"),
+    BGR("BGR", "保加利亚"),
+    FRA("FRA", "法国"),
+    GBR("GBR", "英国"),
+    CHE("CHE", "瑞士"),
+    GRC("GRC", "希腊"),
+    HRV("HRV", "克罗地亚"),
+    AUS("AUS", "澳大利亚"),
+    CAN("CAN", "加拿大"),
+    JPN("JPN", "日本"),
+    CHN("CHN", "中国"),
+    ARG("ARG", "阿根廷"),
+    CHL("CHL", "智利"),
+    BEL("BEL", "比利时"),
+    NED("NED", "荷兰"),
+    KAZ("KAZ", "哈萨克斯坦"),
+    CZE("CZE", "捷克"),
+    SVK("SVK", "斯洛伐克"),
+    NOR("NOR", "挪威"),
+    SWE("SWE", "瑞典"),
+    FIN("FIN", "芬兰"),
+    PRT("PRT", "葡萄牙"),
+    BLR("BLR", "白俄罗斯"),
+    ROU("ROU", "罗马尼亚"),
+    UKR("UKR", "乌克兰"),
+    BRA("BRA", "巴西"),
+    COL("COL", "哥伦比亚"),
+    HUN("HUN", "匈牙利"),
+    GEO("GEO", "格鲁吉亚"),
+    LAT("LAT", "拉脱维亚"),
+    AUT("AUT", "奥地利"),
+    RSA("RSA", "南非"),
+    TPE("TPE", "中国台湾"),
+    THA("THA", "泰国"),
+    IND("IND", "印度"),
+    MEX("MEX", "墨西哥"),
+    TUN("TUN", "突尼斯");
 
     private final String code;
     private final String name;
 
-    /**
-     * 根据国家代码获取国家信息
-     * @param code 国家代码
-     * @return 国家信息，找不到时返回默认值
-     */
     public static CountryVO getCountry(String code) {
         if (code == null) {
             return null;
@@ -61,7 +67,6 @@ public enum CountryEnum {
                 return country;
             }
         }
-        // 找不到时返回 code 作为 name
         CountryVO country = new CountryVO();
         country.setCode(code);
         country.setName(code);

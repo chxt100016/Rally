@@ -1,17 +1,22 @@
 package com.rally.tennis;
 
+import com.rally.client.atp.AtpClient;
+import com.rally.client.atp.model.AtpRankingsResponse;
 import com.rally.client.tennistv.TennisTvClient;
 import com.rally.client.tennistv.model.AtpDrawsResponse;
 import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaDrawsResponse;
 import com.rally.client.wta.model.WtaMatchesResponse;
+import com.rally.client.wta.model.WtaRankingsResponse;
 import com.rally.db.tennis.entity.TennisTournamentPO;
+import com.rally.tennis.model.Player;
 import com.rally.tennis.model.TourEnums;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -23,6 +28,9 @@ public class TennisCollectService {
 
     @Resource
     private WtaClient wtaClient;
+
+    @Resource
+    private AtpClient atpClient;
 
     @Resource
     private TournamentCollectService tournamentCollectService;
@@ -138,6 +146,79 @@ public class TennisCollectService {
             } catch (Exception e) {
                 log.error("采集WTA进行中比赛失败, tournamentId={}", tournament.getTournamentId(), e);
             }
+        }
+    }
+
+    /**
+     * 采集 ATP 和 WTA 球员排名
+     */
+    public void rank() {
+        atpRank();
+        wtaRank();
+    }
+
+    private void atpRank() {
+        AtpRankingsResponse response = atpClient.getRankings(1, 100);
+        if (response == null || response.getData() == null
+                || response.getData().getRankings() == null
+                || CollectionUtils.isEmpty(response.getData().getRankings().getPlayers())) {
+            log.warn("ATP排名数据为空");
+            return;
+        }
+        List<Player> players = response.getData().getRankings().getPlayers().stream()
+                .map(this::fromAtpRanking)
+                .toList();
+        playerCollectService.savePlayers(players, "ATP");
+        log.info("ATP排名采集完成: {}条", players.size());
+    }
+
+    private void wtaRank() {
+        WtaRankingsResponse response = wtaClient.getRankings(1, 100);
+        if (response == null || response.getData() == null
+                || response.getData().getRankings() == null
+                || CollectionUtils.isEmpty(response.getData().getRankings().getPlayers())) {
+            log.warn("WTA排名数据为空");
+            return;
+        }
+        List<Player> players = response.getData().getRankings().getPlayers().stream()
+                .map(this::fromWtaRanking)
+                .toList();
+        playerCollectService.savePlayers(players, "WTA");
+        log.info("WTA排名采集完成: {}条", players.size());
+    }
+
+    private Player fromAtpRanking(AtpRankingsResponse.PlayerRanking r) {
+        Player p = new Player();
+        p.setPlayerId(r.getPlayerId());
+        p.setFirstName(r.getFirstName());
+        p.setLastName(r.getLastName());
+        p.setNationality(r.getNatlId());
+        p.setRank(r.getRank());
+        p.setPoints(r.getPoints());
+        p.setBirthDate(parseDate(r.getBirthDate()));
+        return p;
+    }
+
+    private Player fromWtaRanking(WtaRankingsResponse.PlayerRanking r) {
+        Player p = new Player();
+        p.setPlayerId(r.getPlayerId());
+        p.setFirstName(r.getFirstName());
+        p.setLastName(r.getLastName());
+        p.setNationality(r.getNatlId());
+        p.setRank(r.getRank());
+        p.setPoints(r.getPoints());
+        p.setBirthDate(parseDate(r.getBirthDate()));
+        return p;
+    }
+
+    private LocalDate parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) return null;
+        try {
+            // API 返回格式如 "2001-08-16T00:00:00"，取前 10 位
+            return LocalDate.parse(dateStr.length() > 10 ? dateStr.substring(0, 10) : dateStr);
+        } catch (Exception e) {
+            log.debug("解析日期失败: {}", dateStr);
+            return null;
         }
     }
 }

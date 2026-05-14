@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,6 +25,9 @@ public class TennisQueryService {
 
     @Resource
     private MatchQueryGateway matchQueryGateway;
+
+    @Resource
+    private com.rally.db.tennis.repository.TennisPlayerRepository tennisPlayerRepository;
 
     /**
      * 查询赛事列表，支持按状态、类型和时间范围筛选
@@ -457,5 +461,31 @@ public class TennisQueryService {
             }
         }
         return null;
+    }
+
+    public List<PlayerQueryVO> queryPlayers(String tour) {
+        if (tour == null || tour.isBlank()) return List.of();
+        List<com.rally.db.tennis.entity.TennisPlayerPO> players =
+                tennisPlayerRepository.listByTourOrderByRank(tour.toUpperCase());
+        LocalDate today = LocalDate.now();
+        return players.stream()
+                .map(po -> toPlayerQueryVO(po, today))
+                .toList();
+    }
+
+    private PlayerQueryVO toPlayerQueryVO(com.rally.db.tennis.entity.TennisPlayerPO po, LocalDate today) {
+        PlayerQueryVO vo = new PlayerQueryVO();
+        vo.setId(po.getPlayerId());
+        vo.setRank(po.getRank());
+        String first = po.getFirstName() != null ? po.getFirstName() : "";
+        String last  = po.getLastName()  != null ? po.getLastName()  : "";
+        vo.setName((first + " " + last).trim());
+        vo.setCountry(CountryEnum.getCountry(po.getNationality()));
+        vo.setPoints(po.getPoints());
+        if (po.getBirthDate() != null) {
+            vo.setAge(Period.between(po.getBirthDate(), today).getYears());
+            vo.setBirthDate(po.getBirthDate().format(DATE_FMT));
+        }
+        return vo;
     }
 }

@@ -20,18 +20,21 @@ public interface PlayerAppConvertMapper {
     @Mapping(target = "lastName", source = "playerLastName")
     @Mapping(target = "nationality", source = "playerCountryCode")
     @Mapping(target = "rank", ignore = true)
+    @Mapping(target = "points", ignore = true)
     @Mapping(target = "birthDate", ignore = true)
     @Mapping(target = "gender", ignore = true)
     @Mapping(target = "hand", ignore = true)
     Player toPlayer(MatchesResponse.PlayerTeam team);
 
     @Mapping(target = "nationality", source = "nationality")
+    @Mapping(target = "points", ignore = true)
     @Mapping(target = "birthDate", ignore = true)
     @Mapping(target = "gender", ignore = true)
     @Mapping(target = "hand", ignore = true)
     Player toPlayerFromDraw(AtpDrawsResponse.PlayerInfo info);
 
     @Mapping(target = "nationality", source = "playerCountryCode")
+    @Mapping(target = "points", ignore = true)
     @Mapping(target = "birthDate", ignore = true)
     @Mapping(target = "gender", ignore = true)
     @Mapping(target = "hand", ignore = true)

@@ -19,6 +19,7 @@ public class Player {
     private String lastName;
     private String nationality;
     private Integer rank;
+    private Integer points;
     private LocalDate birthDate;
     private String gender;
     private String hand;

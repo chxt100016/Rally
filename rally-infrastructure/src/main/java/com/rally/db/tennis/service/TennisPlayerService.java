@@ -62,7 +62,8 @@ public class TennisPlayerService extends ServiceImpl<TennisPlayerMapper, TennisP
                     po.setNationality(p.getNationality());
                     po.setBirthDate(p.getBirthDate());
                     po.setGender(p.getGender());
-                    po.setRanking(p.getRanking());
+                    if (p.getRank() != null) po.setRank(p.getRank());
+                    if (p.getPoints() != null) po.setPoints(p.getPoints());
                     po.setHand(p.getHand());
                     return po;
                 })

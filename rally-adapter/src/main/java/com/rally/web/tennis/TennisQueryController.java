@@ -1,6 +1,7 @@
 package com.rally.web.tennis;
 
 import com.rally.domain.tennis.model.MatchQueryVO;
+import com.rally.domain.tennis.model.PlayerQueryVO;
 import com.rally.domain.tennis.model.Result;
 import com.rally.domain.tennis.model.TournamentQueryVO;
 import com.rally.tennis.TennisQueryService;
@@ -34,6 +35,12 @@ public class TennisQueryController {
     public Result<Map<String, List<MatchQueryVO>>> matches(
             @RequestParam(value = "tournamentId") String tournamentId) {
         Map<String, List<MatchQueryVO>> data = tennisQueryService.queryMatches(tournamentId);
+        return Result.ok(data);
+    }
+
+    @GetMapping("/player/players")
+    public Result<List<PlayerQueryVO>> players(@RequestParam("tour") String tour) {
+        List<PlayerQueryVO> data = tennisQueryService.queryPlayers(tour);
         return Result.ok(data);
     }
 }

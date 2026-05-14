@@ -13,7 +13,8 @@ CREATE TABLE tennis_player (
     nationality   CHAR(3)      NOT NULL COMMENT 'ISO 3166-1 alpha-3，如 CHN / USA',
     birth_date    DATE,
     gender        CHAR(1)      COMMENT 'M / F',
-    ranking       INT          COMMENT '当前排名，NULL 表示未排名',
+    `rank`        INT          COMMENT '当前排名，NULL 表示未排名',
+    points        INT          COMMENT '积分',
     hand          VARCHAR(10)  COMMENT 'RIGHT / LEFT / UNKNOWN',
     create_time    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -21,7 +22,7 @@ CREATE TABLE tennis_player (
     -- ATP 和 WTA 的 player_id 来自不同系统，可能重复，用 (player_id, tour) 作为唯一键
     UNIQUE KEY uk_tennis_player_id_tour (player_id, tour),
     INDEX idx_tennis_player_name    (last_name, first_name),
-    INDEX idx_tennis_player_ranking (ranking),
+    INDEX idx_tennis_player_rank    (`rank`),
     INDEX idx_tennis_player_nation  (nationality)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='球员基础信息';
 

@@ -16,4 +16,12 @@ public class TennisPlayerRepository {
     public void saveOrUpdateBatch(List<TennisPlayerPO> players) {
         tennisPlayerService.saveOrUpdateBatch(players);
     }
+
+    public List<TennisPlayerPO> listByTourOrderByRank(String tour) {
+        return tennisPlayerService.lambdaQuery()
+                .eq(TennisPlayerPO::getTour, tour)
+                .isNotNull(TennisPlayerPO::getRank)
+                .orderByAsc(TennisPlayerPO::getRank)
+                .list();
+    }
 }

@@ -41,4 +41,10 @@ public class TennisCollectController {
     public void live() {
         tennisCollectService.liveMatch();
     }
+
+    @GetMapping("/rank")
+    public String rank() {
+        tennisCollectService.rank();
+        return "排名采集完成";
+    }
 }
