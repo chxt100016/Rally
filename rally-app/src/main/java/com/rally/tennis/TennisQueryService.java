@@ -51,6 +51,13 @@ public class TennisQueryService {
             return List.of();
         }
 
+        list = list.stream()
+                .filter(po -> isCategoryKept(po.getCategory()))
+                .toList();
+        if (CollectionUtils.isEmpty(list)) {
+            return List.of();
+        }
+
         // 按 (city, name) 分组，计算 groupId
         List<TournamentQueryVO> result = new ArrayList<>();
         List<List<TennisTournamentPO>> groups = groupByCityAndName(list);
@@ -77,6 +84,20 @@ public class TennisQueryService {
             case "ONGOING", "UPCOMING" -> "active";
             default -> null;
         };
+    }
+
+    /**
+     * category 过滤：非数字或数字 >= 500 才保留
+     */
+    private boolean isCategoryKept(String category) {
+        if (category == null || category.isBlank()) {
+            return true;
+        }
+        try {
+            return Integer.parseInt(category.trim()) >= 500;
+        } catch (NumberFormatException e) {
+            return true;
+        }
     }
 
     /**

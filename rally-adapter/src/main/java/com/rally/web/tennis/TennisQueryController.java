@@ -37,10 +37,4 @@ public class TennisQueryController {
         Map<String, List<MatchQueryVO>> data = tennisQueryService.queryMatches(tournamentId);
         return Result.ok(data);
     }
-
-    @GetMapping("/player/players")
-    public Result<List<PlayerQueryVO>> players(@RequestParam("tour") String tour) {
-        List<PlayerQueryVO> data = tennisQueryService.queryPlayers(tour);
-        return Result.ok(data);
-    }
 }
