@@ -1,0 +1,212 @@
+<h2>发布约球弹窗 · V4</h2>
+<p class="subtitle">费用改为总费用自动分摊、NTRP 点击触发选择器</p>
+
+<div class="split">
+
+  <!-- 左：完整弹窗 -->
+  <div class="mockup">
+    <div class="mockup-header">底部弹窗（完整字段）</div>
+    <div class="mockup-body" style="padding:0;">
+      <div style="font-size:12px;font-family:monospace;background:#e8eeff;padding:8px;">
+        <div style="opacity:0.2;font-size:10px;margin-bottom:4px;padding:2px;">
+          <div style="background:#4f7cff;color:white;border-radius:4px;padding:2px 6px;margin-bottom:2px;">📍 北京</div>
+          <div style="background:white;border-radius:4px;padding:2px;">周六下午单打</div>
+        </div>
+        <div style="background:white;border-radius:12px 12px 0 0;padding:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.15);">
+          <div style="width:32px;height:3px;background:#ddd;border-radius:2px;margin:0 auto 8px;"></div>
+          <div style="font-weight:bold;font-size:13px;margin-bottom:10px;">发布约球</div>
+
+          <!-- 标题（选填） -->
+          <div style="margin-bottom:8px;">
+            <div style="font-size:10px;color:#666;margin-bottom:2px;">标题 <span style="color:#aaa;font-size:9px;">选填，不填自动生成</span></div>
+            <div style="background:#f5f5f5;border-radius:6px;padding:5px 8px;font-size:11px;color:#bbb;">例：周末找人练发球</div>
+          </div>
+
+          <!-- 类型 + 人数 -->
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <div style="flex:1;">
+              <div style="font-size:10px;color:#666;margin-bottom:2px;">类型 <span style="color:red;">*</span></div>
+              <div style="display:flex;gap:3px;">
+                <div style="background:#4f7cff;color:white;border-radius:5px;padding:3px 7px;font-size:10px;">单打</div>
+                <div style="background:#f0f0f0;border-radius:5px;padding:3px 7px;font-size:10px;">双打</div>
+                <div style="background:#f0f0f0;border-radius:5px;padding:3px 7px;font-size:10px;">多人</div>
+              </div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:10px;color:#666;margin-bottom:2px;">人数上限 <span style="color:red;">*</span></div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div style="background:#f0f0f0;border-radius:4px;padding:2px 7px;font-size:12px;">－</div>
+                <div style="font-size:13px;font-weight:bold;">2</div>
+                <div style="background:#4f7cff;color:white;border-radius:4px;padding:2px 7px;font-size:12px;">＋</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 日期 + 开始时间 + 时长 -->
+          <div style="display:flex;gap:5px;margin-bottom:8px;">
+            <div style="flex:2;">
+              <div style="font-size:10px;color:#666;margin-bottom:2px;">日期 <span style="color:red;">*</span></div>
+              <div style="background:#f5f5f5;border-radius:6px;padding:5px 6px;font-size:11px;color:#333;">2026-06-07</div>
+            </div>
+            <div style="flex:1.5;">
+              <div style="font-size:10px;color:#666;margin-bottom:2px;">开始 <span style="color:red;">*</span></div>
+              <div style="background:#f5f5f5;border-radius:6px;padding:5px 6px;font-size:11px;color:#333;">14:00</div>
+            </div>
+            <div style="flex:1.5;">
+              <div style="font-size:10px;color:#666;margin-bottom:2px;">时长 <span style="color:red;">*</span></div>
+              <div style="background:#f5f5f5;border-radius:6px;padding:5px 6px;font-size:11px;color:#333;">1.5h</div>
+            </div>
+          </div>
+
+          <!-- 场地 -->
+          <div style="margin-bottom:8px;">
+            <div style="font-size:10px;color:#666;margin-bottom:2px;">场地 <span style="color:red;">*</span></div>
+            <div style="background:#f5f5f5;border-radius:6px;padding:5px 8px;font-size:11px;display:flex;align-items:center;gap:4px;">
+              <span style="color:#4f7cff;">📍</span>
+              <span style="color:#333;">朝阳网球中心</span>
+              <span style="color:#999;font-size:9px;margin-left:auto;">北京市朝阳区...</span>
+            </div>
+            <div style="background:#e8f4fd;border-radius:6px;margin-top:3px;height:34px;display:flex;align-items:center;justify-content:center;">
+              <span style="font-size:10px;color:#4f7cff;">🗺 点击选择地图位置</span>
+            </div>
+          </div>
+
+          <!-- NTRP 期望水平：平时文本框，点击触发选择器 -->
+          <div style="margin-bottom:8px;">
+            <div style="font-size:10px;color:#666;margin-bottom:4px;">期望水平（NTRP）</div>
+            <div style="display:flex;gap:3px;margin-bottom:5px;">
+              <div style="background:#4f7cff;color:white;border-radius:4px;padding:2px 6px;font-size:10px;">范围</div>
+              <div style="background:#f0f0f0;border-radius:4px;padding:2px 6px;font-size:10px;">指定</div>
+              <div style="background:#f0f0f0;border-radius:4px;padding:2px 6px;font-size:10px;">以上</div>
+              <div style="background:#f0f0f0;border-radius:4px;padding:2px 6px;font-size:10px;">以下</div>
+            </div>
+            <!-- 平时展示：文本框样式，点击触发滚轮 -->
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="background:#f5f5f5;border-radius:6px;padding:5px 0;flex:1;text-align:center;font-size:12px;font-weight:bold;color:#333;border:1.5px solid #4f7cff;">3.5</div>
+              <span style="color:#999;font-size:11px;">~</span>
+              <div style="background:#f5f5f5;border-radius:6px;padding:5px 0;flex:1;text-align:center;font-size:12px;font-weight:bold;color:#333;border:1.5px solid #4f7cff;">4.5</div>
+              <span style="font-size:10px;color:#999;">NTRP</span>
+            </div>
+            <div style="font-size:9px;color:#aaa;margin-top:3px;text-align:center;">点击数值框触发滚轮选择</div>
+          </div>
+
+          <!-- 报名模式 + 最低可信度 -->
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <div style="flex:1;">
+              <div style="font-size:10px;color:#666;margin-bottom:3px;">报名模式</div>
+              <div style="display:flex;gap:3px;">
+                <div style="background:#4f7cff;color:white;border-radius:5px;padding:3px 6px;font-size:10px;">直接加入</div>
+                <div style="background:#f0f0f0;border-radius:5px;padding:3px 6px;font-size:10px;">需审核</div>
+              </div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:10px;color:#666;margin-bottom:3px;">最低可信度</div>
+              <div style="display:flex;gap:3px;">
+                <div style="background:#4f7cff;color:white;border-radius:5px;padding:3px 6px;font-size:10px;">不限</div>
+                <div style="background:#f0f0f0;border-radius:5px;padding:3px 6px;font-size:10px;">初级</div>
+                <div style="background:#f0f0f0;border-radius:5px;padding:3px 6px;font-size:10px;">中级</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AA 费用（总费用，自动分摊） -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:10px;color:#666;margin-bottom:4px;">
+              AA 费用 <span style="color:red;">*</span>
+              <span style="font-size:9px;color:#aaa;margin-left:4px;">填写总费用，自动按人数分摊</span>
+            </div>
+            <!-- 费用项 1 -->
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+              <div style="background:#f5f5f5;border-radius:5px;padding:4px 6px;font-size:10px;flex:2;">球场费（总）</div>
+              <div style="background:#f5f5f5;border-radius:5px;padding:4px 8px;font-size:11px;flex:1;text-align:right;color:#333;">120</div>
+              <span style="font-size:10px;color:#999;">元</span>
+              <span style="color:#ff4444;font-size:13px;">×</span>
+            </div>
+            <!-- 费用项 2 -->
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+              <div style="background:#f5f5f5;border-radius:5px;padding:4px 6px;font-size:10px;flex:2;">球费（总）</div>
+              <div style="background:#f5f5f5;border-radius:5px;padding:4px 8px;font-size:11px;flex:1;text-align:right;color:#333;">40</div>
+              <span style="font-size:10px;color:#999;">元</span>
+              <span style="color:#ff4444;font-size:13px;">×</span>
+            </div>
+            <div style="border:1px dashed #4f7cff;border-radius:5px;padding:4px;text-align:center;font-size:10px;color:#4f7cff;margin-bottom:6px;">+ 添加费用项</div>
+            <!-- 分摊计算 -->
+            <div style="background:#f0f4ff;border-radius:6px;padding:6px 8px;">
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:#666;margin-bottom:2px;">
+                <span>总费用</span>
+                <span>¥160</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:#666;margin-bottom:2px;">
+                <span>参与人数</span>
+                <span>2 人</span>
+              </div>
+              <div style="border-top:1px solid #d0d8ff;margin:4px 0;"></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:bold;color:#4f7cff;">
+                <span>每人分摊</span>
+                <span>¥80</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#4f7cff;color:white;border-radius:8px;padding:8px;text-align:center;font-size:12px;font-weight:bold;">发布约球</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右：NTRP 点击触发滚轮 -->
+  <div class="mockup">
+    <div class="mockup-header">点击文本框 → 触发滚轮选择器</div>
+    <div class="mockup-body">
+      <div style="font-size:12px;font-family:monospace;">
+
+        <div style="margin-bottom:4px;font-size:10px;color:#666;">① 默认状态（文本框展示当前值）</div>
+        <div style="background:#f5f5f5;border-radius:8px;padding:8px;margin-bottom:14px;">
+          <div style="display:flex;gap:3px;margin-bottom:5px;">
+            <div style="background:#4f7cff;color:white;border-radius:4px;padding:2px 6px;font-size:10px;">范围</div>
+            <div style="background:#f0f0f0;border-radius:4px;padding:2px 6px;font-size:10px;">指定</div>
+            <div style="background:#f0f0f0;border-radius:4px;padding:2px 6px;font-size:10px;">以上</div>
+            <div style="background:#f0f0f0;border-radius:4px;padding:2px 6px;font-size:10px;">以下</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="background:white;border:1px solid #ddd;border-radius:6px;padding:5px 0;flex:1;text-align:center;font-size:12px;font-weight:bold;color:#333;">3.5</div>
+            <span style="color:#999;">~</span>
+            <div style="background:white;border:1px solid #ddd;border-radius:6px;padding:5px 0;flex:1;text-align:center;font-size:12px;font-weight:bold;color:#333;">4.5</div>
+            <span style="font-size:10px;color:#999;">NTRP</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:4px;font-size:10px;color:#666;">② 点击左侧数值框后，底部弹出滚轮</div>
+        <div style="background:#f5f5f5;border-radius:8px;padding:8px;margin-bottom:4px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <div style="background:white;border:1.5px solid #4f7cff;border-radius:6px;padding:5px 0;flex:1;text-align:center;font-size:12px;font-weight:bold;color:#4f7cff;">3.5</div>
+            <span style="color:#999;">~</span>
+            <div style="background:white;border:1px solid #ddd;border-radius:6px;padding:5px 0;flex:1;text-align:center;font-size:12px;color:#333;">4.5</div>
+            <span style="font-size:10px;color:#999;">NTRP</span>
+          </div>
+          <!-- 滚轮选择器 -->
+          <div style="background:white;border-radius:8px;padding:6px 0;text-align:center;position:relative;">
+            <div style="position:absolute;top:50%;left:0;right:0;height:24px;background:rgba(79,124,255,0.08);transform:translateY(-50%);border-radius:4px;pointer-events:none;"></div>
+            <div style="color:#ccc;font-size:11px;padding:2px 0;">2.5</div>
+            <div style="color:#ccc;font-size:11px;padding:2px 0;">3.0</div>
+            <div style="font-size:14px;font-weight:bold;color:#4f7cff;padding:2px 0;">3.5</div>
+            <div style="color:#ccc;font-size:11px;padding:2px 0;">4.0</div>
+            <div style="color:#ccc;font-size:11px;padding:2px 0;">4.5</div>
+          </div>
+        </div>
+        <div style="font-size:9px;color:#aaa;text-align:center;margin-bottom:14px;">上下滑动选择，松手确认</div>
+
+        <div style="border-top:1px solid #eee;padding-top:10px;">
+          <div style="font-size:10px;font-weight:bold;margin-bottom:6px;color:#333;">费用分摊逻辑</div>
+          <div style="font-size:10px;color:#555;line-height:1.8;background:#f0f4ff;border-radius:6px;padding:8px;">
+            <div>总费用 ÷ 参与人数 = 每人分摊</div>
+            <div style="color:#aaa;margin-top:4px;">人数变化时实时重算</div>
+            <div style="color:#aaa;">满员后锁定金额展示</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
