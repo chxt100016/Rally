@@ -20,11 +20,11 @@ public interface MatchQueryGateway {
     List<MatchData> listByTournamentIds(List<String> tournamentIds);
 
     /**
-     * 根据比赛ID列表查询盘分
-     * @param matchIds 比赛ID列表
+     * 根据 tennis_match.id 列表查询盘分
+     * @param tennisMatchIds tennis_match.id 列表
      * @return 盘分列表
      */
-    List<SetScoreData> listSetScoresByMatchIds(List<String> matchIds);
+    List<SetScoreData> listSetScoresByTennisMatchIds(List<Long> tennisMatchIds);
 
     /**
      * 根据球员ID列表查询球员信息

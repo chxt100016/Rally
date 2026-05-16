@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 public class MatchData {
 
     private String matchId;
+    /** 对应 tennis_match.id，用于关联盘分数据 */
+    private Long tennisMatchId;
     private String tournamentId;
     private String player1Id;
     private String player2Id;

@@ -220,10 +220,16 @@ public class MatchCollectService {
             return;
         }
         List<TennisMatchPO> matchPOs = MatchAppConvertMapper.INSTANCE.toMatchPOList(matches);
+        // saveOrUpdateBatch 内部会通过 peek 将数据库自增 id 回填到 matchPOs
         tennisMatchRepository.saveOrUpdateBatch(matchPOs);
 
-        // 保存 SetScore 数据
-        saveSetScores(matches);
+        // 构建 matchId|drawId → tennis_match.id 映射，供盘分写入时关联
+        Map<String, Long> matchKeyToId = matchPOs.stream()
+                .filter(m -> m.getId() != null && m.getMatchId() != null)
+                .collect(Collectors.toMap(uniqueKey -> uniqueKey.getMatchId() + "|" + uniqueKey.getDrawId(),
+                        TennisMatchPO::getId, (a, b) -> a));
+
+        saveSetScores(matches, matchKeyToId);
     }
 
     /**
@@ -235,7 +241,6 @@ public class MatchCollectService {
         }
 
         List<Match> allMatches = new ArrayList<>();
-        List<TennisSetScorePO> allSetScores = new ArrayList<>();
 
         for (MatchesResponse.MatchInfo info : matches) {
             Match match = new Match();
@@ -253,8 +258,6 @@ public class MatchCollectService {
                 match.setDrawId(drawIdMap.get(tournamentId + "|" + info.getTournamentYear()));
             }
             allMatches.add(match);
-
-            allSetScores.addAll(buildSetScores(info, match.getTournamentId(), match.getYear()));
         }
 
         // 更新比赛记录
@@ -262,6 +265,24 @@ public class MatchCollectService {
         List<TennisMatchPO> toUpdate = fillIdForUpdate(matchPOs);
         if (CollectionUtils.isNotEmpty(toUpdate)) {
             tennisMatchRepository.updateBatchById(toUpdate);
+        }
+
+        // 构建 matchId|drawId → tennis_match.id 映射，用于关联盘分
+        Map<String, Long> matchKeyToId = toUpdate.stream()
+                .filter(m -> m.getId() != null && m.getMatchId() != null)
+                .collect(Collectors.toMap(m -> m.getMatchId() + "|" + m.getDrawId(),
+                        TennisMatchPO::getId, (a, b) -> a));
+
+        // 构建盘分，在 fillIdForUpdate 之后才能拿到 tennisMatchId
+        List<TennisSetScorePO> allSetScores = new ArrayList<>();
+        for (MatchesResponse.MatchInfo info : matches) {
+            String tournamentId = info.getTournamentId() != null ? String.valueOf(info.getTournamentId()) : null;
+            Long drawId = (tournamentId != null && info.getTournamentYear() != null)
+                    ? drawIdMap.get(tournamentId + "|" + info.getTournamentYear()) : null;
+            Long tennisMatchId = matchKeyToId.get(info.getMatchId() + "|" + drawId);
+            if (tennisMatchId != null) {
+                allSetScores.addAll(buildSetScores(info, tennisMatchId));
+            }
         }
 
         // 更新盘分
@@ -284,11 +305,7 @@ public class MatchCollectService {
         }
     }
 
-    /**
-     * 按业务唯一键 (matchId, tournamentId, year) 查出已存在记录，
-     * 把数据库主键 id 回填到待更新的 PO 上。
-     * updateBatchById 走的是 @TableId 标注的 id 字段，不回填 id 时 SQL 不会命中任何行。
-     */
+
     private List<TennisMatchPO> fillIdForUpdate(List<TennisMatchPO> matchPOs) {
         // 收集所有非空的 matchId 作为查询条件，先用 matchId 粗筛缩小结果集
         List<String> matchIds = matchPOs.stream()
@@ -296,7 +313,6 @@ public class MatchCollectService {
         if (CollectionUtils.isEmpty(matchIds)) {
             return List.of();
         }
-        // matchId 在不同赛事/年份下会重复，必须用 (matchId, tournamentId, year) 三元组作为唯一键
         Map<String, Long> keyToId = tennisMatchRepository.lambdaQuery(matchIds)
                 .stream()
                 .collect(Collectors.toMap(
@@ -304,7 +320,6 @@ public class MatchCollectService {
                         TennisMatchPO::getId,
                         (a, b) -> a));
 
-        // 仅保留库里已存在的记录并回填 id，否则 updateBatchById 因 id=null 而失效
         return matchPOs.stream()
                 .filter(m -> keyToId.containsKey(uniqueKey(m)))
                 .peek(m -> m.setId(keyToId.get(uniqueKey(m))))
@@ -318,17 +333,19 @@ public class MatchCollectService {
         return po.getMatchId() + "|" + po.getDrawId();
     }
 
-    private void saveSetScores(List<Match> matches) {
+    private void saveSetScores(List<Match> matches, Map<String, Long> matchKeyToId) {
         List<TennisSetScorePO> allSetScores = new ArrayList<>();
         for (Match match : matches) {
             if (CollectionUtils.isEmpty(match.getSets()) || match.getMatchId() == null) {
                 continue;
             }
+            Long tennisMatchId = matchKeyToId.get(match.getMatchId() + "|" + match.getDrawId());
+            if (tennisMatchId == null) {
+                continue;
+            }
             for (SetScore setScore : match.getSets()) {
                 TennisSetScorePO po = new TennisSetScorePO();
-                po.setMatchId(match.getMatchId());
-                po.setTournamentId(match.getTournamentId());
-                po.setYear(match.getYear());
+                po.setTennisMatchId(tennisMatchId);
                 po.setSetNumber(setScore.getSetNumber());
                 po.setP1Games(setScore.getP1Games());
                 po.setP2Games(setScore.getP2Games());
@@ -363,8 +380,7 @@ public class MatchCollectService {
     /**
      * 合并两个 PlayerTeam 的盘分数据，按 SetNumber 对齐
      */
-    private List<TennisSetScorePO> buildSetScores(MatchesResponse.MatchInfo info,
-                                                   String tournamentId, Integer year) {
+    private List<TennisSetScorePO> buildSetScores(MatchesResponse.MatchInfo info, Long tennisMatchId) {
         List<TennisSetScorePO> scores = new ArrayList<>();
         if (info.getPlayerTeam1() == null || info.getPlayerTeam2() == null) return scores;
 
@@ -374,9 +390,7 @@ public class MatchCollectService {
 
         for (MatchesResponse.SetInfo s1 : sets1) {
             TennisSetScorePO po = new TennisSetScorePO();
-            po.setMatchId(info.getMatchId());
-            po.setTournamentId(tournamentId);
-            po.setYear(year);
+            po.setTennisMatchId(tennisMatchId);
             po.setSetNumber(s1.getSetNumber());
             po.setP1Games(s1.getSetScore() != null ? Integer.parseInt(s1.getSetScore()) : 0);
             po.setP1Tiebreak(s1.getTieBreakScore() != null ? Integer.parseInt(s1.getTieBreakScore()) : null);
@@ -482,7 +496,12 @@ public class MatchCollectService {
         List<Match> existingMatches = allMatches.stream()
                 .filter(m -> existingMatchIds.contains(m.getMatchId()))
                 .toList();
-        saveSetScores(existingMatches);
+
+        Map<String, Long> matchKeyToId = toUpdate.stream()
+                .filter(m -> m.getId() != null && m.getMatchId() != null)
+                .collect(Collectors.toMap(m -> m.getMatchId() + "|" + m.getDrawId(),
+                        TennisMatchPO::getId, (a, b) -> a));
+        saveSetScores(existingMatches, matchKeyToId);
 
         log.info("WTA进行中比赛更新完成: 比赛={}", toUpdate.size());
     }

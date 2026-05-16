@@ -9,5 +9,5 @@ spring:
         active: dev
 
 deepseek:
-    api-key: ${DEEPSEEK_API_KEY:your-key-here}
+    api-key: ${DEEPSEEK_API_KEY:sk-c14b4b52b0f34d6790d8b491807c2387}
     api-url: https://api.deepseek.com/chat/completions

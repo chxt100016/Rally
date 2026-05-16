@@ -17,10 +17,9 @@ import java.time.LocalDateTime;
 public class TennisSetScorePO {
     @TableId(type = IdType.AUTO)
     private Long id;
-    private String matchId;
-    @TableField("tournament_id")
-    private String tournamentId;
-    private Integer year;
+    /** 关联 tennis_match.id，全局唯一，避免跨赛事 matchId 冲突 */
+    @TableField("tennis_match_id")
+    private Long tennisMatchId;
     @TableField("set_number")
     private Integer setNumber;
     @TableField("p1_games")

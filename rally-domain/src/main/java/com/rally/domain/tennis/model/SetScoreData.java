@@ -8,7 +8,8 @@ import lombok.Data;
 @Data
 public class SetScoreData {
 
-    private String matchId;
+    /** 对应 tennis_match.id，与 MatchData.tennisMatchId 关联 */
+    private Long tennisMatchId;
     private Integer setNumber;
     private Integer p1Games;
     private Integer p2Games;

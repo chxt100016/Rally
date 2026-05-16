@@ -47,13 +47,13 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
     }
 
     @Override
-    public List<SetScoreData> listSetScoresByMatchIds(List<String> matchIds) {
-        if (CollectionUtils.isEmpty(matchIds)) {
+    public List<SetScoreData> listSetScoresByTennisMatchIds(List<Long> tennisMatchIds) {
+        if (CollectionUtils.isEmpty(tennisMatchIds)) {
             return List.of();
         }
         List<TennisSetScorePO> list = setScoreMapper.selectList(
                 new LambdaQueryWrapper<TennisSetScorePO>()
-                        .in(TennisSetScorePO::getMatchId, matchIds)
+                        .in(TennisSetScorePO::getTennisMatchId, tennisMatchIds)
                         .orderByAsc(TennisSetScorePO::getSetNumber)
         );
         return list.stream().map(this::toSetScoreData).toList();
@@ -87,6 +87,7 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
     private MatchData toMatchData(TennisMatchPO po) {
         MatchData data = new MatchData();
         data.setMatchId(po.getMatchId());
+        data.setTennisMatchId(po.getId());
         data.setTournamentId(po.getTournamentId());
         data.setPlayer1Id(po.getPlayer1Id());
         data.setPlayer2Id(po.getPlayer2Id());
@@ -105,7 +106,7 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
 
     private SetScoreData toSetScoreData(TennisSetScorePO po) {
         SetScoreData data = new SetScoreData();
-        data.setMatchId(po.getMatchId());
+        data.setTennisMatchId(po.getTennisMatchId());
         data.setSetNumber(po.getSetNumber());
         data.setP1Games(po.getP1Games());
         data.setP2Games(po.getP2Games());

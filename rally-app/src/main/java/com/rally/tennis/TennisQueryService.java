@@ -252,10 +252,10 @@ public class TennisQueryService {
                 .collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
 
         // 查询所有相关盘分
-        List<String> matchIds = matches.stream().map(MatchData::getMatchId).toList();
-        List<SetScoreData> setScores = matchQueryGateway.listSetScoresByMatchIds(matchIds);
-        Map<String, List<SetScoreData>> setScoreMap = setScores.stream()
-                .collect(Collectors.groupingBy(SetScoreData::getMatchId));
+        List<Long> tennisMatchIds = matches.stream().map(MatchData::getTennisMatchId).filter(Objects::nonNull).toList();
+        List<SetScoreData> setScores = matchQueryGateway.listSetScoresByTennisMatchIds(tennisMatchIds);
+        Map<Long, List<SetScoreData>> setScoreMap = setScores.stream()
+                .collect(Collectors.groupingBy(SetScoreData::getTennisMatchId));
 
         // 查询球员种子信息，构建 tournamentId:playerId -> seed 映射
         List<PlayerSeedData> seeds = matchQueryGateway.listSeedsByTournamentIds(tournamentIds);
@@ -306,7 +306,7 @@ public class TennisQueryService {
      * MatchData → MatchQueryVO 转换
      */
     private MatchQueryVO toMatchVO(MatchData match, Map<String, PlayerData> playerMap,
-                                   Map<String, List<SetScoreData>> setScoreMap,
+                                   Map<Long, List<SetScoreData>> setScoreMap,
                                    Map<String, Integer> seedMap) {
         MatchQueryVO vo = new MatchQueryVO();
         vo.setId(match.getMatchId());
@@ -331,7 +331,7 @@ public class TennisQueryService {
         vo.setPlayer2(buildPlayerVO(match.getPlayer2Id(), match.getTournamentId(), playerMap, seedMap));
 
         // 设置盘分
-        List<SetScoreData> setScores = setScoreMap.getOrDefault(match.getMatchId(), List.of());
+        List<SetScoreData> setScores = setScoreMap.getOrDefault(match.getTennisMatchId(), List.of());
         List<SetScoreVO> sets = setScores.stream().map(this::toSetScoreVO).toList();
         vo.setSets(sets);
 

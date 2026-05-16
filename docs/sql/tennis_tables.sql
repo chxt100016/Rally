@@ -123,19 +123,16 @@ CREATE TABLE tennis_match (
 
 DROP TABLE IF EXISTS tennis_set_score;
 CREATE TABLE tennis_set_score (
-    id          BIGINT   NOT NULL AUTO_INCREMENT,
-    match_id    VARCHAR(50) NOT NULL COMMENT '外部比赛ID',
-    tournament_id VARCHAR(50) NOT NULL COMMENT '外部赛事ID',
-    year        INT      NOT NULL DEFAULT 2026 COMMENT '赛事年份',
-    set_number  TINYINT  NOT NULL COMMENT '第几盘：1 / 2 / 3 ...',
-    p1_games    TINYINT  NOT NULL DEFAULT 0 COMMENT 'player1 局数',
-    p2_games    TINYINT  NOT NULL DEFAULT 0 COMMENT 'player2 局数',
-    p1_tiebreak TINYINT  COMMENT '抢七分数，NULL 表示该盘无抢七',
-    p2_tiebreak TINYINT  COMMENT '抢七分数，NULL 表示该盘无抢七',
-    create_time  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id               BIGINT   NOT NULL AUTO_INCREMENT,
+    tennis_match_id  BIGINT   NOT NULL COMMENT '关联 tennis_match.id（自增主键），全局唯一，无跨赛事冲突',
+    set_number       TINYINT  NOT NULL COMMENT '第几盘：1 / 2 / 3 ...',
+    p1_games         TINYINT  NOT NULL DEFAULT 0 COMMENT 'player1 局数',
+    p2_games         TINYINT  NOT NULL DEFAULT 0 COMMENT 'player2 局数',
+    p1_tiebreak      TINYINT  COMMENT '抢七分数，NULL 表示该盘无抢七',
+    p2_tiebreak      TINYINT  COMMENT '抢七分数，NULL 表示该盘无抢七',
+    create_time       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uk_tennis_set_match_tournament_year_number (match_id, tournament_id, year, set_number),
-    INDEX idx_tennis_set_match (match_id),
-    INDEX idx_tennis_set_tournament_year (tournament_id, year)
+    UNIQUE KEY uk_tennis_set_match_id_set_number (tennis_match_id, set_number),
+    INDEX idx_tennis_set_tennis_match_id (tennis_match_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='每盘比分详情';
