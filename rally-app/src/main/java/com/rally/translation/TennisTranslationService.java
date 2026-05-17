@@ -1,9 +1,12 @@
 package com.rally.translation;
 
-import com.rally.domain.tennis.model.*;
+import com.rally.domain.tennis.model.MatchQueryVO;
+import com.rally.domain.tennis.model.PlayerQueryVO;
+import com.rally.domain.tennis.model.TournamentDTO;
 import com.rally.domain.translation.TranslationQueryService;
 import com.rally.domain.translation.model.TranslationData;
 import com.rally.domain.translation.model.TranslationEntityTypeEnum;
+import com.rally.domain.translation.model.TranslationKey;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,21 +19,33 @@ public class TennisTranslationService {
 
     private static final TranslationLanguageEnum DEFAULT_LANG = TranslationLanguageEnum.ZH_CN;
 
+
+
     @Resource
     private TranslationQueryService translationQueryService;
+
+
 
     /**
      * 批量翻译赛事列表：name（赛事名）、surfaceLabel（场地类型）、city（城市）
      */
-    public void tournaments(List<TournamentDTO> vos) {
-        if (CollectionUtils.isEmpty(vos)) return;
+    public void tournaments(List<TournamentDTO> data, TranslationLanguageEnum language) {
+        if (CollectionUtils.isEmpty(data)) return;
 
-        Map<String, String> translations = batchTranslate(buildTournamentQueries(vos));
+        Map<TranslationKey, List<TournamentDTO>> map = new HashMap<>();
+        for (TournamentDTO item : data) {
+            map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.TOURNAMENT, item.getName().toLowerCase(Locale.ROOT), language), k -> new ArrayList<>()).add(item);
+            map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.CITY, item.getCity()  , language), k -> new ArrayList<>()).add(item);
+            map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.SURFACE, item.getSurfaceLabel(), language), k -> new ArrayList<>()).add(item);
+        }
 
-        for (TournamentDTO vo : vos) {
-            vo.setName(lookup(translations, TranslationEntityTypeEnum.TOURNAMENT, vo.getName()));
-            vo.setSurfaceLabel(lookup(translations, TranslationEntityTypeEnum.SURFACE, vo.getSurfaceLabel()));
-            vo.setCity(lookup(translations, TranslationEntityTypeEnum.CITY, vo.getCity()));
+        Map<TranslationKey, String> translationMap = this.translationQueryService.query(map.keySet());
+        for (Map.Entry<TranslationKey, String> entry : translationMap.entrySet()) {
+            switch (entry.getKey().getEntityType()) {
+                case TOURNAMENT -> map.get(entry.getKey()).forEach(item -> item.setName(entry.getValue()));
+                case CITY -> map.get(entry.getKey()).forEach(item -> item.setCity(entry.getValue()));
+                case SURFACE -> map.get(entry.getKey()).forEach(item -> item.setSurface(entry.getValue()));
+            }
         }
     }
 

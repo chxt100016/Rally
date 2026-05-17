@@ -77,7 +77,7 @@ public class TranslationService {
 
         if (!toUpdate.isEmpty()) {
             translationGateway.updateBatchTranslatedText(toUpdate);
-            translationCache.invalidateBatch(toUpdate);
+            translationCache.invalidate();
         }
 
         return toUpdate.size();

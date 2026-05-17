@@ -6,6 +6,7 @@ import com.rally.db.translation.repository.TranslationRepository;
 import com.rally.domain.translation.gateway.TranslationGateway;
 import com.rally.domain.translation.model.TranslationData;
 import com.rally.domain.translation.model.TranslationEntityTypeEnum;
+import com.rally.domain.translation.model.TranslationKey;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,12 @@ public class TranslationGatewayImpl implements TranslationGateway {
     public TranslationData findOne(TranslationEntityTypeEnum entityType, String originalText, TranslationLanguageEnum language) {
         TranslationPO po = translationRepository.findOne(entityType.name(), originalText, language.name());
         return MAPPER.toDomain(po);
+    }
+
+    @Override
+    public List<TranslationData> find(List<TranslationKey> queries) {
+        List<TranslationPO> poQueries = MAPPER.toQueryPO(queries);
+        return MAPPER.toDomainList(translationRepository.findBatch(poQueries));
     }
 
     @Override

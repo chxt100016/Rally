@@ -3,6 +3,7 @@ package com.rally.db.translation.convert;
 import com.rally.db.translation.entity.TranslationPO;
 import com.rally.domain.translation.model.TranslationData;
 import com.rally.domain.translation.model.TranslationEntityTypeEnum;
+import com.rally.domain.translation.model.TranslationKey;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -38,6 +39,9 @@ public interface TranslationConvertMapper {
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     TranslationPO toQueryPO(TranslationData data);
+
+    TranslationPO toQueryPO(TranslationKey key);
+    List<TranslationPO> toQueryPO(List<TranslationKey> key);
 
     @Named("strToEntityType")
     static TranslationEntityTypeEnum strToEntityType(String value) {

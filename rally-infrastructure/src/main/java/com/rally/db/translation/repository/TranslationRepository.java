@@ -58,4 +58,10 @@ public class TranslationRepository {
                 .isNull(TranslationPO::getTranslatedText)
                 .list();
     }
+
+    public List<TranslationPO> findAllTranslated() {
+        return translationMybatisService.lambdaQuery()
+                .isNotNull(TranslationPO::getTranslatedText)
+                .list();
+    }
 }

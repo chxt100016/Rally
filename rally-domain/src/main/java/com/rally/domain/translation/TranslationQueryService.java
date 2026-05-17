@@ -1,16 +1,16 @@
 package com.rally.domain.translation;
 
+import com.alibaba.fastjson2.JSON;
 import com.rally.domain.translation.cache.TranslationCache;
 import com.rally.domain.translation.gateway.TranslationGateway;
 import com.rally.domain.translation.model.TranslationData;
+import com.rally.domain.translation.model.TranslationKey;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -22,6 +22,40 @@ public class TranslationQueryService {
     @Resource
     private TranslationCache translationCache;
 
+    public Map<TranslationKey, String> query(Set<TranslationKey> keys) {
+        Map<TranslationKey, String> result = new HashMap<>();
+        List<TranslationKey> missed = new ArrayList<>();
+
+        //  没有就新建、不为空就返回、为空就忽略
+        for (TranslationKey key : keys) {
+            String cached = translationCache.get(key);
+            if (Objects.isNull(cached)) {
+                missed.add(key);
+
+            }
+            else if(StringUtils.isNotBlank(cached)) {
+                result.put(key, cached);
+            }
+        }
+
+        if (missed.isEmpty()) return result;
+
+        List<TranslationData> toSave = missed.stream().map(item -> new TranslationData().setOriginalText(item.getOriginalText()).setEntityType(item.getEntityType()).setLanguage(item.getLanguage())).toList();
+        this.save(toSave);
+        return result;
+    }
+
+    public void save(List<TranslationData> dataList) {
+        for (TranslationData item : dataList) {
+            try {
+                this.translationGateway.save(item);
+            } catch (Exception e) {
+                log.error("新增翻译实体失败, item:{}", JSON.toJSONString(item), e);
+            }
+        }
+        translationCache.invalidate();
+    }
+
     /**
      * 批量翻译查询，先查缓存，再一次性查数据库，减少 DB 往返
      * 返回 Map，key = "entityType:originalText:language"，value = 翻译结果
@@ -31,7 +65,7 @@ public class TranslationQueryService {
         List<TranslationData> missedQueries = new ArrayList<>();
 
         for (TranslationData q : queries) {
-            String cached = translationCache.get(q.getEntityType(), q.getOriginalText(), q.getLanguage());
+            String cached = translationCache.get(new TranslationKey(q.getEntityType(), q.getOriginalText(), q.getLanguage()));
             if (cached != null) {
                 result.put(buildResultKey(q), cached);
             } else {
@@ -59,11 +93,9 @@ public class TranslationQueryService {
                 newData.setOriginalText(q.getOriginalText());
                 newData.setLanguage(q.getLanguage());
                 toSaveMap.put(key, newData);
-                translationCache.put(q.getEntityType(), q.getOriginalText(), q.getLanguage(), q.getOriginalText());
                 result.put(key, q.getOriginalText());
             } else {
                 String translated = dbData.getTranslatedText() != null ? dbData.getTranslatedText() : q.getOriginalText();
-                translationCache.put(q.getEntityType(), q.getOriginalText(), q.getLanguage(), translated);
                 result.put(key, translated);
             }
         }

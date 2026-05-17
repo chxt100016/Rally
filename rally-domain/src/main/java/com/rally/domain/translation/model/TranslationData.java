@@ -1,8 +1,10 @@
 package com.rally.domain.translation.model;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 public class TranslationData {
 
     private Long id;
