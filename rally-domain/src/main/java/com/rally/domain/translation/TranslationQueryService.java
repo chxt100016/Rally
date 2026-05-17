@@ -3,8 +3,6 @@ package com.rally.domain.translation;
 import com.rally.domain.translation.cache.TranslationCache;
 import com.rally.domain.translation.gateway.TranslationGateway;
 import com.rally.domain.translation.model.TranslationData;
-import com.rally.domain.translation.model.TranslationEntityTypeEnum;
-import com.rally.domain.translation.model.TranslationLanguageEnum;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,43 +21,6 @@ public class TranslationQueryService {
 
     @Resource
     private TranslationCache translationCache;
-
-    /**
-     * 单条翻译查询
-     * - 命中缓存 → 直接返回
-     * - 数据库有记录且 translatedText 非空 → 返回译文并写缓存
-     * - 数据库有记录但 translatedText 为空 → 返回原文并写缓存
-     * - 数据库无记录 → 新建占位记录，返回原文并写缓存
-     */
-    public String translate(TranslationLanguageEnum language, String text, TranslationEntityTypeEnum entityType) {
-        if (text == null || text.isBlank()) return text;
-
-        String cached = translationCache.get(entityType, text, language);
-        if (cached != null) {
-            return cached;
-        }
-
-        TranslationData data = translationGateway.findOne(entityType, text, language);
-
-        if (data == null) {
-            TranslationData newData = new TranslationData();
-            newData.setEntityType(entityType);
-            newData.setOriginalText(text);
-            newData.setLanguage(language);
-            try {
-                translationGateway.save(newData);
-            } catch (Exception e) {
-                // 并发场景下可能唯一键冲突，忽略
-                log.warn("保存翻译记录冲突，忽略: entityType={}, text={}, lang={}", entityType, text, language);
-            }
-            translationCache.put(entityType, text, language, text);
-            return text;
-        }
-
-        String result = data.getTranslatedText() != null ? data.getTranslatedText() : text;
-        translationCache.put(entityType, text, language, result);
-        return result;
-    }
 
     /**
      * 批量翻译查询，先查缓存，再一次性查数据库，减少 DB 往返
@@ -86,7 +47,8 @@ public class TranslationQueryService {
             dbMap.put(buildResultKey(d), d);
         }
 
-        List<TranslationData> toSave = new ArrayList<>();
+        // 用 Map 去重，避免 queries 中有重复条目时插入重复记录
+        Map<String, TranslationData> toSaveMap = new HashMap<>();
         for (TranslationData q : missedQueries) {
             String key = buildResultKey(q);
             TranslationData dbData = dbMap.get(key);
@@ -96,7 +58,7 @@ public class TranslationQueryService {
                 newData.setEntityType(q.getEntityType());
                 newData.setOriginalText(q.getOriginalText());
                 newData.setLanguage(q.getLanguage());
-                toSave.add(newData);
+                toSaveMap.put(key, newData);
                 translationCache.put(q.getEntityType(), q.getOriginalText(), q.getLanguage(), q.getOriginalText());
                 result.put(key, q.getOriginalText());
             } else {
@@ -106,11 +68,11 @@ public class TranslationQueryService {
             }
         }
 
-        if (!toSave.isEmpty()) {
+        if (!toSaveMap.isEmpty()) {
             try {
-                translationGateway.saveBatch(toSave);
+                translationGateway.saveBatch(new ArrayList<>(toSaveMap.values()));
             } catch (Exception e) {
-                log.warn("批量保存翻译记录部分冲突，忽略: count={}", toSave.size());
+                log.warn("批量保存翻译记录部分冲突，忽略: count={}", toSaveMap.size(), e);
             }
         }
 

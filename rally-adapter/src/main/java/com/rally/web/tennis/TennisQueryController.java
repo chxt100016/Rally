@@ -1,9 +1,8 @@
 package com.rally.web.tennis;
 
 import com.rally.domain.tennis.model.MatchQueryVO;
-import com.rally.domain.tennis.model.PlayerQueryVO;
 import com.rally.domain.tennis.model.Result;
-import com.rally.domain.tennis.model.TournamentQueryVO;
+import com.rally.domain.tennis.model.TournamentDTO;
 import com.rally.tennis.TennisQueryService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +18,11 @@ public class TennisQueryController {
     private TennisQueryService tennisQueryService;
 
     @GetMapping("/tournaments")
-    public Result<List<TournamentQueryVO>> tournaments(
+    public Result<List<TournamentDTO>> tournaments(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "range", required = false) String range) {
-        List<TournamentQueryVO> data = tennisQueryService.queryTournaments(status, type, range);
+        List<TournamentDTO> data = tennisQueryService.queryTournaments(status, type, range);
         return Result.ok(data);
     }
 

@@ -6,7 +6,7 @@ import lombok.Data;
  * 赛事查询响应 VO
  */
 @Data
-public class TournamentQueryVO {
+public class TournamentDTO {
 
     private String id;
     private String name;

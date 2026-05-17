@@ -8,7 +8,8 @@ public enum TranslationEntityTypeEnum {
     COURT("球场"),
     PLAYER("球员"),
     TOURNAMENT("赛事"),
-    SURFACE("场地类型");
+    SURFACE("场地类型"),
+    CITY("城市");
 
     private final String chineseDesc;
 

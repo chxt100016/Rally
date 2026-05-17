@@ -9,7 +9,7 @@ CREATE TABLE translation (
     entity_type     VARCHAR(50)  NOT NULL COMMENT '实体类型，如 tournament_name / player_name',
     original_text   VARCHAR(500) NOT NULL COMMENT '原始文本',
     language        VARCHAR(10)  NOT NULL COMMENT '目标语言，如 zh / en / fr',
-    translated_text VARCHAR(500) NOT NULL COMMENT '翻译后的文本',
+    translated_text VARCHAR(500) NOT NULL DEFAULT  '' COMMENT '翻译后的文本',
     create_time     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),

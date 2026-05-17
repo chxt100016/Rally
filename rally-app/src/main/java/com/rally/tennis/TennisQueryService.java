@@ -4,6 +4,7 @@ import com.rally.db.tennis.entity.TennisTournamentPO;
 import com.rally.db.tennis.repository.TennisTournamentRepository;
 import com.rally.domain.tennis.gateway.MatchQueryGateway;
 import com.rally.domain.tennis.model.*;
+import com.rally.translation.TennisTranslationService;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -29,11 +30,14 @@ public class TennisQueryService {
     @Resource
     private com.rally.db.tennis.repository.TennisPlayerRepository tennisPlayerRepository;
 
+    @Resource
+    private TennisTranslationService tennisTranslationService;
+
     /**
      * 查询赛事列表，支持按状态、类型和时间范围筛选
      * @param range recent=最近一个月, 其他或null=全部
      */
-    public List<TournamentQueryVO> queryTournaments(String status, String type, String range) {
+    public List<TournamentDTO> queryTournaments(String status, String type, String range) {
         String dbStatus = resolveDbStatus(status);
         String tour = type;
 
@@ -59,7 +63,7 @@ public class TennisQueryService {
         }
 
         // 按 (city, name) 分组，计算 groupId
-        List<TournamentQueryVO> result = new ArrayList<>();
+        List<TournamentDTO> result = new ArrayList<>();
         List<List<TennisTournamentPO>> groups = groupByCityAndName(list);
 
         for (List<TennisTournamentPO> group : groups) {
@@ -69,6 +73,7 @@ public class TennisQueryService {
             }
         }
 
+        tennisTranslationService.tournaments(result);
         return result;
     }
 
@@ -157,8 +162,8 @@ public class TennisQueryService {
     /**
      * PO → VO 转换，包含状态派生逻辑
      */
-    private TournamentQueryVO toVO(TennisTournamentPO po, String groupId) {
-        TournamentQueryVO vo = new TournamentQueryVO();
+    private TournamentDTO toVO(TennisTournamentPO po, String groupId) {
+        TournamentDTO vo = new TournamentDTO();
         vo.setId(po.getTournamentId());
         vo.setName(po.getName());
         vo.setType(po.getTour());
@@ -282,6 +287,9 @@ public class TennisQueryService {
         // upcomingMatches 按 matchDate 正序，finishedMatches 按日期倒序
         upcomingMatches.sort(Comparator.comparing(MatchQueryVO::getScheduledAt, Comparator.nullsLast(Comparator.naturalOrder())));
         finishedMatches.sort(Comparator.comparing(MatchQueryVO::getStartedAt, Comparator.nullsLast(Comparator.reverseOrder())));
+
+        tennisTranslationService.translateMatches(upcomingMatches);
+        tennisTranslationService.translateMatches(finishedMatches);
 
         Map<String, List<MatchQueryVO>> result = new LinkedHashMap<>();
         result.put("upcomingMatches", upcomingMatches);
