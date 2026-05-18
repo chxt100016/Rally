@@ -2,6 +2,7 @@ package com.rally.tennis;
 
 import com.rally.db.tennis.repository.TennisPlayerRepository;
 import com.rally.domain.tennis.model.*;
+import com.rally.domain.translation.model.TranslationLanguageEnum;
 import com.rally.translation.TennisTranslationService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class TennisPlayerQueryService {
         List<PlayerQueryVO> result = players.stream()
                 .map(po -> toPlayerQueryVO(po, today))
                 .toList();
-        tennisTranslationService.players(result);
+        tennisTranslationService.players(result, TranslationLanguageEnum.ZH_CN);
         return result;
     }
 

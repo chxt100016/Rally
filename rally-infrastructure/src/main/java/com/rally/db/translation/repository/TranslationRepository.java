@@ -55,7 +55,7 @@ public class TranslationRepository {
 
     public List<TranslationPO> findAllPending() {
         return translationMybatisService.lambdaQuery()
-                .isNull(TranslationPO::getTranslatedText)
+                .eq(TranslationPO::getTranslatedText, "")
                 .list();
     }
 

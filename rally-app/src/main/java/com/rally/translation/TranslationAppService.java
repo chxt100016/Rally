@@ -25,6 +25,10 @@ public class TranslationAppService {
         return delegate.process(data);
     }
 
+    public List<TranslationData> findAllPending() {
+        return delegate.findAllPending();
+    }
+
 
 
 

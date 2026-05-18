@@ -58,6 +58,10 @@ public class TranslationService {
         return translationClient.translate(batch);
     }
 
+    public List<TranslationData> findAllPending() {
+        return translationGateway.findAllPending();
+    }
+
     public int processBatch(List<TranslationData> batch) {
         List<String> results = translationClient.translate(batch);
         if (results == null) {
