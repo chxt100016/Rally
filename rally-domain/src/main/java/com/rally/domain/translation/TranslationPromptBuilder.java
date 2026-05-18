@@ -51,7 +51,7 @@ public class TranslationPromptBuilder {
     }
 
     private static String toTaskLineWithId(TranslationData data) {
-        return "id:" + data.getId() + "文案:" + data.getOriginalText()
+        return "id:" + data.getId() + ";文案:" + data.getOriginalText()
                 + ";实体:" + data.getEntityType().getChineseDesc()
                 + ";翻译后语言:" + data.getLanguage().getChineseDesc();
     }
