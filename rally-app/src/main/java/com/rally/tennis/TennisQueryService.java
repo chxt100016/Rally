@@ -288,8 +288,8 @@ public class TennisQueryService {
         upcomingMatches.sort(Comparator.comparing(MatchQueryVO::getScheduledAt, Comparator.nullsLast(Comparator.naturalOrder())));
         finishedMatches.sort(Comparator.comparing(MatchQueryVO::getStartedAt, Comparator.nullsLast(Comparator.reverseOrder())));
 
-        tennisTranslationService.translateMatches(upcomingMatches);
-        tennisTranslationService.translateMatches(finishedMatches);
+        tennisTranslationService.matches(upcomingMatches);
+        tennisTranslationService.matches(finishedMatches);
 
         Map<String, List<MatchQueryVO>> result = new LinkedHashMap<>();
         result.put("upcomingMatches", upcomingMatches);

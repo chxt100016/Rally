@@ -30,7 +30,7 @@ public class TennisPlayerQueryService {
         List<PlayerQueryVO> result = players.stream()
                 .map(po -> toPlayerQueryVO(po, today))
                 .toList();
-        tennisTranslationService.translatePlayers(result);
+        tennisTranslationService.players(result);
         return result;
     }
 

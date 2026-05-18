@@ -181,6 +181,9 @@ public class MatchCollectService {
                         if (!detail.getAssociationCode().equals("ATP")) {
                             continue;
                         }
+                        if (!detail.getMatchId().startsWith("MS")) {
+                            continue;
+                        }
                         Match match = OopMatchAppConvertMapper.INSTANCE.toMatch(detail);
                         match.setDrawId(drawId);
 

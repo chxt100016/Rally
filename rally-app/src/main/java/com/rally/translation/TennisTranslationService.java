@@ -52,7 +52,7 @@ public class TennisTranslationService {
     /**
      * 批量翻译比赛列表：court（球场）、round（轮次）、player name（球员姓名）
      */
-    public void translateMatches(List<MatchQueryVO> vos) {
+    public void matches(List<MatchQueryVO> vos) {
         if (CollectionUtils.isEmpty(vos)) return;
 
         Map<String, String> translations = batchTranslate(buildMatchQueries(vos));
@@ -72,7 +72,7 @@ public class TennisTranslationService {
     /**
      * 批量翻译球员列表：name（球员姓名）
      */
-    public void translatePlayers(List<PlayerQueryVO> vos) {
+    public void players(List<PlayerQueryVO> vos) {
         if (CollectionUtils.isEmpty(vos)) return;
 
         Map<String, String> translations = batchTranslate(buildPlayerQueries(vos));
