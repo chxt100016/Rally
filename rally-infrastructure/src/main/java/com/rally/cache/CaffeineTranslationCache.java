@@ -47,7 +47,7 @@ public class CaffeineTranslationCache implements TranslationCache {
         TranslationPO queryPO = TranslationConvertMapper.INSTANCE.toQueryPO(key);
         TranslationPO po = translationRepository.findOne(
                 queryPO.getEntityType(), queryPO.getOriginalText(), queryPO.getLanguage());
-        return po != null ? po.getTranslatedText() : "";
+        return po != null ? po.getTranslatedText() : null;
     }
 
     private void loadAll() {

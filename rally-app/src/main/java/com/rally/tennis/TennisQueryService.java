@@ -4,6 +4,7 @@ import com.rally.db.tennis.entity.TennisTournamentPO;
 import com.rally.db.tennis.repository.TennisTournamentRepository;
 import com.rally.domain.tennis.gateway.MatchQueryGateway;
 import com.rally.domain.tennis.model.*;
+import com.rally.domain.translation.model.TranslationLanguageEnum;
 import com.rally.translation.TennisTranslationService;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
@@ -39,7 +40,6 @@ public class TennisQueryService {
      */
     public List<TournamentDTO> queryTournaments(String status, String type, String range) {
         String dbStatus = resolveDbStatus(status);
-        String tour = type;
 
         // 时间范围：recent=最近一个月，其他=不筛选
         LocalDate dateFrom = null;
@@ -50,7 +50,7 @@ public class TennisQueryService {
             dateTo = today.plusMonths(1);
         }
 
-        List<TennisTournamentPO> list = tennisTournamentRepository.listByCondition(dbStatus, tour, dateFrom, dateTo);
+        List<TennisTournamentPO> list = tennisTournamentRepository.listByCondition(dbStatus, type, dateFrom, dateTo);
         if (CollectionUtils.isEmpty(list)) {
             return List.of();
         }
@@ -73,7 +73,7 @@ public class TennisQueryService {
             }
         }
 
-        tennisTranslationService.tournaments(result);
+        tennisTranslationService.tournaments(result, TranslationLanguageEnum.ZH_CN);
         return result;
     }
 

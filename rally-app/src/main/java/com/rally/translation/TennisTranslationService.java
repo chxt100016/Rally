@@ -34,7 +34,7 @@ public class TennisTranslationService {
 
         Map<TranslationKey, List<TournamentDTO>> map = new HashMap<>();
         for (TournamentDTO item : data) {
-            map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.TOURNAMENT, item.getName().toLowerCase(Locale.ROOT), language), k -> new ArrayList<>()).add(item);
+            map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.TOURNAMENT, item.getName(), language), k -> new ArrayList<>()).add(item);
             map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.CITY, item.getCity()  , language), k -> new ArrayList<>()).add(item);
             map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.SURFACE, item.getSurfaceLabel(), language), k -> new ArrayList<>()).add(item);
         }

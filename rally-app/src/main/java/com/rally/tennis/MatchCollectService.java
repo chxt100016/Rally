@@ -77,13 +77,6 @@ public class MatchCollectService {
                 match.setRoundNumber(round.getRoundId());
                 match.setRoundName(TennisRoundEnum.toShortName(round.getRoundName()));
 
-                // 如果没有有效的 matchId，生成一个唯一 ID
-                if (match.getMatchId() == null || match.getMatchId().isEmpty()) {
-                    String generatedId = generateMatchId(tournamentId, drawId, round.getRoundId(),
-                            match.getPlayer1Id(), match.getPlayer2Id());
-                    match.setMatchId(generatedId);
-                }
-
                 allMatches.add(match);
             }
         }
