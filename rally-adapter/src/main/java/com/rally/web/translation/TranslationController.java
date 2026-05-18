@@ -40,7 +40,7 @@ public class TranslationController {
     public String promptPreview() {
         List<TranslationData> pending = translationAppService.findAllPending();
         String systemPrompt = TranslationPromptBuilder.buildSystemPrompt(pending);
-        String userContent = TranslationPromptBuilder.buildUserContent(pending);
+        String userContent = TranslationPromptBuilder.buildUserContentWithId(pending);
         return "=== SYSTEM ===\n" + systemPrompt
                 + "\n\n=== USER ===\n" + userContent;
     }
