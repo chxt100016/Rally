@@ -1,10 +1,12 @@
 package com.rally.db.tennis.gateway;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.rally.db.tennis.entity.TennisDrawPO;
 import com.rally.db.tennis.entity.TennisMatchPO;
 import com.rally.db.tennis.entity.TennisPlayerPO;
 import com.rally.db.tennis.entity.TennisSetScorePO;
 import com.rally.db.tennis.entity.TennisTournamentEntryPO;
+import com.rally.db.tennis.mapper.TennisDrawMapper;
 import com.rally.db.tennis.mapper.TennisMatchMapper;
 import com.rally.db.tennis.mapper.TennisPlayerMapper;
 import com.rally.db.tennis.mapper.TennisSetScoreMapper;
@@ -19,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 比赛查询 Gateway 实现
@@ -31,6 +34,7 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
     private final TennisPlayerMapper playerMapper;
     private final TennisSetScoreMapper setScoreMapper;
     private final TennisTournamentEntryMapper tournamentEntryMapper;
+    private final TennisDrawMapper drawMapper;
 
     @Override
     public List<MatchData> listByTournamentIds(List<String> tournamentIds) {
@@ -76,12 +80,24 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
         if (CollectionUtils.isEmpty(tournamentIds)) {
             return List.of();
         }
+        List<TennisDrawPO> draws = drawMapper.selectList(
+                new LambdaQueryWrapper<TennisDrawPO>()
+                        .in(TennisDrawPO::getTournamentId, tournamentIds)
+        );
+        if (CollectionUtils.isEmpty(draws)) {
+            return List.of();
+        }
+        Map<Long, String> drawIdToTournamentId = draws.stream()
+                .collect(java.util.stream.Collectors.toMap(TennisDrawPO::getId, TennisDrawPO::getTournamentId));
+
         List<TennisTournamentEntryPO> list = tournamentEntryMapper.selectList(
                 new LambdaQueryWrapper<TennisTournamentEntryPO>()
-                        .in(TennisTournamentEntryPO::getTournamentId, tournamentIds)
+                        .in(TennisTournamentEntryPO::getDrawId, drawIdToTournamentId.keySet())
                         .isNotNull(TennisTournamentEntryPO::getSeed)
         );
-        return list.stream().map(this::toPlayerSeedData).toList();
+        return list.stream()
+                .map(po -> toPlayerSeedData(po, drawIdToTournamentId.get(po.getDrawId())))
+                .toList();
     }
 
     private MatchData toMatchData(TennisMatchPO po) {
@@ -124,9 +140,9 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
         return data;
     }
 
-    private PlayerSeedData toPlayerSeedData(TennisTournamentEntryPO po) {
+    private PlayerSeedData toPlayerSeedData(TennisTournamentEntryPO po, String tournamentId) {
         PlayerSeedData data = new PlayerSeedData();
-        data.setTournamentId(po.getTournamentId());
+        data.setTournamentId(tournamentId);
         data.setPlayerId(po.getPlayerId());
         data.setSeed(po.getSeed() != null ? po.getSeed().intValue() : null);
         return data;

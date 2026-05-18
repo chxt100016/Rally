@@ -8,6 +8,7 @@ import com.rally.domain.translation.model.TranslationLanguageEnum;
 import com.rally.translation.TennisTranslationService;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -379,10 +380,7 @@ public class TennisQueryService {
 
         PlayerVO vo = new PlayerVO();
         vo.setId(player.getPlayerId());
-        String name = player.getFirstName();
-        if (player.getLastName() != null && !player.getLastName().isEmpty()) {
-            name = (name != null ? name + " " : "") + player.getLastName();
-        }
+        String name = StringUtils.isNotBlank(player.getLastName()) ? player.getLastName() : player.getFirstName();
         vo.setName(name);
         vo.setCountry(CountryEnum.getCountry(player.getNationality()));
         vo.setSeed(seedMap.getOrDefault(tournamentId + ":" + playerId, null));

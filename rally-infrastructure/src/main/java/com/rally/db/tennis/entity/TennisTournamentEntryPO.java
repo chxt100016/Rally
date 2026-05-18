@@ -16,11 +16,8 @@ import java.time.LocalDateTime;
 public class TennisTournamentEntryPO {
     @TableId(type = IdType.AUTO)
     private Long id;
-    private String tournamentId;
-    private Integer year;
     private String playerId;
     private Long drawId;
-    private String drawType;
     private Short seed;
     private String entryType;
     private String status;

@@ -17,14 +17,11 @@ public class TennisTournamentEntryService extends ServiceImpl<TennisTournamentEn
     public void saveEntries(List<TennisTournamentEntryPO> entries) {
         for (TennisTournamentEntryPO entry : entries) {
             TennisTournamentEntryPO existing = this.lambdaQuery()
-                    .eq(TennisTournamentEntryPO::getTournamentId, entry.getTournamentId())
-                    .eq(TennisTournamentEntryPO::getYear, entry.getYear())
+                    .eq(TennisTournamentEntryPO::getDrawId, entry.getDrawId())
                     .eq(TennisTournamentEntryPO::getPlayerId, entry.getPlayerId())
-                    .eq(TennisTournamentEntryPO::getDrawType, entry.getDrawType())
                     .one();
 
             if (existing != null) {
-                existing.setDrawId(entry.getDrawId());
                 existing.setSeed(entry.getSeed());
                 this.updateById(existing);
             } else {

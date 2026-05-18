@@ -89,7 +89,7 @@ public class TournamentCollectService {
         log.info("WTA赛事采集完成: year={}, 数量={}", year, poList.size());
     }
 
-    public void wtaTournamentEntry(WtaDrawsResponse response, String tournamentId, int year, Long drawId) {
+    public void wtaTournamentEntry(WtaDrawsResponse response, Long drawId) {
         if (response == null || response.getData() == null
                 || CollectionUtils.isEmpty(response.getData().getDraw())) {
             return;
@@ -101,11 +101,8 @@ public class TournamentCollectService {
                 continue;
             }
             TennisTournamentEntryPO po = new TennisTournamentEntryPO();
-            po.setTournamentId(tournamentId);
-            po.setYear(year);
             po.setPlayerId(entry.getPlayerId());
             po.setDrawId(drawId);
-            po.setDrawType("LS");
             po.setSeed(entry.getSeed() != null ? entry.getSeed().shortValue() : null);
             po.setEntryType(entry.getEntryType());
             entries.add(po);
@@ -113,7 +110,7 @@ public class TournamentCollectService {
         tennisTournamentEntryRepository.saveEntries(entries);
     }
 
-    public void atpTournamentEntry(AtpDrawsResponse response, String tournamentId, int year, Long drawId, String drawType) {
+    public void atpTournamentEntry(AtpDrawsResponse response, Long drawId) {
         AtpDrawsResponse.Draw draw = response.getMS();
         // key: playerId，value: TennisTournamentEntryPO
         Map<String, TennisTournamentEntryPO> entryMap = new LinkedHashMap<>();
@@ -127,8 +124,8 @@ public class TournamentCollectService {
                 continue;
             }
             for (AtpDrawsResponse.Fixture fixture : round.getFixtures()) {
-                extractEntriesFromDrawLine(fixture.getDrawLineTop(), tournamentId, year, drawId, drawType, entryMap);
-                extractEntriesFromDrawLine(fixture.getDrawLineBottom(), tournamentId, year, drawId, drawType, entryMap);
+                extractEntriesFromDrawLine(fixture.getDrawLineTop(), drawId, entryMap);
+                extractEntriesFromDrawLine(fixture.getDrawLineBottom(), drawId, entryMap);
             }
         }
 
@@ -136,12 +133,9 @@ public class TournamentCollectService {
 
     }
 
-    /**
-     * 从 DrawLine 中提取球员种子信息
-     */
     private void extractEntriesFromDrawLine(
-            AtpDrawsResponse.DrawLine drawLine, String tournamentId, int year,
-            Long drawId, String drawType, Map<String, TennisTournamentEntryPO> entryMap) {
+            AtpDrawsResponse.DrawLine drawLine, Long drawId,
+            Map<String, TennisTournamentEntryPO> entryMap) {
         if (drawLine == null || CollectionUtils.isEmpty(drawLine.getPlayers())) {
             return;
         }
@@ -151,11 +145,8 @@ public class TournamentCollectService {
                 continue;
             }
             TennisTournamentEntryPO entry = new TennisTournamentEntryPO();
-            entry.setTournamentId(tournamentId);
-            entry.setYear(year);
             entry.setPlayerId(playerInfo.getPlayerId());
             entry.setDrawId(drawId);
-            entry.setDrawType(drawType);
             entry.setSeed(drawLine.getSeed() != null ? drawLine.getSeed().shortValue() : null);
             // 相同 playerId 覆盖，保留最新的种子数
             entryMap.put(playerInfo.getPlayerId(), entry);

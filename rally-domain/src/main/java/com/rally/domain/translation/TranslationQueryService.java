@@ -53,7 +53,6 @@ public class TranslationQueryService {
                 log.error("新增翻译实体失败, item:{}", JSON.toJSONString(item), e);
             }
         }
-        translationCache.invalidate();
     }
 
     /**

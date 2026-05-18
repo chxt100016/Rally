@@ -40,7 +40,7 @@ public class TennisTranslationService {
             switch (entry.getKey().getEntityType()) {
                 case TOURNAMENT -> map.get(entry.getKey()).forEach(item -> item.setName(entry.getValue()));
                 case CITY -> map.get(entry.getKey()).forEach(item -> item.setCity(entry.getValue()));
-                case SURFACE -> map.get(entry.getKey()).forEach(item -> item.setSurface(entry.getValue()));
+                case SURFACE -> map.get(entry.getKey()).forEach(item -> item.setSurfaceLabel(entry.getValue()));
             }
         }
     }

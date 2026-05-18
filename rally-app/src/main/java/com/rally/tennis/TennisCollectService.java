@@ -89,7 +89,7 @@ public class TennisCollectService {
             // 比赛
             this.matchCollectService.atpFromDraw(response, tournamentId, drawId, year);
             // 球员赛事登记
-            this.tournamentCollectService.atpTournamentEntry(response, tournamentId, year, drawId, "MS");
+            this.tournamentCollectService.atpTournamentEntry(response, drawId);
             // 球员
             this.playerCollectService.atpFromDraw(response);
         }
@@ -104,7 +104,7 @@ public class TennisCollectService {
             // 比赛
             this.matchCollectService.wtaFromDraw(response, tournamentId, drawId, year);
             // 球员赛事登记
-            this.tournamentCollectService.wtaTournamentEntry(response, tournamentId, year, drawId);
+            this.tournamentCollectService.wtaTournamentEntry(response, drawId);
             // 球员
             this.playerCollectService.wtaFromDraw(response);
         }

@@ -18,15 +18,15 @@ public class TranslationKey {
         return String.format("%s:%s:%s",  originalText, entityType, language);
     }
 
-//    @Override
-//    public boolean equals(Object o) {
-//        if (o == null || getClass() != o.getClass()) return false;
-//        TranslationKey that = (TranslationKey) o;
-//        return entityType == that.entityType && Objects.equals(originalText.toLowerCase(), that.originalText.toLowerCase()) && language == that.language;
-//    }
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        TranslationKey that = (TranslationKey) o;
+        return entityType == that.entityType && Objects.equals(originalText.toLowerCase(), that.originalText.toLowerCase()) && language == that.language;
+    }
 
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(entityType, originalText.toLowerCase(), language);
-//    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(entityType, originalText.toLowerCase(), language);
+    }
 }
