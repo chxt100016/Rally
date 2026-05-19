@@ -1,6 +1,7 @@
 package com.rally.tennis;
 
 import com.rally.tennis.model.Discipline;
+import com.rally.tennis.model.Match;
 import com.rally.tennis.parser.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -69,7 +70,7 @@ public class MatchCollectManager {
                     tournamentId, draw.getYear(), draw.getDrawTypeCode(),
                     draw.getMeta().getDrawSize(), draw.getMeta().getTotalRounds());
 
-            List<com.rally.tennis.model.Match> matches = parser.getMatches(draw, tournamentId, drawId);
+            List<Match> matches = parser.getMatches(draw, tournamentId, drawId);
             if (parser.isLive()) {
                 matchCollectService.updateMatches(matches);
             } else {
