@@ -2,6 +2,7 @@ package com.rally.translation;
 
 import com.rally.domain.tennis.model.MatchQueryVO;
 import com.rally.domain.tennis.model.PlayerQueryVO;
+import com.rally.domain.tennis.model.SeedVO;
 import com.rally.domain.tennis.model.TournamentDTO;
 import com.rally.domain.translation.TranslationQueryService;
 import com.rally.domain.translation.model.TranslationEntityTypeEnum;
@@ -45,6 +46,8 @@ public class TennisTranslationService {
         }
     }
 
+
+
     /**
      * 批量翻译比赛列表：court（球场）、round（轮次）、player name（球员姓名）
      */
@@ -53,7 +56,9 @@ public class TennisTranslationService {
 
         Map<TranslationKey, List<MatchQueryVO>> map = new HashMap<>();
         for (MatchQueryVO vo : vos) {
-            map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.COURT, vo.getCourt(), language), k -> new ArrayList<>()).add(vo);
+            if (vo.getCourt() != null) {
+                map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.COURT, vo.getCourt(), language), k -> new ArrayList<>()).add(vo);
+            }
             if (vo.getPlayer1() != null) {
                 map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.PLAYER, vo.getPlayer1().getName(), language), k -> new ArrayList<>()).add(vo);
             }
@@ -85,6 +90,20 @@ public class TennisTranslationService {
 
         Map<TranslationKey, List<PlayerQueryVO>> map = new HashMap<>();
         for (PlayerQueryVO vo : vos) {
+            map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.PLAYER, vo.getName(), language), k -> new ArrayList<>()).add(vo);
+        }
+
+        Map<TranslationKey, String> translationMap = this.translationQueryService.query(map.keySet());
+        for (Map.Entry<TranslationKey, String> entry : translationMap.entrySet()) {
+            map.get(entry.getKey()).forEach(vo -> vo.setName(entry.getValue()));
+        }
+    }
+
+    public void seeds(List<SeedVO> vos, TranslationLanguageEnum language) {
+        if (CollectionUtils.isEmpty(vos)) return;
+
+        Map<TranslationKey, List<SeedVO>> map = new HashMap<>();
+        for (SeedVO vo : vos) {
             map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.PLAYER, vo.getName(), language), k -> new ArrayList<>()).add(vo);
         }
 

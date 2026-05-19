@@ -87,6 +87,10 @@ public class TennisTournamentService extends ServiceImpl<TennisTournamentMapper,
     /**
      * 按条件查询赛事，日期区间取赛事时间与查询窗口的交集（startDate <= dateTo && endDate >= dateFrom）
      */
+    public boolean existsByTournamentId(String tournamentId) {
+        return lambdaQuery().eq(TennisTournamentPO::getTournamentId, tournamentId).exists();
+    }
+
     public List<TennisTournamentPO> listByCondition(String dbStatus, String tour,
                                                      LocalDate dateFrom, LocalDate dateTo) {
         var wrapper = this.lambdaQuery();

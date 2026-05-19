@@ -1,10 +1,13 @@
 package com.rally.tennis;
 
+import com.rally.client.atp.AtpClient;
+import com.rally.client.atp.model.AtpRankingsResponse;
 import com.rally.client.tennistv.model.AtpDrawsResponse;
-import com.rally.client.tennistv.model.MatchesResponse;
 import com.rally.client.tennistv.model.AtpOopResponse;
+import com.rally.client.tennistv.model.MatchesResponse;
+import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaDrawsResponse;
-import com.rally.client.wta.model.WtaMatchesResponse;
+import com.rally.client.wta.model.WtaRankingsResponse;
 import com.rally.db.tennis.repository.TennisPlayerRepository;
 import com.rally.tennis.convert.PlayerAppConvertMapper;
 import com.rally.tennis.model.Player;
@@ -13,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +26,12 @@ public class PlayerCollectService {
 
     @Resource
     private TennisPlayerRepository tennisPlayerRepository;
+
+    @Resource
+    private AtpClient atpClient;
+
+    @Resource
+    private WtaClient wtaClient;
 
     /**
      * 从 live matches 响应中提取球员
@@ -97,10 +107,12 @@ public class PlayerCollectService {
     }
 
     /**
-     * 批量保存球员，统一标记为 ATP
+     * 批量保存球员，tour 未设置的默认为 ATP
      */
     public void savePlayers(List<Player> players) {
-        savePlayers(players, "ATP");
+        if (CollectionUtils.isEmpty(players)) return;
+        players.stream().filter(p -> p.getTour() == null).forEach(p -> p.setTour("ATP"));
+        tennisPlayerRepository.saveOrUpdateBatch(PlayerAppConvertMapper.INSTANCE.toPlayerPOList(players));
     }
 
     public void wtaFromDraw(WtaDrawsResponse response) {
@@ -131,6 +143,70 @@ public class PlayerCollectService {
         players.forEach(p -> p.setTour(tour));
         tennisPlayerRepository.saveOrUpdateBatch(
                 PlayerAppConvertMapper.INSTANCE.toPlayerPOList(players));
+    }
+
+    public void atpRank() {
+        AtpRankingsResponse response = atpClient.getRankings(1, 100);
+        if (response == null || response.getData() == null
+                || response.getData().getRankings() == null
+                || CollectionUtils.isEmpty(response.getData().getRankings().getPlayers())) {
+            log.warn("ATP排名数据为空");
+            return;
+        }
+        List<Player> players = response.getData().getRankings().getPlayers().stream()
+                .map(this::fromAtpRanking)
+                .toList();
+        this.savePlayers(players, "ATP");
+        log.info("ATP排名采集完成: {}条", players.size());
+    }
+
+    public void wtaRank() {
+        WtaRankingsResponse response = wtaClient.getRankings(1, 100);
+        if (response == null || response.getData() == null
+                || response.getData().getRankings() == null
+                || CollectionUtils.isEmpty(response.getData().getRankings().getPlayers())) {
+            log.warn("WTA排名数据为空");
+            return;
+        }
+        List<Player> players = response.getData().getRankings().getPlayers().stream()
+                .map(this::fromWtaRanking)
+                .toList();
+        this.savePlayers(players, "WTA");
+        log.info("WTA排名采集完成: {}条", players.size());
+    }
+
+    private Player fromAtpRanking(AtpRankingsResponse.PlayerRanking r) {
+        Player p = new Player();
+        p.setPlayerId(r.getPlayerId());
+        p.setFirstName(r.getFirstName());
+        p.setLastName(r.getLastName());
+        p.setNationality(r.getNatlId());
+        p.setRank(r.getRank());
+        p.setPoints(r.getPoints());
+        p.setBirthDate(parseDate(r.getBirthDate()));
+        return p;
+    }
+
+    private Player fromWtaRanking(WtaRankingsResponse.PlayerRanking r) {
+        Player p = new Player();
+        p.setPlayerId(r.getPlayerId());
+        p.setFirstName(r.getFirstName());
+        p.setLastName(r.getLastName());
+        p.setNationality(r.getNatlId());
+        p.setRank(r.getRank());
+        p.setPoints(r.getPoints());
+        p.setBirthDate(parseDate(r.getBirthDate()));
+        return p;
+    }
+
+    private LocalDate parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) return null;
+        try {
+            return LocalDate.parse(dateStr.length() > 10 ? dateStr.substring(0, 10) : dateStr);
+        } catch (Exception e) {
+            log.debug("解析日期失败: {}", dateStr);
+            return null;
+        }
     }
 
 

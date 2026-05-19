@@ -26,6 +26,10 @@ public class TennisTournamentRepository {
         return tennisTournamentService.findCurrentTournaments(date);
     }
 
+    public boolean exists(String tournamentId) {
+        return tennisTournamentService.existsByTournamentId(tournamentId);
+    }
+
     public List<TennisTournamentPO> listByCondition(String dbStatus, String tour,
                                                      LocalDate dateFrom, LocalDate dateTo) {
         return tennisTournamentService.listByCondition(dbStatus, tour, dateFrom, dateTo);

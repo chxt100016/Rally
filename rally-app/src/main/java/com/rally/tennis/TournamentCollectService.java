@@ -14,6 +14,7 @@ import com.rally.db.tennis.repository.TennisTournamentRepository;
 import com.rally.tennis.convert.TournamentAppConvertMapper;
 import com.rally.tennis.convert.WtaTournamentAppConvertMapper;
 import com.rally.tennis.model.Tournament;
+import com.rally.tennis.model.TournamentEntry;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -47,6 +48,24 @@ public class TournamentCollectService {
     public List<TennisTournamentPO> current() {
         LocalDate today = LocalDate.now();
         return tennisTournamentRepository.findCurrentTournaments(today);
+    }
+
+    public boolean exists(String tournamentId) {
+        return tennisTournamentRepository.exists(tournamentId);
+    }
+
+    public void saveEntries(List<TournamentEntry> entries) {
+        if (CollectionUtils.isEmpty(entries)) return;
+        List<TennisTournamentEntryPO> pos = new ArrayList<>();
+        for (TournamentEntry entry : entries) {
+            TennisTournamentEntryPO po = new TennisTournamentEntryPO();
+            po.setPlayerId(entry.getPlayerId());
+            po.setDrawId(entry.getDrawId());
+            po.setSeed(entry.getSeed());
+            po.setEntryType(entry.getEntryType());
+            pos.add(po);
+        }
+        tennisTournamentEntryRepository.saveEntries(pos);
     }
 
     public void collectTournament(int year) {

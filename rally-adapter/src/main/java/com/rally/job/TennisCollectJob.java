@@ -1,7 +1,7 @@
 package com.rally.job;
 
 
-import com.rally.tennis.TennisCollectService;
+import com.rally.tennis.TennisCollectFacade;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -14,23 +14,23 @@ import org.springframework.stereotype.Component;
 public class TennisCollectJob {
 
     @Resource
-    private TennisCollectService tennisCollectService;
+    private TennisCollectFacade tennisCollectFacade;
 
     /** 每天凌晨2点采集当前进行中赛事签表 */
     @Scheduled(cron = "${job.tennis.collect.draws.cron}")
     public void currentDraws() {
-        tennisCollectService.currentDraws();
+        tennisCollectFacade.currentDraws();
     }
 
     /** 每小时采集比赛详情 */
     @Scheduled(cron = "${job.tennis.collect.matches.cron}")
     public void currentMatch() {
-        tennisCollectService.oop();
+        tennisCollectFacade.oop();
     }
 
     /** 每分钟采集进行中比赛实时状态 */
     @Scheduled(cron = "${job.tennis.collect.live.cron}")
     public void liveMatch() {
-        tennisCollectService.liveMatch();
+        tennisCollectFacade.liveMatch();
     }
 }

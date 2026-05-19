@@ -329,6 +329,7 @@ public class TennisQueryService {
 
         tennisTranslationService.matches(upcomingMatches, TranslationLanguageEnum.ZH_CN);
         tennisTranslationService.matches(finishedMatches, TranslationLanguageEnum.ZH_CN);
+        tennisTranslationService.seeds(seedVOList, TranslationLanguageEnum.ZH_CN);
 
         Map<String, List<MatchQueryVO>> matchMap = new LinkedHashMap<>();
         matchMap.put("upcomingMatches", upcomingMatches);

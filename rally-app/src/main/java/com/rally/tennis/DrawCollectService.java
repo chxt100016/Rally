@@ -39,6 +39,8 @@ public class DrawCollectService {
         return tennisDrawRepository.saveOrUpdate(tournamentId, year, "LS", drawSize, totalRounds);
     }
 
-
+    public Long saveOrUpdate(String tournamentId, int year, String drawTypeCode, Integer drawSize, Integer totalRounds) {
+        return tennisDrawRepository.saveOrUpdate(tournamentId, year, drawTypeCode, drawSize, totalRounds);
+    }
 
 }
