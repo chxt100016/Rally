@@ -93,14 +93,14 @@ public class TennisQueryService {
     }
 
     /**
-     * category 过滤：非数字或数字 >= 500 才保留
+     * category 过滤：非数字或数字 >= 250 才保留
      */
     private boolean isCategoryKept(String category) {
         if (category == null || category.isBlank()) {
             return true;
         }
         try {
-            return Integer.parseInt(category.trim()) >= 500;
+            return Integer.parseInt(category.trim()) >= 250;
         } catch (NumberFormatException e) {
             return true;
         }
