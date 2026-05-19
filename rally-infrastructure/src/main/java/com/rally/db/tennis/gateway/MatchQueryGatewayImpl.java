@@ -43,9 +43,10 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
         }
         List<TennisMatchPO> list = matchMapper.selectList(
                 new LambdaQueryWrapper<TennisMatchPO>()
-                        .isNotNull(TennisMatchPO::getMatchDate)
+                        .and(w -> w.isNotNull(TennisMatchPO::getMatchDate)
+                                .or()
+                                .eq(TennisMatchPO::getStatus, "FINISHED"))
                         .in(TennisMatchPO::getTournamentId, tournamentIds)
-
         );
         return list.stream().map(this::toMatchData).toList();
     }

@@ -190,7 +190,7 @@ public class TennisQueryService {
      */
     private String deriveStatus(TennisTournamentPO po) {
         LocalDate today = LocalDate.now();
-        if ("completed".equals(po.getStatus())) {
+        if (po.getEndDate() != null && today.isAfter(po.getEndDate())) {
             return "FINISHED";
         }
         if (po.getStartDate() != null && today.isBefore(po.getStartDate())) {
