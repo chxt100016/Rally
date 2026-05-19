@@ -22,17 +22,12 @@ S = 单个签表的切片类型（如 AtpDrawsResponse.DrawSection）
 ```java
 public abstract class MatchParser<R, S> {
 
-    /** 从原始响应中拆分出多个签表切片（一次响应可能含单打+双打） */
+    /** 从原始响应中拆分出多个签表切片（一次响应可能含单打+双打）
+     *  实现类负责将 tournamentId / year / discipline 填入 DrawResult */
     public abstract List<DrawResult<S>> getDraws(R response);
 
     /** 判断该切片的赛制（SINGLES / DOUBLES / MIXED） */
     public abstract Discipline parseDiscipline(S slice);
-
-    /** 从切片中提取 tournamentId，供 Manager 做 tournament 存在性校验 */
-    public abstract String getTournamentId(S slice);
-
-    /** 解析签表元信息（drawSize、totalRounds） */
-    public abstract DrawMeta getDrawMeta(S slice);
 
     /** 从切片提取所有比赛（含 tournamentId 和 drawId 注入） */
     public abstract List<Match> getMatches(DrawResult<S> draw, String tournamentId, Long drawId);
@@ -52,6 +47,8 @@ public class DrawResult<S> {
     private final S slice;          // 强类型原始切片
     private final Discipline discipline;
     private final DrawMeta meta;    // drawSize / totalRounds
+    private final String tournamentId;
+    private final int year;         // getDraws() 负责从响应中提取并填充
 }
 ```
 
@@ -112,7 +109,7 @@ public class MatchCollectManager {
             // 1. Discipline 过滤
             if (!shouldCollect(draw.getDiscipline())) continue;
 
-            String tournamentId = parser.getTournamentId(draw.getSlice());
+            String tournamentId = draw.getTournamentId();
 
             // 2. Tournament 存在性校验
             if (!tournamentCollectService.exists(tournamentId)) {
@@ -123,7 +120,7 @@ public class MatchCollectManager {
             // 3. 创建/更新 Draw 记录
             DrawMeta meta = draw.getMeta();
             Long drawId = drawCollectService.saveOrUpdate(
-                tournamentId, draw.getDiscipline(), meta.getDrawSize(), meta.getTotalRounds()
+                tournamentId, draw.getYear(), draw.getDiscipline(), meta.getDrawSize(), meta.getTotalRounds()
             );
 
             // 4. 保存比赛
