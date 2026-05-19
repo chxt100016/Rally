@@ -16,16 +16,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class WtaLiveMatchParser extends MatchParser<DrawParams, List<WtaMatchesResponse.MatchItem>> {
+public class WtaLiveMatchParser extends MatchParser<WtaMatchesResponse, List<WtaMatchesResponse.MatchItem>> {
 
     @Resource
     private WtaClient wtaClient;
 
     @Override
-    public List<DrawResult<List<WtaMatchesResponse.MatchItem>>> fetchDraws(DrawParams params) {
-        WtaMatchesResponse response = wtaClient.getLiveMatches(params.getTournamentId(), params.getYear());
-        if (response == null || CollectionUtils.isEmpty(response.getMatches())) return List.of();
-        return List.of(new DrawResult<>(response.getMatches(), Discipline.SINGLES, "LS",
+    protected WtaMatchesResponse fetchData(DrawParams params) {
+        return wtaClient.getLiveMatches(params.getTournamentId(), params.getYear());
+    }
+
+    @Override
+    protected List<DrawResult<List<WtaMatchesResponse.MatchItem>>> fetchLs(WtaMatchesResponse data, DrawParams params) {
+        if (data == null || CollectionUtils.isEmpty(data.getMatches())) return List.of();
+        return List.of(new DrawResult<>(data.getMatches(), Discipline.SINGLES, "LS",
                 new DrawMeta(null, null), params.getTournamentId(), params.getYear()));
     }
 
@@ -55,11 +59,6 @@ public class WtaLiveMatchParser extends MatchParser<DrawParams, List<WtaMatchesR
     @Override
     public List<TournamentEntry> getEntries(DrawResult<List<WtaMatchesResponse.MatchItem>> draw, Long drawId) {
         return List.of();
-    }
-
-    @Override
-    public boolean isLive() {
-        return true;
     }
 
     private String resolveWinner(String winner, String playerA, String playerB) {

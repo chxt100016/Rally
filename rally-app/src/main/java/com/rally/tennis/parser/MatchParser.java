@@ -4,12 +4,33 @@ import com.rally.tennis.model.Match;
 import com.rally.tennis.model.Player;
 import com.rally.tennis.model.TournamentEntry;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public abstract class MatchParser<P, S> {
+/**
+ * R: Client 接口的原始返回类型，由 fetchData 获取，在 fetchMs/fetchMd/fetchLs/fetchLd 间共享
+ * S: 单个签表切片类型，用于 getMatches/getPlayers/getEntries
+ */
+public abstract class MatchParser<R, S> {
 
-    /** 调用 Client 获取数据并拆分出多个签表切片，同时填充 tournamentId / year / discipline */
-    public abstract List<DrawResult<S>> fetchDraws(P params);
+    /** 模板方法：依次调用 fetchMs/fetchMd/fetchLs/fetchLd 收集各类签表，子类按需覆盖对应方法 */
+    public final List<DrawResult<S>> fetchDraws(DrawParams params) {
+        R data = fetchData(params);
+        List<DrawResult<S>> results = new ArrayList<>();
+        results.addAll(fetchMs(data, params));
+        results.addAll(fetchMd(data, params));
+        results.addAll(fetchLs(data, params));
+        results.addAll(fetchLd(data, params));
+        return results;
+    }
+
+    /** 调用 Client 获取原始数据，供各 draw 方法共享 */
+    protected R fetchData(DrawParams params) { return null; }
+
+    protected List<DrawResult<S>> fetchMs(R data, DrawParams params) { return List.of(); }
+    protected List<DrawResult<S>> fetchMd(R data, DrawParams params) { return List.of(); }
+    protected List<DrawResult<S>> fetchLs(R data, DrawParams params) { return List.of(); }
+    protected List<DrawResult<S>> fetchLd(R data, DrawParams params) { return List.of(); }
 
     /** 从切片提取所有比赛 */
     public abstract List<Match> getMatches(DrawResult<S> draw, String tournamentId, Long drawId);
@@ -22,9 +43,4 @@ public abstract class MatchParser<P, S> {
 
     /** 标识当前 Parser 对应的采集类型，用于 Manager 构建路由 Map */
     public abstract CollectType collectType();
-
-    /** Live 类 Parser 返回 true，Manager 会调用 updateMatches 而非 saveMatches */
-    public boolean isLive() {
-        return false;
-    }
 }

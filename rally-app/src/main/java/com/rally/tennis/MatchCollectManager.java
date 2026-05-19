@@ -48,12 +48,12 @@ public class MatchCollectManager {
     }
 
     @SuppressWarnings("unchecked")
-    public <P> void collect(CollectType type, P params) {
-        MatchParser<P, Object> parser = (MatchParser<P, Object>) parsers.get(type);
+    public void collect(CollectType type, DrawParams params) {
+        MatchParser<Object, Object> parser = (MatchParser<Object, Object>) parsers.get(type);
         collectFromDraw(params, parser);
     }
 
-    public <P, S> void collectFromDraw(P params, MatchParser<P, S> parser) {
+    public <R, S> void collectFromDraw(DrawParams params, MatchParser<R, S> parser) {
         List<DrawResult<S>> draws = parser.fetchDraws(params);
         if (CollectionUtils.isEmpty(draws)) return;
 
@@ -71,11 +71,7 @@ public class MatchCollectManager {
                     draw.getMeta().getDrawSize(), draw.getMeta().getTotalRounds());
 
             List<Match> matches = parser.getMatches(draw, tournamentId, drawId);
-            if (parser.isLive()) {
-                matchCollectService.updateMatches(matches);
-            } else {
-                matchCollectService.saveMatches(matches);
-            }
+            matchCollectService.saveMatches(matches);
 
             playerCollectService.savePlayers(parser.getPlayers(draw));
             tournamentCollectService.saveEntries(parser.getEntries(draw, drawId));

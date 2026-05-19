@@ -22,18 +22,20 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class WtaOopMatchParser extends MatchParser<DrawParams, WtaMatchesResponse> {
+public class WtaOopMatchParser extends MatchParser<WtaMatchesResponse, WtaMatchesResponse> {
 
     @Resource
     private WtaClient wtaClient;
 
     @Override
-    public List<DrawResult<WtaMatchesResponse>> fetchDraws(DrawParams params) {
-        WtaMatchesResponse response = wtaClient.getMatches(params.getTournamentId(), params.getYear());
-        if (response == null || CollectionUtils.isEmpty(response.getMatches())) {
-            return List.of();
-        }
-        return List.of(new DrawResult<>(response, Discipline.SINGLES, "LS",
+    protected WtaMatchesResponse fetchData(DrawParams params) {
+        return wtaClient.getMatches(params.getTournamentId(), params.getYear());
+    }
+
+    @Override
+    protected List<DrawResult<WtaMatchesResponse>> fetchLs(WtaMatchesResponse data, DrawParams params) {
+        if (data == null || CollectionUtils.isEmpty(data.getMatches())) return List.of();
+        return List.of(new DrawResult<>(data, Discipline.SINGLES, "LS",
                 new DrawMeta(null, null), params.getTournamentId(), params.getYear()));
     }
 

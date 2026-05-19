@@ -16,22 +16,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class WtaDrawMatchParser extends MatchParser<DrawParams, WtaDrawsResponse.DrawData> {
+public class WtaDrawMatchParser extends MatchParser<WtaDrawsResponse, WtaDrawsResponse.DrawData> {
 
     @Resource
     private WtaClient wtaClient;
 
     @Override
-    public List<DrawResult<WtaDrawsResponse.DrawData>> fetchDraws(DrawParams params) {
-        WtaDrawsResponse response = wtaClient.getDraws(params.getTournamentId(), params.getYear());
-        if (response == null || response.getData() == null
-                || CollectionUtils.isEmpty(response.getData().getResults())) {
-            return List.of();
-        }
-        WtaDrawsResponse.DrawData data = response.getData();
-        Integer drawSize = data.getEvent() != null ? data.getEvent().getSglDrawSize() : null;
-        Integer totalRounds = data.getResults().size();
-        return List.of(new DrawResult<>(data, Discipline.SINGLES, "LS",
+    protected WtaDrawsResponse fetchData(DrawParams params) {
+        return wtaClient.getDraws(params.getTournamentId(), params.getYear());
+    }
+
+    @Override
+    protected List<DrawResult<WtaDrawsResponse.DrawData>> fetchLs(WtaDrawsResponse data, DrawParams params) {
+        if (data == null || data.getData() == null
+                || CollectionUtils.isEmpty(data.getData().getResults())) return List.of();
+        WtaDrawsResponse.DrawData drawData = data.getData();
+        Integer drawSize = drawData.getEvent() != null ? drawData.getEvent().getSglDrawSize() : null;
+        Integer totalRounds = drawData.getResults().size();
+        return List.of(new DrawResult<>(drawData, Discipline.SINGLES, "LS",
                 new DrawMeta(drawSize, totalRounds), params.getTournamentId(), params.getYear()));
     }
 

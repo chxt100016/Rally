@@ -19,34 +19,35 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class AtpDrawMatchParser extends MatchParser<DrawParams, AtpDrawsResponse.Draw> {
+public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsResponse.Draw> {
 
     @Resource
     private TennisTvClient tennisTvClient;
 
     @Override
-    public List<DrawResult<AtpDrawsResponse.Draw>> fetchDraws(DrawParams params) {
-        AtpDrawsResponse response = tennisTvClient.getDraws(params.getTournamentId(), params.getYear());
-        if (response == null) return List.of();
-
-        List<DrawResult<AtpDrawsResponse.Draw>> results = new ArrayList<>();
-
-        AtpDrawsResponse.Draw ms = response.getMS();
-        if (ms != null && CollectionUtils.isNotEmpty(ms.getRounds())) {
-            results.add(new DrawResult<>(ms, Discipline.SINGLES, "MS",
-                    new DrawMeta(ms.getDrawSize(), ms.getRounds().size()),
-                    params.getTournamentId(), params.getYear()));
-        }
-
-        AtpDrawsResponse.Draw md = response.getMD();
-        if (md != null && CollectionUtils.isNotEmpty(md.getRounds())) {
-            results.add(new DrawResult<>(md, Discipline.DOUBLES, "MD",
-                    new DrawMeta(md.getDrawSize(), md.getRounds().size()),
-                    params.getTournamentId(), params.getYear()));
-        }
-
-        return results;
+    protected AtpDrawsResponse fetchData(DrawParams params) {
+        return tennisTvClient.getDraws(params.getTournamentId(), params.getYear());
     }
+
+    @Override
+    protected List<DrawResult<AtpDrawsResponse.Draw>> fetchMs(AtpDrawsResponse data, DrawParams params) {
+        if (data == null) return List.of();
+        AtpDrawsResponse.Draw ms = data.getMS();
+        if (ms == null || CollectionUtils.isEmpty(ms.getRounds())) return List.of();
+        return List.of(new DrawResult<>(ms, Discipline.SINGLES, "MS",
+                new DrawMeta(ms.getDrawSize(), ms.getRounds().size()),
+                params.getTournamentId(), params.getYear()));
+    }
+
+//    @Override
+//    protected List<DrawResult<AtpDrawsResponse.Draw>> fetchMd(AtpDrawsResponse data, DrawParams params) {
+//        if (data == null) return List.of();
+//        AtpDrawsResponse.Draw md = data.getMD();
+//        if (md == null || CollectionUtils.isEmpty(md.getRounds())) return List.of();
+//        return List.of(new DrawResult<>(md, Discipline.DOUBLES, "MD",
+//                new DrawMeta(md.getDrawSize(), md.getRounds().size()),
+//                params.getTournamentId(), params.getYear()));
+//    }
 
     @Override
     public List<Match> getMatches(DrawResult<AtpDrawsResponse.Draw> draw, String tournamentId, Long drawId) {

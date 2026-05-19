@@ -18,17 +18,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class AtpLiveMatchParser extends MatchParser<Void, List<MatchesResponse.MatchInfo>> {
+public class AtpLiveMatchParser extends MatchParser<MatchesResponse, List<MatchesResponse.MatchInfo>> {
 
     @Resource
     private TennisTvClient tennisTvClient;
 
+    /** 按赛事分组聚合，每组产生一个 MS DrawResult */
     @Override
-    public List<DrawResult<List<MatchesResponse.MatchInfo>>> fetchDraws(Void params) {
-        MatchesResponse response = tennisTvClient.getMatchesByStatus("L");
-        if (response == null || CollectionUtils.isEmpty(response.getMatches())) return List.of();
+    protected List<DrawResult<List<MatchesResponse.MatchInfo>>> fetchMs(MatchesResponse data, DrawParams params) {
+        if (data == null || CollectionUtils.isEmpty(data.getMatches())) return List.of();
 
-        Map<String, List<MatchesResponse.MatchInfo>> grouped = response.getMatches().stream()
+        Map<String, List<MatchesResponse.MatchInfo>> grouped = data.getMatches().stream()
                 .filter(m -> m.getTournamentId() != null && m.getTournamentYear() != null)
                 .collect(Collectors.groupingBy(
                         m -> m.getTournamentId() + "|" + m.getTournamentYear()));
@@ -38,10 +38,16 @@ public class AtpLiveMatchParser extends MatchParser<Void, List<MatchesResponse.M
             MatchesResponse.MatchInfo first = group.get(0);
             String tournamentId = String.valueOf(first.getTournamentId());
             int year = first.getTournamentYear();
+            group = group.stream().filter(item -> item.getMatchId().startsWith("MS")).toList();
             results.add(new DrawResult<>(group, Discipline.SINGLES, "MS",
                     new DrawMeta(null, null), tournamentId, year));
         }
         return results;
+    }
+
+    @Override
+    protected MatchesResponse fetchData(DrawParams params) {
+        return tennisTvClient.getMatchesByStatus("L");
     }
 
     @Override
@@ -73,11 +79,6 @@ public class AtpLiveMatchParser extends MatchParser<Void, List<MatchesResponse.M
     @Override
     public List<TournamentEntry> getEntries(DrawResult<List<MatchesResponse.MatchInfo>> draw, Long drawId) {
         return List.of();
-    }
-
-    @Override
-    public boolean isLive() {
-        return true;
     }
 
     private Integer parseDuration(String matchTime) {
