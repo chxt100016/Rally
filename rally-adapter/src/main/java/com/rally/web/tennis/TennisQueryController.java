@@ -1,6 +1,6 @@
 package com.rally.web.tennis;
 
-import com.rally.domain.tennis.model.MatchQueryVO;
+import com.rally.domain.tennis.model.MatchQueryResponse;
 import com.rally.domain.tennis.model.Result;
 import com.rally.domain.tennis.model.TournamentDTO;
 import com.rally.tennis.TennisQueryService;
@@ -8,7 +8,6 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/query")
@@ -31,9 +30,9 @@ public class TennisQueryController {
      * @param tournamentId tournamentId，多个用逗号分隔
      */
     @GetMapping("/matches")
-    public Result<Map<String, List<MatchQueryVO>>> matches(
+    public Result<MatchQueryResponse> matches(
             @RequestParam(value = "tournamentId") String tournamentId) {
-        Map<String, List<MatchQueryVO>> data = tennisQueryService.queryMatches(tournamentId);
+        MatchQueryResponse data = tennisQueryService.queryMatches(tournamentId);
         return Result.ok(data);
     }
 }

@@ -223,20 +223,20 @@ public class TennisQueryService {
     }
 
     /**
-     * 查询比赛列表，返回按状态分类的比赛
+     * 查询比赛列表，返回按状态分类的比赛及种子信息
      * @param tournamentIdStr tournamentId，多个用逗号分隔
      */
-    public Map<String, List<MatchQueryVO>> queryMatches(String tournamentIdStr) {
+    public MatchQueryResponse queryMatches(String tournamentIdStr) {
         // 解析 tournamentId 列表
         List<String> tournamentIds = parseTournamentIds(tournamentIdStr);
         if (CollectionUtils.isEmpty(tournamentIds)) {
-            return Map.of("upcomingMatches", List.of(), "finishedMatches", List.of());
+            return emptyMatchResponse();
         }
 
         // 查询比赛数据
         List<MatchData> matches = matchQueryGateway.listByTournamentIds(tournamentIds);
         if (CollectionUtils.isEmpty(matches)) {
-            return Map.of("upcomingMatches", List.of(), "finishedMatches", List.of());
+            return emptyMatchResponse();
         }
 
         // 过滤掉 player1_id 和 player2_id 都为空的比赛
@@ -244,7 +244,7 @@ public class TennisQueryService {
                 .filter(m -> m.getPlayer1Id() != null || m.getPlayer2Id() != null)
                 .toList();
         if (CollectionUtils.isEmpty(matches)) {
-            return Map.of("upcomingMatches", List.of(), "finishedMatches", List.of());
+            return emptyMatchResponse();
         }
 
         // 查询所有相关球员
@@ -253,6 +253,16 @@ public class TennisQueryService {
             if (match.getPlayer1Id() != null) playerIds.add(match.getPlayer1Id());
             if (match.getPlayer2Id() != null) playerIds.add(match.getPlayer2Id());
         }
+        // 查询球员种子信息，构建 tournamentId:playerId -> seed 映射
+        List<PlayerSeedData> seeds = matchQueryGateway.listSeedsByTournamentIds(tournamentIds);
+        Map<String, Integer> seedMap = seeds.stream()
+                .collect(Collectors.toMap(
+                        s -> s.getTournamentId() + ":" + s.getPlayerId(),
+                        PlayerSeedData::getSeed,
+                        (a, b) -> a));
+
+        // 将种子球员 ID 补充进查询集合，确保没有比赛记录的种子球员信息也能获取到
+        seeds.stream().map(PlayerSeedData::getPlayerId).forEach(playerIds::add);
         List<PlayerData> players = matchQueryGateway.listPlayersByPlayerIds(new ArrayList<>(playerIds));
         Map<String, PlayerData> playerMap = players.stream()
                 .collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
@@ -262,14 +272,6 @@ public class TennisQueryService {
         List<SetScoreData> setScores = matchQueryGateway.listSetScoresByTennisMatchIds(tennisMatchIds);
         Map<Long, List<SetScoreData>> setScoreMap = setScores.stream()
                 .collect(Collectors.groupingBy(SetScoreData::getTennisMatchId));
-
-        // 查询球员种子信息，构建 tournamentId:playerId -> seed 映射
-        List<PlayerSeedData> seeds = matchQueryGateway.listSeedsByTournamentIds(tournamentIds);
-        Map<String, Integer> seedMap = seeds.stream()
-                .collect(Collectors.toMap(
-                        s -> s.getTournamentId() + ":" + s.getPlayerId(),
-                        PlayerSeedData::getSeed,
-                        (a, b) -> a));
 
         // 转换并按状态分组
         List<MatchQueryVO> upcomingMatches = new ArrayList<>();
@@ -285,6 +287,42 @@ public class TennisQueryService {
             }
         }
 
+        // 构建种子列表，按 seed 升序排列
+        // 被淘汰判断：在 finishedMatches 中参与过但不是 winnerId 的球员
+        Set<String> eliminatedPlayerIds = finishedMatches.stream()
+                .filter(m -> m.getWinnerId() != null)
+                .flatMap(m -> {
+                    Set<String> losers = new HashSet<>();
+                    if (m.getPlayer1() != null && !m.getWinnerId().equals(m.getPlayer1().getId())) {
+                        losers.add(m.getPlayer1().getId());
+                    }
+                    if (m.getPlayer2() != null && !m.getWinnerId().equals(m.getPlayer2().getId())) {
+                        losers.add(m.getPlayer2().getId());
+                    }
+                    return losers.stream();
+                })
+                .collect(Collectors.toSet());
+
+        List<SeedVO> seedVOList = seeds.stream()
+                .filter(s -> s.getSeed() != null && s.getSeed() != 0)
+                .map(s -> {
+                    SeedVO seedVO = new SeedVO();
+                    seedVO.setPlayerId(s.getPlayerId());
+                    seedVO.setSeed(s.getSeed());
+                    PlayerData player = playerMap.get(s.getPlayerId());
+                    if (player != null) {
+                        String name = StringUtils.isNotBlank(player.getLastName())
+                                ? player.getLastName() : player.getFirstName();
+                        seedVO.setName(name);
+                        seedVO.setCountry(CountryEnum.getCountry(player.getNationality()));
+                    }
+                    seedVO.setStatus(eliminatedPlayerIds.contains(s.getPlayerId())
+                            ? SeedStatusEnum.ELIMINATED : SeedStatusEnum.ACTIVE);
+                    return seedVO;
+                })
+                .sorted(Comparator.comparing(SeedVO::getSeed, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
+
         // upcomingMatches 按 matchDate 正序，finishedMatches 按日期倒序
         upcomingMatches.sort(Comparator.comparing(MatchQueryVO::getScheduledAt, Comparator.nullsLast(Comparator.naturalOrder())));
         finishedMatches.sort(Comparator.comparing(MatchQueryVO::getStartedAt, Comparator.nullsLast(Comparator.reverseOrder())));
@@ -292,10 +330,24 @@ public class TennisQueryService {
         tennisTranslationService.matches(upcomingMatches, TranslationLanguageEnum.ZH_CN);
         tennisTranslationService.matches(finishedMatches, TranslationLanguageEnum.ZH_CN);
 
-        Map<String, List<MatchQueryVO>> result = new LinkedHashMap<>();
-        result.put("upcomingMatches", upcomingMatches);
-        result.put("finishedMatches", finishedMatches);
-        return result;
+        Map<String, List<MatchQueryVO>> matchMap = new LinkedHashMap<>();
+        matchMap.put("upcomingMatches", upcomingMatches);
+        matchMap.put("finishedMatches", finishedMatches);
+
+        MatchQueryResponse response = new MatchQueryResponse();
+        response.setSeeds(seedVOList);
+        response.setMatches(matchMap);
+        return response;
+    }
+
+    private MatchQueryResponse emptyMatchResponse() {
+        MatchQueryResponse response = new MatchQueryResponse();
+        response.setSeeds(List.of());
+        Map<String, List<MatchQueryVO>> emptyMatch = new LinkedHashMap<>();
+        emptyMatch.put("upcomingMatches", List.of());
+        emptyMatch.put("finishedMatches", List.of());
+        response.setMatches(emptyMatch);
+        return response;
     }
 
     /**
