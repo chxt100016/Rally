@@ -70,19 +70,15 @@ CREATE TABLE tennis_draw (
 DROP TABLE IF EXISTS tennis_tournament_entry;
 CREATE TABLE tennis_tournament_entry (
     id            BIGINT      NOT NULL AUTO_INCREMENT,
-    tournament_id VARCHAR(50) NOT NULL COMMENT '外部赛事ID',
-    year          INT         NOT NULL DEFAULT 2026 COMMENT '赛事年份',
     player_id     VARCHAR(50) NOT NULL COMMENT '外部球员ID',
     draw_id       BIGINT      COMMENT '签表ID，关联 tennis_draw 表',
-    draw_type     VARCHAR(10) NOT NULL COMMENT '对应哪个项目签表',
     seed          SMALLINT    COMMENT '种子号，NULL 表示非种子',
     entry_type    VARCHAR(10) NOT NULL DEFAULT 'DIRECT' COMMENT 'DIRECT / WILDCARD / QUALIFIER / LUCKY_LOSER',
     status        VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED' COMMENT 'CONFIRMED / WITHDRAWN / RETIRED',
     create_time    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uk_tennis_entry_player_draw_year (tournament_id, year, player_id, draw_type),
-    INDEX idx_tennis_entry_tournament     (tournament_id),
+    UNIQUE KEY uk_tennis_entry_player_draw_year (draw_id, player_id),
     INDEX idx_tennis_entry_player         (player_id),
     INDEX idx_tennis_entry_draw           (draw_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='球员报名信息';
