@@ -24,4 +24,4 @@ qiniu:
 
 upload:
     tournament:
-        compress-kb: 100
+        compress-kb: 10
