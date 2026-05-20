@@ -30,6 +30,8 @@ public class TennisTournamentPO {
     private String status;
     private LocalDate startDate;
     private LocalDate endDate;
+    private String imagePath;
+    private String backgroundPath;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

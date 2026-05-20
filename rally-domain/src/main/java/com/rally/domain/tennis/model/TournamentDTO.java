@@ -21,4 +21,5 @@ public class TournamentDTO {
     private String status;
     private String statusLabel;
     private String groupId;
+    private String backgroundUrl;
 }

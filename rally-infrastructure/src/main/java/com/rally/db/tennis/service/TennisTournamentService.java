@@ -109,4 +109,12 @@ public class TennisTournamentService extends ServiceImpl<TennisTournamentMapper,
         wrapper.orderByAsc(TennisTournamentPO::getStartDate);
         return wrapper.list();
     }
+
+    public void updateImagePaths(String tournamentId, String imagePath, String backgroundPath) {
+        this.lambdaUpdate()
+                .eq(TennisTournamentPO::getTournamentId, tournamentId)
+                .set(TennisTournamentPO::getImagePath, imagePath)
+                .set(TennisTournamentPO::getBackgroundPath, backgroundPath)
+                .update();
+    }
 }

@@ -5,9 +5,23 @@ server:
 spring:
     application:
         name: rally
+    servlet:
+        multipart:
+            max-file-size: 5MB
+            max-request-size: 5MB
     profiles:
         active: dev
 
 deepseek:
     api-key: ${DEEPSEEK_API_KEY:sk-c14b4b52b0f34d6790d8b491807c2387}
     api-url: https://api.deepseek.com/chat/completions
+
+qiniu:
+    access-key: ${QINIU_ACCESS_KEY:jZaKt1r9LJuQLt2NP6ARBOcOHcvRZkLUVuDzesL_}
+    secret-key: ${QINIU_SECRET_KEY:0Yh6Ks9K6xhVAVEWjH5H1cCMK50IMj7pOB596UWe}
+    bucket: ${QINIU_BUCKET:rallyo}
+    domain: ${QINIU_DOMAIN:http://tfbg5zeuz.hd-bkt.clouddn.com}
+
+upload:
+    tournament:
+        compress-kb: 200

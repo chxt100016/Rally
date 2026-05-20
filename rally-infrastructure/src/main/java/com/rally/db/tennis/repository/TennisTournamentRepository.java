@@ -34,4 +34,8 @@ public class TennisTournamentRepository {
                                                      LocalDate dateFrom, LocalDate dateTo) {
         return tennisTournamentService.listByCondition(dbStatus, tour, dateFrom, dateTo);
     }
+
+    public void updateImagePaths(String tournamentId, String imagePath, String backgroundPath) {
+        tennisTournamentService.updateImagePaths(tournamentId, imagePath, backgroundPath);
+    }
 }

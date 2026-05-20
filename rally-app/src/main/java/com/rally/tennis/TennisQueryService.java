@@ -6,6 +6,7 @@ import com.rally.domain.tennis.gateway.MatchQueryGateway;
 import com.rally.domain.tennis.model.*;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
 import com.rally.translation.TennisTranslationService;
+import com.rally.client.qiniu.QiniuClient;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +35,9 @@ public class TennisQueryService {
 
     @Resource
     private TennisTranslationService tennisTranslationService;
+
+    @Resource
+    private QiniuClient qiniuClient;
 
     /**
      * 查询赛事列表，支持按状态、类型和时间范围筛选
@@ -181,6 +185,10 @@ public class TennisQueryService {
         vo.setStatus(displayStatus);
         vo.setStatusLabel(resolveStatusLabel(displayStatus));
         vo.setGroupId(groupId);
+
+        if (po.getBackgroundPath() != null && !po.getBackgroundPath().isBlank()) {
+            vo.setBackgroundUrl(qiniuClient.buildSignedUrl(po.getBackgroundPath()));
+        }
 
         return vo;
     }
