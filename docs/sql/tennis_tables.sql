@@ -42,6 +42,8 @@ CREATE TABLE tennis_tournament (
     status       VARCHAR(20)   NOT NULL DEFAULT 'active' COMMENT 'active / completed',
     start_date   DATE          NOT NULL,
     end_date     DATE          NOT NULL,
+    image_path      VARCHAR(16)   NOT NULL DEFAULT '' COMMENT '主图',
+    background_path      VARCHAR(16)   NOT NULL DEFAULT '' COMMENT '背景图',
     create_time   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
