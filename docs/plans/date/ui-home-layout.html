@@ -1,140 +1,364 @@
-<h2>首页「发现约球」布局方案</h2>
-<p class="subtitle">选择一个你最喜欢的首页布局风格</p>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>首页发现约球 · Apple 风格</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    background: #f2f2f7;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
 
-<div class="cards">
+  /* 手机外壳 */
+  .phone {
+    width: 375px;
+    background: #f2f2f7;
+    border-radius: 44px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.08);
+    overflow: hidden;
+    position: relative;
+  }
 
-  <!-- 方案 A -->
-  <div class="card" data-choice="a" onclick="toggleSelect(this)">
-    <div class="card-image">
-      <div style="background:#f0f4ff;border-radius:8px;padding:12px;font-size:12px;line-height:1.6;font-family:monospace;">
-        <div style="background:#4f7cff;color:white;border-radius:6px;padding:6px 10px;margin-bottom:8px;font-size:11px;">📍 北京 · 附近场地</div>
-        <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:8px;margin-bottom:6px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-weight:bold;">周六下午单打</span>
-            <span style="background:#e8f5e9;color:#2e7d32;border-radius:4px;padding:2px 6px;font-size:10px;">2/2人</span>
-          </div>
-          <div style="color:#666;font-size:11px;margin-top:4px;">🕐 06-07 14:00 · 朝阳网球中心</div>
-          <div style="color:#666;font-size:11px;">⭐ 期望水平 NTRP 3.5-4.5 · <span style="color:#4f7cff;">✓ 匹配</span></div>
-        </div>
-        <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:8px;margin-bottom:6px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-weight:bold;">双打找搭档</span>
-            <span style="background:#fff3e0;color:#e65100;border-radius:4px;padding:2px 6px;font-size:10px;">3/4人</span>
-          </div>
-          <div style="color:#666;font-size:11px;margin-top:4px;">🕐 06-08 09:00 · 国贸体育馆</div>
-          <div style="color:#666;font-size:11px;">⭐ 期望水平 UTR 4-6 · <span style="color:#ff9800;">⚠ 水平偏高</span></div>
-        </div>
-        <div style="display:flex;gap:6px;margin-top:8px;">
-          <div style="flex:1;background:#f5f5f5;border-radius:6px;padding:4px 8px;text-align:center;font-size:11px;">全部</div>
-          <div style="flex:1;background:#4f7cff;color:white;border-radius:6px;padding:4px 8px;text-align:center;font-size:11px;">推荐</div>
-          <div style="flex:1;background:#f5f5f5;border-radius:6px;padding:4px 8px;text-align:center;font-size:11px;">单打</div>
-          <div style="flex:1;background:#f5f5f5;border-radius:6px;padding:4px 8px;text-align:center;font-size:11px;">双打</div>
-        </div>
-        <div style="display:flex;justify-content:space-around;margin-top:12px;border-top:1px solid #eee;padding-top:8px;">
-          <span style="color:#4f7cff;font-size:11px;">🎾 发现</span>
-          <span style="font-size:18px;background:#4f7cff;color:white;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;margin-top:-4px;">+</span>
-          <span style="color:#999;font-size:11px;">👤 我的</span>
-        </div>
-      </div>
-    </div>
-    <div class="card-body">
-      <h3>A · 列表流 + 筛选标签</h3>
-      <p>卡片列表为主，顶部位置筛选，中部 Tab 切换全部/推荐/单打/双打。信息密度适中，一屏可见 2-3 条约球。</p>
+  /* 状态栏 */
+  .status-bar {
+    height: 44px;
+    background: #f2f2f7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #000;
+  }
+  .status-bar .time { font-size: 15px; font-weight: 600; }
+  .status-bar .icons { display: flex; gap: 6px; align-items: center; }
+
+  /* 顶部导航 */
+  .nav {
+    padding: 4px 20px 12px;
+    background: #f2f2f7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-title { font-size: 28px; font-weight: 700; color: #000; letter-spacing: -0.5px; }
+  .nav-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: #007aff;
+    font-weight: 500;
+  }
+
+  /* Tab 栏 */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    background: #e5e5ea;
+    color: #3c3c43;
+    cursor: pointer;
+  }
+  .tab.active {
+    background: #007aff;
+    color: #fff;
+  }
+
+  /* 列表区 */
+  .list {
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* 约球卡片 */
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #000;
+    letter-spacing: -0.2px;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 8px;
+  }
+  .badge-open   { background: #e8f5e9; color: #2e7d32; }
+  .badge-almost { background: #fff3e0; color: #e65100; }
+  .badge-full   { background: #f5f5f5; color: #8e8e93; }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: #3c3c43;
+  }
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .meta-icon { font-size: 12px; }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 4px;
+    border-top: 0.5px solid #f2f2f7;
+  }
+  /* 不可报名的卡片整体降透明度 */
+  .card-dim { opacity: 0.42; }
+
+  .venue {
+    font-size: 12px;
+    color: #8e8e93;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  /* 底部 Tab Bar */
+  .tab-bar {
+    margin-top: 20px;
+    height: 83px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px);
+    border-top: 0.5px solid rgba(0,0,0,0.1);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding-top: 10px;
+  }
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: #8e8e93;
+    font-weight: 500;
+  }
+  .tab-item.active { color: #007aff; }
+  .tab-icon { font-size: 22px; }
+
+  /* 发布按钮（中间） */
+  .fab {
+    width: 44px;
+    height: 44px;
+    background: #007aff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #fff;
+    font-weight: 300;
+    box-shadow: 0 4px 12px rgba(0,122,255,0.4);
+    margin-top: -8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div class="icons">
+      <span>●●●</span>
+      <span>WiFi</span>
+      <span>🔋</span>
     </div>
   </div>
 
-  <!-- 方案 B -->
-  <div class="card" data-choice="b" onclick="toggleSelect(this)">
-    <div class="card-image">
-      <div style="background:#f0f4ff;border-radius:8px;padding:12px;font-size:12px;line-height:1.6;font-family:monospace;">
-        <div style="background:#4f7cff;color:white;border-radius:6px;padding:8px 10px;margin-bottom:8px;">
-          <div style="font-size:13px;font-weight:bold;">为你推荐</div>
-          <div style="font-size:10px;opacity:0.8;">基于你的水平和位置</div>
-        </div>
-        <div style="display:flex;gap:6px;margin-bottom:8px;overflow:hidden;">
-          <div style="background:white;border:1px solid #4f7cff;border-radius:8px;padding:8px;flex:1;min-width:0;">
-            <div style="font-weight:bold;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">周六单打</div>
-            <div style="color:#666;font-size:10px;">14:00 朝阳</div>
-            <div style="color:#4f7cff;font-size:10px;">✓ 匹配</div>
-            <div style="background:#4f7cff;color:white;border-radius:4px;padding:2px 6px;font-size:10px;margin-top:4px;text-align:center;">报名</div>
-          </div>
-          <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:8px;flex:1;min-width:0;">
-            <div style="font-weight:bold;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">双打搭档</div>
-            <div style="color:#666;font-size:10px;">09:00 国贸</div>
-            <div style="color:#ff9800;font-size:10px;">⚠ 偏高</div>
-            <div style="background:#f5f5f5;color:#333;border-radius:4px;padding:2px 6px;font-size:10px;margin-top:4px;text-align:center;">查看</div>
-          </div>
-        </div>
-        <div style="font-size:11px;font-weight:bold;margin-bottom:6px;color:#333;">附近约球</div>
-        <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:8px;margin-bottom:6px;">
-          <div style="display:flex;justify-content:space-between;">
-            <span style="font-weight:bold;font-size:11px;">周日早上练球</span>
-            <span style="background:#e8f5e9;color:#2e7d32;border-radius:4px;padding:1px 5px;font-size:10px;">1/2人</span>
-          </div>
-          <div style="color:#666;font-size:10px;">🕐 06-09 08:00 · 望京体育场</div>
-        </div>
-        <div style="display:flex;justify-content:space-around;margin-top:8px;border-top:1px solid #eee;padding-top:8px;">
-          <span style="color:#4f7cff;font-size:11px;">🎾 发现</span>
-          <span style="font-size:18px;background:#4f7cff;color:white;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;margin-top:-4px;">+</span>
-          <span style="color:#999;font-size:11px;">👤 我的</span>
-        </div>
-      </div>
-    </div>
-    <div class="card-body">
-      <h3>B · 推荐横滑 + 附近列表</h3>
-      <p>顶部横向滑动卡片展示系统推荐（高亮匹配），下方是附近全部约球列表。推荐和浏览分区明确。</p>
+  <!-- 顶部导航 -->
+  <div class="nav">
+    <span class="nav-title">发现约球</span>
+    <div class="nav-location">
+      <span>📍</span>
+      <span>北京 · 朝阳</span>
     </div>
   </div>
 
-  <!-- 方案 C -->
-  <div class="card" data-choice="c" onclick="toggleSelect(this)">
-    <div class="card-image">
-      <div style="background:#f0f4ff;border-radius:8px;padding:12px;font-size:12px;line-height:1.6;font-family:monospace;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-weight:bold;font-size:13px;">约球广场</span>
-          <span style="font-size:11px;color:#4f7cff;">🔍 筛选</span>
+  <!-- Tab 筛选 -->
+  <div class="tabs">
+    <div class="tab">全部</div>
+    <div class="tab active">推荐</div>
+    <div class="tab">单打</div>
+    <div class="tab">双打</div>
+  </div>
+
+  <!-- 约球列表 -->
+  <div class="list">
+
+    <!-- 卡片 1：匹配 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">周六下午单打</span>
+        <span class="badge badge-open">1/2 人</span>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">
+          <span class="meta-icon">🕐</span>
+          <span>06-07 &nbsp;14:00</span>
         </div>
-        <div style="display:flex;gap:4px;margin-bottom:8px;">
-          <div style="background:#4f7cff;color:white;border-radius:12px;padding:3px 8px;font-size:10px;">全部</div>
-          <div style="background:#f0f0f0;border-radius:12px;padding:3px 8px;font-size:10px;">今天</div>
-          <div style="background:#f0f0f0;border-radius:12px;padding:3px 8px;font-size:10px;">明天</div>
-          <div style="background:#f0f0f0;border-radius:12px;padding:3px 8px;font-size:10px;">单打</div>
-          <div style="background:#f0f0f0;border-radius:12px;padding:3px 8px;font-size:10px;">双打</div>
+        <div class="meta-item">
+          <span class="meta-icon">⏱</span>
+          <span>2h</span>
         </div>
-        <div style="background:white;border-radius:8px;padding:8px;margin-bottom:6px;border-left:3px solid #4f7cff;">
-          <div style="display:flex;justify-content:space-between;">
-            <span style="font-weight:bold;">周六下午单打</span>
-            <span style="color:#4f7cff;font-size:10px;background:#e8eeff;padding:2px 6px;border-radius:4px;">✓ 推荐</span>
-          </div>
-          <div style="color:#666;font-size:11px;margin-top:3px;">🕐 06-07 14:00 · 朝阳网球中心 · 2km</div>
-          <div style="display:flex;gap:4px;margin-top:4px;">
-            <span style="background:#f0f0f0;border-radius:4px;padding:1px 5px;font-size:10px;">NTRP 3.5-4.5</span>
-            <span style="background:#f0f0f0;border-radius:4px;padding:1px 5px;font-size:10px;">2/2人</span>
-            <span style="background:#f0f0f0;border-radius:4px;padding:1px 5px;font-size:10px;">需审核</span>
-          </div>
+        <div class="meta-item">
+          <span class="meta-icon">👤</span>
+          <span>NTRP 3.5–4.5</span>
         </div>
-        <div style="background:white;border-radius:8px;padding:8px;margin-bottom:6px;border-left:3px solid #e0e0e0;">
-          <div style="display:flex;justify-content:space-between;">
-            <span style="font-weight:bold;">双打找搭档</span>
-            <span style="color:#ff9800;font-size:10px;background:#fff3e0;padding:2px 6px;border-radius:4px;">⚠ 水平偏高</span>
-          </div>
-          <div style="color:#666;font-size:11px;margin-top:3px;">🕐 06-08 09:00 · 国贸体育馆 · 5km</div>
-          <div style="display:flex;gap:4px;margin-top:4px;">
-            <span style="background:#f0f0f0;border-radius:4px;padding:1px 5px;font-size:10px;">UTR 4-6</span>
-            <span style="background:#f0f0f0;border-radius:4px;padding:1px 5px;font-size:10px;">3/4人</span>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-around;margin-top:8px;border-top:1px solid #eee;padding-top:8px;">
-          <span style="color:#4f7cff;font-size:11px;">🎾 发现</span>
-          <span style="font-size:18px;background:#4f7cff;color:white;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;margin-top:-4px;">+</span>
-          <span style="color:#999;font-size:11px;">👤 我的</span>
+      </div>
+      <div class="card-footer">
+        <div class="venue">
+          <span>📍</span>
+          <span>朝阳网球中心</span>
         </div>
       </div>
     </div>
-    <div class="card-body">
-      <h3>C · 胶囊筛选 + 统一列表</h3>
-      <p>顶部胶囊 Tag 快速筛选（今天/明天/单打/双打），列表统一展示，推荐条目用左侧色条 + 标签区分，信息最完整。</p>
+
+    <!-- 卡片 2：偏高，不可报名 -->
+    <div class="card card-dim">
+      <div class="card-header">
+        <span class="card-title">双打找搭档</span>
+        <span class="badge badge-almost">3/4 人</span>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">
+          <span class="meta-icon">🕐</span>
+          <span>06-08 &nbsp;09:00</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">⏱</span>
+          <span>1.5h</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">👤</span>
+          <span>NTRP 4.0–5.0</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="venue">
+          <span>📍</span>
+          <span>国贸体育馆</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡片 3：满员，不可报名 -->
+    <div class="card card-dim">
+      <div class="card-header">
+        <span class="card-title">周日早上练球</span>
+        <span class="badge badge-full">2/2 满</span>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">
+          <span class="meta-icon">🕐</span>
+          <span>06-09 &nbsp;08:00</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">⏱</span>
+          <span>1h</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">👤</span>
+          <span>NTRP 3.0+</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="venue">
+          <span>📍</span>
+          <span>望京体育场</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡片 4：偏低，不可报名 -->
+    <div class="card card-dim">
+      <div class="card-header">
+        <span class="card-title">多人混打热身</span>
+        <span class="badge badge-open">2/6 人</span>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">
+          <span class="meta-icon">🕐</span>
+          <span>06-10 &nbsp;19:00</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">⏱</span>
+          <span>2h</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">👤</span>
+          <span>NTRP 2.0–3.0</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="venue">
+          <span>📍</span>
+          <span>三里屯网球馆</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 底部 Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item active">
+      <span class="tab-icon">🎾</span>
+      <span>发现</span>
+    </div>
+    <div class="tab-item">
+      <div class="fab">+</div>
+    </div>
+    <div class="tab-item">
+      <span class="tab-icon">👤</span>
+      <span>我的</span>
     </div>
   </div>
 
 </div>
+
+</body>
+</html>

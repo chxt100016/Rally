@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public enum MatchStatus {
-    FINISHED(List.of("F")),
+    FINISHED(List.of("F", "Completed")),
     PENDING(List.of("S", "Scheduled", "U")),
     COMING(List.of("C")),
     LIVE(List.of("P")),

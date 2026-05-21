@@ -53,7 +53,7 @@ public class TennisCollectFacade {
     }
 
     public void oop() {
-//        matchCollectManager.collect(CollectType.ATP_OOP, null);
+        matchCollectManager.collect(CollectType.ATP_OOP, null);
 
         List<TennisTournamentPO> current = tournamentCollectService.current();
         for (TennisTournamentPO item : current) {

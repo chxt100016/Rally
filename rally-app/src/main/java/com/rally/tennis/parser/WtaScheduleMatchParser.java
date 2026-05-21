@@ -2,6 +2,7 @@ package com.rally.tennis.parser;
 
 import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaScheduleResponse;
+import com.rally.domain.tennis.model.ScheduledAtTextEnum;
 import com.rally.tennis.model.Discipline;
 import com.rally.tennis.model.Match;
 import com.rally.tennis.model.MatchStatus;
@@ -11,10 +12,12 @@ import com.rally.tennis.model.TournamentEntry;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -31,6 +34,8 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
 
     private static final DateTimeFormatter UTC_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final ZoneId UTC_ZONE = ZoneId.of("UTC");
+    private static final ZoneId CST_ZONE = ZoneId.of("Asia/Shanghai");
 
     @Resource
     private WtaClient wtaClient;
@@ -47,20 +52,19 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
                 || CollectionUtils.isEmpty(data.getData().getScheduleDays())) {
             return List.of();
         }
+
+        for (WtaScheduleResponse.ScheduleDay scheduleDay : data.getData().getScheduleDays()) {
+            for (WtaScheduleResponse.ScheduleCourt scheduleCourt : scheduleDay.getScheduleCourts()) {
+                List<WtaScheduleResponse.ScheduleMatch> filtered = scheduleCourt.getScheduleMatches().stream().filter(item -> item.getMatchId().startsWith("LS")).toList();
+                scheduleCourt.setScheduleMatches(filtered);
+            }
+        }
+
         return List.of(new DrawResult<>(data.getData(), Discipline.SINGLES, "LS",
                 new DrawMeta(null, null), params.getTournamentId(), params.getYear()));
     }
 
-    @Override
-    protected List<DrawResult<WtaScheduleResponse.ScheduleData>> fetchLd(
-            WtaScheduleResponse data, DrawParams params) {
-        if (data == null || data.getData() == null
-                || CollectionUtils.isEmpty(data.getData().getScheduleDays())) {
-            return List.of();
-        }
-        return List.of(new DrawResult<>(data.getData(), Discipline.DOUBLES, "LD",
-                new DrawMeta(null, null), params.getTournamentId(), params.getYear()));
-    }
+
 
     @Override
     public List<Match> getMatches(DrawResult<WtaScheduleResponse.ScheduleData> draw,
@@ -79,6 +83,9 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
 
             for (WtaScheduleResponse.ScheduleCourt court : day.getScheduleCourts()) {
                 if (CollectionUtils.isEmpty(court.getScheduleMatches())) continue;
+
+                // 同一场地按顺序追踪上一场开始时间，用于 AFTER_PREVIOUS 推算
+                LocalDateTime prevScheduledAt = null;
 
                 for (WtaScheduleResponse.ScheduleMatch m : court.getScheduleMatches()) {
                     // 按 Partner 字段区分单打/双打，与当前 draw 类型对应
@@ -99,14 +106,21 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
                     }
 
                     match.setStatus(MatchStatus.toStatus(m.getMatchState()));
-                    match.setScheduledAtText(m.getDisplayTime());
+                    String scheduledAtText = ScheduledAtTextEnum.fromText(m.getNotBeforeText());
+                    match.setScheduledAtText(scheduledAtText);
 
-                    // 解析 UTC 时间
-                    LocalDateTime scheduledAt = parseUtcDateTime(m.getMatchTimeUtcIsoDateTime());
+                    // AFTER_PREVIOUS：用上一场时间 +1h10m 推算；否则解析原始 UTC 时间
+                    LocalDateTime scheduledAt;
+                    if (ScheduledAtTextEnum.AFTER_PREVIOUS.name().equals(scheduledAtText) && prevScheduledAt != null) {
+                        scheduledAt = prevScheduledAt.plusMinutes(70);
+                    } else {
+                        scheduledAt = parseUtcDateTime(m.getMatchTimeUtcIsoDateTime());
+                    }
                     match.setScheduledAt(scheduledAt);
                     if (scheduledAt != null && "F".equals(m.getMatchState())) {
                         match.setEndedAt(scheduledAt);
                     }
+                    prevScheduledAt = scheduledAt;
 
                     // 球员
                     if (m.getPlayer() != null) {
@@ -121,8 +135,7 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
                     }
 
                     // 获胜者
-                    match.setWinnerId(resolveWinner(m.getWinningPlayerId(),
-                            m.getPlayer(), m.getOpponent()));
+                    match.setWinnerId(StringUtils.isBlank(m.getWinner()) ? null : m.getWinningPlayerId());
 
                     // 比分
                     match.setSets(parseSets(m.getMatchScores()));
@@ -186,18 +199,15 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
 
     // --- 私有工具方法 ---
 
-    private String resolveWinner(String winningPlayerId,
-                                 WtaScheduleResponse.PlayerInfo player,
-                                 WtaScheduleResponse.PlayerInfo opponent) {
-        if (winningPlayerId == null || winningPlayerId.isEmpty()) return null;
-        // WinningPlayerId 直接就是 PlayerId，无需转换
-        return winningPlayerId;
-    }
 
     private LocalDateTime parseUtcDateTime(String raw) {
         if (raw == null || raw.isEmpty()) return null;
         try {
-            return LocalDateTime.parse(raw, UTC_FORMATTER);
+            // 原始字符串为 UTC 时间，转换为中国时区（UTC+8）存储
+            return LocalDateTime.parse(raw, UTC_FORMATTER)
+                    .atZone(UTC_ZONE)
+                    .withZoneSameInstant(CST_ZONE)
+                    .toLocalDateTime();
         } catch (DateTimeParseException e) {
             log.debug("无法解析 MatchTimeUtcIsoDateTime: {}", raw);
             return null;
