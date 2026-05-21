@@ -2,7 +2,9 @@ package com.rally.tennis.convert;
 
 import com.rally.client.tennistv.model.AtpDrawsResponse;
 import com.rally.tennis.model.Match;
+import com.rally.tennis.model.MatchStatus;
 import com.rally.tennis.model.SetScore;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -39,13 +41,14 @@ public interface DrawMatchAppConvertMapper {
     @Mapping(target = "matchDate", expression = "java(parseMatchDateToOnlyDate(fixture))")
     Match toMatch(AtpDrawsResponse.Fixture fixture);
 
-    default Long parseLong(Object value) {
-        if (value == null) return null;
-        try {
-            return Long.parseLong(String.valueOf(value));
-        } catch (NumberFormatException e) {
+    default String getStatus(AtpDrawsResponse.Fixture fixture) {
+        if (fixture == null) return null;
+        String resultReason = fixture.getResult().getResultReason();
+        if (StringUtils.isBlank(resultReason)) {
             return null;
         }
+
+        return "NOT_FINISHED".equals(resultReason) ? MatchStatus.PENDING.name() : MatchStatus.FINISHED.name();
     }
 
     default String getMatchId(AtpDrawsResponse.Fixture fixture) {
