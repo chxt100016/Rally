@@ -1,0 +1,381 @@
+{
+    "Content": null,
+    "Data": {
+        "EventYear": 2026,
+        "EventId": 406,
+        "EventType": "500",
+        "SchedulePdfUrl": "https://wtafiles.wtatennis.com/pdf/draws/2026/406/OP.pdf",
+        "MatchDates": [
+            "2026-05-16",
+            "2026-05-17",
+            "2026-05-18",
+            "2026-05-19",
+            "2026-05-20",
+            "2026-05-21"
+        ],
+        "ActiveScheduleDay": "2026-05-21",
+        "ScheduleDays": [
+            {
+                "MatchDate": "2026-05-21T00:00:00",
+                "DaySequence": 6,
+                "IsActiveDay": false,
+                "ScheduleCourts": [
+                    {
+                        "CourtId": 1,
+                        "CourtName": "Court Patrice Dominguez",
+                        "CityName": "STRASBOURG",
+                        "ScheduleMatches": [
+                            {
+                                "MatchId": "LS007",
+                                "Round": {
+                                    "Id": "3",
+                                    "ShortName": "QF",
+                                    "LongName": "Quarterfinals"
+                                },
+                                "MatchState": "",
+                                "HasStats": false,
+                                "HasHead2Head": true,
+                                "MatchSequence": "1",
+                                "GroupName": null,
+                                "DisplayTime": "Starts at 10:30 AM",
+                                "MatchTimeUtcIsoDateTime": "2026-05-21 08:30:00",
+                                "DisplayIsoTime": "10:30+0200",
+                                "NotBeforeText": "Starts at",
+                                "EntryTypeTeam1": "",
+                                "SeedTeam1": "8",
+                                "EntryTypeTeam2": "",
+                                "SeedTeam2": "",
+                                "Player": {
+                                    "PlayerId": "320983",
+                                    "PlayerFirstName": "Marie",
+                                    "PlayerLastName": "Bouzkova",
+                                    "Country": "CZE"
+                                },
+                                "Partner": null,
+                                "OpponentPartner": null,
+                                "Opponent": {
+                                    "PlayerId": "326096",
+                                    "PlayerFirstName": "Ann",
+                                    "PlayerLastName": "Li",
+                                    "Country": "USA"
+                                },
+                                "PossiblePlayers": [],
+                                "PossiblePartners": [],
+                                "PossibleOpponents": [],
+                                "PossibleOpponentPartners": [],
+                                "MatchScores": {
+                                    "PointA": "",
+                                    "PointB": "",
+                                    "ScoreSet1A": "",
+                                    "ScoreSet1B": "",
+                                    "ScoreTBSet1": "",
+                                    "ScoreSet2A": "",
+                                    "ScoreSet2B": "",
+                                    "ScoreTBSet2": "",
+                                    "ScoreSet3A": "",
+                                    "ScoreSet3B": "",
+                                    "ScoreTBSet3": "",
+                                    "ScoreSet4A": "",
+                                    "ScoreSet4B": "",
+                                    "ScoreTBSet4": "",
+                                    "ScoreSet5A": "",
+                                    "ScoreSet5B": "",
+                                    "ScoreTBSet5": ""
+                                },
+                                "Winner": null,
+                                "ResultString": null,
+                                "MatchStateReasonMessage": "",
+                                "Reason": null,
+                                "Tour": "WTA",
+                                "PlaceholderTextOne": null,
+                                "PlaceholderTextTwo": null,
+                                "WinningPlayerId": "326096"
+                            },
+                            {
+                                "MatchId": "LS005",
+                                "Round": {
+                                    "Id": "3",
+                                    "ShortName": "QF",
+                                    "LongName": "Quarterfinals"
+                                },
+                                "MatchState": "",
+                                "HasStats": false,
+                                "HasHead2Head": true,
+                                "MatchSequence": "2",
+                                "GroupName": null,
+                                "DisplayTime": "Followed By",
+                                "MatchTimeUtcIsoDateTime": "",
+                                "DisplayIsoTime": "",
+                                "NotBeforeText": "Followed By",
+                                "EntryTypeTeam1": "",
+                                "SeedTeam1": "",
+                                "EntryTypeTeam2": "Q",
+                                "SeedTeam2": "",
+                                "Player": {
+                                    "PlayerId": "320319",
+                                    "PlayerFirstName": "Jaqueline",
+                                    "PlayerLastName": "Cristian",
+                                    "Country": "ROU"
+                                },
+                                "Partner": null,
+                                "OpponentPartner": null,
+                                "Opponent": {
+                                    "PlayerId": "322082",
+                                    "PlayerFirstName": "Daria",
+                                    "PlayerLastName": "Kasatkina",
+                                    "Country": "AUS"
+                                },
+                                "PossiblePlayers": [],
+                                "PossiblePartners": [],
+                                "PossibleOpponents": [],
+                                "PossibleOpponentPartners": [],
+                                "MatchScores": {
+                                    "PointA": "",
+                                    "PointB": "",
+                                    "ScoreSet1A": "",
+                                    "ScoreSet1B": "",
+                                    "ScoreTBSet1": "",
+                                    "ScoreSet2A": "",
+                                    "ScoreSet2B": "",
+                                    "ScoreTBSet2": "",
+                                    "ScoreSet3A": "",
+                                    "ScoreSet3B": "",
+                                    "ScoreTBSet3": "",
+                                    "ScoreSet4A": "",
+                                    "ScoreSet4B": "",
+                                    "ScoreTBSet4": "",
+                                    "ScoreSet5A": "",
+                                    "ScoreSet5B": "",
+                                    "ScoreTBSet5": ""
+                                },
+                                "Winner": null,
+                                "ResultString": null,
+                                "MatchStateReasonMessage": "",
+                                "Reason": null,
+                                "Tour": "WTA",
+                                "PlaceholderTextOne": null,
+                                "PlaceholderTextTwo": null,
+                                "WinningPlayerId": "322082"
+                            },
+                            {
+                                "MatchId": "LS006",
+                                "Round": {
+                                    "Id": "3",
+                                    "ShortName": "QF",
+                                    "LongName": "Quarterfinals"
+                                },
+                                "MatchState": "",
+                                "HasStats": false,
+                                "HasHead2Head": true,
+                                "MatchSequence": "3",
+                                "GroupName": null,
+                                "DisplayTime": "Not Before 3:00 PM",
+                                "MatchTimeUtcIsoDateTime": "2026-05-21 13:00:00",
+                                "DisplayIsoTime": "15:00+0200",
+                                "NotBeforeText": "Not Before",
+                                "EntryTypeTeam1": "LL",
+                                "SeedTeam1": "",
+                                "EntryTypeTeam2": "",
+                                "SeedTeam2": "",
+                                "Player": {
+                                    "PlayerId": "311779",
+                                    "PlayerFirstName": "Shuai",
+                                    "PlayerLastName": "Zhang",
+                                    "Country": "CHN"
+                                },
+                                "Partner": null,
+                                "OpponentPartner": null,
+                                "Opponent": {
+                                    "PlayerId": "325410",
+                                    "PlayerFirstName": "Emma",
+                                    "PlayerLastName": "Navarro",
+                                    "Country": "USA"
+                                },
+                                "PossiblePlayers": [],
+                                "PossiblePartners": [],
+                                "PossibleOpponents": [],
+                                "PossibleOpponentPartners": [],
+                                "MatchScores": {
+                                    "PointA": "",
+                                    "PointB": "",
+                                    "ScoreSet1A": "",
+                                    "ScoreSet1B": "",
+                                    "ScoreTBSet1": "",
+                                    "ScoreSet2A": "",
+                                    "ScoreSet2B": "",
+                                    "ScoreTBSet2": "",
+                                    "ScoreSet3A": "",
+                                    "ScoreSet3B": "",
+                                    "ScoreTBSet3": "",
+                                    "ScoreSet4A": "",
+                                    "ScoreSet4B": "",
+                                    "ScoreTBSet4": "",
+                                    "ScoreSet5A": "",
+                                    "ScoreSet5B": "",
+                                    "ScoreTBSet5": ""
+                                },
+                                "Winner": null,
+                                "ResultString": null,
+                                "MatchStateReasonMessage": "",
+                                "Reason": null,
+                                "Tour": "WTA",
+                                "PlaceholderTextOne": null,
+                                "PlaceholderTextTwo": null,
+                                "WinningPlayerId": "325410"
+                            },
+                            {
+                                "MatchId": "LS004",
+                                "Round": {
+                                    "Id": "3",
+                                    "ShortName": "QF",
+                                    "LongName": "Quarterfinals"
+                                },
+                                "MatchState": "",
+                                "HasStats": false,
+                                "HasHead2Head": true,
+                                "MatchSequence": "4",
+                                "GroupName": null,
+                                "DisplayTime": "Not Before 5:30 PM",
+                                "MatchTimeUtcIsoDateTime": "2026-05-21 15:30:00",
+                                "DisplayIsoTime": "17:30+0200",
+                                "NotBeforeText": "Not Before",
+                                "EntryTypeTeam1": "WC",
+                                "SeedTeam1": "1",
+                                "EntryTypeTeam2": "",
+                                "SeedTeam2": "7",
+                                "Player": {
+                                    "PlayerId": "331006",
+                                    "PlayerFirstName": "Victoria",
+                                    "PlayerLastName": "Mboko",
+                                    "Country": "CAN"
+                                },
+                                "Partner": null,
+                                "OpponentPartner": null,
+                                "Opponent": {
+                                    "PlayerId": "326735",
+                                    "PlayerFirstName": "Leylah",
+                                    "PlayerLastName": "Fernandez",
+                                    "Country": "CAN"
+                                },
+                                "PossiblePlayers": [],
+                                "PossiblePartners": [],
+                                "PossibleOpponents": [],
+                                "PossibleOpponentPartners": [],
+                                "MatchScores": {
+                                    "PointA": "",
+                                    "PointB": "",
+                                    "ScoreSet1A": "",
+                                    "ScoreSet1B": "",
+                                    "ScoreTBSet1": "",
+                                    "ScoreSet2A": "",
+                                    "ScoreSet2B": "",
+                                    "ScoreTBSet2": "",
+                                    "ScoreSet3A": "",
+                                    "ScoreSet3B": "",
+                                    "ScoreTBSet3": "",
+                                    "ScoreSet4A": "",
+                                    "ScoreSet4B": "",
+                                    "ScoreTBSet4": "",
+                                    "ScoreSet5A": "",
+                                    "ScoreSet5B": "",
+                                    "ScoreTBSet5": ""
+                                },
+                                "Winner": null,
+                                "ResultString": null,
+                                "MatchStateReasonMessage": "",
+                                "Reason": null,
+                                "Tour": "WTA",
+                                "PlaceholderTextOne": null,
+                                "PlaceholderTextTwo": null,
+                                "WinningPlayerId": "326735"
+                            }
+                        ]
+                    },
+                    {
+                        "CourtId": 2,
+                        "CourtName": "Court 1",
+                        "CityName": "STRASBOURG",
+                        "ScheduleMatches": [
+                            {
+                                "MatchId": "LD003",
+                                "Round": {
+                                    "Id": "3",
+                                    "ShortName": "SF",
+                                    "LongName": "Semifinals"
+                                },
+                                "MatchState": "",
+                                "HasStats": false,
+                                "HasHead2Head": true,
+                                "MatchSequence": "2",
+                                "GroupName": null,
+                                "DisplayTime": "Starts at 12:00 PM",
+                                "MatchTimeUtcIsoDateTime": "2026-05-21 10:00:00",
+                                "DisplayIsoTime": "12:00+0200",
+                                "NotBeforeText": "Starts at",
+                                "EntryTypeTeam1": "",
+                                "SeedTeam1": "",
+                                "EntryTypeTeam2": "",
+                                "SeedTeam2": "",
+                                "Player": {
+                                    "PlayerId": "330544",
+                                    "PlayerFirstName": "Maya",
+                                    "PlayerLastName": "Joint",
+                                    "Country": "AUS"
+                                },
+                                "Partner": {
+                                    "PlayerId": "319960",
+                                    "PlayerFirstName": "Ellen",
+                                    "PlayerLastName": "Perez",
+                                    "Country": "AUS"
+                                },
+                                "OpponentPartner": {
+                                    "PlayerId": "319413",
+                                    "PlayerFirstName": "Quinn",
+                                    "PlayerLastName": "Gleason",
+                                    "Country": "USA"
+                                },
+                                "Opponent": {
+                                    "PlayerId": "315314",
+                                    "PlayerFirstName": "Ulrikke",
+                                    "PlayerLastName": "Eikeri",
+                                    "Country": "NOR"
+                                },
+                                "PossiblePlayers": [],
+                                "PossiblePartners": [],
+                                "PossibleOpponents": [],
+                                "PossibleOpponentPartners": [],
+                                "MatchScores": {
+                                    "PointA": "",
+                                    "PointB": "",
+                                    "ScoreSet1A": "",
+                                    "ScoreSet1B": "",
+                                    "ScoreTBSet1": "",
+                                    "ScoreSet2A": "",
+                                    "ScoreSet2B": "",
+                                    "ScoreTBSet2": "",
+                                    "ScoreSet3A": "",
+                                    "ScoreSet3B": "",
+                                    "ScoreTBSet3": "",
+                                    "ScoreSet4A": "",
+                                    "ScoreSet4B": "",
+                                    "ScoreTBSet4": "",
+                                    "ScoreSet5A": "",
+                                    "ScoreSet5B": "",
+                                    "ScoreTBSet5": ""
+                                },
+                                "Winner": null,
+                                "ResultString": null,
+                                "MatchStateReasonMessage": "",
+                                "Reason": null,
+                                "Tour": "WTA",
+                                "PlaceholderTextOne": null,
+                                "PlaceholderTextTwo": null,
+                                "WinningPlayerId": "315314"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
