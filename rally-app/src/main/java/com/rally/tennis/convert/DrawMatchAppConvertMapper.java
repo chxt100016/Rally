@@ -26,7 +26,7 @@ public interface DrawMatchAppConvertMapper {
     @Mapping(target = "playerName1", expression = "java(buildFullName(getPlayer1(fixture)))")
     @Mapping(target = "playerName2", expression = "java(buildFullName(getPlayer2(fixture)))")
     @Mapping(target = "winnerId", expression = "java(getWinnerId(fixture))")
-    @Mapping(target = "status", expression = "java(com.rally.tennis.model.MatchStatus.toStatus(fixture.getMatch() != null ? fixture.getMatch().getStatus() : null))")
+    @Mapping(target = "status", expression = "java(getStatus(fixture))")
     @Mapping(target = "startedAt", expression = "java(parseMatchDate(fixture))")
     @Mapping(target = "endedAt", expression = "java(parseMatchDate(fixture))")
     @Mapping(target = "durationMinutes", expression = "java(parseDuration(fixture.getResult()))")
