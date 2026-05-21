@@ -39,7 +39,7 @@ public class WtaLiveMatchParser extends MatchParser<WtaMatchesResponse, List<Wta
         for (WtaMatchesResponse.MatchItem m : draw.getSlice()) {
             Match match = new Match();
             match.setMatchId(m.getMatchID());
-            match.setTournamentId(m.getEventID());
+            match.setTournamentId(tournamentId);
             match.setYear(m.getEventYear());
             match.setDrawId(drawId);
             match.setStatus(MatchStatus.toStatus(m.getMatchState()));

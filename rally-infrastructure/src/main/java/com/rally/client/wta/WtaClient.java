@@ -3,6 +3,7 @@ package com.rally.client.wta;
 import com.rally.client.wta.model.WtaDrawsResponse;
 import com.rally.client.wta.model.WtaMatchesResponse;
 import com.rally.client.wta.model.WtaRankingsResponse;
+import com.rally.client.wta.model.WtaScheduleResponse;
 import com.rally.client.wta.model.WtaTournamentsResponse;
 import com.rally.domain.utils.Http;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,21 @@ public class WtaClient {
             return Http.uri(url).param("states", "L").doGet().result(WtaMatchesResponse.class);
         } catch (Exception e) {
             log.error("获取WTA进行中比赛失败, tournamentId={}, year={}", tournamentId, year, e);
+            return null;
+        }
+    }
+
+    public WtaScheduleResponse getSchedule(String tournamentId, int year) {
+        try {
+            String url = "https://wta-webapi-prod-apimanagement.azure-api.net/atpjoint-api/v1/Scores/Schedule";
+            return Http.uri(url)
+                    .param("eventId", tournamentId)
+                    .param("eventYear", String.valueOf(year))
+                    .header("apikey", "8334323343164715938a39449ac5bb69")
+                    .doGet()
+                    .result(WtaScheduleResponse.class);
+        } catch (Exception e) {
+            log.error("获取WTA赛程失败, tournamentId={}, year={}", tournamentId, year, e);
             return null;
         }
     }
