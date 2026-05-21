@@ -81,6 +81,7 @@ public class TournamentCollectService {
         }
         List<Tournament> tournaments = infos.stream()
                 .map(TournamentAppConvertMapper.INSTANCE::toTournament)
+                .peek(item -> item.setTour("ATP"))
                 .toList();
         tennisTournamentRepository.saveOrUpdateBatch(TournamentAppConvertMapper.INSTANCE.toTournamentPOList(tournaments));
         log.info("ATP赛事采集完成: year={}, 数量={}", year, tournaments.size());
