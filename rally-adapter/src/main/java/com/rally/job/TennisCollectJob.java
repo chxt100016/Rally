@@ -5,8 +5,11 @@ import com.rally.tennis.TennisCollectFacade;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -15,6 +18,9 @@ public class TennisCollectJob {
 
     @Resource
     private TennisCollectFacade tennisCollectFacade;
+
+    @Resource
+    private Environment environment;
 
     /** 每天凌晨2点采集当前进行中赛事签表 */
     @Scheduled(cron = "${job.tennis.collect.draws.cron}")
@@ -32,5 +38,12 @@ public class TennisCollectJob {
     @Scheduled(cron = "${job.tennis.collect.live.cron}")
     public void liveMatch() {
         tennisCollectFacade.liveMatch();
+    }
+
+    /** 每天凌晨4点采集排名，仅 wechat 环境执行 */
+    @Scheduled(cron = "${job.tennis.collect.rank.cron}")
+    public void rank() {
+        if (!List.of(environment.getActiveProfiles()).contains("wechat")) return;
+        tennisCollectFacade.rank();
     }
 }
