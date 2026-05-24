@@ -24,7 +24,7 @@ public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopR
 
     /** 一次获取全部赛事 OOP 数据，每个赛事产生一个 MS DrawResult */
     @Override
-    protected List<DrawResult<AtpOopResponse>> fetchMs(List<AtpOopResponse> data, DrawParams params) {
+    protected List<DrawResult<AtpOopResponse>> ms(List<AtpOopResponse> data, DrawParams params) {
         if (CollectionUtils.isEmpty(data)) return List.of();
         List<DrawResult<AtpOopResponse>> results = new ArrayList<>();
         for (AtpOopResponse tournament : data) {
@@ -48,7 +48,7 @@ public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopR
     }
 
     @Override
-    protected List<AtpOopResponse> fetchData(DrawParams params) {
+    protected List<AtpOopResponse> request(DrawParams params) {
         return tennisTvClient.getOop();
     }
 

@@ -8,29 +8,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * R: Client 接口的原始返回类型，由 fetchData 获取，在 fetchMs/fetchMd/fetchLs/fetchLd 间共享
+ * R: Client 接口的原始返回类型，由 request 获取，在 ms/fetchMd/fetchLs/fetchLd 间共享
  * S: 单个签表切片类型，用于 getMatches/getPlayers/getEntries
  */
 public abstract class MatchParser<R, S> {
 
-    /** 模板方法：依次调用 fetchMs/fetchMd/fetchLs/fetchLd 收集各类签表，子类按需覆盖对应方法 */
-    public final List<DrawResult<S>> fetchDraws(DrawParams params) {
-        R data = fetchData(params);
+    /** 模板方法：依次调用 ms/fetchMd/fetchLs/fetchLd 收集各类签表，子类按需覆盖对应方法 */
+    public final List<DrawResult<S>> fetch(DrawParams params) {
+        R data = request(params);
         List<DrawResult<S>> results = new ArrayList<>();
-        results.addAll(fetchMs(data, params));
-        results.addAll(fetchMd(data, params));
-        results.addAll(fetchLs(data, params));
-        results.addAll(fetchLd(data, params));
+        results.addAll(ms(data, params));
+        results.addAll(md(data, params));
+        results.addAll(ls(data, params));
+        results.addAll(ld(data, params));
         return results;
     }
 
     /** 调用 Client 获取原始数据，供各 draw 方法共享 */
-    protected R fetchData(DrawParams params) { return null; }
+    protected R request(DrawParams params) { return null; }
 
-    protected List<DrawResult<S>> fetchMs(R data, DrawParams params) { return List.of(); }
-    protected List<DrawResult<S>> fetchMd(R data, DrawParams params) { return List.of(); }
-    protected List<DrawResult<S>> fetchLs(R data, DrawParams params) { return List.of(); }
-    protected List<DrawResult<S>> fetchLd(R data, DrawParams params) { return List.of(); }
+    protected List<DrawResult<S>> ms(R data, DrawParams params) { return List.of(); }
+
+    protected List<DrawResult<S>> md(R data, DrawParams params) { return List.of(); }
+
+    protected List<DrawResult<S>> ls(R data, DrawParams params) { return List.of(); }
+
+    protected List<DrawResult<S>> ld(R data, DrawParams params) { return List.of(); }
 
     /** 从切片提取所有比赛 */
     public abstract List<Match> getMatches(DrawResult<S> draw, String tournamentId, Long drawId);

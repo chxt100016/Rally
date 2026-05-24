@@ -41,12 +41,12 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
     private WtaClient wtaClient;
 
     @Override
-    protected WtaScheduleResponse fetchData(DrawParams params) {
+    protected WtaScheduleResponse request(DrawParams params) {
         return wtaClient.getSchedule(params.getTournamentId(), params.getYear());
     }
 
     @Override
-    protected List<DrawResult<WtaScheduleResponse.ScheduleData>> fetchLs(
+    protected List<DrawResult<WtaScheduleResponse.ScheduleData>> ls(
             WtaScheduleResponse data, DrawParams params) {
         if (data == null || data.getData() == null
                 || CollectionUtils.isEmpty(data.getData().getScheduleDays())) {

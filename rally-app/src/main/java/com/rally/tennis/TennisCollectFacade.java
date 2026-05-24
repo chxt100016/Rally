@@ -56,7 +56,12 @@ public class TennisCollectFacade {
         List<TennisTournamentPO> current = tournamentCollectService.current();
         for (TennisTournamentPO item : current) {
             if ("WTA".equals(item.getTour())) {
-                matchCollectManager.collect(CollectType.WTA_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear()));
+                if (item.getCategory().equals("Grand Slam")) {
+                    matchCollectManager.collect(CollectType.ATP_SCHEDULE_FOR_WTA, new DrawParams(item.getTournamentId(), item.getYear()));
+                } else {
+                    matchCollectManager.collect(CollectType.WTA_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear()));
+                }
+
             } else if ("ATP".equals(item.getTour())) {
                 matchCollectManager.collect(CollectType.ATP_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear()));
             }
