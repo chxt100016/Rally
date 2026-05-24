@@ -461,43 +461,6 @@ public class TennisQueryService {
         return vo;
     }
 
-    /**
-     * 根据数据库状态和日期派生前端展示状态
-     */
-    private String deriveMatchStatus(MatchData match) {
-        String dbStatus = match.getStatus();
-        if ("finished".equals(dbStatus) || "completed".equals(dbStatus)) {
-            return "FINISHED";
-        }
-        if ("live".equals(dbStatus)) {
-            return "LIVE";
-        }
-        // scheduled 或其他状态
-        if (match.getScheduledAt() != null) {
-            LocalDateTime now = LocalDateTime.now();
-            if (now.isBefore(match.getScheduledAt())) {
-                return "WAITING";
-            } else {
-                // 已过预定时间但状态还是 scheduled，说明是 NOT_EARLIER_THAN
-                return "NOT_EARLIER_THAN";
-            }
-        }
-        return "WAITING";
-    }
-
-    /**
-     * 解析比赛状态标签
-     */
-    private String resolveMatchStatusLabel(String status) {
-        if (status == null) return "";
-        return switch (status) {
-            case "LIVE" -> "直播中";
-            case "WAITING" -> "候场中";
-            case "NOT_EARLIER_THAN" -> "不早于";
-            case "FINISHED" -> "已结束";
-            default -> status;
-        };
-    }
 
     /**
      * 计算当前盘数
@@ -551,15 +514,7 @@ public class TennisQueryService {
         return null;
     }
 
-    public List<PlayerQueryVO> queryPlayers(String tour) {
-        if (tour == null || tour.isBlank()) return List.of();
-        List<com.rally.db.tennis.entity.TennisPlayerPO> players =
-                tennisPlayerRepository.listByTourOrderByRank(tour.toUpperCase());
-        LocalDate today = LocalDate.now();
-        return players.stream()
-                .map(po -> toPlayerQueryVO(po, today))
-                .toList();
-    }
+
 
     private PlayerQueryVO toPlayerQueryVO(com.rally.db.tennis.entity.TennisPlayerPO po, LocalDate today) {
         PlayerQueryVO vo = new PlayerQueryVO();

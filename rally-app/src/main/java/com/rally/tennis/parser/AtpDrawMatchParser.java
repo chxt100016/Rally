@@ -117,7 +117,7 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
         for (AtpDrawsResponse.PlayerInfo playerInfo : drawLine.getPlayers()) {
             if (playerInfo == null || playerInfo.getPlayerId() == null) continue;
             TournamentEntry entry = new TournamentEntry();
-            entry.setPlayerId(playerInfo.getPlayerId());
+            entry.setPlayerId(playerInfo.getPlayerId() == null ? null : playerInfo.getPlayerId().toUpperCase());
             entry.setDrawId(drawId);
             entry.setSeed(drawLine.getSeed() != null ? drawLine.getSeed().shortValue() : null);
             entryMap.put(playerInfo.getPlayerId(), entry);

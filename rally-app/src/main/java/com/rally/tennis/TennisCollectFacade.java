@@ -47,7 +47,7 @@ public class TennisCollectFacade {
     public void draws(String tour, String tournamentId, int year) {
         DrawParams params = new DrawParams(tournamentId, year);
         switch (TourEnums.valueOf(tour)) {
-            case ATP -> matchCollectManager.collect(CollectType.ATP_DRAW, params);
+            case ATP -> matchCollectManager.collect(CollectType.ATP_SCHEDULE, params);
             case WTA -> matchCollectManager.collect(CollectType.WTA_DRAW, params);
         }
     }

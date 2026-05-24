@@ -119,11 +119,11 @@ public class AtpScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
                     prevScheduledAt = scheduledAt;
 
                     if (m.getPlayer() != null) {
-                        match.setPlayer1Id(m.getPlayer().getPlayerId());
+                        match.setPlayer1Id(m.getPlayer().getPlayerId() == null ? null : m.getPlayer().getPlayerId().toUpperCase());
                         match.setPlayerName1(buildName(m.getPlayer()));
                     }
                     if (m.getOpponent() != null) {
-                        match.setPlayer2Id(m.getOpponent().getPlayerId());
+                        match.setPlayer2Id(m.getOpponent().getPlayerId() == null ? null : m.getOpponent().getPlayerId().toUpperCase());
                         match.setPlayerName2(buildName(m.getOpponent()));
                     }
 
@@ -138,7 +138,23 @@ public class AtpScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
 
     @Override
     public List<Player> getPlayers(DrawResult<WtaScheduleResponse.ScheduleData> draw) {
-       return List.of();
+        WtaScheduleResponse.ScheduleData scheduleData = draw.getSlice();
+        if (scheduleData == null || CollectionUtils.isEmpty(scheduleData.getScheduleDays())) {
+            return List.of();
+        }
+
+        List<Player> players = new ArrayList<>();
+        for (WtaScheduleResponse.ScheduleDay day : scheduleData.getScheduleDays()) {
+            if (CollectionUtils.isEmpty(day.getScheduleCourts())) continue;
+            for (WtaScheduleResponse.ScheduleCourt court : day.getScheduleCourts()) {
+                if (CollectionUtils.isEmpty(court.getScheduleMatches())) continue;
+                for (WtaScheduleResponse.ScheduleMatch m : court.getScheduleMatches()) {
+                    addPlayer(players, m.getPlayer());
+                    addPlayer(players, m.getOpponent());
+                }
+            }
+        }
+        return players;
     }
 
     @Override
@@ -220,7 +236,7 @@ public class AtpScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
     private void addPlayer(List<Player> players, WtaScheduleResponse.PlayerInfo info) {
         if (info == null || StringUtils.isBlank(info.getPlayerId())) return;
         Player player = new Player();
-        player.setPlayerId(info.getPlayerId());
+        player.setPlayerId(info.getPlayerId() == null ? null : info.getPlayerId().toUpperCase());
         player.setFirstName(info.getPlayerFirstName());
         player.setLastName(info.getPlayerLastName());
         player.setNationality(info.getCountry());
@@ -233,7 +249,7 @@ public class AtpScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
                           String seedStr, String entryType) {
         if (info == null || StringUtils.isBlank(info.getPlayerId())) return;
         TournamentEntry entry = new TournamentEntry();
-        entry.setPlayerId(info.getPlayerId());
+        entry.setPlayerId(info.getPlayerId() == null ? null : info.getPlayerId().toUpperCase());
         entry.setDrawId(drawId);
         if (StringUtils.isNotBlank(seedStr)) {
             try { entry.setSeed(Short.parseShort(seedStr)); } catch (NumberFormatException ignored) {}

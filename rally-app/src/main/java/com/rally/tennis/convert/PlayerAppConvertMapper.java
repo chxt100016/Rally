@@ -31,7 +31,12 @@ public interface PlayerAppConvertMapper {
     @Mapping(target = "birthDate", ignore = true)
     @Mapping(target = "gender", ignore = true)
     @Mapping(target = "hand", ignore = true)
+    @Mapping(target = "playerId", expression = "java(upCasePlayerId(info))")
     Player toPlayerFromDraw(AtpDrawsResponse.PlayerInfo info);
+
+    default String upCasePlayerId(AtpDrawsResponse.PlayerInfo info) {
+        return info.getPlayerId() == null ? null : info.getPlayerId().toUpperCase();
+    }
 
     @Mapping(target = "nationality", source = "playerCountryCode")
     @Mapping(target = "points", ignore = true)
