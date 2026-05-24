@@ -1,16 +1,15 @@
 package com.rally.db.tennis.gateway;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.rally.db.tennis.entity.TennisDrawPO;
 import com.rally.db.tennis.entity.TennisMatchPO;
 import com.rally.db.tennis.entity.TennisPlayerPO;
 import com.rally.db.tennis.entity.TennisSetScorePO;
 import com.rally.db.tennis.entity.TennisTournamentEntryPO;
-import com.rally.db.tennis.mapper.TennisDrawMapper;
-import com.rally.db.tennis.mapper.TennisMatchMapper;
-import com.rally.db.tennis.mapper.TennisPlayerMapper;
-import com.rally.db.tennis.mapper.TennisSetScoreMapper;
-import com.rally.db.tennis.mapper.TennisTournamentEntryMapper;
+import com.rally.db.tennis.service.TennisDrawService;
+import com.rally.db.tennis.service.TennisMatchService;
+import com.rally.db.tennis.service.TennisPlayerService;
+import com.rally.db.tennis.service.TennisSetScoreService;
+import com.rally.db.tennis.service.TennisTournamentEntryService;
 import com.rally.domain.tennis.gateway.MatchQueryGateway;
 import com.rally.domain.tennis.model.MatchData;
 import com.rally.domain.tennis.model.PlayerData;
@@ -30,24 +29,23 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MatchQueryGatewayImpl implements MatchQueryGateway {
 
-    private final TennisMatchMapper matchMapper;
-    private final TennisPlayerMapper playerMapper;
-    private final TennisSetScoreMapper setScoreMapper;
-    private final TennisTournamentEntryMapper tournamentEntryMapper;
-    private final TennisDrawMapper drawMapper;
+    private final TennisMatchService matchService;
+    private final TennisPlayerService playerService;
+    private final TennisSetScoreService setScoreService;
+    private final TennisTournamentEntryService tournamentEntryService;
+    private final TennisDrawService drawService;
 
     @Override
     public List<MatchData> listByTournamentIds(List<String> tournamentIds) {
         if (CollectionUtils.isEmpty(tournamentIds)) {
             return List.of();
         }
-        List<TennisMatchPO> list = matchMapper.selectList(
-                new LambdaQueryWrapper<TennisMatchPO>()
-                        .and(w -> w.isNotNull(TennisMatchPO::getMatchDate)
-                                .or()
-                                .eq(TennisMatchPO::getStatus, "FINISHED"))
-                        .in(TennisMatchPO::getTournamentId, tournamentIds)
-        );
+        List<TennisMatchPO> list = matchService.lambdaQuery()
+                .and(w -> w.isNotNull(TennisMatchPO::getMatchDate)
+                        .or()
+                        .eq(TennisMatchPO::getStatus, "FINISHED"))
+                .in(TennisMatchPO::getTournamentId, tournamentIds)
+                .list();
         return list.stream().map(this::toMatchData).toList();
     }
 
@@ -56,11 +54,10 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
         if (CollectionUtils.isEmpty(tennisMatchIds)) {
             return List.of();
         }
-        List<TennisSetScorePO> list = setScoreMapper.selectList(
-                new LambdaQueryWrapper<TennisSetScorePO>()
-                        .in(TennisSetScorePO::getTennisMatchId, tennisMatchIds)
-                        .orderByAsc(TennisSetScorePO::getSetNumber)
-        );
+        List<TennisSetScorePO> list = setScoreService.lambdaQuery()
+                .in(TennisSetScorePO::getTennisMatchId, tennisMatchIds)
+                .orderByAsc(TennisSetScorePO::getSetNumber)
+                .list();
         return list.stream().map(this::toSetScoreData).toList();
     }
 
@@ -69,10 +66,9 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
         if (CollectionUtils.isEmpty(playerIds)) {
             return List.of();
         }
-        List<TennisPlayerPO> list = playerMapper.selectList(
-                new LambdaQueryWrapper<TennisPlayerPO>()
-                        .in(TennisPlayerPO::getPlayerId, playerIds)
-        );
+        List<TennisPlayerPO> list = playerService.lambdaQuery()
+                .in(TennisPlayerPO::getPlayerId, playerIds)
+                .list();
         return list.stream().map(this::toPlayerData).toList();
     }
 
@@ -81,21 +77,20 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
         if (CollectionUtils.isEmpty(tournamentIds)) {
             return List.of();
         }
-        List<TennisDrawPO> draws = drawMapper.selectList(
-                new LambdaQueryWrapper<TennisDrawPO>()
-                        .in(TennisDrawPO::getTournamentId, tournamentIds)
-        );
+        List<TennisDrawPO> draws = drawService.lambdaQuery()
+                .in(TennisDrawPO::getTournamentId, tournamentIds)
+                .list();
         if (CollectionUtils.isEmpty(draws)) {
             return List.of();
         }
         Map<Long, String> drawIdToTournamentId = draws.stream()
                 .collect(java.util.stream.Collectors.toMap(TennisDrawPO::getId, TennisDrawPO::getTournamentId));
 
-        List<TennisTournamentEntryPO> list = tournamentEntryMapper.selectList(
-                new LambdaQueryWrapper<TennisTournamentEntryPO>()
-                        .in(TennisTournamentEntryPO::getDrawId, drawIdToTournamentId.keySet())
-                        .isNotNull(TennisTournamentEntryPO::getSeed)
-        );
+        List<TennisTournamentEntryPO> list = tournamentEntryService.lambdaQuery()
+                .in(TennisTournamentEntryPO::getDrawId, drawIdToTournamentId.keySet())
+                .isNotNull(TennisTournamentEntryPO::getSeed)
+                .ne(TennisTournamentEntryPO::getSeed, 0)
+                .list();
         return list.stream()
                 .map(po -> toPlayerSeedData(po, drawIdToTournamentId.get(po.getDrawId())))
                 .toList();

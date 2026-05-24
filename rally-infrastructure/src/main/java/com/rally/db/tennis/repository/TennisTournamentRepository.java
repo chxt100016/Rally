@@ -38,4 +38,9 @@ public class TennisTournamentRepository {
     public void updateImagePaths(String tournamentId, String imagePath, String backgroundPath) {
         tennisTournamentService.updateImagePaths(tournamentId, imagePath, backgroundPath);
     }
+
+    /** 按 tournamentId 列表批量查询 */
+    public List<TennisTournamentPO> listByTournamentIds(List<String> tournamentIds) {
+        return tennisTournamentService.listByTournamentIds(tournamentIds);
+    }
 }

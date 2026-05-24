@@ -269,6 +269,14 @@ public class TennisQueryService {
                         PlayerSeedData::getSeed,
                         (a, b) -> a));
 
+        // 查询赛事 tour 信息，构建 tournamentId -> tour 映射
+        Map<String, String> tournamentTourMap = tennisTournamentRepository.listByTournamentIds(tournamentIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        TennisTournamentPO::getTournamentId,
+                        po -> po.getTour() != null ? po.getTour() : "",
+                        (a, b) -> a));
+
         // 将种子球员 ID 补充进查询集合，确保没有比赛记录的种子球员信息也能获取到
         seeds.stream().map(PlayerSeedData::getPlayerId).forEach(playerIds::add);
         List<PlayerData> players = matchQueryGateway.listPlayersByPlayerIds(new ArrayList<>(playerIds));
@@ -317,6 +325,8 @@ public class TennisQueryService {
                     SeedVO seedVO = new SeedVO();
                     seedVO.setPlayerId(s.getPlayerId());
                     seedVO.setSeed(s.getSeed());
+                    seedVO.setTournamentId(s.getTournamentId());
+                    seedVO.setTour(tournamentTourMap.getOrDefault(s.getTournamentId(), ""));
                     PlayerData player = playerMap.get(s.getPlayerId());
                     if (player != null) {
                         String name = StringUtils.isNotBlank(player.getLastName())

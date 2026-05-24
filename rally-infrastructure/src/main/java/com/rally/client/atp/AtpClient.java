@@ -1,5 +1,6 @@
 package com.rally.client.atp;
 
+import com.rally.client.atp.model.AtpAppLiveResponse;
 import com.rally.client.atp.model.AtpRankingsResponse;
 import com.rally.client.wta.model.WtaScheduleResponse;
 import com.rally.domain.utils.Http;
@@ -27,6 +28,31 @@ public class AtpClient {
                     .result(AtpRankingsResponse.class);
         } catch (Exception e) {
             log.error("获取ATP排名失败, fromRank={}, toRank={}", fromRank, toRank, e);
+            return null;
+        }
+    }
+
+    private static final String LIVE_MATCHES_URL =
+            "https://app.atptour.com/api/v2/gateway/livematches";
+
+    /**
+     * 获取指定赛事的实时比赛数据
+     * @param eventId   ATP 赛事 ID（如 520 = Roland Garros）
+     * @param eventYear 赛事年份
+     */
+    public AtpAppLiveResponse getLiveMatches(String eventId, int eventYear) {
+        try {
+            return Http.uri(LIVE_MATCHES_URL)
+                    .param("eventid", eventId)
+                    .param("eventYear", String.valueOf(eventYear))
+                    .header("Host", "app.atptour.com")
+                    .header("accept", "application/json")
+                    .header("user-agent", "ATPTourApp")
+                    .header("accept-language", "zh-CN,zh-Hans;q=0.9")
+                    .doGet()
+                    .result(AtpAppLiveResponse.class);
+        } catch (Exception e) {
+            log.error("获取ATP实时比赛失败, eventId={}, eventYear={}", eventId, eventYear, e);
             return null;
         }
     }
