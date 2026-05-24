@@ -64,7 +64,7 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
                 match.setDrawId(drawId);
                 match.setYear(draw.getYear());
                 match.setRoundNumber(round.getRoundId());
-                match.setRoundName(TennisRoundEnum.toShortName(round.getRoundName()));
+                match.setRoundName(TennisRoundEnum.of(round.getRoundName()));
                 matches.add(match);
             }
         }

@@ -1,6 +1,7 @@
 package com.rally.client.atp;
 
 import com.rally.client.atp.model.AtpRankingsResponse;
+import com.rally.client.wta.model.WtaScheduleResponse;
 import com.rally.domain.utils.Http;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,31 @@ public class AtpClient {
                     .result(AtpRankingsResponse.class);
         } catch (Exception e) {
             log.error("获取ATP排名失败, fromRank={}, toRank={}", fromRank, toRank, e);
+            return null;
+        }
+    }
+
+    private static final String SCHEDULE_URL =
+            "https://app.atptour.com/api/v2/gateway/scores/schedule";
+
+    /**
+     * 获取 ATP 赛事赛程（OOP 备用数据源）
+     * @param eventId  ATP 赛事 ID（如 520 = Roland Garros）
+     * @param eventYear 赛事年份
+     */
+    public WtaScheduleResponse getSchedule(String eventId, int eventYear) {
+        try {
+            return Http.uri(SCHEDULE_URL)
+                    .param("eventId", eventId)
+                    .param("eventYear", String.valueOf(eventYear))
+                    .header("Host", "app.atptour.com")
+                    .header("accept", "application/json")
+                    .header("user-agent", "ATPTourApp")
+                    .header("accept-language", "zh-CN,zh-Hans;q=0.9")
+                    .doGet()
+                    .result(WtaScheduleResponse.class);
+        } catch (Exception e) {
+            log.error("获取ATP赛程失败, eventId={}, eventYear={}", eventId, eventYear, e);
             return null;
         }
     }

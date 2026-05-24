@@ -53,15 +53,12 @@ public class TennisCollectFacade {
     }
 
     public void oop() {
-        matchCollectManager.collect(CollectType.ATP_OOP, null);
-
         List<TennisTournamentPO> current = tournamentCollectService.current();
         for (TennisTournamentPO item : current) {
-            if (!"WTA".equals(item.getTour())) continue;
-            try {
+            if ("WTA".equals(item.getTour())) {
                 matchCollectManager.collect(CollectType.WTA_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear()));
-            } catch (Exception e) {
-                log.error("采集WTA OOP失败, tournamentId={}", item.getTournamentId(), e);
+            } else if ("ATP".equals(item.getTour())) {
+                matchCollectManager.collect(CollectType.ATP_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear()));
             }
         }
     }

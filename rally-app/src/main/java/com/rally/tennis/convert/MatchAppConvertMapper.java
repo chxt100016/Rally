@@ -27,7 +27,7 @@ public interface MatchAppConvertMapper {
     @Mapping(target = "playerName2", expression = "java(buildPlayerName(info.getPlayerTeam2()))")
     @Mapping(target = "status", expression = "java(com.rally.tennis.model.MatchStatus.toStatus(info.getStatus()))")
     @Mapping(target = "scheduledAt", expression = "java(parseDateTime(info.getMatchDate()))")
-    @Mapping(target = "roundName", expression = "java(com.rally.domain.tennis.model.TennisRoundEnum.toShortName(info.getRound().getLongName()))")
+    @Mapping(target = "roundName", expression = "java(com.rally.domain.tennis.model.TennisRoundEnum.of(info.getRound().getLongName()))")
     @Mapping(target = "drawId", ignore = true)
     @Mapping(target = "roundNumber", ignore = true)
     @Mapping(target = "winnerId", ignore = true)

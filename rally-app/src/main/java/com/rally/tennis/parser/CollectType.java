@@ -10,7 +10,8 @@ public enum CollectType {
     WTA_OOP(Phase.OOP),
     ATP_LIVE(Phase.LIVE),
     WTA_LIVE(Phase.LIVE),
-    WTA_SCHEDULE(Phase.OOP);
+    WTA_SCHEDULE(Phase.OOP),
+    ATP_SCHEDULE(Phase.OOP);
 
     public enum Phase { DRAW, OOP, LIVE }
 
