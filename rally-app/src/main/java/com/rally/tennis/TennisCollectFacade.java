@@ -83,19 +83,13 @@ public class TennisCollectFacade {
     }
 
     public void liveMatch() {
-        matchCollectManager.collect(CollectType.ATP_LIVE, null);
+//        matchCollectManager.collect(CollectType.ATP_LIVE, null);
 
         List<TennisTournamentPO> tournaments = tournamentCollectService.current();
         if (CollectionUtils.isEmpty(tournaments)) return;
 
         for (TennisTournamentPO tournament : tournaments) {
-            if (!"WTA".equals(tournament.getTour())) continue;
-            try {
-                matchCollectManager.collect(CollectType.WTA_LIVE,
-                        new DrawParams(tournament.getTournamentId(), tournament.getYear(), tournament.getTour()));
-            } catch (Exception e) {
-                log.error("采集WTA进行中比赛失败, tournamentId={}", tournament.getTournamentId(), e);
-            }
+            matchCollectManager.collect(CollectType.ATP_APP_LIVE, new DrawParams(tournament.getTournamentId(), tournament.getYear(), tournament.getTour()));
         }
     }
 
