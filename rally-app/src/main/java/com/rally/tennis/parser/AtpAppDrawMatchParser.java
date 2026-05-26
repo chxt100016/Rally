@@ -90,7 +90,7 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
             if (CollectionUtils.isEmpty(roundResult.getMatches())) continue;
             for (AtpAppDrawResponse.Match m : roundResult.getMatches()) {
                 if (m.getPlayerId() != null) {
-                    playerMap.computeIfAbsent(m.getPlayerId(), id -> {
+                    playerMap.computeIfAbsent(m.getPlayerId().toUpperCase(), id -> {
                         Player p = new Player();
                         p.setPlayerId(id);
                         p.setFirstName(m.getPlayerFirstName());
@@ -124,7 +124,7 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
         if (CollectionUtils.isNotEmpty(data.getData().getSeededPlayers())) {
             for (AtpAppDrawResponse.SeededPlayer sp : data.getData().getSeededPlayers()) {
                 if (sp.getPlayerId() != null && sp.getSeed() != null) {
-                    seedMap.put(sp.getPlayerId(), sp.getSeed());
+                    seedMap.put(sp.getPlayerId().toUpperCase(), sp.getSeed());
                 }
             }
         }
@@ -151,7 +151,7 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
                 if (CollectionUtils.isEmpty(roundResult.getMatches())) continue;
                 for (AtpAppDrawResponse.Match m : roundResult.getMatches()) {
                     if (m.getPlayerId() != null) {
-                        entryMap.computeIfAbsent(m.getPlayerId(), id -> {
+                        entryMap.computeIfAbsent(m.getPlayerId().toUpperCase(), id -> {
                             TournamentEntry entry = new TournamentEntry();
                             entry.setPlayerId(id);
                             entry.setDrawId(drawId);
@@ -162,7 +162,7 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
                         });
                     }
                     if (m.getOpponentId() != null) {
-                        entryMap.computeIfAbsent(m.getOpponentId(), id -> {
+                        entryMap.computeIfAbsent(m.getOpponentId().toUpperCase(), id -> {
                             TournamentEntry entry = new TournamentEntry();
                             entry.setPlayerId(id);
                             entry.setDrawId(drawId);

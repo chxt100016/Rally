@@ -45,7 +45,7 @@ public class TennisCollectFacade {
     }
 
     public void draws(TennisTournamentPO tournament) {
-        DrawParams params = new DrawParams(tournament.getTournamentId(), tournament.getYear());
+        DrawParams params = new DrawParams(tournament.getTournamentId(), tournament.getYear(), tournament.getTour());
         switch (TourEnums.valueOf(tournament.getTour())) {
             case ATP -> matchCollectManager.collect(CollectType.ATP_APP_DRAW, params);
             case WTA -> {
@@ -60,7 +60,7 @@ public class TennisCollectFacade {
     }
 
     public void completed(TennisTournamentPO tournament) {
-        DrawParams params = new DrawParams(tournament.getTournamentId(), tournament.getYear());
+        DrawParams params = new DrawParams(tournament.getTournamentId(), tournament.getYear(), tournament.getTour());
         matchCollectManager.collect(CollectType.ATP_APP_COMPLETED, params);
     }
 
@@ -69,13 +69,13 @@ public class TennisCollectFacade {
         for (TennisTournamentPO item : current) {
             if ("WTA".equals(item.getTour())) {
                 if (item.getCategory().equals("Grand Slam")) {
-                    matchCollectManager.collect(CollectType.ATP_SCHEDULE_FOR_WTA, new DrawParams(item.getTournamentId(), item.getYear()));
+                    matchCollectManager.collect(CollectType.ATP_SCHEDULE_FOR_WTA, new DrawParams(item.getTournamentId(), item.getYear(), item.getTour()));
                 } else {
-                    matchCollectManager.collect(CollectType.WTA_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear()));
+                    matchCollectManager.collect(CollectType.WTA_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear(), item.getTour()));
                 }
 
             } else if ("ATP".equals(item.getTour())) {
-                matchCollectManager.collect(CollectType.ATP_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear()));
+                matchCollectManager.collect(CollectType.ATP_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear(), item.getTour()));
             }
         }
     }
@@ -90,7 +90,7 @@ public class TennisCollectFacade {
             if (!"WTA".equals(tournament.getTour())) continue;
             try {
                 matchCollectManager.collect(CollectType.WTA_LIVE,
-                        new DrawParams(tournament.getTournamentId(), tournament.getYear()));
+                        new DrawParams(tournament.getTournamentId(), tournament.getYear(), tournament.getTour()));
             } catch (Exception e) {
                 log.error("采集WTA进行中比赛失败, tournamentId={}", tournament.getTournamentId(), e);
             }

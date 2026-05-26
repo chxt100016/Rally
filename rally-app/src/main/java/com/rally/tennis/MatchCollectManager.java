@@ -2,11 +2,13 @@ package com.rally.tennis;
 
 import com.rally.tennis.model.Discipline;
 import com.rally.tennis.model.Match;
-import com.rally.tennis.parser.*;
+import com.rally.tennis.parser.CollectType;
+import com.rally.tennis.parser.DrawParams;
+import com.rally.tennis.parser.DrawResult;
+import com.rally.tennis.parser.MatchParser;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +40,7 @@ public class MatchCollectManager {
 
     @PostConstruct
     private void initParsers() {
-        parsers = matchParsers.stream()
-                .collect(Collectors.toMap(
+        parsers = matchParsers.stream().collect(Collectors.toMap(
                         MatchParser::collectType,
                         p -> p,
                         (a, b) -> a,
@@ -55,7 +56,6 @@ public class MatchCollectManager {
 
     public <R, S> void collect(DrawParams params, MatchParser<R, S> parser) {
         List<DrawResult<S>> draws = parser.fetch(params);
-        if (CollectionUtils.isEmpty(draws)) return;
 
         for (DrawResult<S> draw : draws) {
             if (!shouldCollect(draw.getDiscipline())) continue;

@@ -1,9 +1,14 @@
 package com.rally.tennis.parser;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Value
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DrawParams {
-    String tournamentId;
-    int year;
+    private String tournamentId;
+    private int year;
+    private String tour;
 }
