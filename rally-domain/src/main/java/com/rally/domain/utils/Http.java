@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
@@ -45,6 +46,7 @@ public class Http {
 //                .setConnectionRequestTimeout(1000)
 //                .setConnectTimeout(5000)
 //                .setSocketTimeout(5000)
+                .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
                 .build();
 
         httpClient = HttpClientBuilder.create()
