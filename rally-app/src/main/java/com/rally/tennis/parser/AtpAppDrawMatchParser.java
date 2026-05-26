@@ -24,12 +24,12 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
     private AtpClient atpClient;
 
     @Override
-    protected AtpAppDrawResponse fetchData(DrawParams params) {
+    protected AtpAppDrawResponse request(DrawParams params) {
         return atpClient.getDraws(params.getTournamentId(), params.getYear());
     }
 
     @Override
-    protected List<DrawResult<AtpAppDrawResponse>> fetchMs(AtpAppDrawResponse data, DrawParams params) {
+    protected List<DrawResult<AtpAppDrawResponse>> ms(AtpAppDrawResponse data, DrawParams params) {
         if (data == null || data.getData() == null) return List.of();
         AtpAppDrawResponse.Data d = data.getData();
         if (CollectionUtils.isEmpty(d.getResults())) return List.of();
@@ -41,6 +41,19 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
                 params.getTournamentId(), params.getYear()));
     }
 
+
+    @Override
+    protected List<DrawResult<AtpAppDrawResponse>> ls(AtpAppDrawResponse data, DrawParams params) {
+        if (data == null || data.getData() == null) return List.of();
+        AtpAppDrawResponse.Data d = data.getData();
+        if (CollectionUtils.isEmpty(d.getResults())) return List.of();
+        int drawSize = d.getEvent() != null && d.getEvent().getSglDrawSize() != null
+                ? d.getEvent().getSglDrawSize() : 0;
+        int rounds = d.getResults().size();
+        return List.of(new DrawResult<>(data, Discipline.SINGLES, "LS",
+                new DrawMeta(drawSize, rounds),
+                params.getTournamentId(), params.getYear()));
+    }
     @Override
     public List<Match> getMatches(DrawResult<AtpAppDrawResponse> draw, String tournamentId, Long drawId) {
         AtpAppDrawResponse data = draw.getSlice();
@@ -58,7 +71,7 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
                 match.setYear(draw.getYear());
                 if (round != null) {
                     match.setRoundNumber(round.getId() != null ? Integer.parseInt(round.getId()) : null);
-                    match.setRoundName(TennisRoundEnum.toShortName(round.getLongName()));
+                    match.setRoundName(TennisRoundEnum.of(round.getLongName()));
                 }
                 matches.add(match);
             }
@@ -118,6 +131,21 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
 
         // 从 Results 收集所有球员及其 entryType，合并 seed
         Map<String, TournamentEntry> entryMap = new HashMap<>();
+        // init
+        for (Map.Entry<String, Integer> entry : seedMap.entrySet()) {
+            String key = entry.getKey();
+            Integer value = entry.getValue();
+            entryMap.computeIfAbsent(key, id -> {
+                TournamentEntry item = new TournamentEntry();
+                item.setPlayerId(key);
+                item.setDrawId(drawId);
+                item.setSeed(value.shortValue());
+                return item;
+            });
+
+        }
+
+
         if (CollectionUtils.isNotEmpty(data.getData().getResults())) {
             for (AtpAppDrawResponse.RoundResult roundResult : data.getData().getResults()) {
                 if (CollectionUtils.isEmpty(roundResult.getMatches())) continue;

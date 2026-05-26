@@ -1,5 +1,6 @@
 package com.rally.client.atp;
 
+import com.rally.client.atp.model.AtpAppCompletedResponse;
 import com.rally.client.atp.model.AtpAppDrawResponse;
 import com.rally.client.atp.model.AtpAppLiveResponse;
 import com.rally.client.atp.model.AtpRankingsResponse;
@@ -107,6 +108,26 @@ public class AtpClient {
                     .result(AtpAppLiveResponse.class);
         } catch (Exception e) {
             log.error("获取ATP实时比赛失败, eventId={}, eventYear={}", eventId, eventYear, e);
+            return null;
+        }
+    }
+
+    private static final String COMPLETED_URL =
+            "https://app.atptour.com/api/v2/gateway/results/completed";
+
+    public AtpAppCompletedResponse getCompleted(String eventId, int eventYear) {
+        try {
+            return Http.uri(COMPLETED_URL)
+                    .param("eventId", eventId)
+                    .param("eventYear", String.valueOf(eventYear))
+                    .header("Host", "app.atptour.com")
+                    .header("accept", "application/json")
+                    .header("user-agent", "ATPTourApp")
+                    .header("accept-language", "zh-CN,zh-Hans;q=0.9")
+                    .doGet()
+                    .result(AtpAppCompletedResponse.class);
+        } catch (Exception e) {
+            log.error("获取ATP已完成比赛失败, eventId={}, eventYear={}", eventId, eventYear, e);
             return null;
         }
     }

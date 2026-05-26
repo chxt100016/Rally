@@ -16,6 +16,7 @@ public enum CollectType {
     ATP_SCHEDULE_FOR_WTA(Phase.OOP),
     ATP_APP_LIVE(Phase.LIVE),
     WTA_APP_LIVE(Phase.LIVE),
+    ATP_APP_COMPLETED(Phase.DRAW),
     ;
 
     public enum Phase { DRAW, OOP, LIVE }

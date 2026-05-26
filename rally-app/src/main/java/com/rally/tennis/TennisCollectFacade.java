@@ -37,19 +37,31 @@ public class TennisCollectFacade {
 
         for (TennisTournamentPO tournament : tournaments) {
             try {
-                this.draws(tournament.getTour(), tournament.getTournamentId(), tournament.getYear());
+                this.draws(tournament);
             } catch (Exception e) {
                 log.error("采集签表失败, tournamentId={}", tournament.getTournamentId(), e);
             }
         }
     }
 
-    public void draws(String tour, String tournamentId, int year) {
-        DrawParams params = new DrawParams(tournamentId, year);
-        switch (TourEnums.valueOf(tour)) {
-            case ATP -> matchCollectManager.collect(CollectType.ATP_SCHEDULE, params);
-            case WTA -> matchCollectManager.collect(CollectType.WTA_DRAW, params);
+    public void draws(TennisTournamentPO tournament) {
+        DrawParams params = new DrawParams(tournament.getTournamentId(), tournament.getYear());
+        switch (TourEnums.valueOf(tournament.getTour())) {
+            case ATP -> matchCollectManager.collect(CollectType.ATP_APP_DRAW, params);
+            case WTA -> {
+                if (tournament.getCategory().equals("GS")) {
+                    matchCollectManager.collect(CollectType.ATP_APP_DRAW, params);
+                } else {
+                    matchCollectManager.collect(CollectType.WTA_DRAW, params);
+                }
+
+            }
         }
+    }
+
+    public void completed(TennisTournamentPO tournament) {
+        DrawParams params = new DrawParams(tournament.getTournamentId(), tournament.getYear());
+        matchCollectManager.collect(CollectType.ATP_APP_COMPLETED, params);
     }
 
     public void oop() {

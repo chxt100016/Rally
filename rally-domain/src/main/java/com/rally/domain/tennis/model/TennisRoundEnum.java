@@ -33,7 +33,7 @@ public enum TennisRoundEnum {
             case "Round of 32", "Round Of 32" -> target = ROUND_OF_32;
             case "Round of 64", "Round Of 64" -> target = ROUND_OF_64;
             case "Round of 96" -> target = ROUND_OF_96;
-            case "Round Of 128" -> target = ROUND_OF_128;
+            case "Round of 128", "Round Of 128" -> target = ROUND_OF_128;
             default -> {}
         }
 
