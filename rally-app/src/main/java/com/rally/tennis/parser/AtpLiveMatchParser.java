@@ -25,7 +25,7 @@ public class AtpLiveMatchParser extends MatchParser<MatchesResponse, List<Matche
 
     /** 按赛事分组聚合，每组产生一个 MS DrawResult */
     @Override
-    protected List<DrawResult<List<MatchesResponse.MatchInfo>>> fetchMs(MatchesResponse data, DrawParams params) {
+    protected List<DrawResult<List<MatchesResponse.MatchInfo>>> ms(MatchesResponse data, DrawParams params) {
         if (data == null || CollectionUtils.isEmpty(data.getMatches())) return List.of();
 
         Map<String, List<MatchesResponse.MatchInfo>> grouped = data.getMatches().stream()
@@ -46,7 +46,7 @@ public class AtpLiveMatchParser extends MatchParser<MatchesResponse, List<Matche
     }
 
     @Override
-    protected MatchesResponse fetchData(DrawParams params) {
+    protected MatchesResponse request(DrawParams params) {
         return tennisTvClient.getMatchesByStatus("L");
     }
 

@@ -31,7 +31,7 @@ public interface OopMatchAppConvertMapper {
     @Mapping(target = "scheduledAtText", expression = "java(parseNotBeforeText(detail))")
     @Mapping(target = "court", source = "courtName")
     @Mapping(target = "courtSeq", source = "courtSeq")
-    @Mapping(target = "roundName", expression = "java(com.rally.domain.tennis.model.TennisRoundEnum.toShortName(detail.getRound() != null ? detail.getRound().getLongName() : null))")
+    @Mapping(target = "roundName", expression = "java(com.rally.domain.tennis.model.TennisRoundEnum.of(detail.getRound() != null ? detail.getRound().getLongName() : null))")
     @Mapping(target = "roundNumber", ignore = true)
     @Mapping(target = "drawId", ignore = true)
     @Mapping(target = "startedAt", ignore = true)

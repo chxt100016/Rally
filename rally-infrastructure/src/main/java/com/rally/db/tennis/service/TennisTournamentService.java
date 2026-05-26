@@ -117,4 +117,14 @@ public class TennisTournamentService extends ServiceImpl<TennisTournamentMapper,
                 .set(TennisTournamentPO::getBackgroundPath, backgroundPath)
                 .update();
     }
+
+    /** 按 tournamentId 列表批量查询 */
+    public List<TennisTournamentPO> listByTournamentIds(List<String> tournamentIds) {
+        if (CollectionUtils.isEmpty(tournamentIds)) {
+            return List.of();
+        }
+        return this.lambdaQuery()
+                .in(TennisTournamentPO::getTournamentId, tournamentIds)
+                .list();
+    }
 }

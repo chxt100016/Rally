@@ -1,13 +1,12 @@
 package com.rally.tennis.parser;
 
-import com.rally.client.wta.WtaClient;
+import com.rally.client.atp.AtpClient;
 import com.rally.client.wta.model.WtaScheduleResponse;
 import com.rally.domain.tennis.model.ScheduledAtTextEnum;
 import com.rally.tennis.model.Discipline;
 import com.rally.tennis.model.Match;
 import com.rally.tennis.model.MatchStatus;
 import com.rally.tennis.model.Player;
-import com.rally.tennis.model.SetScore;
 import com.rally.tennis.model.TournamentEntry;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * WTA 赛程解析器，对应 /Scores/Schedule 接口。
- * 按赛事+年份拉取赛程，遍历 ScheduleDays / ScheduleCourts / ScheduleMatches 提取比赛数据。
- * 单打（Partner == null）产生 LS DrawResult，双打（Partner != null）产生 LD DrawResult。
+ * ATP 赛程备用解析器，对应 app.atptour.com /scores/schedule 接口。
+ * 响应结构与 WtaScheduleResponse 相同，按赛事+年份拉取，
+ * 过滤 Tour=ATP 且 MatchId 以 "MS" 开头的单打比赛。
  */
 @Slf4j
 @Component
-public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, WtaScheduleResponse.ScheduleData> {
+public class AtpScheduleMatchParser extends MatchParser<WtaScheduleResponse, WtaScheduleResponse.ScheduleData> {
 
     private static final DateTimeFormatter UTC_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -38,33 +37,36 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
     private static final ZoneId CST_ZONE = ZoneId.of("Asia/Shanghai");
 
     @Resource
-    private WtaClient wtaClient;
+    private AtpClient atpClient;
 
     @Override
     protected WtaScheduleResponse request(DrawParams params) {
-        return wtaClient.getSchedule(params.getTournamentId(), params.getYear());
+        return atpClient.getSchedule(params.getTournamentId(), params.getYear());
     }
 
+    /** 过滤出 Tour=ATP 且 MatchId 以 "MS" 开头的单打比赛，产生一个 MS DrawResult */
     @Override
-    protected List<DrawResult<WtaScheduleResponse.ScheduleData>> ls(
-            WtaScheduleResponse data, DrawParams params) {
-        if (data == null || data.getData() == null
-                || CollectionUtils.isEmpty(data.getData().getScheduleDays())) {
+    protected List<DrawResult<WtaScheduleResponse.ScheduleData>> ms(WtaScheduleResponse data, DrawParams params) {
+        if (data == null || data.getData() == null || CollectionUtils.isEmpty(data.getData().getScheduleDays())) {
             return List.of();
         }
 
-        for (WtaScheduleResponse.ScheduleDay scheduleDay : data.getData().getScheduleDays()) {
-            for (WtaScheduleResponse.ScheduleCourt scheduleCourt : scheduleDay.getScheduleCourts()) {
-                List<WtaScheduleResponse.ScheduleMatch> filtered = scheduleCourt.getScheduleMatches().stream().filter(item -> item.getMatchId().startsWith("LS")).toList();
-                scheduleCourt.setScheduleMatches(filtered);
+        for (WtaScheduleResponse.ScheduleDay day : data.getData().getScheduleDays()) {
+            if (CollectionUtils.isEmpty(day.getScheduleCourts())) continue;
+            for (WtaScheduleResponse.ScheduleCourt court : day.getScheduleCourts()) {
+                if (CollectionUtils.isEmpty(court.getScheduleMatches())) continue;
+                // 只保留 ATP 单打比赛
+                court.setScheduleMatches(court.getScheduleMatches().stream()
+                        .filter(m -> "ATP".equals(m.getTour())
+                                && m.getMatchId() != null
+                                && m.getMatchId().startsWith("MS"))
+                        .toList());
             }
         }
 
-        return List.of(new DrawResult<>(data.getData(), Discipline.SINGLES, "LS",
+        return List.of(new DrawResult<>(data.getData(), Discipline.SINGLES, "MS",
                 new DrawMeta(null, null), params.getTournamentId(), params.getYear()));
     }
-
-
 
     @Override
     public List<Match> getMatches(DrawResult<WtaScheduleResponse.ScheduleData> draw,
@@ -74,9 +76,7 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
             return List.of();
         }
 
-        boolean isDoubles = draw.getDiscipline() == Discipline.DOUBLES;
         List<Match> matches = new ArrayList<>();
-
         for (WtaScheduleResponse.ScheduleDay day : scheduleData.getScheduleDays()) {
             LocalDate matchDate = parseDate(day.getMatchDate());
             if (CollectionUtils.isEmpty(day.getScheduleCourts())) continue;
@@ -88,10 +88,6 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
                 LocalDateTime prevScheduledAt = null;
 
                 for (WtaScheduleResponse.ScheduleMatch m : court.getScheduleMatches()) {
-                    // 按 Partner 字段区分单打/双打，与当前 draw 类型对应
-                    boolean matchIsDoubles = m.getPartner() != null;
-                    if (matchIsDoubles != isDoubles) continue;
-
                     Match match = new Match();
                     match.setMatchId(m.getMatchId());
                     match.setTournamentId(tournamentId);
@@ -111,34 +107,25 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
 
                     // AFTER_PREVIOUS：用上一场时间 +1h10m 推算；否则解析原始 UTC 时间
                     LocalDateTime scheduledAt;
-                    if (ScheduledAtTextEnum.AFTER_PREVIOUS.name().equals(scheduledAtText) && prevScheduledAt != null) {
+                    if (ScheduledAtTextEnum.AFTER_PREVIOUS.name().equals(scheduledAtText)
+                            && prevScheduledAt != null) {
                         scheduledAt = prevScheduledAt.plusMinutes(70);
                     } else {
                         scheduledAt = parseUtcDateTime(m.getMatchTimeUtcIsoDateTime());
                     }
                     match.setScheduledAt(scheduledAt);
-                    if (scheduledAt != null && "F".equals(m.getMatchState())) {
-                        match.setEndedAt(scheduledAt);
-                    }
                     prevScheduledAt = scheduledAt;
 
-                    // 球员
                     if (m.getPlayer() != null) {
-                        match.setPlayer1Id(m.getPlayer().getPlayerId());
-                        match.setPlayerName1(m.getPlayer().getPlayerFirstName()
-                                + " " + m.getPlayer().getPlayerLastName());
+                        match.setPlayer1Id(m.getPlayer().getPlayerId() == null ? null : m.getPlayer().getPlayerId().toUpperCase());
+                        match.setPlayerName1(buildName(m.getPlayer()));
                     }
                     if (m.getOpponent() != null) {
-                        match.setPlayer2Id(m.getOpponent().getPlayerId());
-                        match.setPlayerName2(m.getOpponent().getPlayerFirstName()
-                                + " " + m.getOpponent().getPlayerLastName());
+                        match.setPlayer2Id(m.getOpponent().getPlayerId() == null ? null : m.getOpponent().getPlayerId().toUpperCase());
+                        match.setPlayerName2(buildName(m.getOpponent()));
                     }
 
-                    // 获胜者
                     match.setWinnerId(StringUtils.isBlank(m.getWinner()) ? null : m.getWinningPlayerId());
-
-                    // 比分
-                    match.setSets(parseSets(m.getMatchScores()));
 
                     matches.add(match);
                 }
@@ -162,8 +149,6 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
                 for (WtaScheduleResponse.ScheduleMatch m : court.getScheduleMatches()) {
                     addPlayer(players, m.getPlayer());
                     addPlayer(players, m.getOpponent());
-                    addPlayer(players, m.getPartner());
-                    addPlayer(players, m.getOpponentPartner());
                 }
             }
         }
@@ -194,16 +179,14 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
 
     @Override
     public CollectType collectType() {
-        return CollectType.WTA_SCHEDULE;
+        return CollectType.ATP_SCHEDULE;
     }
 
     // --- 私有工具方法 ---
 
-
     private LocalDateTime parseUtcDateTime(String raw) {
         if (raw == null || raw.isEmpty()) return null;
         try {
-            // 原始字符串为 UTC 时间，转换为中国时区（UTC+8）存储
             return LocalDateTime.parse(raw, UTC_FORMATTER)
                     .atZone(UTC_ZONE)
                     .withZoneSameInstant(CST_ZONE)
@@ -217,7 +200,7 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
     private LocalDate parseDate(String raw) {
         if (raw == null || raw.isEmpty()) return null;
         try {
-            // MatchDate 格式 "2026-05-21T00:00:00"
+            // MatchDate 格式 "2026-05-24T00:00:00"
             return LocalDateTime.parse(raw).toLocalDate();
         } catch (DateTimeParseException e) {
             try {
@@ -238,53 +221,38 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
         }
     }
 
-    private List<SetScore> parseSets(WtaScheduleResponse.MatchScores scores) {
-        if (scores == null) return null;
-        String[][] setData = {
-            {scores.getScoreSet1A(), scores.getScoreSet1B(), scores.getScoreTBSet1()},
-            {scores.getScoreSet2A(), scores.getScoreSet2B(), scores.getScoreTBSet2()},
-            {scores.getScoreSet3A(), scores.getScoreSet3B(), scores.getScoreTBSet3()},
-            {scores.getScoreSet4A(), scores.getScoreSet4B(), scores.getScoreTBSet4()},
-            {scores.getScoreSet5A(), scores.getScoreSet5B(), scores.getScoreTBSet5()},
-        };
-        List<SetScore> sets = new ArrayList<>();
-        for (int i = 0; i < setData.length; i++) {
-            String a = setData[i][0], b = setData[i][1], tb = setData[i][2];
-            if (a == null || a.isEmpty()) break;
-            SetScore s = new SetScore();
-            s.setSetNumber(i + 1);
-            try { s.setP1Games(Integer.parseInt(a)); } catch (NumberFormatException ignored) {}
-            try { s.setP2Games(Integer.parseInt(b)); } catch (NumberFormatException ignored) {}
-            if (tb != null && !tb.isEmpty()) {
-                try { s.setP1Tiebreak(Integer.parseInt(tb)); } catch (NumberFormatException ignored) {}
-            }
-            sets.add(s);
-        }
-        return sets.isEmpty() ? null : sets;
+    private String buildName(WtaScheduleResponse.PlayerInfo info) {
+        if (info == null) return null;
+        String first = info.getPlayerFirstName();
+        String last = info.getPlayerLastName();
+        if (first == null && last == null) return null;
+        if (first == null) return last;
+        if (last == null) return first;
+        return first + " " + last;
     }
 
     private void addPlayer(List<Player> players, WtaScheduleResponse.PlayerInfo info) {
-        if (info == null || info.getPlayerId() == null || info.getPlayerId().isEmpty()) return;
+        if (info == null || StringUtils.isBlank(info.getPlayerId())) return;
         Player player = new Player();
-        player.setPlayerId(info.getPlayerId());
+        player.setPlayerId(info.getPlayerId() == null ? null : info.getPlayerId().toUpperCase());
         player.setFirstName(info.getPlayerFirstName());
         player.setLastName(info.getPlayerLastName());
         player.setNationality(info.getCountry());
-        player.setTour("WTA");
+        player.setTour("ATP");
         players.add(player);
     }
 
     private void addEntry(List<TournamentEntry> entries, Long drawId,
                           WtaScheduleResponse.PlayerInfo info,
                           String seedStr, String entryType) {
-        if (info == null || info.getPlayerId() == null || info.getPlayerId().isEmpty()) return;
+        if (info == null || StringUtils.isBlank(info.getPlayerId())) return;
         TournamentEntry entry = new TournamentEntry();
-        entry.setPlayerId(info.getPlayerId());
+        entry.setPlayerId(info.getPlayerId() == null ? null : info.getPlayerId().toUpperCase());
         entry.setDrawId(drawId);
-        if (seedStr != null && !seedStr.isEmpty()) {
+        if (StringUtils.isNotBlank(seedStr)) {
             try { entry.setSeed(Short.parseShort(seedStr)); } catch (NumberFormatException ignored) {}
         }
-        if (entryType != null && !entryType.isEmpty()) {
+        if (StringUtils.isNotBlank(entryType)) {
             entry.setEntryType(entryType);
         }
         entries.add(entry);

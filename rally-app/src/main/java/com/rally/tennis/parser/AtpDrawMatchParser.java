@@ -25,12 +25,12 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
     private TennisTvClient tennisTvClient;
 
     @Override
-    protected AtpDrawsResponse fetchData(DrawParams params) {
+    protected AtpDrawsResponse request(DrawParams params) {
         return tennisTvClient.getDraws(params.getTournamentId(), params.getYear());
     }
 
     @Override
-    protected List<DrawResult<AtpDrawsResponse.Draw>> fetchMs(AtpDrawsResponse data, DrawParams params) {
+    protected List<DrawResult<AtpDrawsResponse.Draw>> ms(AtpDrawsResponse data, DrawParams params) {
         if (data == null) return List.of();
         AtpDrawsResponse.Draw ms = data.getMS();
         if (ms == null || CollectionUtils.isEmpty(ms.getRounds())) return List.of();
@@ -39,15 +39,6 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
                 params.getTournamentId(), params.getYear()));
     }
 
-//    @Override
-//    protected List<DrawResult<AtpDrawsResponse.Draw>> fetchMd(AtpDrawsResponse data, DrawParams params) {
-//        if (data == null) return List.of();
-//        AtpDrawsResponse.Draw md = data.getMD();
-//        if (md == null || CollectionUtils.isEmpty(md.getRounds())) return List.of();
-//        return List.of(new DrawResult<>(md, Discipline.DOUBLES, "MD",
-//                new DrawMeta(md.getDrawSize(), md.getRounds().size()),
-//                params.getTournamentId(), params.getYear()));
-//    }
 
     @Override
     public List<Match> getMatches(DrawResult<AtpDrawsResponse.Draw> draw, String tournamentId, Long drawId) {
@@ -64,7 +55,7 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
                 match.setDrawId(drawId);
                 match.setYear(draw.getYear());
                 match.setRoundNumber(round.getRoundId());
-                match.setRoundName(TennisRoundEnum.toShortName(round.getRoundName()));
+                match.setRoundName(TennisRoundEnum.of(round.getRoundName()));
                 matches.add(match);
             }
         }
@@ -117,7 +108,7 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
         for (AtpDrawsResponse.PlayerInfo playerInfo : drawLine.getPlayers()) {
             if (playerInfo == null || playerInfo.getPlayerId() == null) continue;
             TournamentEntry entry = new TournamentEntry();
-            entry.setPlayerId(playerInfo.getPlayerId());
+            entry.setPlayerId(playerInfo.getPlayerId() == null ? null : playerInfo.getPlayerId().toUpperCase());
             entry.setDrawId(drawId);
             entry.setSeed(drawLine.getSeed() != null ? drawLine.getSeed().shortValue() : null);
             entryMap.put(playerInfo.getPlayerId(), entry);

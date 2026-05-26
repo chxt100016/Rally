@@ -47,21 +47,23 @@ public class TennisCollectFacade {
     public void draws(String tour, String tournamentId, int year) {
         DrawParams params = new DrawParams(tournamentId, year);
         switch (TourEnums.valueOf(tour)) {
-            case ATP -> matchCollectManager.collect(CollectType.ATP_DRAW, params);
+            case ATP -> matchCollectManager.collect(CollectType.ATP_SCHEDULE, params);
             case WTA -> matchCollectManager.collect(CollectType.WTA_DRAW, params);
         }
     }
 
     public void oop() {
-        matchCollectManager.collect(CollectType.ATP_OOP, null);
-
         List<TennisTournamentPO> current = tournamentCollectService.current();
         for (TennisTournamentPO item : current) {
-            if (!"WTA".equals(item.getTour())) continue;
-            try {
-                matchCollectManager.collect(CollectType.WTA_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear()));
-            } catch (Exception e) {
-                log.error("采集WTA OOP失败, tournamentId={}", item.getTournamentId(), e);
+            if ("WTA".equals(item.getTour())) {
+                if (item.getCategory().equals("Grand Slam")) {
+                    matchCollectManager.collect(CollectType.ATP_SCHEDULE_FOR_WTA, new DrawParams(item.getTournamentId(), item.getYear()));
+                } else {
+                    matchCollectManager.collect(CollectType.WTA_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear()));
+                }
+
+            } else if ("ATP".equals(item.getTour())) {
+                matchCollectManager.collect(CollectType.ATP_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear()));
             }
         }
     }

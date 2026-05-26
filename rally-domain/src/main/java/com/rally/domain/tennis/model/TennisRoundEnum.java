@@ -1,35 +1,42 @@
 package com.rally.domain.tennis.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum TennisRoundEnum {
 
-    FINAL("Final", "F"),
-    SEMIFINAL("Semifinal", "SF"),
-    QUARTERFINAL("Quarterfinal", "QF"),
-    ROUND_OF_16("Round of 16", "R16"),
-    ROUND_OF_32("Round of 32", "R32"),
-    ROUND_OF_64("Round of 64", "R64"),
-    ROUND_OF_96("Round of 96", "R96");
+    FINAL("F"),
+    SEMIFINAL("SF"),
+    QUARTERFINAL("QF"),
+    ROUND_OF_16("R16"),
+    ROUND_OF_32("R32"),
+    ROUND_OF_64("R64"),
+    ROUND_OF_96("R96"),
+    ROUND_OF_128("R128"),
+    ;
 
-    private final String longName;
-    private final String shortName;
+    private final String roundName;
 
-    TennisRoundEnum(String longName, String shortName) {
-        this.longName = longName;
-        this.shortName = shortName;
-    }
-
-    public static String toShortName(String longName) {
-        if (longName == null) {
+    public static String of(String str) {
+        if (str == null) {
             return null;
         }
-        for (TennisRoundEnum round : values()) {
-            if (round.longName.equals(longName)) {
-                return round.shortName;
-            }
+
+        TennisRoundEnum target = null;
+        switch (str) {
+            case "Final" -> target = FINAL;
+            case "Semifinal" -> target = SEMIFINAL;
+            case "Quarterfinal" -> target = QUARTERFINAL;
+            case "Round of 16", "Round Of 16" -> target = ROUND_OF_16;
+            case "Round of 32", "Round Of 32" -> target = ROUND_OF_32;
+            case "Round of 64", "Round Of 64" -> target = ROUND_OF_64;
+            case "Round of 96" -> target = ROUND_OF_96;
+            case "Round Of 128" -> target = ROUND_OF_128;
+            default -> {}
         }
-        return longName;
+
+        return target == null ? null : target.roundName;
     }
 }

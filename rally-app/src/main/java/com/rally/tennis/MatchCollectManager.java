@@ -50,11 +50,11 @@ public class MatchCollectManager {
     @SuppressWarnings("unchecked")
     public void collect(CollectType type, DrawParams params) {
         MatchParser<Object, Object> parser = (MatchParser<Object, Object>) parsers.get(type);
-        collectFromDraw(params, parser);
+        collect(params, parser);
     }
 
-    public <R, S> void collectFromDraw(DrawParams params, MatchParser<R, S> parser) {
-        List<DrawResult<S>> draws = parser.fetchDraws(params);
+    public <R, S> void collect(DrawParams params, MatchParser<R, S> parser) {
+        List<DrawResult<S>> draws = parser.fetch(params);
         if (CollectionUtils.isEmpty(draws)) return;
 
         for (DrawResult<S> draw : draws) {

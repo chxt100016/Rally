@@ -22,12 +22,12 @@ public class WtaDrawMatchParser extends MatchParser<WtaDrawsResponse, WtaDrawsRe
     private WtaClient wtaClient;
 
     @Override
-    protected WtaDrawsResponse fetchData(DrawParams params) {
+    protected WtaDrawsResponse request(DrawParams params) {
         return wtaClient.getDraws(params.getTournamentId(), params.getYear());
     }
 
     @Override
-    protected List<DrawResult<WtaDrawsResponse.DrawData>> fetchLs(WtaDrawsResponse data, DrawParams params) {
+    protected List<DrawResult<WtaDrawsResponse.DrawData>> ls(WtaDrawsResponse data, DrawParams params) {
         if (data == null || data.getData() == null
                 || CollectionUtils.isEmpty(data.getData().getResults())) return List.of();
         WtaDrawsResponse.DrawData drawData = data.getData();
