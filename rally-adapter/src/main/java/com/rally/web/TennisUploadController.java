@@ -25,9 +25,14 @@ public class TennisUploadController {
             @RequestParam("tournamentId") String tournamentId) throws Exception {
         TennisUploadAppService.TournamentImageResult result =
                 tennisUploadAppService.uploadTournamentImage(file, tournamentId);
+        // 生成可直接在线上执行的 UPDATE 语句，方便手动同步图片路径
+        String sql = String.format(
+                "UPDATE tennis_tournament SET image_path = '%s', background_path = '%s' WHERE tournament_id = '%s';",
+                result.imageKey(), result.backgroundKey(), tournamentId);
         return Map.of(
                 "imageKey", result.imageKey(),
-                "backgroundKey", result.backgroundKey()
+                "backgroundKey", result.backgroundKey(),
+                "sql", sql
         );
     }
 }
