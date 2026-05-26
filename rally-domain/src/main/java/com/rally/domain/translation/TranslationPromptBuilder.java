@@ -24,12 +24,31 @@ public class TranslationPromptBuilder {
             "3. 只输出翻译文案本身，不加序号、标点、解释或任何多余内容\n" +
             "4. 专有名词（球员姓名、赛事名称）优先使用业界通用译名";
 
+    private static final String BASE_MANUAL_SYSTEM_PROMPT =
+            "你是一名专业的网球领域翻译专家，熟悉网球术语、球员姓名、赛事名称及场地类型等专有名词的标准译法。\n" +
+                    "任务规则：\n" +
+                    "1. 每行是一个独立翻译任务，格式为：文案:AA;实体:BB;翻译后语言:CC\n" +
+                    "   - 文案：需要翻译的原始内容\n" +
+                    "   - 实体：文案所属的业务实体（如 player/tournament/match/surface 等），用于辅助理解上下文\n" +
+                    "   - 翻译后语言：目标语言（如 简体中文 等）\n" +
+                    "2. 翻译的结果基于id生成表的修改语句，表名translation，结果字段存在translated_text。\n" +
+                    "3. 只输出翻译文案本身，不加序号、标点、解释或任何多余内容\n" +
+                    "4. 专有名词（球员姓名、赛事名称）优先使用业界通用译名";
+
     public static String buildSystemPrompt(List<TranslationData> tasks) {
         String hints = buildEntityHints(tasks);
         if (hints.isEmpty()) {
             return BASE_SYSTEM_PROMPT;
         }
         return BASE_SYSTEM_PROMPT + "\n5. 各实体类型的额外翻译说明（未列出的实体类型无需特殊处理）：\n" + hints;
+    }
+
+    public static String buildManualSystemPrompt(List<TranslationData> tasks) {
+        String hints = buildEntityHints(tasks);
+        if (hints.isEmpty()) {
+            return BASE_MANUAL_SYSTEM_PROMPT;
+        }
+        return BASE_MANUAL_SYSTEM_PROMPT + "\n5. 各实体类型的额外翻译说明（未列出的实体类型无需特殊处理）：\n" + hints;
     }
 
     public static String buildUserContent(List<TranslationData> tasks) {
