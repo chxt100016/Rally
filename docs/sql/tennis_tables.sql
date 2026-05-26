@@ -36,7 +36,7 @@ CREATE TABLE tennis_tournament (
     category     VARCHAR(20)   DEFAULT ''  NOT NULL COMMENT '',
     surface      VARCHAR(10)   NOT NULL COMMENT '',
     city         VARCHAR(50)   NOT NULL,
-    country      VARCHAR(16)   NOT NULL COMMENT '',
+    country      VARCHAR(32)   COMMENT '',
     prize_money  INT           COMMENT '总奖金（USD）',
     prize_money_text  VARCHAR(50)    COMMENT '总奖金文本',
     status       VARCHAR(20)   NOT NULL DEFAULT 'active' COMMENT 'active / completed',

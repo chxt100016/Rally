@@ -18,9 +18,7 @@ public class TennisTournamentRepository {
         tennisTournamentService.saveOrUpdateBatch(tournaments);
     }
 
-    public List<TennisTournamentPO> findActive() {
-        return tennisTournamentService.findActive();
-    }
+
 
     public List<TennisTournamentPO> findCurrentTournaments(LocalDate date) {
         return tennisTournamentService.findCurrentTournaments(date);

@@ -53,7 +53,13 @@ public interface WtaTournamentAppConvertMapper {
     @Named("groupToCategory")
     default String groupToCategory(WtaTournamentsResponse.TournamentGroup group) {
         if (group == null) return null;
+
+        if (group.getLevel().contains("Grand Slam")) {
+            return "GS";
+        }
+
         return group.getLevel().replace("WTA", "").trim();
+
     }
 
     @Named("longToInt")
