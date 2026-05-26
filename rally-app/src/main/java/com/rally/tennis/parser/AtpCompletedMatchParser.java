@@ -42,6 +42,18 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
     }
 
     @Override
+    protected List<DrawResult<AtpAppCompletedResponse>> ls(AtpAppCompletedResponse data, DrawParams params) {
+        if (data == null || data.getData() == null) return List.of();
+        List<AtpAppCompletedResponse.Match> matches = data.getData().getMatches();
+        if (CollectionUtils.isEmpty(matches)) return List.of();
+        // 过滤出单打比赛
+        boolean hasMs = matches.stream().anyMatch(m -> Boolean.FALSE.equals(m.getIsDoubles()));
+        if (!hasMs) return List.of();
+        return List.of(new DrawResult<>(data, Discipline.SINGLES, "LS",
+                new DrawMeta(null, null), params.getTournamentId(), params.getYear()));
+    }
+
+    @Override
     public List<Match> getMatches(DrawResult<AtpAppCompletedResponse> draw, String tournamentId, Long drawId) {
         AtpAppCompletedResponse data = draw.getSlice();
         if (data == null || data.getData() == null
@@ -87,34 +99,12 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
 
     @Override
     public List<Player> getPlayers(DrawResult<AtpAppCompletedResponse> draw) {
-        AtpAppCompletedResponse data = draw.getSlice();
-        if (data == null || data.getData() == null
-                || CollectionUtils.isEmpty(data.getData().getMatches())) {
-            return List.of();
-        }
-        Map<String, Player> playerMap = new HashMap<>();
-        for (AtpAppCompletedResponse.Match m : data.getData().getMatches()) {
-            if (Boolean.TRUE.equals(m.getIsDoubles())) continue;
-            addPlayer(playerMap, m.getPlayerTeam());
-            addPlayer(playerMap, m.getOpponentTeam());
-        }
-        return new ArrayList<>(playerMap.values());
+        return List.of();
     }
 
     @Override
     public List<TournamentEntry> getEntries(DrawResult<AtpAppCompletedResponse> draw, Long drawId) {
-        AtpAppCompletedResponse data = draw.getSlice();
-        if (data == null || data.getData() == null
-                || CollectionUtils.isEmpty(data.getData().getMatches())) {
-            return List.of();
-        }
-        Map<String, TournamentEntry> entryMap = new HashMap<>();
-        for (AtpAppCompletedResponse.Match m : data.getData().getMatches()) {
-            if (Boolean.TRUE.equals(m.getIsDoubles())) continue;
-            addEntry(entryMap, m.getPlayerTeam(), drawId);
-            addEntry(entryMap, m.getOpponentTeam(), drawId);
-        }
-        return new ArrayList<>(entryMap.values());
+        return List.of();
     }
 
     @Override
@@ -164,19 +154,6 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
             p.setLastName(pi.getPlayerLastName());
             p.setTour("ATP");
             return p;
-        });
-    }
-
-    private void addEntry(Map<String, TournamentEntry> map, AtpAppCompletedResponse.TeamInfo team, Long drawId) {
-        if (team == null || team.getPlayer() == null || team.getPlayer().getPlayerId() == null) return;
-        String playerId = team.getPlayer().getPlayerId();
-        map.computeIfAbsent(playerId, id -> {
-            TournamentEntry entry = new TournamentEntry();
-            entry.setPlayerId(id);
-            entry.setDrawId(drawId);
-            entry.setSeed(team.getSeed() != null ? team.getSeed().shortValue() : null);
-            entry.setEntryType(team.getEntryType());
-            return entry;
         });
     }
 

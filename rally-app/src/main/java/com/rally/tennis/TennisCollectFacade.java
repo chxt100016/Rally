@@ -51,8 +51,10 @@ public class TennisCollectFacade {
             case WTA -> {
                 if (tournament.getCategory().equals("GS")) {
                     matchCollectManager.collect(CollectType.ATP_APP_DRAW, params);
+                    matchCollectManager.collect(CollectType.ATP_APP_COMPLETED, params);
                 } else {
                     matchCollectManager.collect(CollectType.WTA_DRAW, params);
+
                 }
 
             }
