@@ -1,6 +1,8 @@
 package com.rally.client.atp;
 
+import com.rally.client.atp.model.AtpAppDrawResponse;
 import com.rally.client.atp.model.AtpRankingsResponse;
+
 import com.rally.domain.utils.Http;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,9 @@ public class AtpClient {
 
     private static final String RANKINGS_URL =
             "https://app.atptour.com/api/v2/gateway/rankings/sglroll";
+
+    private static final String DRAWS_URL =
+            "https://app.atptour.com/api/v2/gateway/draws/ms";
 
     public AtpRankingsResponse getRankings(int fromRank, int toRank) {
         try {
@@ -26,6 +31,23 @@ public class AtpClient {
                     .result(AtpRankingsResponse.class);
         } catch (Exception e) {
             log.error("获取ATP排名失败, fromRank={}, toRank={}", fromRank, toRank, e);
+            return null;
+        }
+    }
+
+    public AtpAppDrawResponse getDraws(String eventId, int eventYear) {
+        try {
+            return Http.uri(DRAWS_URL)
+                    .param("eventId", eventId)
+                    .param("eventYear", String.valueOf(eventYear))
+                    .header("Host", "app.atptour.com")
+                    .header("accept", "application/json")
+                    .header("user-agent", "ATPTourApp")
+                    .header("accept-language", "zh-CN,zh-Hans;q=0.9")
+                    .doGet()
+                    .result(AtpAppDrawResponse.class);
+        } catch (Exception e) {
+            log.error("获取ATP签表失败, eventId={}, eventYear={}", eventId, eventYear, e);
             return null;
         }
     }
