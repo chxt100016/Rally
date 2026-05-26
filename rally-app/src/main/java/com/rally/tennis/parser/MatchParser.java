@@ -2,6 +2,7 @@ package com.rally.tennis.parser;
 
 import com.rally.tennis.model.Match;
 import com.rally.tennis.model.Player;
+import com.rally.tennis.model.TourEnums;
 import com.rally.tennis.model.TournamentEntry;
 
 import java.util.ArrayList;
@@ -17,10 +18,16 @@ public abstract class MatchParser<R, S> {
     public final List<DrawResult<S>> fetch(DrawParams params) {
         R data = request(params);
         List<DrawResult<S>> results = new ArrayList<>();
-        results.addAll(ms(data, params));
-        results.addAll(md(data, params));
-        results.addAll(ls(data, params));
-        results.addAll(ld(data, params));
+        switch (TourEnums.valueOf(params.getTour())) {
+            case ATP -> {
+                results.addAll(ms(data, params));
+                results.addAll(md(data, params));
+            }
+            case WTA -> {
+                results.addAll(ls(data, params));
+                results.addAll(ld(data, params));
+            }
+        }
         return results;
     }
 

@@ -82,35 +82,22 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
     @Override
     public List<Player> getPlayers(DrawResult<AtpAppDrawResponse> draw) {
         AtpAppDrawResponse data = draw.getSlice();
-        if (data == null || data.getData() == null || CollectionUtils.isEmpty(data.getData().getResults())) {
-            return List.of();
-        }
+        if (data == null || data.getData() == null || CollectionUtils.isEmpty(data.getData().getDraw())) return List.of();
+
         Map<String, Player> playerMap = new HashMap<>();
-        for (AtpAppDrawResponse.RoundResult roundResult : data.getData().getResults()) {
-            if (CollectionUtils.isEmpty(roundResult.getMatches())) continue;
-            for (AtpAppDrawResponse.Match m : roundResult.getMatches()) {
-                if (m.getPlayerId() != null) {
-                    playerMap.computeIfAbsent(m.getPlayerId().toUpperCase(), id -> {
-                        Player p = new Player();
-                        p.setPlayerId(id);
-                        p.setFirstName(m.getPlayerFirstName());
-                        p.setLastName(m.getPlayerLastName());
-                        p.setTour("ATP");
-                        return p;
-                    });
-                }
-                if (m.getOpponentId() != null) {
-                    playerMap.computeIfAbsent(m.getOpponentId(), id -> {
-                        Player p = new Player();
-                        p.setPlayerId(id);
-                        p.setFirstName(m.getOpponentFirstName());
-                        p.setLastName(m.getOpponentLastName());
-                        p.setTour("ATP");
-                        return p;
-                    });
-                }
-            }
+        for (AtpAppDrawResponse.DrawEntry entry : data.getData().getDraw()) {
+            if (entry.getPlayerId() == null) continue;
+            playerMap.computeIfAbsent(entry.getPlayerId().toUpperCase(), id -> {
+                Player p = new Player();
+                p.setPlayerId(id);
+                p.setFirstName(entry.getPlayerFirstName());
+                p.setLastName(entry.getPlayerLastName());
+                p.setNationality(entry.getPlayerNatlId());
+                p.setTour("ATP");
+                return p;
+            });
         }
+
         return new ArrayList<>(playerMap.values());
     }
 

@@ -10,7 +10,7 @@ CREATE TABLE tennis_player (
     tour          VARCHAR(10)  NOT NULL DEFAULT 'ATP' COMMENT '所属巡回赛：ATP / WTA',
     first_name    VARCHAR(50)  NOT NULL,
     last_name     VARCHAR(50)  NOT NULL,
-    nationality   CHAR(3)      NOT NULL COMMENT 'ISO 3166-1 alpha-3，如 CHN / USA',
+    nationality   CHAR(3)      COMMENT 'ISO 3166-1 alpha-3，如 CHN / USA',
     birth_date    DATE,
     gender        CHAR(1)      COMMENT 'M / F',
     `rank`        INT          COMMENT '当前排名，NULL 表示未排名',

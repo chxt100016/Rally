@@ -19,12 +19,32 @@ public class AtpAppDrawResponse {
         private List<SeededPlayer> seededPlayers;
         @JSONField(name = "Results")
         private List<RoundResult> results;
+        @JSONField(name = "Draw")
+        private List<DrawEntry> draw;
     }
 
     @lombok.Data
     public static class Event {
         @JSONField(name = "SglDrawSize")
         private Integer sglDrawSize;
+    }
+
+    @lombok.Data
+    public static class DrawEntry {
+        @JSONField(name = "DrawPosition")
+        private Integer drawPosition;
+        @JSONField(name = "PlayerId")
+        private String playerId;
+        @JSONField(name = "PlayerLastName")
+        private String playerLastName;
+        @JSONField(name = "PlayerFirstName")
+        private String playerFirstName;
+        @JSONField(name = "PlayerNatlId")
+        private String playerNatlId;
+        @JSONField(name = "Seed")
+        private Integer seed;
+        @JSONField(name = "EntryType")
+        private String entryType;
     }
 
     @lombok.Data

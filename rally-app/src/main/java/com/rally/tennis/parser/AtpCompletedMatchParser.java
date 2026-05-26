@@ -3,12 +3,7 @@ package com.rally.tennis.parser;
 import com.rally.client.atp.AtpClient;
 import com.rally.client.atp.model.AtpAppCompletedResponse;
 import com.rally.domain.tennis.model.TennisRoundEnum;
-import com.rally.tennis.model.Discipline;
-import com.rally.tennis.model.Match;
-import com.rally.tennis.model.MatchStatus;
-import com.rally.tennis.model.Player;
-import com.rally.tennis.model.SetScore;
-import com.rally.tennis.model.TournamentEntry;
+import com.rally.tennis.model.*;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -21,7 +16,7 @@ import java.util.Map;
 
 /**
  * ATP App 已完成比赛解析器（男子单打 MS）
- * 数据源：https://app.atptour.com/api/v2/gateway/results/completed
+ * 数据源：app.atptour.com/api/v2/gateway/results/completed
  */
 @Component
 public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse, AtpAppCompletedResponse> {
