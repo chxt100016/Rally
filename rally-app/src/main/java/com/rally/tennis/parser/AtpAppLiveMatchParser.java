@@ -2,12 +2,7 @@ package com.rally.tennis.parser;
 
 import com.rally.client.atp.AtpClient;
 import com.rally.client.atp.model.AtpAppLiveResponse;
-import com.rally.tennis.model.Discipline;
-import com.rally.tennis.model.Match;
-import com.rally.tennis.model.MatchStatus;
-import com.rally.tennis.model.Player;
-import com.rally.tennis.model.SetScore;
-import com.rally.tennis.model.TournamentEntry;
+import com.rally.tennis.model.*;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -17,7 +12,7 @@ import java.util.List;
 
 /**
  * ATP App 实时比赛解析器（男子单打 MS）
- * 数据源：https://app.atptour.com/api/v2/gateway/livematches
+ * 数据源：<a href="https://app.atptour.com/api/v2/gateway/livematches">...</a>
  * 每次请求对应一个赛事，按 eventId + eventYear 拉取
  */
 @Component
@@ -43,6 +38,11 @@ public class AtpAppLiveMatchParser extends MatchParser<AtpAppLiveResponse, List<
         return buildDrawResult(data, params, "MS", Discipline.SINGLES);
     }
 
+    @Override
+    protected List<DrawResult<List<AtpAppLiveResponse.LiveMatch>>> ls(AtpAppLiveResponse data, DrawParams params) {
+        return buildDrawResult(data, params, "LS", Discipline.SINGLES);
+    }
+
     /**
      * 构建 DrawResult 的通用方法，供子类复用
      * @param data       原始响应
@@ -50,8 +50,7 @@ public class AtpAppLiveMatchParser extends MatchParser<AtpAppLiveResponse, List<
      * @param prefix     MatchId 前缀过滤，如 "MS"、"LS"
      * @param discipline 赛事类型
      */
-    protected List<DrawResult<List<AtpAppLiveResponse.LiveMatch>>> buildDrawResult(
-            AtpAppLiveResponse data, DrawParams params, String prefix, Discipline discipline) {
+    protected List<DrawResult<List<AtpAppLiveResponse.LiveMatch>>> buildDrawResult(AtpAppLiveResponse data, DrawParams params, String prefix, Discipline discipline) {
         if (data == null || data.getData() == null
                 || CollectionUtils.isEmpty(data.getData().getLiveMatches())) {
             return List.of();
@@ -87,10 +86,8 @@ public class AtpAppLiveMatchParser extends MatchParser<AtpAppLiveResponse, List<
             match.setYear(draw.getYear());
             match.setDrawId(drawId);
             // PlayerTeam 对应 player1，OpponentTeam 对应 player2
-            match.setPlayer1Id(lm.getPlayerTeam() != null && lm.getPlayerTeam().getPlayer() != null
-                    ? lm.getPlayerTeam().getPlayer().getPlayerId() : null);
-            match.setPlayer2Id(lm.getOpponentTeam() != null && lm.getOpponentTeam().getPlayer() != null
-                    ? lm.getOpponentTeam().getPlayer().getPlayerId() : null);
+            match.setPlayer1Id(lm.getPlayerTeam() != null && lm.getPlayerTeam().getPlayer() != null ? lm.getPlayerTeam().getPlayer().getPlayerId() : null);
+            match.setPlayer2Id(lm.getOpponentTeam() != null && lm.getOpponentTeam().getPlayer() != null ? lm.getOpponentTeam().getPlayer().getPlayerId() : null);
             match.setStatus(MatchStatus.toStatus(lm.getMatchStatus()));
             match.setCourt(lm.getCourtName());
             match.setWinnerId(lm.getWinningPlayerId());
