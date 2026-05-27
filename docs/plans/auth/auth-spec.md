@@ -32,7 +32,7 @@
 | `com.rally.domain.user.model.UserVO` | VO | 对外暴露的用户视图 |
 | `com.rally.domain.user.model.UserData` | Data | 领域内用户数据 |
 | `com.rally.domain.user.gateway.UserGateway` | 接口 | 用户读写 |
-| `com.rally.domain.auth.model.LoginResultVO` | VO | 登录响应：`token` / `userId` / `isNewUser` / `needOnboarding` |
+| `com.rally.domain.auth.model.LoginResultVO` | VO | 登录响应：`token` / `userId` / `isNewUser` |
 | `com.rally.domain.auth.model.WechatLoginCmd` | DTO | 登录入参：`code` |
 | `com.rally.domain.auth.model.WechatSession` | Data | code2Session 返回：`openid` / `unionid` / `sessionKey` |
 | `com.rally.domain.auth.model.TokenPayload` | Data | JWT 解析结果：`userId` |
@@ -144,8 +144,7 @@ CREATE TABLE `accounts` (
   "data": {
     "token": "eyJhbGciOiJIUzI1NiJ9...",
     "userId": "1234567890123456789",
-    "isNewUser": true,
-    "needOnboarding": true
+    "isNewUser": true
   }
 }
 ```
@@ -154,8 +153,7 @@ CREATE TABLE `accounts` (
 |------|------|------|
 | `token` | string | JWT，前端后续放 `Authorization: Bearer <token>` |
 | `userId` | string | 用户 ID |
-| `isNewUser` | boolean | 是否本次登录新建账号 |
-| `needOnboarding` | boolean | 是否需要拉起 Onboarding 弹窗，详见 [date-design.md](../date/date-design.md) |
+| `isNewUser` | boolean | 是否本次登录新建账号；前端据此决定是否拉起 Onboarding 弹窗，详见 [date-design.md](../date/date-design.md) |
 
 ### 4.2 获取当前用户
 
@@ -202,8 +200,7 @@ CREATE TABLE `accounts` (
 ```
 
 要点：
-- `isNewUser = true` 当且仅当本次调用新建了 user + account 记录
-- `needOnboarding` 当前等价于 `isNewUser`（MVP 简化），后续可独立判断（如引入 onboarding 完成位时调整）
+- `isNewUser = true` 当且仅当本次调用新建了 user + account 记录；前端凭此决定是否拉起 Onboarding
 - `WechatSession.unionid` 写入 `accounts.wechat_unionid`；`sessionKey` 不入库（后续如需解密用户信息再考虑短期缓存）
 
 ### 5.2 Token 校验
