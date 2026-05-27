@@ -51,7 +51,7 @@ public class QiniuClient {
         }
         log.info("qiniu upload: key={}", key);
         Auth auth = Auth.create(accessKey, secretKey);
-        String upToken = auth.uploadToken(bucket);
+        String upToken = auth.uploadToken(bucket, key);
         Response response = uploadManager.put(data, key, upToken);
         DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
         return putRet.key;

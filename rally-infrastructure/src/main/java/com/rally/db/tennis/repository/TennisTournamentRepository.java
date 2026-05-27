@@ -41,4 +41,12 @@ public class TennisTournamentRepository {
     public List<TennisTournamentPO> listByTournamentIds(List<String> tournamentIds) {
         return tennisTournamentService.listByTournamentIds(tournamentIds);
     }
+
+    public TennisTournamentPO findByTournamentId(String tournamentId) {
+        return tennisTournamentService.findByTournamentId(tournamentId);
+    }
+
+    public List<TennisTournamentPO> listPendingBackground(LocalDate dateFrom, LocalDate dateTo) {
+        return tennisTournamentService.listPendingBackground(dateFrom, dateTo);
+    }
 }

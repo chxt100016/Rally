@@ -127,4 +127,22 @@ public class TennisTournamentService extends ServiceImpl<TennisTournamentMapper,
                 .in(TennisTournamentPO::getTournamentId, tournamentIds)
                 .list();
     }
+
+    public TennisTournamentPO findByTournamentId(String tournamentId) {
+        return this.lambdaQuery()
+                .eq(TennisTournamentPO::getTournamentId, tournamentId)
+                .last("LIMIT 1")
+                .one();
+    }
+
+    /** 查询指定日期窗口内 background_path 为空的赛事 */
+    public List<TennisTournamentPO> listPendingBackground(LocalDate dateFrom, LocalDate dateTo) {
+        return this.lambdaQuery()
+                .le(TennisTournamentPO::getStartDate, dateTo)
+                .ge(TennisTournamentPO::getEndDate, dateFrom)
+                .and(w -> w.isNull(TennisTournamentPO::getBackgroundPath)
+                        .or().eq(TennisTournamentPO::getBackgroundPath, ""))
+                .orderByAsc(TennisTournamentPO::getStartDate)
+                .list();
+    }
 }
