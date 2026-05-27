@@ -18,21 +18,21 @@ public class TennisPromptService {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private static final Map<String, String> CATEGORY_ANGLE = Map.of(
-            "GS",     "low-angle oblique aerial view (45°), full panoramic court, epic scale, packed grandstands visible",
-            "1000",   "medium-angle side aerial view (60°), professional atmosphere, imposing presence",
-            "500",    "near-ground oblique view, refined composition focused on the court surface",
-            "250",    "partial court close-up with blurred surroundings, clean and minimal",
-            "final",  "night scene, indoor arena dome overhead view, grand finale atmosphere, dramatic lighting",
-            "finals", "night scene, indoor arena dome overhead view, grand finale atmosphere, dramatic lighting"
+            "GS",     "低空斜俯视（45°）+ 全景球场，壮观史诗感，展现观众席规模",
+            "1000",   "中角度侧俯视（60°），专业感强，有一定气势",
+            "500",    "接近球场地面的斜视角，精致感，聚焦球场本身",
+            "250",    "球场局部特写 + 环境虚化，简洁干净",
+            "final",  "夜景 + 室内穹顶俯视，与所有常规赛事区分，强调收官之战氛围",
+            "finals", "夜景 + 室内穹顶俯视，与所有常规赛事区分，强调收官之战氛围"
     );
 
     private static final Map<String, String> SURFACE_DESC = Map.of(
-            "clay",         "red clay court with characteristic terracotta dust and baseline wear marks",
-            "grass",        "lush green grass court with crisp white lines",
-            "hard",         "blue-green hard court surface with sharp white lines",
-            "indoor",       "indoor hard court under warm artificial lighting",
-            "indoor clay",  "indoor red clay court under artificial lighting",
-            "indoor hard",  "indoor hard court under artificial lighting"
+            "clay",         "红土",
+            "grass",        "草地",
+            "hard",         "硬地",
+            "indoor",       "室内硬地",
+            "indoor clay",  "室内红土",
+            "indoor hard",  "室内硬地"
     );
 
     @Resource
@@ -56,55 +56,78 @@ public class TennisPromptService {
             return List.of();
         }
 
-        return list.stream().map(po -> {
-            TournamentPromptVO vo = new TournamentPromptVO();
-            vo.setTournamentId(po.getTournamentId());
-            vo.setName(po.getName());
-            vo.setCategory(po.getCategory());
-            vo.setSurface(po.getSurface());
-            vo.setCity(po.getCity());
-            vo.setStartDate(po.getStartDate() != null ? po.getStartDate().format(DATE_FMT) : null);
-            vo.setPrompt(buildPrompt(po));
-            return vo;
-        }).toList();
+        return list.stream()
+                .filter(po -> isCategoryKept(po.getCategory()))
+                .map(po -> {
+                    TournamentPromptVO vo = new TournamentPromptVO();
+                    vo.setTournamentId(po.getTournamentId());
+                    vo.setName(po.getName());
+                    vo.setCategory(po.getCategory());
+                    vo.setSurface(po.getSurface());
+                    vo.setCity(po.getCity());
+                    vo.setStartDate(po.getStartDate() != null ? po.getStartDate().format(DATE_FMT) : null);
+                    vo.setPrompt(buildPrompt(po));
+                    return vo;
+                }).toList();
+    }
+
+    private boolean isCategoryKept(String category) {
+        if (category == null || category.isBlank()) {
+            return true;
+        }
+        try {
+            return Integer.parseInt(category.trim()) >= 250;
+        } catch (NumberFormatException e) {
+            return true;
+        }
     }
 
     private String buildPrompt(TennisTournamentPO po) {
         String category = po.getCategory() != null ? po.getCategory().trim() : "";
         String surface  = po.getSurface()  != null ? po.getSurface().trim().toLowerCase() : "";
         String city     = po.getCity()     != null ? po.getCity().trim() : "";
+        String name     = po.getName()     != null ? po.getName().trim() : "";
 
+        String surfaceDesc = SURFACE_DESC.getOrDefault(surface, surface);
+        String levelLabel  = resolveLevelLabel(category);
         String angleDesc   = CATEGORY_ANGLE.getOrDefault(category.toLowerCase(),
-                CATEGORY_ANGLE.getOrDefault(category, "medium-angle view of the tennis court"));
-        String surfaceDesc = SURFACE_DESC.getOrDefault(surface,
-                surface + " tennis court");
+                CATEGORY_ANGLE.getOrDefault(category, "中角度俯视球场"));
 
-        String cityLine = city.isBlank() ? ""
-                : " Subtly integrate recognizable architectural or natural elements of " + city
-                  + " into the distant background, blending naturally without being distracting.";
+        StringBuilder sb = new StringBuilder();
+        sb.append("基于赛事文化背景。生成用于app的网球系列赛赛事卡片的背景图。遵循以下的规则。\n");
+        sb.append("1. 要体现出赛事的场地类型（比如红土、草地、硬地、室内、室内红土、室内硬地）\n");
+        sb.append("2. 作为三方app展示赛程使用，不要出现赛事名字图标等可能侵权的元素。\n");
+        sb.append("3. 需要体现出对应赛事中央球场的特点。\n");
+        sb.append("4. 如果你存在数据在图片远景增加举办赛事的城市的特征元素，但是不要太突兀或者显眼，要自然融入。\n");
+        sb.append("5. 网球赛事有多个级别 GS、1000、500、250、final 不同级别的赛事要在照片中体现出该赛事的重要程度。").append("\n");
+        sb.append("   如果是一些特别的赛事就要和普通的系列赛区分开来，比如年终总决赛。\n");
+        sb.append("   - GS: 低空斜俯视（45°）+ 全景球场, 壮观、史诗感，展现观众席规模\n");
+        sb.append("   - 1000: 中角度侧俯视（60°）,专业感强，有一定气势\n");
+        sb.append("   - 500: 接近球场地面的斜视角, 精致感，聚焦球场本身。\n");
+        sb.append("   - 250: 球场局部特写 + 环境虚化, 简洁干净\n");
+        sb.append("   - final: 年终总决赛, 夜景 + 室内穹顶俯视, 与所有常规赛事区分，强调\"收官之战\"\n");
+        sb.append("6. 图片比例要为16:9\n");
+        sb.append("---\n");
+        sb.append("赛事名称: ").append(name).append("\n");
+        sb.append("级别: ").append(levelLabel).append("\n");
+        sb.append("场地类型: ").append(surfaceDesc).append("\n");
+        if (!city.isBlank()) {
+            sb.append("城市: ").append(city).append("\n");
+        }
+        sb.append("\n当前赛事拍摄角度参考：").append(angleDesc);
 
-        String levelNote = resolveLevelNote(category);
-
-        return "Photorealistic tennis venue background image for a mobile app card, 16:9 aspect ratio. "
-                + "Court surface: " + surfaceDesc + ". "
-                + "Camera angle: " + angleDesc + ". "
-                + "Show the central court in detail — net, service boxes, and surrounding seating structure. "
-                + cityLine
-                + " Do not include any tournament names, logos, sponsor banners, or branded elements. "
-                + levelNote
-                + "Cinematic color grading, high detail, no people on court.";
+        return sb.toString();
     }
 
-    private String resolveLevelNote(String category) {
+    private String resolveLevelLabel(String category) {
         if (category == null) return "";
         return switch (category.toUpperCase()) {
-            case "GS"     -> "This is a Grand Slam — convey a sense of history, grandeur, and massive scale. ";
-            case "1000"   -> "This is a Masters 1000 event — convey prestige and professional intensity. ";
-            case "500"    -> "This is an ATP/WTA 500 event — convey a polished, high-level atmosphere. ";
-            case "250"    -> "This is an ATP/WTA 250 event — keep the composition clean and focused. ";
-            case "FINAL", "FINALS" ->
-                    "This is the year-end Finals — distinguish it clearly from regular tour events with a spectacular, celebratory feel. ";
-            default       -> "";
+            case "GS"            -> "GS（大满贯）";
+            case "1000"          -> "1000";
+            case "500"           -> "500";
+            case "250"           -> "250";
+            case "FINAL", "FINALS" -> "final（年终总决赛）";
+            default              -> category;
         };
     }
 }
