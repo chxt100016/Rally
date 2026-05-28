@@ -83,6 +83,8 @@ public class Http {
 
     private boolean formEncoded;
 
+    private boolean printCurl;
+
 
     private Http() {
     }
@@ -229,7 +231,13 @@ public class Http {
 
     @SneakyThrows
     public Http doPost() {
-        return this.doPost(null);
+        return this.doPost((PostProcessor) null);
+    }
+
+    @SneakyThrows
+    public Http doPost(boolean printCurl) {
+        this.printCurl = printCurl;
+        return this.doPost((PostProcessor) null);
     }
 
     @SneakyThrows
@@ -241,7 +249,13 @@ public class Http {
 
     @SneakyThrows
     public Http doPut() {
-        return this.doPut(null);
+        return this.doPut((PostProcessor) null);
+    }
+
+    @SneakyThrows
+    public Http doPut(boolean printCurl) {
+        this.printCurl = printCurl;
+        return this.doPut((PostProcessor) null);
     }
 
     @SneakyThrows
@@ -253,7 +267,13 @@ public class Http {
 
     @SneakyThrows
     public Http doGet(){
-        return this.doGet(null);
+        return this.doGet((PostProcessor) null);
+    }
+
+    @SneakyThrows
+    public Http doGet(boolean printCurl){
+        this.printCurl = printCurl;
+        return this.doGet((PostProcessor) null);
     }
 
     @SneakyThrows
@@ -265,7 +285,13 @@ public class Http {
 
     @SneakyThrows
     public Http doDelete() {
-        return this.doDelete(null);
+        return this.doDelete((PostProcessor) null);
+    }
+
+    @SneakyThrows
+    public Http doDelete(boolean printCurl) {
+        this.printCurl = printCurl;
+        return this.doDelete((PostProcessor) null);
     }
 
     @SneakyThrows
@@ -280,6 +306,10 @@ public class Http {
         this.setHeader();
         this.setUri();
         this.setEntity();
+
+        if (this.printCurl) {
+            log.info("[curl] {}", buildCurlCommand());
+        }
 
         CloseableHttpResponse response = null;
         try {
@@ -373,6 +403,41 @@ public class Http {
     public interface PostProcessor {
 
         CloseableHttpResponse process(CloseableHttpClient client, HttpRequestBase request, CloseableHttpResponse response) throws IOException;
+    }
+
+    private String buildCurlCommand() {
+        StringBuilder curl = new StringBuilder("curl");
+
+        String method = this.request.getMethod();
+        if (!"GET".equals(method)) {
+            curl.append(" -X ").append(method);
+        }
+
+        if (this.header != null) {
+            for (Map.Entry<String, String> e : this.header.entrySet()) {
+                curl.append(" -H '").append(e.getKey()).append(": ").append(e.getValue()).append("'");
+            }
+        }
+
+        if (this.request instanceof HttpEntityEnclosingRequestBase) {
+            if (this.fileName != null && this.fileData != null) {
+                curl.append(" --form 'media=@").append(this.fileName).append("'");
+            } else if (this.formEncoded && this.entityMap != null) {
+                StringBuilder body = new StringBuilder();
+                for (Map.Entry<String, String> entry : this.entityMap.entrySet()) {
+                    if (body.length() > 0) body.append("&");
+                    body.append(entry.getKey()).append("=").append(entry.getValue());
+                }
+                curl.append(" -d '").append(body).append("'");
+            } else if (this.entityMap != null && this.entity == null) {
+                curl.append(" -d '").append(JSON.toJSONString(this.entityMap)).append("'");
+            } else if (this.entity != null) {
+                curl.append(" -d '").append(JSON.toJSONString(this.entity)).append("'");
+            }
+        }
+
+        curl.append(" '").append(this.request.getURI()).append("'");
+        return curl.toString();
     }
 
 }
