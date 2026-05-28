@@ -27,12 +27,12 @@ public class AtpClient {
     private static final String SCHEDULE_URL =
             "https://app.atptour.com/api/v2/gateway/scores/schedule";
 
-    private static final String PROXY_URL = "http://lacdqhja:hmp9e1ij0dsu@142.111.67.146:5611";
+//    private static final String PROXY_URL = "http://lacdqhja:hmp9e1ij0dsu@142.111.67.146:5611";
 
     public AtpRankingsResponse getRankings(int fromRank, int toRank) {
         try {
             return Http.uri(RANKINGS_URL)
-                    .proxy(PROXY_URL)
+//                    .proxy(PROXY_URL)
                     .param("fromRank", String.valueOf(fromRank))
                     .param("toRank", String.valueOf(toRank))
                     .param("language", "en")
@@ -51,7 +51,7 @@ public class AtpClient {
     public AtpAppDrawResponse getDraws(String eventId, int eventYear) {
         try {
             return Http.uri(DRAWS_URL)
-                    .proxy(PROXY_URL)
+//                    .proxy(PROXY_URL)
                     .param("eventId", eventId)
                     .param("eventYear", String.valueOf(eventYear))
                     .header("Host", "app.atptour.com")
@@ -69,7 +69,7 @@ public class AtpClient {
     public AtpAppLiveResponse getLiveMatches(String eventId, int eventYear) {
         try {
             return Http.uri(LIVE_MATCHES_URL)
-                    .proxy(PROXY_URL)
+//                    .proxy(PROXY_URL)
                     .param("eventid", eventId)
                     .param("eventYear", String.valueOf(eventYear))
                     .header("Host", "app.atptour.com")
@@ -90,7 +90,7 @@ public class AtpClient {
     public AtpAppCompletedResponse getCompleted(String eventId, int eventYear) {
         try {
             return Http.uri(COMPLETED_URL)
-                    .proxy(PROXY_URL)
+//                    .proxy(PROXY_URL)
                     .param("eventId", eventId)
                     .param("eventYear", String.valueOf(eventYear))
                     .header("Host", "app.atptour.com")
@@ -108,7 +108,7 @@ public class AtpClient {
     public WtaScheduleResponse getSchedule(String eventId, int eventYear) {
         try {
             return Http.uri(SCHEDULE_URL)
-                    .proxy(PROXY_URL)
+//                    .proxy(PROXY_URL)
                     .param("eventId", eventId)
                     .param("eventYear", String.valueOf(eventYear))
                     .header("Host", "app.atptour.com")
