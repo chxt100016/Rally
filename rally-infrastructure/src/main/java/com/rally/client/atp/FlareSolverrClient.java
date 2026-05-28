@@ -2,9 +2,14 @@ package com.rally.client.atp;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.rally.domain.utils.Http;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 
 /**
  * FlareSolverr 代理客户端，用于绕过 Cloudflare 人机验证。
@@ -15,6 +20,10 @@ import org.springframework.stereotype.Component;
 public class FlareSolverrClient {
 
     private static final String FLARESOLVERR_URL = "http://localhost:8191/v1";
+
+    private static final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
 
     /**
      * 通过 FlareSolverr 发起 GET 请求，返回响应体 JSON 字符串
@@ -30,11 +39,17 @@ public class FlareSolverrClient {
             requestBody.put("url", targetUrl);
             requestBody.put("maxTimeout", 60000);
 
-            String responseStr = Http.uri(FLARESOLVERR_URL)
+            String body = requestBody.toJSONString();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(FLARESOLVERR_URL))
                     .header("Content-Type", "application/json")
-                    .entity(requestBody.toJSONString())
-                    .doPost()
-                    .result();
+                    .timeout(Duration.ofSeconds(90))
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+
+            HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            String responseStr = httpResponse.body();
 
             if (responseStr == null) {
                 log.error("FlareSolverr 无响应, url={}", targetUrl);
