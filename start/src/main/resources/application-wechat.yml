@@ -8,7 +8,7 @@ spring:
 
 job:
   tennis:
-    enabled: true
+    enabled: false
     collect:
       draws:
         cron: "0 0 */1 * * ?"
