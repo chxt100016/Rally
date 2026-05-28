@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AtpClientTest {
 
-    private final AtpClient atpClient = new AtpClient();
+    private final AtpClient atpClient = new AtpClient(new FlareSolverrClient());
 
     @Test
     public void testGetDraws() {

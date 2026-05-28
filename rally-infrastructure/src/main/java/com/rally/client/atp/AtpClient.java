@@ -1,19 +1,18 @@
 package com.rally.client.atp;
 
+import com.alibaba.fastjson2.JSON;
 import com.rally.client.atp.model.AtpAppCompletedResponse;
 import com.rally.client.atp.model.AtpAppDrawResponse;
 import com.rally.client.atp.model.AtpAppLiveResponse;
 import com.rally.client.atp.model.AtpRankingsResponse;
 import com.rally.client.atp.model.AtpTournamentsResponse;
 import com.rally.client.wta.model.WtaScheduleResponse;
-import com.rally.domain.utils.Http;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class AtpClient {
-
 
     private static final String RANKINGS_URL =
             "https://app.atptour.com/api/v2/gateway/rankings/sglroll";
@@ -27,21 +26,23 @@ public class AtpClient {
     private static final String SCHEDULE_URL =
             "https://app.atptour.com/api/v2/gateway/scores/schedule";
 
-//    private static final String PROXY_URL = "http://lacdqhja:hmp9e1ij0dsu@142.111.67.146:5611";
+    private static final String COMPLETED_URL =
+            "https://app.atptour.com/api/v2/gateway/results/completed";
+
+    private final FlareSolverrClient flareSolverr;
+
+    public AtpClient(FlareSolverrClient flareSolverr) {
+        this.flareSolverr = flareSolverr;
+    }
 
     public AtpRankingsResponse getRankings(int fromRank, int toRank) {
         try {
-            return Http.uri(RANKINGS_URL)
-//                    .proxy(PROXY_URL)
-                    .param("fromRank", String.valueOf(fromRank))
-                    .param("toRank", String.valueOf(toRank))
-                    .param("language", "en")
-                    .header("Host", "app.atptour.com")
-                    .header("accept", "application/json")
-                    .header("user-agent", "ATPTourApp")
-                    .header("accept-language", "zh-CN,zh-Hans;q=0.9")
-                    .doGet()
-                    .result(AtpRankingsResponse.class);
+            String url = RANKINGS_URL
+                    + "?fromRank=" + fromRank
+                    + "&toRank=" + toRank
+                    + "&language=en";
+            String json = flareSolverr.get(url);
+            return json == null ? null : JSON.parseObject(json, AtpRankingsResponse.class);
         } catch (Exception e) {
             log.error("获取ATP排名失败, fromRank={}, toRank={}", fromRank, toRank, e);
             return null;
@@ -50,16 +51,11 @@ public class AtpClient {
 
     public AtpAppDrawResponse getDraws(String eventId, int eventYear) {
         try {
-            return Http.uri(DRAWS_URL)
-//                    .proxy(PROXY_URL)
-                    .param("eventId", eventId)
-                    .param("eventYear", String.valueOf(eventYear))
-                    .header("Host", "app.atptour.com")
-                    .header("accept", "application/json")
-                    .header("user-agent", "ATPTourApp")
-                    .header("accept-language", "zh-CN,zh-Hans;q=0.9")
-                    .doGet()
-                    .result(AtpAppDrawResponse.class);
+            String url = DRAWS_URL
+                    + "?eventId=" + eventId
+                    + "&eventYear=" + eventYear;
+            String json = flareSolverr.get(url);
+            return json == null ? null : JSON.parseObject(json, AtpAppDrawResponse.class);
         } catch (Exception e) {
             log.error("获取ATP签表失败, eventId={}, eventYear={}", eventId, eventYear, e);
             return null;
@@ -68,37 +64,24 @@ public class AtpClient {
 
     public AtpAppLiveResponse getLiveMatches(String eventId, int eventYear) {
         try {
-            return Http.uri(LIVE_MATCHES_URL)
-//                    .proxy(PROXY_URL)
-                    .param("eventid", eventId)
-                    .param("eventYear", String.valueOf(eventYear))
-                    .header("Host", "app.atptour.com")
-                    .header("accept", "application/json")
-                    .header("user-agent", "ATPTourApp")
-                    .header("accept-language", "zh-CN,zh-Hans;q=0.9")
-                    .doGet()
-                    .result(AtpAppLiveResponse.class);
+            String url = LIVE_MATCHES_URL
+                    + "?eventid=" + eventId
+                    + "&eventYear=" + eventYear;
+            String json = flareSolverr.get(url);
+            return json == null ? null : JSON.parseObject(json, AtpAppLiveResponse.class);
         } catch (Exception e) {
             log.error("获取ATP实时比赛失败, eventId={}, eventYear={}", eventId, eventYear, e);
             return null;
         }
     }
 
-    private static final String COMPLETED_URL =
-            "https://app.atptour.com/api/v2/gateway/results/completed";
-
     public AtpAppCompletedResponse getCompleted(String eventId, int eventYear) {
         try {
-            return Http.uri(COMPLETED_URL)
-//                    .proxy(PROXY_URL)
-                    .param("eventId", eventId)
-                    .param("eventYear", String.valueOf(eventYear))
-                    .header("Host", "app.atptour.com")
-                    .header("accept", "application/json")
-                    .header("user-agent", "ATPTourApp")
-                    .header("accept-language", "zh-CN,zh-Hans;q=0.9")
-                    .doGet()
-                    .result(AtpAppCompletedResponse.class);
+            String url = COMPLETED_URL
+                    + "?eventId=" + eventId
+                    + "&eventYear=" + eventYear;
+            String json = flareSolverr.get(url);
+            return json == null ? null : JSON.parseObject(json, AtpAppCompletedResponse.class);
         } catch (Exception e) {
             log.error("获取ATP已完成比赛失败, eventId={}, eventYear={}", eventId, eventYear, e);
             return null;
@@ -107,16 +90,11 @@ public class AtpClient {
 
     public WtaScheduleResponse getSchedule(String eventId, int eventYear) {
         try {
-            return Http.uri(SCHEDULE_URL)
-//                    .proxy(PROXY_URL)
-                    .param("eventId", eventId)
-                    .param("eventYear", String.valueOf(eventYear))
-                    .header("Host", "app.atptour.com")
-                    .header("accept", "application/json")
-                    .header("user-agent", "ATPTourApp")
-                    .header("accept-language", "zh-CN,zh-Hans;q=0.9")
-                    .doGet()
-                    .result(WtaScheduleResponse.class);
+            String url = SCHEDULE_URL
+                    + "?eventId=" + eventId
+                    + "&eventYear=" + eventYear;
+            String json = flareSolverr.get(url);
+            return json == null ? null : JSON.parseObject(json, WtaScheduleResponse.class);
         } catch (Exception e) {
             log.error("获取ATP赛程失败, eventId={}, eventYear={}", eventId, eventYear, e);
             return null;
