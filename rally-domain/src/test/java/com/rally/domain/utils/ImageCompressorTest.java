@@ -19,7 +19,7 @@ public class ImageCompressorTest {
 
     // ===== 配置区 =====
     private static final String SOURCE_DIR = "/Users/mac/Downloads/done";   // 源图片文件夹
-    private static final String OUTPUT_DIR = "/Users/mac/Downloads/compressor";  // 压缩后输出文件夹
+    private static final String OUTPUT_DIR = "/Users/mac/Downloads/tournament";  // 压缩后输出文件夹
     private static final int TARGET_KB  = 10;                   // 目标大小（KB）
     // ==================
 

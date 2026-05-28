@@ -8,15 +8,21 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URIBuilder;
 
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
@@ -85,6 +91,12 @@ public class Http {
 
     private boolean printCurl;
 
+    private HttpHost proxy;
+
+    private String proxyUsername;
+
+    private String proxyPassword;
+
 
     private Http() {
     }
@@ -150,6 +162,24 @@ public class Http {
     public Http formEncoded(){
         this.formEncoded = true;
         this.header("Content-Type", "application/x-www-form-urlencoded");
+        return this;
+    }
+
+    public Http proxy(String url) {
+        URI uri = URI.create(url);
+        this.proxy = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+        if (uri.getUserInfo() != null) {
+            String[] parts = uri.getUserInfo().split(":", 2);
+            this.proxyUsername = parts[0];
+            this.proxyPassword = parts.length > 1 ? parts[1] : null;
+        }
+        return this;
+    }
+
+    public Http proxy(String address, int port, String username, String password) {
+        this.proxy = new HttpHost(address, port);
+        this.proxyUsername = username;
+        this.proxyPassword = password;
         return this;
     }
 
@@ -311,9 +341,11 @@ public class Http {
             log.info("[curl] {}", buildCurlCommand());
         }
 
+        HttpClientContext context = this.buildContext();
+
         CloseableHttpResponse response = null;
         try {
-            response = Http.httpClient.execute(this.request);
+            response = Http.httpClient.execute(this.request, context);
 
             if(postProcessor != null) {
                 CloseableHttpResponse responseTmp = postProcessor.process(Http.httpClient, this.request, response);
@@ -372,6 +404,23 @@ public class Http {
         }
         URI uri = uriBuilder.build();
         this.request.setURI(uri);
+    }
+
+    private HttpClientContext buildContext() {
+        HttpClientContext context = HttpClientContext.create();
+        if (this.proxy != null) {
+            RequestConfig config = RequestConfig.custom()
+                    .setProxy(this.proxy)
+                    .build();
+            this.request.setConfig(config);
+            if (this.proxyUsername != null) {
+                CredentialsProvider cp = new BasicCredentialsProvider();
+                cp.setCredentials(new AuthScope(this.proxy.getHostName(), this.proxy.getPort()),
+                        new UsernamePasswordCredentials(this.proxyUsername, this.proxyPassword));
+                context.setCredentialsProvider(cp);
+            }
+        }
+        return context;
     }
 
     private void setEntity(){

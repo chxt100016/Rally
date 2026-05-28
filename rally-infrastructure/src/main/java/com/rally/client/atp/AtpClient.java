@@ -81,6 +81,7 @@ public class AtpClient {
     public AtpAppDrawResponse getDraws(String eventId, int eventYear) {
         try {
             return Http.uri(DRAWS_URL)
+                    .proxy("http://lacdqhja:hmp9e1ij0dsu@209.127.138.10:5784")
                     .param("eventId", eventId)
                     .param("eventYear", String.valueOf(eventYear))
                     .header("Host", "app.atptour.com")
@@ -98,6 +99,7 @@ public class AtpClient {
     public AtpAppLiveResponse getLiveMatches(String eventId, int eventYear) {
         try {
             return Http.uri(LIVE_MATCHES_URL)
+                    .proxy("http://lacdqhja:hmp9e1ij0dsu@209.127.138.10:5784")
                     .param("eventid", eventId)
                     .param("eventYear", String.valueOf(eventYear))
                     .header("Host", "app.atptour.com")
@@ -118,6 +120,7 @@ public class AtpClient {
     public AtpAppCompletedResponse getCompleted(String eventId, int eventYear) {
         try {
             return Http.uri(COMPLETED_URL)
+                    .proxy("http://lacdqhja:hmp9e1ij0dsu@209.127.138.10:5784")
                     .param("eventId", eventId)
                     .param("eventYear", String.valueOf(eventYear))
                     .header("Host", "app.atptour.com")
@@ -135,6 +138,7 @@ public class AtpClient {
     public WtaScheduleResponse getSchedule(String eventId, int eventYear) {
         try {
             return Http.uri(SCHEDULE_URL)
+                    .proxy("http://lacdqhja:hmp9e1ij0dsu@209.127.138.10:5784")
                     .param("eventId", eventId)
                     .param("eventYear", String.valueOf(eventYear))
                     .header("Host", "app.atptour.com")
