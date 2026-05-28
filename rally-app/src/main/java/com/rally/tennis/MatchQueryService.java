@@ -5,230 +5,31 @@ import com.rally.db.tennis.repository.TennisTournamentRepository;
 import com.rally.domain.tennis.gateway.MatchQueryGateway;
 import com.rally.domain.tennis.model.*;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
+import com.rally.tennis.convert.MatchConvertMapper;
 import com.rally.translation.TennisTranslationService;
-import com.rally.client.qiniu.QiniuClient;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class TennisQueryService {
+public class MatchQueryService {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-    @Resource
-    private TennisTournamentRepository tennisTournamentRepository;
 
     @Resource
     private MatchQueryGateway matchQueryGateway;
 
     @Resource
-    private com.rally.db.tennis.repository.TennisPlayerRepository tennisPlayerRepository;
+    private TennisTournamentRepository tennisTournamentRepository;
 
     @Resource
     private TennisTranslationService tennisTranslationService;
-
-    @Resource
-    private QiniuClient qiniuClient;
-
-    /**
-     * 查询赛事列表，支持按状态、类型和时间范围筛选
-     * @param range recent=最近一个月, 其他或null=全部
-     */
-    public List<TournamentDTO> queryTournaments(String status, String type, String range) {
-        String dbStatus = resolveDbStatus(status);
-
-        // 时间范围：recent=最近一个月，其他=不筛选
-        LocalDate dateFrom = null;
-        LocalDate dateTo = null;
-        if ("recent".equalsIgnoreCase(range)) {
-            LocalDate today = LocalDate.now();
-            dateFrom = today.minusMonths(1);
-            dateTo = today.plusMonths(1);
-        }
-
-        List<TennisTournamentPO> list = tennisTournamentRepository.listByCondition(dbStatus, type, dateFrom, dateTo);
-        if (CollectionUtils.isEmpty(list)) {
-            return List.of();
-        }
-
-        list = list.stream()
-                .filter(po -> isCategoryKept(po.getCategory()))
-                .toList();
-        if (CollectionUtils.isEmpty(list)) {
-            return List.of();
-        }
-
-        // 按 (city, name) 分组，计算 groupId
-        List<TournamentDTO> result = new ArrayList<>();
-        List<List<TennisTournamentPO>> groups = groupByCityAndName(list);
-
-        for (List<TennisTournamentPO> group : groups) {
-            String groupId = "g" + (result.size() + 1);
-            for (TennisTournamentPO po : group) {
-                result.add(toVO(po, groupId));
-            }
-        }
-
-        tennisTranslationService.tournaments(result, TranslationLanguageEnum.ZH_CN);
-        return result;
-    }
-
-    /**
-     * 根据前端 status 参数映射到数据库 status
-     */
-    private String resolveDbStatus(String status) {
-        if (status == null) {
-            return null;
-        }
-        return switch (status) {
-            case "FINISHED" -> "completed";
-            case "ONGOING", "UPCOMING" -> "active";
-            default -> null;
-        };
-    }
-
-    /**
-     * category 过滤：非数字或数字 >= 250 才保留
-     */
-    private boolean isCategoryKept(String category) {
-        if (category == null || category.isBlank()) {
-            return true;
-        }
-        try {
-            return Integer.parseInt(category.trim()) >= 250;
-        } catch (NumberFormatException e) {
-            return true;
-        }
-    }
-
-    /**
-     * 按城市和时间分组：city 不区分大小写相同 且 startDate 和 endDate 时间重合算作同一分组
-     */
-    private List<List<TennisTournamentPO>> groupByCityAndName(List<TennisTournamentPO> list) {
-        // 使用列表存储分组，每个分组是一个 Map 的 entry: key 是组索引，value 是该组的赛事列表
-        List<List<TennisTournamentPO>> groups = new ArrayList<>();
-
-        for (TennisTournamentPO po : list) {
-            boolean added = false;
-            for (List<TennisTournamentPO> group : groups) {
-                TennisTournamentPO first = group.get(0);
-                if (isSameGroup(first, po)) {
-                    group.add(po);
-                    added = true;
-                    break;
-                }
-            }
-            if (!added) {
-                List<TennisTournamentPO> newGroup = new ArrayList<>();
-                newGroup.add(po);
-                groups.add(newGroup);
-            }
-        }
-
-        // 组内按 startDate 排序
-        for (List<TennisTournamentPO> group : groups) {
-            group.sort(Comparator.comparing(TennisTournamentPO::getStartDate,
-                    Comparator.nullsLast(Comparator.naturalOrder())));
-        }
-
-        return groups;
-    }
-
-    /**
-     * 判断两个赛事是否属于同一分组：city 不区分大小写相同 且 startDate 和 endDate 时间重合
-     */
-    private boolean isSameGroup(TennisTournamentPO a, TennisTournamentPO b) {
-        // city 不区分大小写比较
-        String cityA = a.getCity() != null ? a.getCity().toLowerCase() : "";
-        String cityB = b.getCity() != null ? b.getCity().toLowerCase() : "";
-        if (!cityA.equals(cityB)) {
-            return false;
-        }
-
-        // startDate 和 endDate 时间重合
-        if (a.getStartDate() == null || b.getStartDate() == null ||
-            a.getEndDate() == null || b.getEndDate() == null) {
-            return false;
-        }
-
-        // 时间重合判断：a.start <= b.end && b.start <= a.end
-        return !a.getStartDate().isAfter(b.getEndDate()) && !b.getStartDate().isAfter(a.getEndDate());
-    }
-
-    /**
-     * PO → VO 转换，包含状态派生逻辑
-     */
-    private TournamentDTO toVO(TennisTournamentPO po, String groupId) {
-        TournamentDTO vo = new TournamentDTO();
-        vo.setId(po.getTournamentId());
-        vo.setName(po.getName());
-        vo.setType(po.getTour());
-        vo.setTypeLabel(resolveTypeLabel(po.getTour()));
-        vo.setCategory(po.getCategory());
-        vo.setSurface(po.getSurface() != null ? po.getSurface().toUpperCase() : null);
-        vo.setSurfaceLabel(po.getSurface());
-        vo.setCity(po.getCity());
-        vo.setStartDate(po.getStartDate() != null ? po.getStartDate().format(DATE_FMT) : null);
-        vo.setEndDate(po.getEndDate() != null ? po.getEndDate().format(DATE_FMT) : null);
-
-        // 派生展示状态
-        String displayStatus = deriveStatus(po);
-        vo.setStatus(displayStatus);
-        vo.setStatusLabel(resolveStatusLabel(displayStatus));
-        vo.setGroupId(groupId);
-
-        if (po.getBackgroundPath() != null && !po.getBackgroundPath().isBlank()) {
-            vo.setBackgroundUrl(qiniuClient.buildSignedUrl(po.getBackgroundPath()));
-        }
-
-        return vo;
-    }
-
-    /**
-     * 根据数据库 status 和日期派生前端展示状态
-     */
-    private String deriveStatus(TennisTournamentPO po) {
-        LocalDate today = LocalDate.now();
-        if (po.getEndDate() != null && today.isAfter(po.getEndDate())) {
-            return "FINISHED";
-        }
-        if (po.getStartDate() != null && today.isBefore(po.getStartDate())) {
-            return "UPCOMING";
-        }
-        return "ONGOING";
-    }
-
-    private String resolveTypeLabel(String type) {
-        if (type == null) return "";
-        return switch (type) {
-            case "ATP" -> "ATP";
-            case "WTA" -> "WTA";
-            default -> type;
-        };
-    }
-
-    private String resolveStatusLabel(String status) {
-        if (status == null) return "";
-        return switch (status) {
-            case "ONGOING" -> "进行中";
-            case "UPCOMING" -> "即将开始";
-            case "FINISHED" -> "已结束";
-            default -> status;
-        };
-    }
-
-    private String safeStr(String s) {
-        return s != null ? s : "";
-    }
 
     /**
      * 查询比赛列表，返回按状态分类的比赛及种子信息
@@ -412,12 +213,11 @@ public class TennisQueryService {
 
         // 设置盘分
         List<SetScoreData> setScores = setScoreMap.getOrDefault(match.getTennisMatchId(), List.of());
-        List<SetScoreVO> sets = setScores.stream().map(this::toSetScoreVO).toList();
+        List<SetScoreVO> sets = setScores.stream().map(MatchConvertMapper.INSTANCE::toSetScoreVO).toList();
         vo.setSets(sets);
 
         // 派生状态
         vo.setStatus(match.getStatus());
-//        vo.setStatusLabel(resolveMatchStatusLabel(displayStatus));
 
         // 计算当前盘和当前盘比分
         vo.setCurrentSet(calculateCurrentSet(sets));
@@ -457,20 +257,6 @@ public class TennisQueryService {
         vo.setSeed(seedMap.getOrDefault(tournamentId + ":" + playerId, null));
         return vo;
     }
-
-    /**
-     * SetScoreData → SetScoreVO 转换
-     */
-    private SetScoreVO toSetScoreVO(SetScoreData data) {
-        SetScoreVO vo = new SetScoreVO();
-        vo.setNumber(data.getSetNumber());
-        vo.setPlayer1(data.getP1Games());
-        vo.setPlayer2(data.getP2Games());
-        vo.setTiebreak1(data.getP1Tiebreak());
-        vo.setTiebreak2(data.getP2Tiebreak());
-        return vo;
-    }
-
 
     /**
      * 计算当前盘数
@@ -522,23 +308,5 @@ public class TennisQueryService {
             }
         }
         return null;
-    }
-
-
-
-    private PlayerQueryVO toPlayerQueryVO(com.rally.db.tennis.entity.TennisPlayerPO po, LocalDate today) {
-        PlayerQueryVO vo = new PlayerQueryVO();
-        vo.setId(po.getPlayerId());
-        vo.setRank(po.getRank());
-        String first = po.getFirstName() != null ? po.getFirstName() : "";
-        String last  = po.getLastName()  != null ? po.getLastName()  : "";
-        vo.setName((first + " " + last).trim());
-        vo.setCountry(CountryEnum.getCountry(po.getNationality()));
-        vo.setPoints(po.getPoints());
-        if (po.getBirthDate() != null) {
-            vo.setAge(Period.between(po.getBirthDate(), today).getYears());
-            vo.setBirthDate(po.getBirthDate().format(DATE_FMT));
-        }
-        return vo;
     }
 }
