@@ -16,3 +16,5 @@ job:
         cron: "0 0 */1 * * ?"
       live:
         cron: "0 */5 * * * ?"
+      rank:
+        cron: "0 0 4 * * ?"
