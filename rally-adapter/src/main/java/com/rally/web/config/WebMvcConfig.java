@@ -17,7 +17,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/wechat/**")
                 .excludePathPatterns(
-                        "/wechat/auth/login", "/actuator/**", "**/query/tournaments", "**/query/matches", "**/query/player/players"
+                        "/wechat/auth/login", "/actuator/**",
+                        "/wechat/query/tournaments",
+                        "/wechat/query/matches",
+                        "/wechat/query/player/players"
                 );
     }
 }
