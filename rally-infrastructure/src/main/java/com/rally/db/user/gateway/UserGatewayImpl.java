@@ -53,7 +53,7 @@ public class UserGatewayImpl implements UserGateway {
         if (user.getBirthday() != null) {
             po.setBirthday(user.getBirthday());
         }
-        userRepository.save(po);
+        userRepository.updateById(po);
 
         return toData(po);
     }

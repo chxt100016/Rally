@@ -17,6 +17,10 @@ public class UserRepository {
         return userService.insert(user);
     }
 
+    public boolean updateById(UserPO user) {
+        return userService.updateById(user);
+    }
+
     public Optional<UserPO> findByUserId(String userId) {
         return userService.findByUserId(userId);
     }
