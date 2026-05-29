@@ -16,6 +16,7 @@ public class MatchQueryVO {
     private String court;
     private Integer courtSeq;
     private String round;
+    private String roundLabel;
     private String status;
     private String statusLabel;
     private String schedulingType;

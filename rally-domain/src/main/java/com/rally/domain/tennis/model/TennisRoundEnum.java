@@ -7,17 +7,19 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum TennisRoundEnum {
 
-    FINAL("F"),
-    SEMIFINAL("SF"),
-    QUARTERFINAL("QF"),
-    ROUND_OF_16("R16"),
-    ROUND_OF_32("R32"),
-    ROUND_OF_64("R64"),
-    ROUND_OF_96("R96"),
-    ROUND_OF_128("R128"),
+    FINAL("F", "决赛"),
+    SEMIFINAL("SF", "半决赛"),
+    QUARTERFINAL("QF", "四分之一决赛"),
+    ROUND_OF_16("R16", "16强"),
+    ROUND_OF_32("R32", "32强"),
+    ROUND_OF_64("R64", "64强"),
+    ROUND_OF_96("R96", "96强"),
+    ROUND_OF_128("R128", "128强"),
     ;
 
     private final String roundName;
+    /** 中文显示名 */
+    private final String label;
 
     public static String of(String str) {
         if (str == null) {
@@ -38,5 +40,18 @@ public enum TennisRoundEnum {
         }
 
         return target == null ? null : target.roundName;
+    }
+
+    /** 根据 roundName（如 "F"、"SF"）返回中文 label */
+    public static String labelOf(String roundName) {
+        if (roundName == null) {
+            return null;
+        }
+        for (TennisRoundEnum e : values()) {
+            if (e.roundName.equals(roundName)) {
+                return e.label;
+            }
+        }
+        return null;
     }
 }

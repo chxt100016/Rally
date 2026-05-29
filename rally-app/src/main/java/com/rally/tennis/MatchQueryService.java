@@ -104,6 +104,22 @@ public class MatchQueryService {
             }
         }
 
+        // 若 upcomingMatches 中存在某日期，则将 finishedMatches 中同日期的比赛移入 upcomingMatches
+        Set<String> upcomingDates = new HashSet<>();
+        for (MatchQueryVO m : upcomingMatches) {
+            if (m.getDate() != null) upcomingDates.add(m.getDate());
+        }
+        if (!upcomingDates.isEmpty()) {
+            Iterator<MatchQueryVO> it = finishedMatches.iterator();
+            while (it.hasNext()) {
+                MatchQueryVO m = it.next();
+                if (upcomingDates.contains(m.getDate())) {
+                    it.remove();
+                    upcomingMatches.add(m);
+                }
+            }
+        }
+
         // 构建种子列表，按 seed 升序排列
         // 被淘汰判断：在 finishedMatches 中参与过但不是 winnerId 的球员
         Set<String> eliminatedPlayerIds = finishedMatches.stream()
@@ -195,6 +211,7 @@ public class MatchQueryService {
         vo.setCourt(match.getCourt());
         vo.setCourtSeq(match.getCourtSeq());
         vo.setRound(match.getRoundName());
+        vo.setRoundLabel(TennisRoundEnum.labelOf(match.getRoundName()));
         vo.setSchedulingType(match.getScheduledAtText());
         vo.setDate(match.getMatchDate() != null ? match.getMatchDate().format(DATE_FMT) : null);
         vo.setStartedAt(match.getStartedAt());
