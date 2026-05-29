@@ -88,33 +88,39 @@
 ```sql
 -- 用户核心表
 CREATE TABLE `users` (
-  `user_id`     VARCHAR(32) NOT NULL COMMENT '系统唯一 ID（雪花算法字符串形式）',
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `user_id`     VARCHAR(32)  NOT NULL COMMENT '系统唯一 ID（雪花算法字符串形式）',
   `nickname`    VARCHAR(64)  DEFAULT NULL COMMENT '昵称',
   `avatar_url`  VARCHAR(512) DEFAULT NULL COMMENT '头像 URL',
   `gender`      ENUM('male','female','undisclosed') NOT NULL DEFAULT 'undisclosed' COMMENT '性别',
   `birthday`    DATE         DEFAULT NULL COMMENT '生日，用于年龄段筛选，不直接展示',
   `phone`       VARCHAR(20)  DEFAULT NULL COMMENT '手机号（MVP 不收集，列保留供后续手机号注册使用）',
   `email`       VARCHAR(100) DEFAULT NULL COMMENT '邮箱（MVP 不收集，列保留）',
-  `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
-  PRIMARY KEY (`user_id`)
+  `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
+  `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户核心表';
 
 -- 渠道认证表
 CREATE TABLE `accounts` (
-  `account_id`     VARCHAR(32) NOT NULL COMMENT '账号唯一 ID',
-  `user_id`        VARCHAR(32) NOT NULL COMMENT '关联 users.user_id',
+  `id`             BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `account_id`     VARCHAR(32)  NOT NULL COMMENT '账号唯一 ID',
+  `user_id`        VARCHAR(32)  NOT NULL COMMENT '关联 users.user_id',
   `channel`        ENUM('phone','wechat_miniapp') NOT NULL COMMENT '渠道类型',
   `identifier`     VARCHAR(128) NOT NULL COMMENT '渠道唯一标识：手机号 或 wechat_openid',
   `credential`     VARCHAR(256) DEFAULT NULL COMMENT '凭证：密码哈希；微信渠道保持 NULL',
   `wechat_unionid` VARCHAR(128) DEFAULT NULL COMMENT '微信跨端识别，仅微信渠道填写',
-  `created_at`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '绑定时间',
-  PRIMARY KEY (`account_id`),
+  `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '绑定时间',
+  `update_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_account_id` (`account_id`),
   UNIQUE KEY `uk_channel_identifier` (`channel`, `identifier`),
   KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='渠道认证表';
 ```
 
-> 字段口径修正：design 中 `users.邮箱` 改为 `email`（design 文档名称为中文，落库以本 spec 为准）。
+> 字段口径修正：design 中 `users.邮箱` 改为 `email`（design 文档名称为中文，落库以本 spec 为准）。两张表均以自增 `id` 为物理主键，`user_id` / `account_id` 保留为业务唯一键；`created_at` 统一改为 `create_time` / `update_time`，与项目其他表命名风格一致。
 
 ---
 
