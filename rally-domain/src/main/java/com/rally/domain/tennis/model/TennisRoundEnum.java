@@ -9,7 +9,7 @@ public enum TennisRoundEnum {
 
     FINAL("F", "决赛"),
     SEMIFINAL("SF", "半决赛"),
-    QUARTERFINAL("QF", "四分之一决赛"),
+    QUARTERFINAL("QF", "8强"),
     ROUND_OF_16("R16", "16强"),
     ROUND_OF_32("R32", "32强"),
     ROUND_OF_64("R64", "64强"),
