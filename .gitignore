@@ -35,3 +35,6 @@ start/docker/**
 **.war
 **.ear
 **.class    
+
+
+/docs/plan
