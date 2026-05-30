@@ -1,6 +1,7 @@
 package com.rally.tennis;
 
 import com.rally.db.tennis.entity.TennisTournamentPO;
+import com.rally.db.tennis.repository.TennisTournamentRepository;
 import com.rally.tennis.model.TourEnums;
 import com.rally.tennis.parser.CollectType;
 import com.rally.tennis.parser.DrawParams;
@@ -23,6 +24,9 @@ public class TennisCollectFacade {
 
     @Resource
     private MatchCollectManager matchCollectManager;
+
+    @Resource
+    private TennisTournamentRepository tennisTournamentRepository;
 
     public void tournaments(int year) {
         tournamentCollectService.collectTournament(year);
@@ -96,5 +100,10 @@ public class TennisCollectFacade {
     public void rank() {
         playerCollectService.atpRank();
         playerCollectService.wtaRank();
+    }
+
+    public void draws(String tournamentId) {
+        TennisTournamentPO byTournamentId = this.tennisTournamentRepository.findByTournamentId(tournamentId);
+        this.draws(byTournamentId);
     }
 }

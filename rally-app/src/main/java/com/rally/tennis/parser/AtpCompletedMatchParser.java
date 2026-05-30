@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * ATP App 已完成比赛解析器（男子单打 MS）
@@ -32,24 +32,18 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
     @Override
     protected List<DrawResult<AtpAppCompletedResponse>> ms(AtpAppCompletedResponse data, DrawParams params) {
         if (data == null || data.getData() == null) return List.of();
-        List<AtpAppCompletedResponse.Match> matches = data.getData().getMatches();
-        if (CollectionUtils.isEmpty(matches)) return List.of();
-        // 过滤出单打比赛
-        boolean hasMs = matches.stream().anyMatch(m -> Boolean.FALSE.equals(m.getIsDoubles()));
-        if (!hasMs) return List.of();
-        return List.of(new DrawResult<>(data, Discipline.SINGLES, "MS",
+        List<AtpAppCompletedResponse.Match> filtered = filterByPrefix(data.getData().getMatches(), "MS");
+        if (filtered.isEmpty()) return List.of();
+        return List.of(new DrawResult<>(buildFiltered(data, filtered), Discipline.SINGLES, "MS",
                 new DrawMeta(null, null), params.getTournamentId(), params.getYear()));
     }
 
     @Override
     protected List<DrawResult<AtpAppCompletedResponse>> ls(AtpAppCompletedResponse data, DrawParams params) {
         if (data == null || data.getData() == null) return List.of();
-        List<AtpAppCompletedResponse.Match> matches = data.getData().getMatches();
-        if (CollectionUtils.isEmpty(matches)) return List.of();
-        // 过滤出单打比赛
-        boolean hasMs = matches.stream().anyMatch(m -> Boolean.FALSE.equals(m.getIsDoubles()));
-        if (!hasMs) return List.of();
-        return List.of(new DrawResult<>(data, Discipline.SINGLES, "LS",
+        List<AtpAppCompletedResponse.Match> filtered = filterByPrefix(data.getData().getMatches(), "LS");
+        if (filtered.isEmpty()) return List.of();
+        return List.of(new DrawResult<>(buildFiltered(data, filtered), Discipline.SINGLES, "LS",
                 new DrawMeta(null, null), params.getTournamentId(), params.getYear()));
     }
 
@@ -60,10 +54,11 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
                 || CollectionUtils.isEmpty(data.getData().getMatches())) {
             return List.of();
         }
+        // 按 drawTypeCode 前缀过滤，MS 签表只取 matchId 以 MS 开头的，LS 同理
+        String prefix = draw.getDrawTypeCode();
         List<Match> result = new ArrayList<>();
         for (AtpAppCompletedResponse.Match m : data.getData().getMatches()) {
-            // 只处理单打
-            if (!Boolean.FALSE.equals(m.getIsDoubles())) continue;
+            if (m.getMatchId() == null || !m.getMatchId().startsWith(prefix)) continue;
 
             Match match = new Match();
             match.setMatchId(m.getMatchId());
@@ -110,6 +105,23 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
     @Override
     public CollectType collectType() {
         return CollectType.ATP_APP_COMPLETED;
+    }
+
+    /** 按 matchId 前缀过滤比赛列表 */
+    private List<AtpAppCompletedResponse.Match> filterByPrefix(List<AtpAppCompletedResponse.Match> matches, String prefix) {
+        if (CollectionUtils.isEmpty(matches)) return List.of();
+        return matches.stream()
+                .filter(m -> m.getMatchId() != null && m.getMatchId().startsWith(prefix))
+                .collect(Collectors.toList());
+    }
+
+    /** 用过滤后的 matches 构造新的 AtpAppCompletedResponse，避免污染原始数据 */
+    private AtpAppCompletedResponse buildFiltered(AtpAppCompletedResponse original, List<AtpAppCompletedResponse.Match> matches) {
+        AtpAppCompletedResponse.DataWrapper wrapper = new AtpAppCompletedResponse.DataWrapper();
+        wrapper.setMatches(matches);
+        AtpAppCompletedResponse result = new AtpAppCompletedResponse();
+        result.setData(wrapper);
+        return result;
     }
 
     /** 合并 PlayerTeam 和 OpponentTeam 的 SetScores，过滤 SetNumber=0 的无效数据 */

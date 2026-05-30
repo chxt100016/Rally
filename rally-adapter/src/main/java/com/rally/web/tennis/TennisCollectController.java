@@ -1,7 +1,9 @@
 package com.rally.web.tennis;
 
 import com.rally.db.tennis.entity.TennisTournamentPO;
+import com.rally.tennis.PlayerCollectService;
 import com.rally.tennis.TennisCollectFacade;
+import com.rally.tennis.TournamentQueryService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,10 @@ public class TennisCollectController {
         tennisCollectFacade.tournaments(year);
     }
 
+    @GetMapping("/draws")
+    public void draw(@RequestParam("tournamentId") String tournamentId) {
+        tennisCollectFacade.draws(tournamentId);
+    }
 
     @GetMapping("/currentDraws")
     public String collectCurrentDraws() {
