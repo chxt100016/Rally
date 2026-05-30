@@ -1,8 +1,8 @@
 spring:
     datasource:
-        url: jdbc:mysql://127.0.0.1:3306/fan?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-        username: ${MYSQL_USERNAME}
-        password: ${MYSQL_PASSWORD}
+        url: jdbc:mysql://10.10.0.1:3306/fan?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+        username: root
+        password: 0ot4a72adxC2E0+Bvyv9CltrIzRA6g1R
         driver-class-name: com.mysql.cj.jdbc.Driver
         type: com.zaxxer.hikari.HikariDataSource
 
