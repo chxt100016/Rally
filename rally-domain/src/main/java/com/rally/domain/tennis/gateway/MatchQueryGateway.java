@@ -2,8 +2,10 @@ package com.rally.domain.tennis.gateway;
 
 import com.rally.domain.tennis.model.MatchData;
 import com.rally.domain.tennis.model.PlayerData;
+import com.rally.domain.tennis.model.PlayerDetailData;
 import com.rally.domain.tennis.model.PlayerSeedData;
 import com.rally.domain.tennis.model.SetScoreData;
+import com.rally.domain.tennis.model.TennisDrawData;
 
 import java.util.List;
 
@@ -39,4 +41,29 @@ public interface MatchQueryGateway {
      * @return 种子信息列表
      */
     List<PlayerSeedData> listSeedsByTournamentIds(List<String> tournamentIds);
+
+    /**
+     * 查询签表信息
+     */
+    TennisDrawData getDrawByTournamentIdAndType(String tournamentId, Integer year, String drawType);
+
+    /**
+     * 查询某签表下某球员参与的所有比赛（含未来场次）
+     */
+    List<MatchData> listByDrawIdAndPlayerId(Long drawId, String playerId);
+
+    /**
+     * 查询某签表下所有比赛（用于前方对手推算）
+     */
+    List<MatchData> listByDrawId(Long drawId);
+
+    /**
+     * 查询球员详细信息（含排名、积分、出生日期）
+     */
+    PlayerDetailData getPlayerById(String playerId);
+
+    /**
+     * 查询球员在某签表中的种子信息
+     */
+    PlayerSeedData getSeedByDrawIdAndPlayerId(Long drawId, String playerId);
 }

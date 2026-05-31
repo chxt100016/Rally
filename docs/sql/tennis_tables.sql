@@ -89,6 +89,7 @@ DROP TABLE IF EXISTS tennis_match;
 CREATE TABLE tennis_match (
     id               BIGINT      NOT NULL AUTO_INCREMENT,
     match_id         VARCHAR(50) NOT NULL COMMENT '外部API返回的比赛ID，如 MS008',
+    match_index      INT         COMMENT '比赛序号，从 match_id 中提取的数字部分，如 MS008 → 8',
     draw_id          BIGINT      NOT NULL COMMENT '签表ID',
     tournament_id    VARCHAR(50) NOT NULL COMMENT '外部赛事ID，便于按赛事查询',
     year             INT         NOT NULL COMMENT '赛事年份',

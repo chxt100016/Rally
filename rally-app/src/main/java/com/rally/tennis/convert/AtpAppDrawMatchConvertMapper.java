@@ -17,6 +17,7 @@ public interface AtpAppDrawMatchConvertMapper {
     AtpAppDrawMatchConvertMapper INSTANCE = Mappers.getMapper(AtpAppDrawMatchConvertMapper.class);
 
     @Mapping(target = "matchId", source = "matchId")
+    @Mapping(target = "matchIndex", expression = "java(extractMatchNumber(match.getMatchId()))")
     @Mapping(target = "player1Id", source = "playerId")
     @Mapping(target = "player2Id", source = "opponentId")
     @Mapping(target = "playerName1", expression = "java(buildFullName(match.getPlayerFirstName(), match.getPlayerLastName()))")
@@ -43,6 +44,18 @@ public interface AtpAppDrawMatchConvertMapper {
     default String getStatus(AtpAppDrawResponse.Match match) {
         if (match == null) return null;
         return match.getWinningPlayerId() != null ? MatchStatus.FINISHED.name() : MatchStatus.PENDING.name();
+    }
+
+    // 从 matchId 末尾提取数字，如 MS008 → 8
+    default Integer extractMatchNumber(String matchId) {
+        if (matchId == null || matchId.isEmpty()) return null;
+        String digits = matchId.replaceAll("\\D+", "");
+        if (digits.isEmpty()) return null;
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     default String buildFullName(String firstName, String lastName) {

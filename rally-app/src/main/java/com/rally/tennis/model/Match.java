@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Match {
     private String matchId;
+    private Integer matchIndex;
     private String tournamentId;
     private Integer year;
     private Long drawId;

@@ -18,6 +18,7 @@ public class TennisMatchPO {
     @TableId(type = IdType.AUTO)
     private Long id;
     private String matchId;
+    private Integer matchIndex;
     private Long drawId;
     private String tournamentId;
     private Integer year;

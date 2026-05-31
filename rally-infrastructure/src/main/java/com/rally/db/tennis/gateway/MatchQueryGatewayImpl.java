@@ -13,8 +13,10 @@ import com.rally.db.tennis.service.TennisTournamentEntryService;
 import com.rally.domain.tennis.gateway.MatchQueryGateway;
 import com.rally.domain.tennis.model.MatchData;
 import com.rally.domain.tennis.model.PlayerData;
+import com.rally.domain.tennis.model.PlayerDetailData;
 import com.rally.domain.tennis.model.PlayerSeedData;
 import com.rally.domain.tennis.model.SetScoreData;
+import com.rally.domain.tennis.model.TennisDrawData;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -100,6 +102,9 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
         MatchData data = new MatchData();
         data.setMatchId(po.getMatchId());
         data.setTennisMatchId(po.getId());
+        data.setDrawId(po.getDrawId());
+        data.setMatchIndex(po.getMatchIndex());
+        data.setRoundNumber(po.getRoundNumber());
         data.setTournamentId(po.getTournamentId());
         data.setPlayer1Id(po.getPlayer1Id());
         data.setPlayer2Id(po.getPlayer2Id());
@@ -139,6 +144,79 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
     private PlayerSeedData toPlayerSeedData(TennisTournamentEntryPO po, String tournamentId) {
         PlayerSeedData data = new PlayerSeedData();
         data.setTournamentId(tournamentId);
+        data.setPlayerId(po.getPlayerId());
+        data.setSeed(po.getSeed() != null ? po.getSeed().intValue() : null);
+        return data;
+    }
+
+    @Override
+    public TennisDrawData getDrawByTournamentIdAndType(String tournamentId, Integer year, String drawType) {
+        TennisDrawPO po = drawService.lambdaQuery()
+                .eq(TennisDrawPO::getTournamentId, tournamentId)
+                .eq(TennisDrawPO::getYear, year)
+                .eq(TennisDrawPO::getDrawType, drawType)
+                .one();
+        if (po == null) {
+            return null;
+        }
+        TennisDrawData data = new TennisDrawData();
+        data.setId(po.getId());
+        data.setTournamentId(po.getTournamentId());
+        data.setYear(po.getYear());
+        data.setDrawType(po.getDrawType());
+        data.setSize(po.getSize());
+        data.setTotalRounds(po.getTotalRounds());
+        return data;
+    }
+
+    @Override
+    public List<MatchData> listByDrawIdAndPlayerId(Long drawId, String playerId) {
+        List<TennisMatchPO> list = matchService.lambdaQuery()
+                .eq(TennisMatchPO::getDrawId, drawId)
+                .and(w -> w.eq(TennisMatchPO::getPlayer1Id, playerId)
+                        .or()
+                        .eq(TennisMatchPO::getPlayer2Id, playerId))
+                .list();
+        return list.stream().map(this::toMatchData).toList();
+    }
+
+    @Override
+    public List<MatchData> listByDrawId(Long drawId) {
+        List<TennisMatchPO> list = matchService.lambdaQuery()
+                .eq(TennisMatchPO::getDrawId, drawId)
+                .list();
+        return list.stream().map(this::toMatchData).toList();
+    }
+
+    @Override
+    public PlayerDetailData getPlayerById(String playerId) {
+        TennisPlayerPO po = playerService.lambdaQuery()
+                .eq(TennisPlayerPO::getPlayerId, playerId)
+                .one();
+        if (po == null) {
+            return null;
+        }
+        PlayerDetailData data = new PlayerDetailData();
+        data.setPlayerId(po.getPlayerId());
+        data.setFirstName(po.getFirstName());
+        data.setLastName(po.getLastName());
+        data.setNationality(po.getNationality());
+        data.setRank(po.getRank());
+        data.setPoints(po.getPoints());
+        data.setBirthDate(po.getBirthDate());
+        return data;
+    }
+
+    @Override
+    public PlayerSeedData getSeedByDrawIdAndPlayerId(Long drawId, String playerId) {
+        TennisTournamentEntryPO po = tournamentEntryService.lambdaQuery()
+                .eq(TennisTournamentEntryPO::getDrawId, drawId)
+                .eq(TennisTournamentEntryPO::getPlayerId, playerId)
+                .one();
+        if (po == null) {
+            return null;
+        }
+        PlayerSeedData data = new PlayerSeedData();
         data.setPlayerId(po.getPlayerId());
         data.setSeed(po.getSeed() != null ? po.getSeed().intValue() : null);
         return data;

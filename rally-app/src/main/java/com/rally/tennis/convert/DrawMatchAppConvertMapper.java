@@ -21,6 +21,7 @@ public interface DrawMatchAppConvertMapper {
     DrawMatchAppConvertMapper INSTANCE = Mappers.getMapper(DrawMatchAppConvertMapper.class);
 
     @Mapping(target = "matchId", expression = "java(getMatchId(fixture))")
+    @Mapping(target = "matchIndex", expression = "java(extractMatchNumber(getMatchId(fixture)))")
     @Mapping(target = "player1Id", expression = "java(getPlayer1Id(fixture))")
     @Mapping(target = "player2Id", expression = "java(getPlayer2Id(fixture))")
     @Mapping(target = "playerName1", expression = "java(buildFullName(getPlayer1(fixture)))")
@@ -174,6 +175,18 @@ public interface DrawMatchAppConvertMapper {
     default String getCourtName(AtpDrawsResponse.Fixture fixture) {
         if (fixture.getMatch() == null) return null;
         return fixture.getMatch().getCourtName();
+    }
+
+    // 从 matchId 末尾提取数字，如 MS008 → 8
+    default Integer extractMatchNumber(String matchId) {
+        if (matchId == null || matchId.isEmpty()) return null;
+        String digits = matchId.replaceAll("\\D+", "");
+        if (digits.isEmpty()) return null;
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     default List<SetScore> parseSetResults(AtpDrawsResponse.Fixture fixture) {

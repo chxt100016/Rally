@@ -19,6 +19,7 @@ public interface OopMatchAppConvertMapper {
     OopMatchAppConvertMapper INSTANCE = Mappers.getMapper(OopMatchAppConvertMapper.class);
 
     @Mapping(target = "matchId", source = "matchId")
+    @Mapping(target = "matchIndex", expression = "java(extractMatchNumber(detail.getMatchId()))")
     @Mapping(target = "tournamentId", expression = "java(detail.getTournamentId() != null ? String.valueOf(detail.getTournamentId()) : null)")
     @Mapping(target = "year", source = "tournamentYear")
     @Mapping(target = "player1Id", expression = "java(detail.getPlayerTeam1() != null ? detail.getPlayerTeam1().getPlayerId() : null)")
@@ -102,6 +103,18 @@ public interface OopMatchAppConvertMapper {
             }
             return LocalDate.parse(matchDateStr);
         } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 从 matchId 末尾提取数字，如 MS008 → 8
+    default Integer extractMatchNumber(String matchId) {
+        if (matchId == null || matchId.isEmpty()) return null;
+        String digits = matchId.replaceAll("\\D+", "");
+        if (digits.isEmpty()) return null;
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
             return null;
         }
     }

@@ -28,6 +28,7 @@ public interface MatchAppConvertMapper {
     @Mapping(target = "status", expression = "java(com.rally.tennis.model.MatchStatus.toStatus(info.getStatus()))")
     @Mapping(target = "scheduledAt", expression = "java(parseDateTime(info.getMatchDate()))")
     @Mapping(target = "roundName", expression = "java(com.rally.domain.tennis.model.TennisRoundEnum.of(info.getRound().getLongName()))")
+    @Mapping(target = "matchIndex", expression = "java(extractMatchNumber(info.getMatchId()))")
     @Mapping(target = "drawId", ignore = true)
     @Mapping(target = "roundNumber", ignore = true)
     @Mapping(target = "winnerId", ignore = true)
@@ -77,6 +78,18 @@ public interface MatchAppConvertMapper {
             LocalDateTime dateTime = LocalDateTime.parse(matchDateStr);
             return dateTime.toLocalDate();
         } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 从 matchId 末尾提取数字，如 MS008 → 8，WS12 → 12
+    default Integer extractMatchNumber(String matchId) {
+        if (matchId == null || matchId.isEmpty()) return null;
+        String digits = matchId.replaceAll("\\D+", "");
+        if (digits.isEmpty()) return null;
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
             return null;
         }
     }
