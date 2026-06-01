@@ -164,7 +164,6 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
             p.setPlayerId(id);
             p.setFirstName(pi.getPlayerFirstName());
             p.setLastName(pi.getPlayerLastName());
-            p.setTour("ATP");
             return p;
         });
     }

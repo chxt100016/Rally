@@ -83,7 +83,6 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
                 }
             }
         }
-        players.forEach(p -> p.setTour("ATP"));
         return players;
     }
 

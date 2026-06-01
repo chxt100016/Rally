@@ -80,7 +80,6 @@ public class WtaDrawMatchParser extends MatchParser<WtaDrawsResponse, WtaDrawsRe
             player.setFirstName(entry.getPlayerFirstName());
             player.setLastName(entry.getPlayerLastName());
             player.setNationality(entry.getPlayerNatlId());
-            player.setTour("WTA");
             players.add(player);
         }
         return players;

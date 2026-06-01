@@ -121,20 +121,18 @@ public class MatchQueryService {
         }
 
         // 构建种子列表，按 seed 升序排列
-        // 被淘汰判断：在 finishedMatches 中参与过但不是 winnerId 的球员
-        Set<String> eliminatedPlayerIds = finishedMatches.stream()
-                .filter(m -> m.getWinnerId() != null)
-                .flatMap(m -> {
-                    Set<String> losers = new HashSet<>();
-                    if (m.getPlayer1() != null && !m.getWinnerId().equals(m.getPlayer1().getId())) {
-                        losers.add(m.getPlayer1().getId());
-                    }
-                    if (m.getPlayer2() != null && !m.getWinnerId().equals(m.getPlayer2().getId())) {
-                        losers.add(m.getPlayer2().getId());
-                    }
-                    return losers.stream();
-                })
-                .collect(Collectors.toSet());
+        // 被淘汰判断：在 finishedMatches 中参与过但不是 winnerId 的球员；同时记录淘汰轮次
+        Map<String, String> eliminatedRoundMap = new HashMap<>();
+        for (MatchQueryVO m : finishedMatches) {
+            if (m.getWinnerId() == null) continue;
+            if (m.getPlayer1() != null && !m.getWinnerId().equals(m.getPlayer1().getId())) {
+                // 同一球员可能出现多次（理论上不会），保留最后一条即可
+                eliminatedRoundMap.put(m.getPlayer1().getId(), m.getRound());
+            }
+            if (m.getPlayer2() != null && !m.getWinnerId().equals(m.getPlayer2().getId())) {
+                eliminatedRoundMap.put(m.getPlayer2().getId(), m.getRound());
+            }
+        }
 
         List<SeedVO> seedVOList = seeds.stream()
                 .filter(s -> s.getSeed() != null && s.getSeed() != 0)
@@ -151,8 +149,14 @@ public class MatchQueryService {
                         seedVO.setName(name);
                         seedVO.setCountry(CountryEnum.getCountry(player.getNationality()));
                     }
-                    seedVO.setStatus(eliminatedPlayerIds.contains(s.getPlayerId())
-                            ? SeedStatusEnum.ELIMINATED : SeedStatusEnum.ACTIVE);
+                    String eliminatedRound = eliminatedRoundMap.get(s.getPlayerId());
+                    if (eliminatedRound != null) {
+                        seedVO.setStatus(SeedStatusEnum.ELIMINATED);
+                        // 将 roundName（如 "QF"）转为中文展示名（如 "8强"）
+                        seedVO.setLabel(TennisRoundEnum.labelOf(eliminatedRound));
+                    } else {
+                        seedVO.setStatus(SeedStatusEnum.ACTIVE);
+                    }
                     return seedVO;
                 })
                 .sorted(Comparator.comparing(SeedVO::getSeed, Comparator.nullsLast(Comparator.naturalOrder())))

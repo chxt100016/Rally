@@ -93,7 +93,6 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
                 p.setFirstName(entry.getPlayerFirstName());
                 p.setLastName(entry.getPlayerLastName());
                 p.setNationality(entry.getPlayerNatlId());
-                p.setTour("ATP");
                 return p;
             });
         }

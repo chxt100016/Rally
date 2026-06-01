@@ -73,7 +73,10 @@ public class MatchCollectManager {
             List<Match> matches = parser.getMatches(draw, tournamentId, drawId);
             matchCollectService.saveMatches(matches);
 
-            playerCollectService.savePlayers(parser.getPlayers(draw));
+            List<Player> players = parser.getPlayers(draw);
+            // 统一在 manager 层设置 tour，parser 无需感知
+            players.forEach(p -> p.setTour(params.getTour()));
+            playerCollectService.savePlayers(players);
             tournamentCollectService.saveEntries(parser.getEntries(draw, drawId));
         }
     }

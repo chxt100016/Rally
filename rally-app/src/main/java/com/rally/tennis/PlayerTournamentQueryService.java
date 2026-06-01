@@ -56,7 +56,7 @@ public class PlayerTournamentQueryService {
         // 对手名字只取 lastName
         Map<String, String> playerNameMap = playerDataList.stream()
                 .collect(Collectors.toMap(PlayerData::getPlayerId,
-                        p -> p.getLastName() != null ? p.getLastName() : ""));
+                        p -> p.getLastName() != null ? p.getLastName() : "", (a,b) -> a));
 
         // 7. 查询球员参与比赛的盘分数据
         List<Long> tennisMatchIds = playerMatches.stream()

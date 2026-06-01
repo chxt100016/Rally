@@ -10,6 +10,8 @@ public class SeedVO {
     private String name;
     private Integer seed;
     private SeedStatusEnum status;
+    /** 被淘汰的轮次中文名，如"8强"；仅 ELIMINATED 时有值 */
+    private String label;
     /** 所属赛事 ID */
     private String tournamentId;
     /** 赛事类型，如 ATP / WTA */

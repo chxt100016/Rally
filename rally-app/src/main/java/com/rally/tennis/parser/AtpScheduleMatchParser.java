@@ -238,7 +238,6 @@ public class AtpScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
         player.setFirstName(info.getPlayerFirstName());
         player.setLastName(info.getPlayerLastName());
         player.setNationality(info.getCountry());
-        player.setTour("ATP");
         players.add(player);
     }
 
