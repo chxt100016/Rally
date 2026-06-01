@@ -75,7 +75,7 @@ public class MatchCollectManager {
             matchCollectService.saveMatches(matches);
 
             List<Player> players = parser.getPlayers(draw);
-            // 统一在 manager 层设置 tour
+            // 统一在 manager 层设置  tour
             players.forEach(p -> p.setTour(params.getTour()));
             playerCollectService.savePlayers(players);
             tournamentCollectService.saveEntries(parser.getEntries(draw, drawId));
