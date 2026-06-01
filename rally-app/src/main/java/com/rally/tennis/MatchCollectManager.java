@@ -2,6 +2,7 @@ package com.rally.tennis;
 
 import com.rally.tennis.model.Discipline;
 import com.rally.tennis.model.Match;
+import com.rally.tennis.model.Player;
 import com.rally.tennis.parser.CollectType;
 import com.rally.tennis.parser.DrawParams;
 import com.rally.tennis.parser.DrawResult;
@@ -74,7 +75,7 @@ public class MatchCollectManager {
             matchCollectService.saveMatches(matches);
 
             List<Player> players = parser.getPlayers(draw);
-            // 统一在 manager 层设置 tour，parser 无需感知
+            // 统一在 manager 层设置 tour
             players.forEach(p -> p.setTour(params.getTour()));
             playerCollectService.savePlayers(players);
             tournamentCollectService.saveEntries(parser.getEntries(draw, drawId));
