@@ -86,10 +86,14 @@ public interface AtpAppDrawMatchConvertMapper {
         Integer p1Tie = null;
         Integer p2Tie = null;
         if (tie != null && p1 != null && p2 != null) {
+            // 赢家抢七分：输家≤5时赢家得7，输家≥6时赢家=输家+2（需领先2分）
+            int winnerTie = tie <= 5 ? 7 : tie + 2;
             if (p1 < p2) {
                 p1Tie = tie;
+                p2Tie = winnerTie;
             } else {
                 p2Tie = tie;
+                p1Tie = winnerTie;
             }
         }
         sets.add(SetScore.builder()
