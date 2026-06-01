@@ -82,12 +82,22 @@ public interface AtpAppDrawMatchConvertMapper {
 
     private void addSet(List<SetScore> sets, int setNumber, Integer p1, Integer p2, Integer tie) {
         if (p1 == null && p2 == null) return;
+        // tie 分属于没赢到7分的那方（即局数较少的一方）
+        Integer p1Tie = null;
+        Integer p2Tie = null;
+        if (tie != null && p1 != null && p2 != null) {
+            if (p1 < p2) {
+                p1Tie = tie;
+            } else {
+                p2Tie = tie;
+            }
+        }
         sets.add(SetScore.builder()
                 .setNumber(setNumber)
                 .p1Games(p1)
                 .p2Games(p2)
-                .p1Tiebreak(tie)
-                .p2Tiebreak(null)
+                .p1Tiebreak(p1Tie)
+                .p2Tiebreak(p2Tie)
                 .build());
     }
 }

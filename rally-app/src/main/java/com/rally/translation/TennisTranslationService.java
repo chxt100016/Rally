@@ -1,9 +1,6 @@
 package com.rally.translation;
 
-import com.rally.domain.tennis.model.MatchQueryVO;
-import com.rally.domain.tennis.model.PlayerQueryVO;
-import com.rally.domain.tennis.model.SeedVO;
-import com.rally.domain.tennis.model.TournamentDTO;
+import com.rally.domain.tennis.model.*;
 import com.rally.domain.translation.TranslationQueryService;
 import com.rally.domain.translation.model.TranslationEntityTypeEnum;
 import com.rally.domain.translation.model.TranslationKey;
@@ -110,6 +107,56 @@ public class TennisTranslationService {
         Map<TranslationKey, String> translationMap = this.translationQueryService.query(map.keySet());
         for (Map.Entry<TranslationKey, String> entry : translationMap.entrySet()) {
             map.get(entry.getKey()).forEach(vo -> vo.setName(entry.getValue()));
+        }
+    }
+
+    /**
+     * 翻译球员弹窗 VO：主球员姓名 + 所有对手姓名（晋级路线、前方对手、出局信息）
+     */
+    public void playerTournament(PlayerTournamentVO vo, TranslationLanguageEnum language) {
+        if (vo == null) return;
+
+        // 收集所有 MatchProgressVO（晋级路线 + 前方对手 + 出局信息）
+        List<MatchProgressVO> allProgress = new ArrayList<>();
+        if (vo.getProgressPath() != null) allProgress.addAll(vo.getProgressPath());
+        if (vo.getUpcomingOpponents() != null) allProgress.addAll(vo.getUpcomingOpponents());
+        if (vo.getEliminationInfo() != null) allProgress.add(vo.getEliminationInfo());
+
+        // key → MatchProgressVO 列表（同名对手可能出现在多条记录中）
+        Map<TranslationKey, List<MatchProgressVO>> progressMap = new HashMap<>();
+        for (MatchProgressVO m : allProgress) {
+            if (m.getOpponentName() != null) {
+                progressMap.computeIfAbsent(
+                        new TranslationKey(TranslationEntityTypeEnum.PLAYER, m.getOpponentName(), language),
+                        k -> new ArrayList<>()
+                ).add(m);
+            }
+        }
+
+        // 合并主球员 key，一次批量查询
+        Set<TranslationKey> allKeys = new HashSet<>(progressMap.keySet());
+        PlayerTournamentDetailVO player = vo.getPlayer();
+        TranslationKey playerKey = null;
+        if (player != null && player.getName() != null) {
+            playerKey = new TranslationKey(TranslationEntityTypeEnum.PLAYER, player.getName(), language);
+            allKeys.add(playerKey);
+        }
+        if (allKeys.isEmpty()) return;
+
+        Map<TranslationKey, String> translationMap = this.translationQueryService.query(allKeys);
+
+        // 回写主球员姓名
+        if (playerKey != null) {
+            String translated = translationMap.get(playerKey);
+            if (translated != null) player.setName(translated);
+        }
+
+        // 回写对手姓名
+        for (Map.Entry<TranslationKey, String> entry : translationMap.entrySet()) {
+            List<MatchProgressVO> matches = progressMap.get(entry.getKey());
+            if (matches != null) {
+                matches.forEach(m -> m.setOpponentName(entry.getValue()));
+            }
         }
     }
 }

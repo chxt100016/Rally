@@ -2,6 +2,8 @@ package com.rally.tennis;
 
 import com.rally.domain.tennis.gateway.MatchQueryGateway;
 import com.rally.domain.tennis.model.*;
+import com.rally.domain.translation.model.TranslationLanguageEnum;
+import com.rally.translation.TennisTranslationService;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,9 @@ public class PlayerTournamentQueryService {
 
     @Resource
     private MatchQueryGateway matchQueryGateway;
+
+    @Resource
+    private TennisTranslationService tennisTranslationService;
 
     public PlayerTournamentVO query(String tournamentId, Integer year, String playerId, String drawType) {
         // 1. 查询签表
@@ -133,6 +138,10 @@ public class PlayerTournamentQueryService {
         result.setProgressPath(progressPath);
         result.setUpcomingOpponents(upcomingOpponents);
         result.setEliminationInfo(eliminationInfo);
+
+        // 13. 翻译球员姓名（主球员 + 所有对手）
+        tennisTranslationService.playerTournament(result, TranslationLanguageEnum.ZH_CN);
+
         return result;
     }
 
