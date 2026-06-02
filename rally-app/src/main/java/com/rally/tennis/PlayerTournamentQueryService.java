@@ -187,6 +187,28 @@ public class PlayerTournamentQueryService {
         List<MatchProgressVO> result = new ArrayList<>();
         int playerPathIdx = currentMatch.getMatchIndex();
 
+        // 当前比赛未完成且对手已确定，先加入
+        if (!"FINISHED".equals(currentMatch.getStatus())) {
+            String opponentId = getOpponentId(currentMatch, playerId);
+            if (opponentId != null) {
+                String opponentName = playerNameMap.getOrDefault(opponentId, opponentId);
+                Integer opponentSeed = playerSeedMap.get(opponentId);
+                CountryVO opponentCountry = CountryEnum.getCountry(playerNationalityMap.get(opponentId));
+                String round = currentMatch.getRoundName() != null
+                        ? currentMatch.getRoundName()
+                        : roundNameFromMatchIndex(playerPathIdx);
+                MatchProgressVO vo = new MatchProgressVO();
+                vo.setRound(round);
+                vo.setRoundLabel(TennisRoundEnum.labelOf(round));
+                vo.setOpponentId(opponentId);
+                vo.setOpponentName(opponentName);
+                vo.setOpponentCountry(opponentCountry);
+                vo.setOpponentSeed(opponentSeed);
+                vo.setResult("PENDING");
+                result.add(vo);
+            }
+        }
+
         while (playerPathIdx / 2 >= 1) {
             int parentIdx = playerPathIdx / 2;
             MatchData nextMatch = indexToMatch.get(parentIdx);
