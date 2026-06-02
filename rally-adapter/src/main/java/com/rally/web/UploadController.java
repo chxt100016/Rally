@@ -1,6 +1,8 @@
 package com.rally.web;
 
+import com.rally.domain.tennis.model.Result;
 import com.rally.upload.UploadAppService;
+import com.rally.web.auth.UserContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,11 +22,18 @@ public class UploadController {
     private UploadAppService uploadAppService;
 
     @PostMapping("/image")
-    public Map<String, String> uploadImage(
+    public Result<Map<String, String>> uploadImage(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "dir", required = false) String dir,
             @RequestParam(value = "filename", required = false) String filename) throws Exception {
         String url = uploadAppService.uploadImage(file, dir, filename);
-        return Map.of("url", url);
+        return Result.ok(Map.of("url", url));
+    }
+
+    @PostMapping("/image/avatar")
+    public Result<Map<String, String>> uploadAvatar(
+            @RequestParam("file") MultipartFile file) throws Exception {
+        String url = uploadAppService.uploadImage(file, "avatar", UserContext.get());
+        return Result.ok(Map.of("url", url));
     }
 }

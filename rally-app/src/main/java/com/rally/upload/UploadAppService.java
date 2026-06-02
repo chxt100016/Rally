@@ -14,7 +14,8 @@ public class UploadAppService {
     @Resource
     private QiniuClient qiniuClient;
 
-    public String uploadImage(MultipartFile file, String dir, String filename) throws IOException, QiniuException {
-        return qiniuClient.uploadImage(file.getBytes(), dir, filename);
+    public String uploadImage(MultipartFile file, String dir, String filename) throws IOException {
+        String key = qiniuClient.uploadImage(file.getBytes(), dir, filename);
+        return qiniuClient.buildSignedUrl(key);
     }
 }
