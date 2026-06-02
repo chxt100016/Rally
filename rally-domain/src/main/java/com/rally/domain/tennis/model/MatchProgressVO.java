@@ -12,6 +12,8 @@ public class MatchProgressVO {
     private String roundLabel;
     private String opponentId;
     private String opponentName;
+    /** 对手国籍 */
+    private CountryVO opponentCountry;
     /** 对手种子号，无种子为 null */
     private Integer opponentSeed;
     /** 比分，未完成时为"待定" */

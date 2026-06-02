@@ -146,7 +146,7 @@ public class PlayerCollectService {
     }
 
     public void atpRank() {
-        AtpRankingsResponse response = atpClient.getRankings(1, 100);
+        AtpRankingsResponse response = atpClient.getRankings(1, 200);
         if (response == null || response.getData() == null
                 || response.getData().getRankings() == null
                 || CollectionUtils.isEmpty(response.getData().getRankings().getPlayers())) {
@@ -161,7 +161,7 @@ public class PlayerCollectService {
     }
 
     public void wtaRank() {
-        WtaRankingsResponse response = wtaClient.getRankings(1, 100);
+        WtaRankingsResponse response = wtaClient.getRankings(1, 200);
         if (response == null || response.getData() == null
                 || response.getData().getRankings() == null
                 || CollectionUtils.isEmpty(response.getData().getRankings().getPlayers())) {

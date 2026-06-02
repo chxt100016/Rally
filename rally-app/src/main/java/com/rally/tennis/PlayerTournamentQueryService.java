@@ -62,6 +62,10 @@ public class PlayerTournamentQueryService {
         Map<String, String> playerNameMap = playerDataList.stream()
                 .collect(Collectors.toMap(PlayerData::getPlayerId,
                         p -> p.getLastName() != null ? p.getLastName() : "", (a,b) -> a));
+        // 对手国籍映射
+        Map<String, String> playerNationalityMap = playerDataList.stream()
+                .filter(p -> p.getNationality() != null)
+                .collect(Collectors.toMap(PlayerData::getPlayerId, PlayerData::getNationality, (a, b) -> a));
 
         // 7. 查询球员参与比赛的盘分数据
         List<Long> tennisMatchIds = playerMatches.stream()
@@ -110,11 +114,14 @@ public class PlayerTournamentQueryService {
             String opponentId = getOpponentId(m, playerId);
             String opponentName = opponentId != null ? playerNameMap.getOrDefault(opponentId, opponentId) : null;
             Integer opponentSeed = opponentId != null ? playerSeedMap.get(opponentId) : null;
+            CountryVO opponentCountry = opponentId != null
+                    ? CountryEnum.getCountry(playerNationalityMap.get(opponentId))
+                    : null;
             String score = formatScore(m, playerId, setScoreMap);
 
             if ("FINISHED".equals(m.getStatus())) {
                 boolean won = playerId.equals(m.getWinnerId());
-                MatchProgressVO vo = buildProgressVO(m, opponentId, opponentName, opponentSeed, score, won ? "WIN" : "LOSS");
+                MatchProgressVO vo = buildProgressVO(m, opponentId, opponentName, opponentCountry, opponentSeed, score, won ? "WIN" : "LOSS");
                 if (won) {
                     progressPath.add(vo);
                 } else {
@@ -128,7 +135,7 @@ public class PlayerTournamentQueryService {
         if (!eliminated) {
             MatchData currentMatch = findCurrentMatch(playerMatches, playerId);
             if (currentMatch != null && currentMatch.getMatchIndex() != null) {
-                upcomingOpponents = buildUpcomingOpponents(currentMatch, playerId, indexToMatch, playerNameMap, playerSeedMap, eliminatedPlayers);
+                upcomingOpponents = buildUpcomingOpponents(currentMatch, playerId, indexToMatch, playerNameMap, playerNationalityMap, playerSeedMap, eliminatedPlayers);
             }
         }
 
@@ -173,6 +180,7 @@ public class PlayerTournamentQueryService {
             MatchData currentMatch, String playerId,
             Map<Integer, MatchData> indexToMatch,
             Map<String, String> playerNameMap,
+            Map<String, String> playerNationalityMap,
             Map<String, Integer> playerSeedMap,
             Set<String> eliminatedPlayers) {
 
@@ -191,6 +199,7 @@ public class PlayerTournamentQueryService {
             if (opponentId != null) {
                 String opponentName = playerNameMap.getOrDefault(opponentId, opponentId);
                 Integer opponentSeed = playerSeedMap.get(opponentId);
+                CountryVO opponentCountry = CountryEnum.getCountry(playerNationalityMap.get(opponentId));
                 // 优先取 match 记录的轮次，match 不存在时从 matchIndex 推算
                 String round = (nextMatch != null && nextMatch.getRoundName() != null)
                         ? nextMatch.getRoundName()
@@ -200,6 +209,7 @@ public class PlayerTournamentQueryService {
                 vo.setRoundLabel(TennisRoundEnum.labelOf(round));
                 vo.setOpponentId(opponentId);
                 vo.setOpponentName(opponentName);
+                vo.setOpponentCountry(opponentCountry);
                 vo.setOpponentSeed(opponentSeed);
 //                vo.setScore("待定");
                 vo.setResult("PENDING");
@@ -296,12 +306,13 @@ public class PlayerTournamentQueryService {
     }
 
     private MatchProgressVO buildProgressVO(MatchData match, String opponentId, String opponentName,
-                                             Integer opponentSeed, String score, String result) {
+                                             CountryVO opponentCountry, Integer opponentSeed, String score, String result) {
         MatchProgressVO vo = new MatchProgressVO();
         vo.setRound(match.getRoundName());
         vo.setRoundLabel(TennisRoundEnum.labelOf(match.getRoundName()));
         vo.setOpponentId(opponentId);
         vo.setOpponentName(opponentName);
+        vo.setOpponentCountry(opponentCountry);
         vo.setOpponentSeed(opponentSeed);
         vo.setScore(score);
         vo.setResult(result);
