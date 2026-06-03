@@ -4,3 +4,4 @@
 - 总是创建对应的表的Mapper类和service Mapper 继承 `BaseMapper<PO>`，Service 继承 `ServiceImpl`， 对外暴露Repository 门面层封装 Service，供 app 层调用
 - PO 实体用 `@TableName` 注解
 - 无自定义 XML Mapper，查询总是用 `LambdaQueryWrapper`
+- 每当表字段修改或者新增表时，维护建表语句 `docs/sql` 每个create表前需要加drop
