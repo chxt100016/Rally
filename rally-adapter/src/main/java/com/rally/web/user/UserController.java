@@ -1,4 +1,4 @@
-package com.rally.wechat;
+package com.rally.web.user;
 
 import com.rally.domain.auth.exception.AuthException;
 import com.rally.domain.tennis.model.Result;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/wechat/user")
-public class WechatUserController {
+@RequestMapping("/user")
+public class UserController {
 
     @Resource
     private UserQueryService userQueryService;

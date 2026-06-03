@@ -27,7 +27,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/wechat/query/tournaments",
                         "/wechat/query/matches",
                         "/wechat/query/player/players",
-                        "/tennis/collect/**"
+                        "/tennis/collect/**",
+                        "/wechat/user/video/callback"
                 );
     }
 }

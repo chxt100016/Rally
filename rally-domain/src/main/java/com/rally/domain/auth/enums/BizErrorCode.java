@@ -21,7 +21,17 @@ public enum BizErrorCode {
 
     // ========== 微信相关 30001-39999 ==========
     WECHAT_LOGIN_FAILED(30001, "微信登录失败"),
-    WECHAT_AUTH_FAILED(30002, "微信授权失败");
+    WECHAT_AUTH_FAILED(30002, "微信授权失败"),
+
+    // ========== 用户域 40001-40999 ==========
+    ONBOARDING_INCOMPLETE(40001, "请先完善网球档案"),
+    NTRP_COOLDOWN(40002, "自评修改冷却中"),
+    VIDEO_LIMIT_EXCEEDED(40003, "视频数量已达上限"),
+    VIDEO_NOT_OWNED(40004, "无权操作该视频"),
+    NTRP_INVALID_VALUE(40005, "自评分值非法"),
+    UNDER_REVIEW_LOCKED(40006, "核查期内不可进行该操作"),
+    PROFILE_NOT_FOUND(40007, "档案不存在"),
+    VIDEO_CALLBACK_INVALID(40008, "视频回调校验失败");
 
     private final int code;
     private final String message;

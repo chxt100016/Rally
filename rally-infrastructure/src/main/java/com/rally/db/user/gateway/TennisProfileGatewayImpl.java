@@ -1,0 +1,79 @@
+package com.rally.db.user.gateway;
+
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.rally.db.user.convert.TennisProfileConvertMapper;
+import com.rally.db.user.entity.TennisProfilePO;
+import com.rally.db.user.repository.TennisProfileRepository;
+import com.rally.domain.user.gateway.TennisProfileGateway;
+import com.rally.domain.user.model.TennisProfileData;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+@Component
+@RequiredArgsConstructor
+public class TennisProfileGatewayImpl implements TennisProfileGateway {
+
+    private final TennisProfileRepository repository;
+    private static final TennisProfileConvertMapper CONVERTER = TennisProfileConvertMapper.INSTANCE;
+
+    @Override
+    public TennisProfileData save(TennisProfileData data) {
+        TennisProfilePO po = CONVERTER.toPO(data);
+        po.setBizId(IdWorker.getIdStr());
+        repository.save(po);
+        return CONVERTER.toData(po);
+    }
+
+    @Override
+    public Optional<TennisProfileData> findByUserId(String userId) {
+        return repository.findByUserId(userId).map(CONVERTER::toData);
+    }
+
+    @Override
+    public TennisProfileData update(TennisProfileData data) {
+        TennisProfilePO po = repository.findByUserId(data.getUserId())
+                .orElseThrow(() -> new RuntimeException("档案不存在"));
+
+        if (data.getCityCode() != null) {
+            po.setCityCode(data.getCityCode());
+        }
+        if (data.getBio() != null) {
+            po.setBio(data.getBio());
+        }
+        if (data.getVideoUrls() != null) {
+            po.setVideoUrls(CONVERTER.stringListToJson(data.getVideoUrls()));
+        }
+        if (data.getNtrpScore() != null) {
+            po.setNtrpScore(data.getNtrpScore());
+        }
+        if (data.getNtrpUpdatedAt() != null) {
+            po.setNtrpUpdatedAt(data.getNtrpUpdatedAt());
+        }
+        if (data.getStatus() != null) {
+            po.setStatus(CONVERTER.profileStatusToString(data.getStatus()));
+        }
+        if (data.getIsUnderReview() != null) {
+            po.setIsUnderReview(data.getIsUnderReview());
+        }
+        repository.updateById(po);
+        return CONVERTER.toData(po);
+    }
+
+    @Override
+    public void updateVideoUrls(String userId, List<String> videoUrls) {
+        TennisProfilePO po = repository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("档案不存在"));
+        po.setVideoUrls(CONVERTER.stringListToJson(videoUrls));
+        repository.updateById(po);
+    }
+
+    @Override
+    public void updateScoreFields(String userId, BigDecimal reputationScore, BigDecimal credibilityScore,
+                                  BigDecimal calibrationScore, BigDecimal totalScore, String ratingLevel, Boolean isNewbie) {
+        repository.updateScoreFields(userId, reputationScore, credibilityScore, calibrationScore, totalScore, ratingLevel, isNewbie);
+    }
+}
