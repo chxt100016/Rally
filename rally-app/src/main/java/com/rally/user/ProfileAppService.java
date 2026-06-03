@@ -204,12 +204,13 @@ public class ProfileAppService {
      */
     public VideoTokenVO getVideoUploadToken(String userId) {
         TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
-
-        int maxCount = configGateway.getInt("user.video.max_count", 3);
-        List<String> currentUrls = profileData.getVideoUrls();
-        if (currentUrls != null && currentUrls.size() >= maxCount) {
-            throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED);
+                .orElse(null);
+        if (profileData != null) {
+            int maxCount = configGateway.getInt("user.video.max_count", 3);
+            List<String> currentUrls = profileData.getVideoUrls();
+            if (currentUrls != null && currentUrls.size() >= maxCount) {
+                throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED);
+            }
         }
 
         int maxSizeMb = configGateway.getInt("user.video.max_size_mb", 5);

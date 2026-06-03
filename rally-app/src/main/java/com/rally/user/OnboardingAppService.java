@@ -3,7 +3,9 @@ package com.rally.user;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.user.enums.GenderEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
+import com.rally.domain.user.enums.RatingLevelEnum;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.OnboardingCmd;
@@ -45,17 +47,7 @@ public class OnboardingAppService {
 
         if (existing.isEmpty()) {
             // 首次进入，生成 tbc 记录
-            TennisProfileData newData = new TennisProfileData();
-            newData.setUserId(userId);
-            newData.setStatus(ProfileStatusEnum.TBC);
-            newData.setReputationScore(new java.math.BigDecimal("100"));
-            newData.setCredibilityScore(new java.math.BigDecimal("0"));
-            newData.setCalibrationScore(new java.math.BigDecimal("80"));
-            newData.setTotalScore(new java.math.BigDecimal("0"));
-            newData.setRatingLevel(com.rally.domain.user.enums.RatingLevelEnum.A);
-            newData.setIsUnderReview(false);
-            newData.setIsNewbie(true);
-            newData.setVideoUrls(new ArrayList<>());
+            TennisProfileData newData = buildDefaultProfile(userId);
             tennisProfileGateway.save(newData);
             return buildProfileVO(userId, newData);
         }
@@ -69,9 +61,7 @@ public class OnboardingAppService {
     @Transactional
     public TennisProfileVO submit(String userId, OnboardingCmd cmd) {
         // 1. 校验必填项
-        if (cmd.getGender() == null || cmd.getGender().isBlank()) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, "性别不能为空");
-        }
+
         if (cmd.getNtrpScore() == null) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "NTRP 自评不能为空");
         }
@@ -86,22 +76,27 @@ public class OnboardingAppService {
         UserData userData = userGateway.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.DATA_NOT_FOUND, "用户不存在"));
         try {
-            userData.setGender(com.rally.domain.user.enums.GenderEnum.valueOf(cmd.getGender().toUpperCase()));
+            userData.setGender(cmd.getGender() == null ? null : GenderEnum.valueOf(cmd.getGender()));
         } catch (IllegalArgumentException e) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "性别值非法");
         }
         userData.setBirthday(cmd.getBirthday());
         userGateway.updateUser(userData);
 
-        // 3. 更新 profile 表（ntrp/city/status=normal）
+        // 3. 更新 profile 表（ntrp/city/status=normal），不存在则创建
+        boolean profileExists = tennisProfileGateway.findByUserId(userId).isPresent();
         TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND, "档案不存在"));
+                .orElse(buildDefaultProfile(userId));
         profileData.setNtrpScore(cmd.getNtrpScore());
         profileData.setCityCode(cmd.getCityCode());
         profileData.setStatus(ProfileStatusEnum.NORMAL);
         profileData.setNtrpUpdatedAt(LocalDateTime.now());
         profileData.setVideoUrls(cmd.getVideoKeys());
-        tennisProfileGateway.update(profileData);
+        if (profileExists) {
+            tennisProfileGateway.update(profileData);
+        } else {
+            tennisProfileGateway.save(profileData);
+        }
 
         // 4. 写变更日志
         // 由 ProfileAppService 的 logChange 方法处理，这里简化
@@ -117,6 +112,24 @@ public class OnboardingAppService {
         if (profile.isEmpty() || profile.get().getStatus() == ProfileStatusEnum.TBC) {
             throw new BusinessException(BizErrorCode.ONBOARDING_INCOMPLETE);
         }
+    }
+
+    /**
+     * 构建默认 profile（TBC 状态，供首次创建使用）
+     */
+    private TennisProfileData buildDefaultProfile(String userId) {
+        TennisProfileData data = new TennisProfileData();
+        data.setUserId(userId);
+        data.setStatus(ProfileStatusEnum.TBC);
+        data.setReputationScore(new java.math.BigDecimal("100"));
+        data.setCredibilityScore(new java.math.BigDecimal("0"));
+        data.setCalibrationScore(new java.math.BigDecimal("80"));
+        data.setTotalScore(new java.math.BigDecimal("0"));
+        data.setRatingLevel(RatingLevelEnum.A);
+        data.setIsUnderReview(false);
+        data.setIsNewbie(true);
+        data.setVideoUrls(new ArrayList<>());
+        return data;
     }
 
     private TennisProfileVO buildProfileVO(String userId, TennisProfileData profileData) {

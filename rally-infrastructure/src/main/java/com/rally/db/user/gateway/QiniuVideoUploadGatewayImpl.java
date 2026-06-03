@@ -57,12 +57,13 @@ public class QiniuVideoUploadGatewayImpl implements VideoUploadGateway {
 
         String uploadToken = auth.uploadToken(bucket, null, 3600, policy);
 
+
         VideoTokenVO vo = new VideoTokenVO();
         vo.setUploadToken(uploadToken);
         vo.setKeyPrefix("videos/" + userId + "/");
         vo.setMaxSizeMb(maxSizeMb);
         vo.setMaxDurationSec(60);
-        vo.setUploadHost("https://up-z2.qiniup.com");
+        vo.setUploadHost("https://up-z0.qiniup.com");
         return vo;
     }
 

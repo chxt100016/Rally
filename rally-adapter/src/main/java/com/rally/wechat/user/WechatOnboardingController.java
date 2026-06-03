@@ -11,7 +11,7 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/wechat/user")
+@RequestMapping("/wechat/user/onboarding")
 public class WechatOnboardingController extends OnboardingController {
 
 
