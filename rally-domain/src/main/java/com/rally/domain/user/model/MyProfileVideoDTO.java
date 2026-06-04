@@ -1,6 +1,7 @@
 package com.rally.domain.user.model;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.util.List;
 
@@ -8,6 +9,7 @@ import java.util.List;
  * 我的档案 - 视频信息
  */
 @Data
+@Accessors(chain = true)
 public class MyProfileVideoDTO {
 
     /** 视频总数 */

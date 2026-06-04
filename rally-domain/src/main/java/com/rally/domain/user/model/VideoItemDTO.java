@@ -1,11 +1,13 @@
 package com.rally.domain.user.model;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * 视频项
  */
 @Data
+@Accessors(chain = true)
 public class VideoItemDTO {
 
     /** 视频存储key */

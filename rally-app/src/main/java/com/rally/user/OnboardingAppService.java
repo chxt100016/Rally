@@ -7,7 +7,6 @@ import com.rally.domain.user.model.MyProfileDTO;
 import com.rally.domain.user.model.OnboardingCmd;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileService;
-import com.rally.user.convert.ProfileAppConvertMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +18,9 @@ public class OnboardingAppService {
 
     @Resource
     private UserProfileService userProfileService;
+
+    @Resource
+    private MyProfileAppService myProfileAppService;
 
     /**
      * 查是否需引导，返回状态枚举
@@ -49,7 +51,6 @@ public class OnboardingAppService {
         profile.completeOnboarding(cmd);
         userProfileService.save(profile);
 
-        return ProfileAppConvertMapper.INSTANCE.toMyProfileDTO(
-                profile.getProfile(), profile.getUser(), 99, null, null, null, null);
+        return myProfileAppService.getMyProfile();
     }
 }

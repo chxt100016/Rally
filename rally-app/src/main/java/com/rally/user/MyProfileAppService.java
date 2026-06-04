@@ -1,0 +1,149 @@
+package com.rally.user;
+
+import com.rally.cache.UserContext;
+import com.rally.config.property.QiniuConfiguration;
+import com.rally.domain.review.UserReviewService;
+import com.rally.domain.score.ScoreLevelCalculator;
+import com.rally.domain.system.SystemConfig;
+import com.rally.domain.user.model.*;
+import com.rally.domain.user.service.UserProfileService;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 我的档案应用服务
+ * 负责 getMyProfile 及其子 DTO 构建
+ */
+@Slf4j
+@Service
+public class MyProfileAppService {
+
+    @Resource
+    private UserProfileService userProfileService;
+
+    @Resource
+    private UserReviewService userReviewService;
+
+    /**
+     * 我的档案（新版）
+     */
+    public MyProfileDTO getMyProfile() {
+        String userId = UserContext.get();
+        UserProfile userProfile = userProfileService.getProfile(userId);
+
+        return new MyProfileDTO()
+                .setMeetup(buildMeetupDTO())
+                .setReview(buildReviewDTO(userId))
+                .setLevel(buildLevelDTO(userProfile))
+                .setScore(buildScoreDTO(userProfile.getProfile()))
+                .setUser(buildUserDTO(userProfile.getUser()))
+                .setVideo(buildVideoDTO(userProfile.getProfile()));
+    }
+
+    // ========== 各子 DTO 构建方法 ==========
+
+    /** 构建约球信息 DTO（暂时默认99） */
+    private MyProfileMeetupDTO buildMeetupDTO() {
+        return new MyProfileMeetupDTO().setCompletedCount(99);
+    }
+
+    /** 构建评价信息 DTO（查询领域服务获取评价总数和标签） */
+    private MyProfileReviewDTO buildReviewDTO(String userId) {
+        int reviewTotal = userReviewService.countByToUser(userId);
+        List<String> topTags = userReviewService.getTopTags(userId, 2);
+        return new MyProfileReviewDTO()
+                .setTotal(reviewTotal)
+                .setTags(topTags.stream()
+                        .map(tag -> new ReviewTagDTO().setName(tag))
+                        .collect(Collectors.toList()));
+    }
+
+    /** 构建等级信息 DTO（聚合根计算 lockday，领域服务查核查期剩余场次） */
+    private MyProfileLevelDTO buildLevelDTO(UserProfile userProfile) {
+        TennisProfileData profileData = userProfile.getProfile();
+        Integer lockday = userProfile.calculateNtrpLockDays();
+        Integer remainingMatches = userProfile.isUnderReview()
+                ? userProfileService.getReviewRemainingMatches(userProfile.getUser().getUserId()) : null;
+        return new MyProfileLevelDTO()
+                .setNtrpScore(profileData != null ? profileData.getNtrpScore() : null)
+                .setIsUnderReview(profileData != null ? profileData.getIsUnderReview() : null)
+                .setLockday(lockday)
+                .setRemainingMatches(remainingMatches)
+                .setSuggestion(new LevelSuggestionDTO());
+    }
+
+    /** 构建评分信息 DTO（评分明细权重从 SystemConfig 读取） */
+    private MyProfileScoreDTO buildScoreDTO(TennisProfileData profileData) {
+        String scoreLevel = ScoreLevelCalculator.calculate(profileData);
+        return new MyProfileScoreDTO()
+                .setScoreLevel(scoreLevel)
+                .setData(buildScoreItemList(profileData));
+    }
+
+    /** 构建用户基本信息 DTO */
+    private MyProfileUserDTO buildUserDTO(UserData userData) {
+        if (userData == null) {
+            return new MyProfileUserDTO();
+        }
+        return new MyProfileUserDTO()
+                .setUserId(userData.getUserId())
+                .setNickname(userData.getNickname())
+                .setAvatarUrl(userData.getAvatarUrl())
+                .setGender(userData.getGender())
+                .setBirthday(userData.getBirthday())
+                .setCityCode(userData.getCityCode())
+                .setBio(userData.getBio());
+    }
+
+    /** 构建视频信息 DTO */
+    private MyProfileVideoDTO buildVideoDTO(TennisProfileData profileData) {
+        MyProfileVideoDTO videoDTO = new MyProfileVideoDTO();
+        if (profileData != null && profileData.getVideoUrls() != null) {
+            List<String> videoKeys = profileData.getVideoUrls();
+            videoDTO.setTotal(videoKeys.size());
+            videoDTO.setData(videoKeys.stream()
+                    .map(key -> new VideoItemDTO().setKey(key).setUrl(QiniuConfiguration.buildSignedUrl(key)))
+                    .collect(Collectors.toList()));
+        } else {
+            videoDTO.setTotal(0);
+            videoDTO.setData(new ArrayList<>());
+        }
+        return videoDTO;
+    }
+
+    // ========== 评分明细内部方法 ==========
+
+    /** 构建评分明细列表 */
+    private List<ScoreItemDTO> buildScoreItemList(TennisProfileData profileData) {
+        List<ScoreItemDTO> items = new ArrayList<>();
+        items.add(buildOneScoreItem("信誉分", "reputation_score",
+                profileData != null ? profileData.getReputationScore() : null,
+                "score.weight.reputation", 50, "score.info.reputation", "信誉分说明你有信誉"));
+        items.add(buildOneScoreItem("可信度", "credibility_score",
+                profileData != null ? profileData.getCredibilityScore() : null,
+                "score.weight.credibility", 30, "score.info.credibility", "可信度说明你可信"));
+        items.add(buildOneScoreItem("校准度", "calibration_score",
+                profileData != null ? profileData.getCalibrationScore() : null,
+                "score.weight.calibration", 20, "score.info.calibration", "校准度说明你校准"));
+        return items;
+    }
+
+    /** 构建单个评分明细项 */
+    private ScoreItemDTO buildOneScoreItem(String name, String key, BigDecimal score,
+                                           String weightConfigKey, int defaultWeight,
+                                           String infoConfigKey, String defaultInfo) {
+        return new ScoreItemDTO()
+                .setName(name)
+                .setKey(key)
+                .setValue(score != null ? score.toPlainString() : "0")
+                .setLabel("权重" + SystemConfig.getInt(weightConfigKey, defaultWeight) + "%")
+                .setInfo(SystemConfig.getString(infoConfigKey, defaultInfo))
+                .setSort("");
+    }
+}

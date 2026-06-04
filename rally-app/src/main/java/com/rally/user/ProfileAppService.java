@@ -1,10 +1,8 @@
 package com.rally.user;
 
 import com.rally.cache.UserContext;
-import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.score.ScoreLevelCalculator;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;
@@ -23,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -43,104 +39,8 @@ public class ProfileAppService {
     @Resource
     private UserProfileService userProfileService;
 
-    /**
-     * 我的档案（新版）
-     */
-    public MyProfileDTO getMyProfile() {
-        String userId = UserContext.get();
-        UserProfile userProfile = userProfileService.getProfile(userId);
-        TennisProfileData profileData = userProfile.getProfile();
-        UserData userData = userProfile.getUser();
-
-        // 计算评分等级
-        String scoreLevel = ScoreLevelCalculator.calculate(profileData);
-
-        // 构建评分明细（领域服务）
-        List<ScoreItemDTO> scoreItems = ScoreLevelCalculator.buildScoreItems(profileData);
-
-        // 评价总数（暂时默认99）
-        Integer reviewTotal = 99;
-
-        // 计算自评修改剩余冷却天数（聚合根）
-        Integer lockday = userProfile.calculateNtrpLockday();
-
-        // 获取核查期剩余比赛场次（领域服务）
-        Integer remainingMatches = userProfileService.getReviewRemainingMatches(userId);
-
-        // ========== 构建返回值（直接 new + set） ==========
-        MyProfileDTO dto = new MyProfileDTO();
-
-        // 约球信息（暂时默认99）
-        MyProfileMeetupDTO meetupDTO = new MyProfileMeetupDTO();
-        meetupDTO.setCompletedCount(99);
-        dto.setMeetup(meetupDTO);
-
-        // 评价信息
-        MyProfileReviewDTO reviewDTO = new MyProfileReviewDTO();
-        reviewDTO.setTotal(reviewTotal);
-        List<ReviewTagDTO> tags = new ArrayList<>();
-        ReviewTagDTO tag1 = new ReviewTagDTO();
-        tag1.setName("可爱");
-        tags.add(tag1);
-        ReviewTagDTO tag2 = new ReviewTagDTO();
-        tag2.setName("发球好");
-        tags.add(tag2);
-        reviewDTO.setTags(tags);
-        dto.setReview(reviewDTO);
-
-        // 等级信息
-        MyProfileLevelDTO levelDTO = new MyProfileLevelDTO();
-        if (profileData != null) {
-            levelDTO.setNtrpScore(profileData.getNtrpScore());
-            levelDTO.setIsUnderReview(profileData.getIsUnderReview());
-        }
-        levelDTO.setLockday(lockday);
-        levelDTO.setRemainingMatches(remainingMatches);
-        LevelSuggestionDTO suggestionDTO = new LevelSuggestionDTO();
-        levelDTO.setSuggestion(suggestionDTO);
-        dto.setLevel(levelDTO);
-
-        // 评分信息
-        MyProfileScoreDTO scoreDTO = new MyProfileScoreDTO();
-        scoreDTO.setScoreLevel(scoreLevel);
-        scoreDTO.setData(scoreItems != null ? scoreItems : new ArrayList<>());
-        dto.setScore(scoreDTO);
-
-        // 用户基本信息
-        MyProfileUserDTO userDTO = new MyProfileUserDTO();
-        if (userData != null) {
-            userDTO.setUserId(userData.getUserId());
-            userDTO.setNickname(userData.getNickname());
-            userDTO.setAvatarUrl(userData.getAvatarUrl());
-            userDTO.setGender(userData.getGender());
-            userDTO.setBirthday(userData.getBirthday());
-            userDTO.setCityCode(userData.getCityCode());
-            userDTO.setBio(userData.getBio());
-        }
-        dto.setUser(userDTO);
-
-        // 视频信息
-        MyProfileVideoDTO videoDTO = new MyProfileVideoDTO();
-        if (profileData != null && profileData.getVideoUrls() != null) {
-            List<String> videoKeys = profileData.getVideoUrls();
-            videoDTO.setTotal(videoKeys.size());
-            List<VideoItemDTO> videoItems = new ArrayList<>();
-            for (String key : videoKeys) {
-                VideoItemDTO item = new VideoItemDTO();
-                item.setKey(key);
-                item.setUrl(QiniuConfiguration.buildSignedUrl(key));
-                videoItems.add(item);
-            }
-            videoDTO.setData(videoItems);
-        } else {
-            videoDTO.setTotal(0);
-            videoDTO.setData(new ArrayList<>());
-        }
-        dto.setVideo(videoDTO);
-
-        return dto;
-    }
-
+    @Resource
+    private MyProfileAppService myProfileAppService;
 
     /**
      * 球员主页
@@ -186,7 +86,7 @@ public class ProfileAppService {
         }
         userGateway.updateUser(userData);
 
-        return getMyProfile();
+        return myProfileAppService.getMyProfile();
     }
 
     /**
@@ -262,7 +162,7 @@ public class ProfileAppService {
         ntrpLog.setReason(ChangeReasonEnum.USER);
         profileChangeLogGateway.save(ntrpLog);
 
-        return getMyProfile();
+        return myProfileAppService.getMyProfile();
     }
 
     /**

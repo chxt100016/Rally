@@ -96,20 +96,17 @@ public class UserProfile {
 
     /**
      * 计算自评修改剩余冷却天数
-     * 根据可信度等级读取配置，返回剩余锁定天数，可编辑时返回 null
+     * 可编辑时返回 null，不可编辑时返回剩余天数
      */
-    public Integer calculateNtrpLockday() {
+    public Integer calculateNtrpLockDays() {
         if (profile == null || profile.getNtrpUpdatedAt() == null) {
             return null;
         }
-
         int lowDays = SystemConfig.getInt("score.ntrp.cooldown_low_days", 30);
         int midDays = SystemConfig.getInt("score.ntrp.cooldown_mid_days", 60);
         int highDays = SystemConfig.getInt("score.ntrp.cooldown_high_days", 90);
         int cooldown = calculateNtrpCooldownDays(lowDays, midDays, highDays);
-
         Object[] editStatus = calculateNtrpEditableStatus(cooldown);
-        // editStatus[0]=isEditable, editStatus[1]=cooldownRemainingDays
         if (!Boolean.TRUE.equals(editStatus[0]) && editStatus[1] != null) {
             return (Integer) editStatus[1];
         }

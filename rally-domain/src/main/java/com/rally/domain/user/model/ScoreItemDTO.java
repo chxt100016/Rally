@@ -1,11 +1,13 @@
 package com.rally.domain.user.model;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * 评分明细项
  */
 @Data
+@Accessors(chain = true)
 public class ScoreItemDTO {
 
     /** 评分名称 */

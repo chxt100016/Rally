@@ -2,6 +2,7 @@ package com.rally.domain.user.model;
 
 import com.rally.domain.user.enums.GenderEnum;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 
@@ -9,6 +10,7 @@ import java.time.LocalDate;
  * 我的档案 - 用户信息
  */
 @Data
+@Accessors(chain = true)
 public class MyProfileUserDTO {
 
     private String userId;

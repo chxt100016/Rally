@@ -1,9 +1,9 @@
 package com.rally.web.user;
 
-import com.rally.domain.auth.exception.AuthException;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.tennis.model.Result;
 import com.rally.domain.user.model.*;
+import com.rally.user.MyProfileAppService;
 import com.rally.user.ProfileAppService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +15,15 @@ public class UserProfileController {
     @Resource
     private ProfileAppService profileAppService;
 
+    @Resource
+    private MyProfileAppService myProfileAppService;
+
     /**
      * 我的信息
      */
     @GetMapping("/me")
     public Result<MyProfileDTO> me() {
-       return Result.ok(profileAppService.getMyProfile());
+       return Result.ok(myProfileAppService.getMyProfile());
     }
 
     /**

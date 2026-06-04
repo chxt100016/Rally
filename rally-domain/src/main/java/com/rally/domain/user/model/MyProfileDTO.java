@@ -1,11 +1,13 @@
 package com.rally.domain.user.model;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * 我的档案聚合视图（新版）
  */
 @Data
+@Accessors(chain = true)
 public class MyProfileDTO {
 
     /** 约球信息 */
