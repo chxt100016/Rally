@@ -4,13 +4,12 @@ import com.google.gson.Gson;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
 import com.qiniu.storage.Configuration;
-import com.qiniu.storage.DownloadUrl;
 import com.qiniu.storage.Region;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
+import com.rally.config.property.QiniuConfiguration;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -18,18 +17,6 @@ import java.util.UUID;
 @Slf4j
 @Component
 public class QiniuClient {
-
-    @Value("${qiniu.access-key}")
-    private String accessKey;
-
-    @Value("${qiniu.secret-key}")
-    private String secretKey;
-
-    @Value("${qiniu.bucket}")
-    private String bucket;
-
-    @Value("${qiniu.domain}")
-    private String domain;
 
     private final UploadManager uploadManager;
 
@@ -50,8 +37,8 @@ public class QiniuClient {
             key = dir.replaceAll("^/+|/+$", "") + "/" + key;
         }
         log.info("qiniu upload: key={}", key);
-        Auth auth = Auth.create(accessKey, secretKey);
-        String upToken = auth.uploadToken(bucket, key);
+        Auth auth = Auth.create(QiniuConfiguration.getAccessKey(), QiniuConfiguration.getSecretKey());
+        String upToken = auth.uploadToken(QiniuConfiguration.getBucket(), key);
         Response response = uploadManager.put(data, key, upToken);
         DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
         return putRet.key;
@@ -68,16 +55,5 @@ public class QiniuClient {
         return "jpg";
     }
 
-    public String buildSignedUrl(String key) {
-        boolean useHttps = domain.startsWith("https");
-        String domainHost = domain.replaceFirst("^https?://", "");
-        DownloadUrl downloadUrl = new DownloadUrl(domainHost, useHttps, key);
-        long deadline = System.currentTimeMillis() / 1000 + 3600;
-        Auth auth = Auth.create(accessKey, secretKey);
-        try {
-            return downloadUrl.buildURL(auth, deadline);
-        } catch (QiniuException e) {
-            throw new RuntimeException("构建签名URL失败: " + key, e);
-        }
-    }
+
 }

@@ -1,6 +1,7 @@
 package com.rally.tennis.convert;
 
 import com.rally.client.qiniu.QiniuClient;
+import com.rally.config.property.QiniuConfiguration;
 import com.rally.db.tennis.entity.TennisTournamentPO;
 import com.rally.domain.tennis.model.TournamentDTO;
 import org.mapstruct.*;
@@ -53,7 +54,7 @@ public interface TournamentConvertMapper {
 
         // 生成背景图签名 URL
         if (po.getBackgroundPath() != null && !po.getBackgroundPath().isBlank()) {
-            dto.setBackgroundUrl(qiniuClient.buildSignedUrl(po.getBackgroundPath()));
+            dto.setBackgroundUrl(QiniuConfiguration.buildSignedUrl(po.getBackgroundPath()));
         }
     }
 

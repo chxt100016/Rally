@@ -1,6 +1,8 @@
 package com.rally.user;
 
 import com.rally.cache.UserContext;
+import com.rally.client.qiniu.QiniuClient;
+import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.model.OnboardingCmd;
 import com.rally.domain.user.model.TennisProfileVO;
@@ -18,6 +20,9 @@ public class OnboardingAppService {
 
     @Resource
     private UserProfileService userProfileService;
+
+    @Resource
+    private QiniuClient qiniuClient;
 
     /**
      * 查是否需引导，返回状态枚举
@@ -41,6 +46,10 @@ public class OnboardingAppService {
     public TennisProfileVO submit(OnboardingCmd cmd) {
         String userId = UserContext.get();
         UserProfile profile = userProfileService.getProfile(userId);
+        if (ProfileStatusEnum.NONE == profile.getStatus()) {
+            this.userProfileService.init(profile);
+        }
+        cmd.getVideoKeys().forEach(QiniuConfiguration::buildSignedUrl);
         profile.completeOnboarding(cmd);
         userProfileService.save(profile);
 
