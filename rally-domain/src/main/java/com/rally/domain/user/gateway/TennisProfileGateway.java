@@ -11,10 +11,7 @@ import java.util.Optional;
  */
 public interface TennisProfileGateway {
 
-    /**
-     * 保存档案
-     */
-    TennisProfileData save(TennisProfileData data);
+
 
     /**
      * 根据用户 ID 查询档案

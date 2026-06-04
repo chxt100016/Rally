@@ -3,7 +3,6 @@ package com.rally.db.user.convert;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.rally.db.user.entity.TennisProfilePO;
-import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.model.TennisProfileData;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -17,12 +16,10 @@ public interface TennisProfileConvertMapper {
 
     @Named("toData")
     @Mapping(target = "videoUrls", expression = "java(jsonToStringList(po.getVideoUrls()))")
-    @Mapping(target = "status", expression = "java(stringToProfileStatus(po.getStatus()))")
     TennisProfileData toData(TennisProfilePO po);
 
     @Named("toPO")
     @Mapping(target = "videoUrls", expression = "java(stringListToJson(data.getVideoUrls()))")
-    @Mapping(target = "status", expression = "java(profileStatusToString(data.getStatus()))")
     TennisProfilePO toPO(TennisProfileData data);
 
     /**
@@ -34,7 +31,6 @@ public interface TennisProfileConvertMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "videoUrls", expression = "java(stringListToJson(data.getVideoUrls()))")
-    @Mapping(target = "status", expression = "java(profileStatusToString(data.getStatus()))")
     void updatePO(@MappingTarget TennisProfilePO po, TennisProfileData data);
 
     @Named("stringListToJson")
@@ -53,23 +49,4 @@ public interface TennisProfileConvertMapper {
         return JSON.parseObject(json, new TypeReference<List<String>>() {});
     }
 
-    @Named("profileStatusToString")
-    default String profileStatusToString(ProfileStatusEnum status) {
-        if (status == null) {
-            return null;
-        }
-        return status.name().toLowerCase();
-    }
-
-    @Named("stringToProfileStatus")
-    default ProfileStatusEnum stringToProfileStatus(String status) {
-        if (status == null) {
-            return null;
-        }
-        try {
-            return ProfileStatusEnum.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
 }

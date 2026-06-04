@@ -1,6 +1,5 @@
 package com.rally.db.user.gateway;
 
-import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.rally.db.user.convert.TennisProfileConvertMapper;
 import com.rally.db.user.entity.TennisProfilePO;
 import com.rally.db.user.repository.TennisProfileRepository;
@@ -20,13 +19,7 @@ public class TennisProfileGatewayImpl implements TennisProfileGateway {
     private final TennisProfileRepository repository;
     private static final TennisProfileConvertMapper CONVERTER = TennisProfileConvertMapper.INSTANCE;
 
-    @Override
-    public TennisProfileData save(TennisProfileData data) {
-        TennisProfilePO po = CONVERTER.toPO(data);
-        po.setBizId(IdWorker.getIdStr());
-        repository.save(po);
-        return CONVERTER.toData(po);
-    }
+
 
     @Override
     public Optional<TennisProfileData> findByUserId(String userId) {
@@ -54,7 +47,7 @@ public class TennisProfileGatewayImpl implements TennisProfileGateway {
             po.setNtrpUpdatedAt(data.getNtrpUpdatedAt());
         }
         if (data.getStatus() != null) {
-            po.setStatus(CONVERTER.profileStatusToString(data.getStatus()));
+            po.setStatus(data.getStatus().toString());
         }
         if (data.getIsUnderReview() != null) {
             po.setIsUnderReview(data.getIsUnderReview());
