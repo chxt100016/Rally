@@ -7,6 +7,7 @@ import com.rally.domain.config.gateway.ConfigGateway;
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
+import com.rally.domain.user.enums.RatingLevelEnum;
 import com.rally.domain.user.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -45,29 +47,128 @@ public class ProfileAppService {
     private UserProfileService userProfileService;
 
     /**
-     * 我的档案
+     * 我的档案（新版）
      */
-    public MyUserProfileDTO getMyProfile() {
+    public MyProfileDTO getMyProfile() {
         String userId = UserContext.get();
         UserProfile userProfile = userProfileService.getProfile(userId);
+        TennisProfileData profileData = userProfile.getProfile();
 
-        // 计算核查期剩余场次
-        Integer reviewRemaining = null;
-        if (userProfile.isUnderReview()) {
-            reviewRemaining = userProfileService.getReviewRemainingMatches(userId);
+        // 计算评分等级
+        String scoreLevel = calculateScoreLevel(profileData);
+
+        // 构建评分明细
+        List<ScoreItemDTO> scoreItems = buildScoreItems(profileData);
+
+        // 评价总数（暂时默认99）
+        Integer reviewTotal = 99;
+
+        // 计算自评修改剩余冷却天数
+        Integer lockday = null;
+        if (profileData != null && profileData.getNtrpUpdatedAt() != null) {
+            int lowDays = configGateway.getInt("score.ntrp.cooldown_low_days", 30);
+            int midDays = configGateway.getInt("score.ntrp.cooldown_mid_days", 60);
+            int highDays = configGateway.getInt("score.ntrp.cooldown_high_days", 90);
+            int cooldown = userProfile.calculateNtrpCooldownDays(lowDays, midDays, highDays);
+            Object[] editStatus = userProfile.calculateNtrpEditableStatus(cooldown);
+            // editStatus[0]=isEditable, editStatus[1]=cooldownRemainingDays
+            if (!Boolean.TRUE.equals(editStatus[0]) && editStatus[1] != null) {
+                lockday = (Integer) editStatus[1];
+            }
         }
 
-        // 计算 NTRP 可编辑状态和冷却剩余天数
-        int lowDays = configGateway.getInt("score.ntrp.cooldown_low_days", 30);
-        int midDays = configGateway.getInt("score.ntrp.cooldown_mid_days", 60);
-        int highDays = configGateway.getInt("score.ntrp.cooldown_high_days", 90);
-        int cooldown = userProfile.calculateNtrpCooldownDays(lowDays, midDays, highDays);
+        // 获取核查期剩余比赛场次
+        Integer remainingMatches = null;
+        if (Boolean.TRUE.equals(profileData != null ? profileData.getIsUnderReview() : null)) {
+            Optional<ProfileChangeLogData> latestLog = profileChangeLogGateway.findLatestUnderReviewLog(userId);
+            if (latestLog.isPresent() && latestLog.get().getAfterValue() != null) {
+                remainingMatches = latestLog.get().getAfterValue().intValue();
+            }
+        }
 
-        Object[] editableStatus = userProfile.calculateNtrpEditableStatus(cooldown);
-        Boolean ntrpEditable = (Boolean) editableStatus[0];
-        Integer cooldownDays = (Integer) editableStatus[1];
+        return ProfileAppConvertMapper.INSTANCE.toMyProfileDTO(
+                profileData, userProfile.getUser(), reviewTotal, scoreLevel, scoreItems,
+                lockday, remainingMatches);
+    }
 
-        return ProfileAppConvertMapper.INSTANCE.toMyProfileVO(userProfile.getProfile(), userProfile.getUser(), reviewRemaining, ntrpEditable, cooldownDays);
+    /**
+     * 计算评分等级
+     */
+    private String calculateScoreLevel(TennisProfileData profileData) {
+        if (profileData == null) {
+            return RatingLevelEnum.C.getCode();
+        }
+
+        // 获取权重配置
+        int reputationWeight = configGateway.getInt("score.weight.reputation", 50);
+        int credibilityWeight = configGateway.getInt("score.weight.credibility", 30);
+        int calibrationWeight = configGateway.getInt("score.weight.calibration", 20);
+
+        // 获取分值，默认0
+        BigDecimal reputationScore = profileData.getReputationScore() != null ? profileData.getReputationScore() : BigDecimal.ZERO;
+        BigDecimal credibilityScore = profileData.getCredibilityScore() != null ? profileData.getCredibilityScore() : BigDecimal.ZERO;
+        BigDecimal calibrationScore = profileData.getCalibrationScore() != null ? profileData.getCalibrationScore() : BigDecimal.ZERO;
+
+        // 计算加权总分
+        BigDecimal totalScore = BigDecimal.ZERO;
+        totalScore = totalScore.add(reputationScore.multiply(new BigDecimal(reputationWeight)));
+        totalScore = totalScore.add(credibilityScore.multiply(new BigDecimal(credibilityWeight)));
+        totalScore = totalScore.add(calibrationScore.multiply(new BigDecimal(calibrationWeight)));
+        totalScore = totalScore.divide(new BigDecimal(100), 0, RoundingMode.HALF_UP);
+
+        // 根据总分确定等级
+        int score = totalScore.intValue();
+        if (score >= 90) {
+            return RatingLevelEnum.S.getCode();
+        } else if (score >= 75) {
+            return RatingLevelEnum.A.getCode();
+        } else if (score >= 55) {
+            return RatingLevelEnum.B.getCode();
+        } else {
+            return RatingLevelEnum.C.getCode();
+        }
+    }
+
+    /**
+     * 构建评分明细列表
+     */
+    private List<ScoreItemDTO> buildScoreItems(TennisProfileData profileData) {
+        List<ScoreItemDTO> items = new ArrayList<>();
+
+        // 信誉分
+        ScoreItemDTO reputationItem = new ScoreItemDTO();
+        reputationItem.setName("信誉分");
+        reputationItem.setKey("reputation_score");
+        reputationItem.setValue(profileData != null && profileData.getReputationScore() != null ?
+                profileData.getReputationScore().toPlainString() : "0");
+        reputationItem.setLabel("权重" + configGateway.getInt("score.weight.reputation", 50) + "%");
+        reputationItem.setInfo(configGateway.getString("score.info.reputation", "信誉分说明你有信誉"));
+        reputationItem.setSort("");
+        items.add(reputationItem);
+
+        // 可信度
+        ScoreItemDTO credibilityItem = new ScoreItemDTO();
+        credibilityItem.setName("可信度");
+        credibilityItem.setKey("credibility_score");
+        credibilityItem.setValue(profileData != null && profileData.getCredibilityScore() != null ?
+                profileData.getCredibilityScore().toPlainString() : "0");
+        credibilityItem.setLabel("权重" + configGateway.getInt("score.weight.credibility", 30) + "%");
+        credibilityItem.setInfo(configGateway.getString("score.info.credibility", "可信度说明你可信"));
+        credibilityItem.setSort("");
+        items.add(credibilityItem);
+
+        // 校准度
+        ScoreItemDTO calibrationItem = new ScoreItemDTO();
+        calibrationItem.setName("校准度");
+        calibrationItem.setKey("calibration_score");
+        calibrationItem.setValue(profileData != null && profileData.getCalibrationScore() != null ?
+                profileData.getCalibrationScore().toPlainString() : "0");
+        calibrationItem.setLabel("权重" + configGateway.getInt("score.weight.calibration", 20) + "%");
+        calibrationItem.setInfo(configGateway.getString("score.info.calibration", "校准度说明你校准"));
+        calibrationItem.setSort("");
+        items.add(calibrationItem);
+
+        return items;
     }
 
     /**
@@ -85,7 +186,7 @@ public class ProfileAppService {
      * 编辑资料
      */
     @Transactional
-    public MyUserProfileDTO editProfile(EditProfileCmd cmd) {
+    public MyProfileDTO editProfile(EditProfileCmd cmd) {
         String userId = UserContext.get();
         // 更新 users 表（头像/昵称/性别/生日）
         UserData userData = userGateway.findByUserId(userId)
@@ -121,7 +222,7 @@ public class ProfileAppService {
      * 自评修改
      */
     @Transactional
-    public MyUserProfileDTO updateNtrp(NtrpUpdateCmd cmd) {
+    public MyProfileDTO updateNtrp(NtrpUpdateCmd cmd) {
         String userId = UserContext.get();
         // 1. 校验 NTRP 值
         if (cmd.getNtrpScore() == null) {

@@ -13,9 +13,9 @@ mvn clean package -DskipTests
   - `rally-app → rally-infrastructure`
   - `rally-infrastructure → rally-domain`
 - `rally-adapter`:REST Controller（`com.rally.web`）+ 定时 Job（`com.rally.job`）
-- `rally-app`: 应用服务，编排业务流程，不含领域规则
-- `rally-domain`:领域模型（VO/Data/Enum）、Gateway 接口、工具类
-- `rally-infrastructure`:Gateway 实现、MyBatis-Plus ORM、外部 API Client、FastJson 配置
+- `rally-app`: 应用服务，编排业务流程，不含领域能力。
+- `rally-domain`:领域层， 领域业务核心规则抽象（通过service和聚合根向外暴露）、Gateway接口仅用于操作数据库
+- `rally-infrastructure`:Gateway 实现操作数据库、MyBatis-Plus ORM、外部 API Client、FastJson 配置
 - `start`: Spring Boot 入口，`@MapperScan("com.rally.db")` |
 
 

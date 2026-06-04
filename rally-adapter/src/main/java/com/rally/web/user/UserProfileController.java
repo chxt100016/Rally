@@ -19,7 +19,7 @@ public class UserProfileController {
      * 我的信息
      */
     @GetMapping("/me")
-    public Result<MyUserProfileDTO> me() {
+    public Result<MyProfileDTO> me() {
        return Result.ok(profileAppService.getMyProfile());
     }
 
@@ -39,7 +39,7 @@ public class UserProfileController {
      * 编辑资料
      */
     @PutMapping("")
-    public Result<MyUserProfileDTO> editProfile(@RequestBody EditProfileCmd cmd) {
+    public Result<MyProfileDTO> editProfile(@RequestBody EditProfileCmd cmd) {
         try {
             return Result.ok(profileAppService.editProfile(cmd));
         } catch (BusinessException e) {
@@ -51,7 +51,7 @@ public class UserProfileController {
      * 自评修改
      */
     @PutMapping("/ntrp")
-    public Result<MyUserProfileDTO> updateNtrp(@RequestBody NtrpUpdateCmd cmd) {
+    public Result<MyProfileDTO> updateNtrp(@RequestBody NtrpUpdateCmd cmd) {
         try {
             return Result.ok(profileAppService.updateNtrp(cmd));
         } catch (BusinessException e) {

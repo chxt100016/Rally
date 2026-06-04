@@ -1,53 +1,97 @@
 package com.rally.user.convert;
 
+import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.user.model.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mapper
 public interface ProfileAppConvertMapper {
 
     ProfileAppConvertMapper INSTANCE = Mappers.getMapper(ProfileAppConvertMapper.class);
 
-    default MyUserProfileDTO toMyProfileVO(TennisProfileData profileData, UserData userData,
-                                          Integer reviewRemainingMatches, Boolean ntrpEditable,
-                                          Integer ntrpCooldownRemainingDays) {
-        MyUserProfileDTO dto = new MyUserProfileDTO();
+    /**
+     * 转换为我的档案DTO（新版）
+     */
+    default MyProfileDTO toMyProfileDTO(TennisProfileData profileData, UserData userData,
+                                         Integer reviewTotal, String scoreLevel,
+                                         List<ScoreItemDTO> scoreItems,
+                                         Integer lockday, Integer remainingMatches) {
+        MyProfileDTO dto = new MyProfileDTO();
+
+        // 设置约球信息（暂时默认99）
+        MyProfileMeetupDTO meetupDTO = new MyProfileMeetupDTO();
+        meetupDTO.setCompletedCount(99);
+        dto.setMeetup(meetupDTO);
+
+        // 设置评价信息（暂时默认99，标签默认"可爱"、"发球好"）
+        MyProfileReviewDTO reviewDTO = new MyProfileReviewDTO();
+        reviewDTO.setTotal(reviewTotal != null ? reviewTotal : 99);
+        List<ReviewTagDTO> tags = new ArrayList<>();
+        ReviewTagDTO tag1 = new ReviewTagDTO();
+        tag1.setName("可爱");
+        tags.add(tag1);
+        ReviewTagDTO tag2 = new ReviewTagDTO();
+        tag2.setName("发球好");
+        tags.add(tag2);
+        reviewDTO.setTags(tags);
+        dto.setReview(reviewDTO);
+
+        // 设置等级信息
+        MyProfileLevelDTO levelDTO = new MyProfileLevelDTO();
+        if (profileData != null) {
+            levelDTO.setNtrpScore(profileData.getNtrpScore());
+            levelDTO.setIsUnderReview(profileData.getIsUnderReview());
+        }
+        levelDTO.setLockday(lockday);
+        levelDTO.setRemainingMatches(remainingMatches);
+        // 系统建议暂时为空，后续完善
+        LevelSuggestionDTO suggestionDTO = new LevelSuggestionDTO();
+        levelDTO.setSuggestion(suggestionDTO);
+        dto.setLevel(levelDTO);
+
+        // 设置评分信息
+        MyProfileScoreDTO scoreDTO = new MyProfileScoreDTO();
+        scoreDTO.setScoreLevel(scoreLevel);
+        scoreDTO.setData(scoreItems != null ? scoreItems : new ArrayList<>());
+        dto.setScore(scoreDTO);
 
         // 设置用户基本信息
-        UserVO userVO = new UserVO();
+        MyProfileUserDTO userDTO = new MyProfileUserDTO();
         if (userData != null) {
-            userVO.setUserId(userData.getUserId());
-            userVO.setNickname(userData.getNickname());
-            userVO.setAvatarUrl(userData.getAvatarUrl());
-            userVO.setGender(userData.getGender());
-            userVO.setBirthday(userData.getBirthday());
-            userVO.setCityCode(userData.getCityCode());
+            userDTO.setUserId(userData.getUserId());
+            userDTO.setNickname(userData.getNickname());
+            userDTO.setAvatarUrl(userData.getAvatarUrl());
+            userDTO.setGender(userData.getGender());
+            userDTO.setBirthday(userData.getBirthday());
+            userDTO.setCityCode(userData.getCityCode());
+            userDTO.setBio(userData.getBio());
         }
-        dto.setUser(userVO);
+        dto.setUser(userDTO);
 
-        // 设置网球档案信息
-        TennisProfileVO profileVO = new TennisProfileVO();
-        if (profileData != null) {
-            profileVO.setNtrpScore(profileData.getNtrpScore());
-            profileVO.setUtrScore(profileData.getUtrScore());
-            profileVO.setIsNewbie(profileData.getIsNewbie());
-            profileVO.setReputationScore(profileData.getReputationScore());
-            profileVO.setCredibilityScore(profileData.getCredibilityScore());
-            profileVO.setCalibrationScore(profileData.getCalibrationScore());
-            profileVO.setStatus(profileData.getStatus() != null ? profileData.getStatus().name().toLowerCase() : null);
-            profileVO.setIsUnderReview(profileData.getIsUnderReview());
-            profileVO.setVideoUrls(profileData.getVideoUrls());
-            profileVO.setNtrpUpdatedAt(profileData.getNtrpUpdatedAt());
+        // 设置视频信息
+        MyProfileVideoDTO videoDTO = new MyProfileVideoDTO();
+        if (profileData != null && profileData.getVideoUrls() != null) {
+            List<String> videoKeys = profileData.getVideoUrls();
+            videoDTO.setTotal(videoKeys.size());
+            List<VideoItemDTO> videoItems = new ArrayList<>();
+            for (String key : videoKeys) {
+                VideoItemDTO item = new VideoItemDTO();
+                item.setKey(key);
+                item.setUrl(QiniuConfiguration.buildSignedUrl(key));
+                videoItems.add(item);
+            }
+            videoDTO.setData(videoItems);
+        } else {
+            videoDTO.setTotal(0);
+            videoDTO.setData(new ArrayList<>());
         }
-        profileVO.setReviewRemainingMatches(reviewRemainingMatches);
-        profileVO.setNtrpEditable(ntrpEditable);
-        profileVO.setNtrpCooldownRemainingDays(ntrpCooldownRemainingDays);
-        dto.setProfile(profileVO);
+        dto.setVideo(videoDTO);
 
         return dto;
     }

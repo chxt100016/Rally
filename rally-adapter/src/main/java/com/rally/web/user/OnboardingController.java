@@ -1,7 +1,7 @@
 package com.rally.web.user;
 
 import com.rally.domain.tennis.model.Result;
-import com.rally.domain.user.model.MyUserProfileDTO;
+import com.rally.domain.user.model.MyProfileDTO;
 import com.rally.domain.user.model.OnboardingCmd;
 import com.rally.user.OnboardingAppService;
 import jakarta.annotation.Resource;
@@ -27,7 +27,7 @@ public class OnboardingController {
      * 提交 Onboarding，转 normal
      */
     @PostMapping("/submit")
-    public Result<MyUserProfileDTO> onboardingSubmit(@Valid @RequestBody OnboardingCmd cmd) {
+    public Result<MyProfileDTO> onboardingSubmit(@Valid @RequestBody OnboardingCmd cmd) {
         return Result.ok(onboardingAppService.submit(cmd));
     }
 }

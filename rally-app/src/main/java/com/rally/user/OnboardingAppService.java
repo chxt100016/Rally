@@ -4,7 +4,7 @@ import com.rally.cache.UserContext;
 import com.rally.client.qiniu.QiniuClient;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.user.model.MyUserProfileDTO;
+import com.rally.domain.user.model.MyProfileDTO;
 import com.rally.domain.user.model.OnboardingCmd;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileService;
@@ -40,7 +40,7 @@ public class OnboardingAppService {
      * 提交 Onboarding，转 normal
      */
     @Transactional
-    public MyUserProfileDTO submit(OnboardingCmd cmd) {
+    public MyProfileDTO submit(OnboardingCmd cmd) {
         String userId = UserContext.get();
         UserProfile profile = userProfileService.getProfile(userId);
         if (ProfileStatusEnum.NONE == profile.getStatus()) {
@@ -50,6 +50,7 @@ public class OnboardingAppService {
         profile.completeOnboarding(cmd);
         userProfileService.save(profile);
 
-        return ProfileAppConvertMapper.INSTANCE.toMyProfileVO(profile.getProfile(), profile.getUser(), null, true, null);
+        return ProfileAppConvertMapper.INSTANCE.toMyProfileDTO(
+                profile.getProfile(), profile.getUser(), 99, null, null, null, null);
     }
 }
