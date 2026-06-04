@@ -6,10 +6,8 @@ import com.rally.domain.user.enums.GenderEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 用户档案聚合根
