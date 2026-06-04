@@ -2,9 +2,8 @@ package com.rally.web.upload;
 
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.tennis.model.Result;
-import com.rally.domain.user.model.VideoCallbackCmd;
 import com.rally.domain.user.model.VideoTokenVO;
-import com.rally.user.ProfileAppService;
+import com.rally.upload.VideoAppService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 public class VideoController {
 
     @Resource
-    private ProfileAppService profileAppService;
+    private VideoAppService videoAppService;
 
     /**
      * 取直传凭证
@@ -21,21 +20,7 @@ public class VideoController {
     @PostMapping("/upload-token")
     public Result<VideoTokenVO> getUploadToken() {
         try {
-            return Result.ok(profileAppService.getVideoUploadToken());
-        } catch (BusinessException e) {
-            return Result.fail(e.getErrorCode().getCode(), e.getMessage());
-        }
-    }
-
-    /**
-     * 七牛回调入库（白名单，需校验签名）
-     */
-    @PostMapping("/callback")
-    public Result<Void> videoCallback(@RequestBody VideoCallbackCmd cmd,
-                                       @RequestHeader(value = "Authorization", required = false) String authorization) {
-        try {
-            profileAppService.handleVideoCallback(cmd);
-            return Result.ok(null);
+            return Result.ok(videoAppService.getVideoUploadToken());
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
         }
@@ -45,9 +30,9 @@ public class VideoController {
      * 删除视频
      */
     @DeleteMapping("")
-    public Result<Void> deleteVideo(@RequestParam String key) {
+    public Result<Void> deleteVideo(@RequestParam("key") String key) {
         try {
-            profileAppService.deleteVideo(key);
+            videoAppService.deleteVideo(key);
             return Result.ok(null);
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());

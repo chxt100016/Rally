@@ -170,3 +170,61 @@ INSERT INTO `sys_config` (`biz_id`, `config_key`, `config_value`, `value_type`, 
 
 -- 5.12 约球域 · 城市开通（meetup.city）1 项
 ('cfg0000000000000063', 'meetup.city.opened_codes', '["310000","110000","440100"]', 'json', 'global', '后台开通城市 cityCode 列表，发布/报名/推荐限定其中', 1, 0);
+
+-- ============================================================
+-- 5. 约球域：约球主表
+-- ============================================================
+
+DROP TABLE IF EXISTS `rally_meetup`;
+CREATE TABLE `rally_meetup` (
+  `id`              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`          VARCHAR(32)  NOT NULL COMMENT '业务主键（雪花算法字符串）',
+  `creator_id`      VARCHAR(32)  NOT NULL COMMENT '发布者，关联 users.user_id',
+  `title`           VARCHAR(128) DEFAULT NULL COMMENT '标题，选填；不填后端按模板生成',
+  `match_type`      ENUM('single','double','rally') NOT NULL DEFAULT 'single' COMMENT '类型：单打/双打/拉球',
+  `max_players`     INT          NOT NULL COMMENT '人数上限',
+  `current_players` INT          NOT NULL DEFAULT 1 COMMENT '已加入人数（含发布者，发布即 1）',
+  `city_code`       VARCHAR(32)  NOT NULL COMMENT '城市编码，由 court_location 反查后端写入',
+  `start_time`      DATETIME     NOT NULL COMMENT '活动开始时间（含日期，+08:00）',
+  `end_time`        DATETIME     NOT NULL COMMENT '结束时间 = start_time + duration 小时，懒判定/兜底查询用（裁定 D3/D4）',
+  `duration`        DECIMAL(3,1) NOT NULL COMMENT '持续小时：0.5/1.0/1.5/2.0/2.5/3.0',
+  `court_name`      VARCHAR(128) DEFAULT NULL COMMENT '场地名称，手填',
+  `court_address`   VARCHAR(256) NOT NULL COMMENT '场地详细地址，手填或地图点选',
+  `court_lng`       DOUBLE       NOT NULL COMMENT '场地经度',
+  `court_lat`       DOUBLE       NOT NULL COMMENT '场地纬度',
+  `court_grid`      VARCHAR(64)  DEFAULT NULL COMMENT '场地冷启动去重键：场地名+50m网格（见 §3.4）',
+  `level_mode`      ENUM('range','exact','above','below') DEFAULT 'exact' COMMENT '水平要求模式',
+  `level_value`     VARCHAR(32)  DEFAULT NULL COMMENT '水平值，多值用冒号分割，如 range 存 "3.0:4.0"，exact 存 "3.5"',
+  `gender_limit`    ENUM('any','male','female') NOT NULL DEFAULT 'any' COMMENT '性别限制',
+  `join_mode`       ENUM('direct','approval') NOT NULL DEFAULT 'direct' COMMENT '加入模式：直接/审批',
+  `cost_items`      JSON         DEFAULT NULL COMMENT '费用明细 [{name,totalAmount(分)}]，纯展示',
+  `status`          ENUM('open','full','closed','finished') NOT NULL DEFAULT 'open' COMMENT '状态机',
+  `create_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  KEY `idx_creator` (`creator_id`),
+  KEY `idx_city_status_end` (`city_code`, `status`, `end_time`) COMMENT '列表懒判定过滤主索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='约球主表';
+
+-- ============================================================
+-- 6. 约球域：报名/审核等待表
+-- ============================================================
+
+DROP TABLE IF EXISTS `rally_meetup_waitlist`;
+CREATE TABLE `rally_meetup_waitlist` (
+  `id`              BIGINT      NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`          VARCHAR(32) NOT NULL COMMENT '业务主键（雪花算法字符串）',
+  `rally_meetup_id` VARCHAR(32) NOT NULL COMMENT '关联 rally_meetup.biz_id',
+  `user_id`         VARCHAR(32) NOT NULL COMMENT '报名人，关联 users.user_id',
+  `status`          ENUM('pending','approved','rejected','expired','withdrawn') NOT NULL DEFAULT 'pending' COMMENT '报名状态机',
+  `expires_at`      DATETIME    DEFAULT NULL COMMENT '自动撤回失效时间，NULL=不自动撤回',
+  `opt_time`        DATETIME    DEFAULT NULL COMMENT '管理人审批操作时间',
+  `create_time`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '报名时间',
+  `update_time`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  UNIQUE KEY `uk_meetup_user_active` (`rally_meetup_id`, `user_id`) COMMENT '同人同场仅一条有效报名（撤回/拒绝后复报名见 §6.2 说明）',
+  KEY `idx_user_status` (`user_id`, `status`) COMMENT '查我的报名 + 冲突检测',
+  KEY `idx_meetup_status` (`rally_meetup_id`, `status`) COMMENT '审批列表'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='约球报名/审核等待表';

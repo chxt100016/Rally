@@ -1,0 +1,63 @@
+package com.rally.domain.meetup.gateway;
+
+import com.rally.domain.meetup.model.MeetupData;
+
+import java.util.List;
+
+/**
+ * 约球主表读写网关接口
+ */
+public interface MeetupGateway {
+    /**
+     * 保存约球（新增或更新）
+     */
+    void save(MeetupData data);
+
+    /**
+     * 根据 bizId 查询
+     */
+    MeetupData findByBizId(String bizId);
+
+    /**
+     * 根据 bizId 列表批量查询
+     */
+    List<MeetupData> findByBizIds(List<String> bizIds);
+
+    /**
+     * 根据城市编码和状态列表查询
+     */
+    List<MeetupData> findByCityCodeAndStatus(String cityCode, List<String> statusList);
+
+    /**
+     * 更新状态
+     */
+    void updateStatus(String bizId, String status);
+
+    /**
+     * 原子自增人数（报名/审批通过）
+     * @return 影响行数，0 表示已满或状态变化
+     */
+    int incrementPlayers(String bizId);
+
+    /**
+     * 原子自减人数（退出/拒绝）
+     * @return 影响行数
+     */
+    int decrementPlayers(String bizId);
+
+    /**
+     * 统计用户当日活跃发布数（status IN open,full）
+     */
+    long countTodayActive(String userId);
+
+    /**
+     * 查询城市下活跃约球 ID 列表（status IN open,full AND end_time > NOW()）
+     */
+    List<String> listActiveIds(String cityCode);
+
+    /**
+     * 批量更新状态为 finished（兜底任务用）
+     * @return 影响行数
+     */
+    int batchUpdateToFinished();
+}

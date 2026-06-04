@@ -10,7 +10,6 @@ import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
-import com.rally.domain.user.gateway.VideoUploadGateway;
 import com.rally.domain.user.model.*;
 import com.rally.domain.user.service.UserProfileService;
 import com.rally.user.convert.ProfileAppConvertMapper;
@@ -38,9 +37,6 @@ public class ProfileAppService {
 
     @Resource
     private UserGateway userGateway;
-
-    @Resource
-    private VideoUploadGateway videoUploadGateway;
 
     @Resource
     private ConfigGateway configGateway;
@@ -81,10 +77,6 @@ public class ProfileAppService {
         TennisProfileData profileData = tennisProfileGateway.findByUserId(targetUserId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
         UserData userData = userGateway.findByUserId(targetUserId).orElse(null);
-
-        // 签名视频 URL
-        List<String> signedUrls = signVideoUrls(profileData.getVideoUrls());
-        profileData.setVideoUrls(signedUrls);
 
         return ProfileAppConvertMapper.INSTANCE.toPlayerHomeVO(profileData, userData, null);
     }
@@ -207,89 +199,6 @@ public class ProfileAppService {
     }
 
     /**
-     * 取视频直传凭证
-     */
-    public VideoTokenVO getVideoUploadToken() {
-        String userId = UserContext.get();
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
-                .orElse(null);
-        if (profileData != null) {
-            int maxCount = configGateway.getInt("user.video.max_count", 3);
-            List<String> currentUrls = profileData.getVideoUrls();
-            if (currentUrls != null && currentUrls.size() >= maxCount) {
-                throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED);
-            }
-        }
-
-        int maxSizeMb = configGateway.getInt("user.video.max_size_mb", 5);
-        return videoUploadGateway.generateUploadToken(userId, maxSizeMb);
-    }
-
-    /**
-     * 七牛回调入库
-     */
-    @Transactional
-    public void handleVideoCallback(VideoCallbackCmd cmd) {
-        String userId = cmd.getUserId();
-        String key = cmd.getKey();
-
-        // 校验 key 前缀
-        if (!key.startsWith("videos/" + userId + "/")) {
-            throw new BusinessException(BizErrorCode.VIDEO_NOT_OWNED);
-        }
-
-        // 校验文件大小
-        int maxSizeMb = configGateway.getInt("user.video.max_size_mb", 5);
-        if (cmd.getFsize() != null && cmd.getFsize() > maxSizeMb * 1024 * 1024) {
-            throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED, "视频文件过大");
-        }
-
-        // 校验时长
-        int maxDuration = configGateway.getInt("user.video.max_duration_sec", 60);
-        if (cmd.getDuration() != null && cmd.getDuration() > maxDuration) {
-            throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED, "视频时长超限");
-        }
-
-        // 追加到 video_urls
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
-        List<String> videoUrls = profileData.getVideoUrls();
-        if (videoUrls == null) {
-            videoUrls = new ArrayList<>();
-        }
-
-        int maxCount = configGateway.getInt("user.video.max_count", 3);
-        if (videoUrls.size() >= maxCount) {
-            throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED);
-        }
-
-        videoUrls.add(key);
-        tennisProfileGateway.updateVideoUrls(userId, videoUrls);
-    }
-
-    /**
-     * 删除视频
-     */
-    @Transactional
-    public void deleteVideo(String key) {
-        String userId = UserContext.get();
-        // 校验 key 前缀
-        if (!key.startsWith("videos/" + userId + "/")) {
-            throw new BusinessException(BizErrorCode.VIDEO_NOT_OWNED);
-        }
-
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
-        List<String> videoUrls = profileData.getVideoUrls();
-        if (videoUrls == null) {
-            videoUrls = new ArrayList<>();
-        }
-
-        videoUrls.remove(key);
-        tennisProfileGateway.updateVideoUrls(userId, videoUrls);
-    }
-
-    /**
      * 推进核查期进度（由评分域调用）
      */
     @Transactional
@@ -360,23 +269,5 @@ public class ProfileAppService {
         profileData.setStatus(ProfileStatusEnum.NORMAL);
         profileData.setIsUnderReview(false);
         tennisProfileGateway.update(profileData);
-    }
-
-    /**
-     * 签名视频 URL
-     */
-    private List<String> signVideoUrls(List<String> keys) {
-        if (keys == null || keys.isEmpty()) {
-            return List.of();
-        }
-        int maxCount = configGateway.getInt("user.video.max_count", 3);
-        return keys.stream()
-                .limit(maxCount)
-                .map(key -> {
-                    // 这里需要 QiniuClient 来签名，但 app 层不直接依赖 infrastructure
-                    // 暂时返回原始 key，实际应通过 gateway 或 service 调用
-                    return key;
-                })
-                .toList();
     }
 }

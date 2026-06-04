@@ -31,7 +31,27 @@ public enum BizErrorCode {
     NTRP_INVALID_VALUE(40005, "自评分值非法"),
     UNDER_REVIEW_LOCKED(40006, "核查期内不可进行该操作"),
     PROFILE_NOT_FOUND(40007, "档案不存在"),
-    VIDEO_CALLBACK_INVALID(40008, "视频回调校验失败");
+    VIDEO_CALLBACK_INVALID(40008, "视频回调校验失败"),
+
+    // ========== 约球域 41001-41999 ==========
+    MEETUP_NOT_FOUND(41001, "约球不存在"),
+    MEETUP_FULL(41002, "约球已满员"),
+    MEETUP_EXPIRED(41003, "约球已开始或已结束，无法操作"),
+    MEETUP_CLOSED(41004, "约球已关闭"),
+    MEETUP_STATUS_ILLEGAL(41005, "约球状态不允许该操作"),
+    JOIN_FORBIDDEN(41006, "当前不可报名"),
+    ALREADY_JOINED(41007, "你已报名该约球"),
+    NOT_JOINED(41008, "你未报名该约球"),
+    TIME_CONFLICT(41009, "同一时间段已有其他约球，无法报名"),
+    GENDER_NOT_MATCH(41010, "性别不符合该约球要求"),
+    EDIT_LOCKED(41011, "临近开始，约球信息已锁定不可编辑"),
+    PUBLISH_LIMIT_EXCEEDED(41012, "今日发布已达上限"),
+    LOW_REPUTATION_BANNED(41013, "信誉分过低，暂时无法报名"),
+    WAITLIST_NOT_PENDING(41014, "该报名当前状态不可撤回"),
+    WAITLIST_NOT_FOUND(41015, "报名记录不存在"),
+    NOT_CREATOR(41016, "仅发布者可操作"),
+    CITY_NOT_OPENED(41017, "该城市暂未开通"),
+    CANNOT_JOIN_OWN(41018, "不能报名自己发布的约球");
 
     private final int code;
     private final String message;
