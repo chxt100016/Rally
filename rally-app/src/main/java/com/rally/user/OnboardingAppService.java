@@ -32,8 +32,7 @@ public class OnboardingAppService {
     @Resource
     private UserGateway userGateway;
 
-    @Resource
-    private ConfigGateway configGateway;
+
 
     /**
      * 检查是否需要引导
