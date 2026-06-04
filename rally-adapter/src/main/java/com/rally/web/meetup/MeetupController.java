@@ -64,10 +64,10 @@ public class MeetupController {
 
     /**
      * 约球列表
-     * GET /api/rally/wechat/meetup/list
+     * POST /api/rally/wechat/meetup/list
      */
-    @GetMapping("/list")
-    public Result<PageVO<MeetupCardVO>> list(@Valid MeetupListQuery query) {
+    @PostMapping("/list")
+    public Result<PageVO<MeetupCardVO>> list(@Valid @RequestBody MeetupListQuery query) {
         try {
             return Result.ok(meetupQueryService.list(query));
         } catch (BusinessException e) {

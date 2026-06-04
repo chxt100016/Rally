@@ -1,5 +1,6 @@
 package com.rally.domain.meetup.model;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -47,10 +48,12 @@ public class MeetupListQuery {
     /** 约球类型 */
     private MatchTypeEnum matchType;
 
-    /** 开始时间起 */
+    /** 开始时间起，格式 yyyy-MM-dd HH:mm:ss */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startFrom;
 
-    /** 开始时间止 */
+    /** 开始时间止，格式 yyyy-MM-dd HH:mm:ss */
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startTo;
 
     /** 标签 */

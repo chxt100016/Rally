@@ -18,6 +18,7 @@ public class MeetupCardVO {
     private Integer currentPlayers;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private BigDecimal duration;
     private String courtName;
     private String courtAddress;
     private LevelModeEnum levelMode;
