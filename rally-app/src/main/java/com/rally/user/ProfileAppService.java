@@ -71,8 +71,7 @@ public class ProfileAppService {
         Boolean ntrpEditable = (Boolean) editableStatus[0];
         Integer cooldownDays = (Integer) editableStatus[1];
 
-        return ProfileAppConvertMapper.INSTANCE.toMyProfileVO(
-                userProfile.getProfile(), userProfile.getUser(), reviewRemaining, ntrpEditable, cooldownDays);
+        return ProfileAppConvertMapper.INSTANCE.toMyProfileVO(userProfile.getProfile(), userProfile.getUser(), reviewRemaining, ntrpEditable, cooldownDays);
     }
 
     /**
