@@ -25,7 +25,12 @@ public class OnboardingAppService {
      */
     public ProfileStatusEnum checkStatus() {
         String userId = UserContext.get();
-        UserProfile profile = userProfileService.getOrCreate(userId);
+        UserProfile profile = userProfileService.getProfile(userId);
+
+        if (ProfileStatusEnum.NONE == profile.getStatus()) {
+            this.userProfileService.init(profile);
+            return ProfileStatusEnum.NONE;
+        }
         return profile.getStatus();
     }
 

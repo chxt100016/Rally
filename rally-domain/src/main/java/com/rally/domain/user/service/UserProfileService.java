@@ -4,7 +4,6 @@ import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.gateway.UserProfileGateway;
-import com.rally.domain.user.model.UserData;
 import com.rally.domain.user.model.UserProfile;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -22,19 +21,13 @@ public class UserProfileService {
     /**
      * 查询用户档案，不存在则初始化 TBC
      */
-    public UserProfile getOrCreate(String userId) {
-        UserProfile profile = userProfileGateway.findByUserId(userId);
-
-        if (profile == null || profile.getStatus() == null || profile.getStatus() == ProfileStatusEnum.TBC) {
-            // 首次访问，初始化 TBC
-            UserData userData = new UserData();
-            userData.setUserId(userId);
-            profile = UserProfile.create(userData, null);
-            profile.initializeTBC();
-            userProfileGateway.save(profile);
+    public void init(UserProfile profile) {
+        if (ProfileStatusEnum.NONE != profile.getStatus()) {
+            return;
         }
 
-        return profile;
+        profile.initializeTBC();
+        userProfileGateway.save(profile);
     }
 
     /**

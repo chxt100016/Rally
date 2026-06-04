@@ -32,18 +32,11 @@ public class UserProfile {
     }
 
     /**
-     * 是否已完成 onboarding
-     */
-    public boolean isOnboarded() {
-        return profile != null && profile.getStatus() == ProfileStatusEnum.NORMAL;
-    }
-
-    /**
      * 获取档案状态
      */
     public ProfileStatusEnum getStatus() {
         if (profile == null) {
-            return null;
+            return ProfileStatusEnum.NONE;
         }
         return profile.getStatus();
     }
