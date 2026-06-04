@@ -5,9 +5,7 @@ import com.alibaba.fastjson2.TypeReference;
 import com.rally.db.user.entity.TennisProfilePO;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.model.TennisProfileData;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -26,6 +24,18 @@ public interface TennisProfileConvertMapper {
     @Mapping(target = "videoUrls", expression = "java(stringListToJson(data.getVideoUrls()))")
     @Mapping(target = "status", expression = "java(profileStatusToString(data.getStatus()))")
     TennisProfilePO toPO(TennisProfileData data);
+
+    /**
+     * 更新 PO，只更新源对象中非空的字段
+     * 忽略 bizId、userId、id 等不应被更新的字段
+     */
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "bizId", ignore = true)
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "videoUrls", expression = "java(stringListToJson(data.getVideoUrls()))")
+    @Mapping(target = "status", expression = "java(profileStatusToString(data.getStatus()))")
+    void updatePO(@MappingTarget TennisProfilePO po, TennisProfileData data);
 
     @Named("stringListToJson")
     default String stringListToJson(List<String> list) {
