@@ -48,8 +48,7 @@ CREATE TABLE `user_tennis_profile` (
   `update_time`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_biz_id` (`biz_id`),
-  UNIQUE KEY `uk_user_id` (`user_id`),
-  KEY `idx_city_status` (`city_code`, `status`)
+  UNIQUE KEY `uk_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='球员网球档案表';
 
 -- ============================================================
