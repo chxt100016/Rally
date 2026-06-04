@@ -12,6 +12,7 @@ import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.gateway.VideoUploadGateway;
 import com.rally.domain.user.model.*;
+import com.rally.domain.user.service.UserProfileService;
 import com.rally.user.convert.ProfileAppConvertMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -44,35 +45,34 @@ public class ProfileAppService {
     @Resource
     private ConfigGateway configGateway;
 
+    @Resource
+    private UserProfileService userProfileService;
+
     /**
      * 我的档案
      */
-    public TennisProfileVO getMyProfile() {
+    public MyUserProfileDTO getMyProfile() {
         String userId = UserContext.get();
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
-        UserData userData = userGateway.findByUserId(userId).orElse(null);
+        UserProfile userProfile = userProfileService.getProfile(userId);
 
         // 计算核查期剩余场次
         Integer reviewRemaining = null;
-        if (profileData.getIsUnderReview()) {
-            reviewRemaining = getReviewRemainingMatches(userId);
+        if (userProfile.isUnderReview()) {
+            reviewRemaining = userProfileService.getReviewRemainingMatches(userId);
         }
 
         // 计算 NTRP 可编辑状态和冷却剩余天数
-        Boolean ntrpEditable = true;
-        Integer cooldownDays = null;
-        if (profileData.getNtrpUpdatedAt() != null) {
-            int cooldown = getNtrpCooldownDays(profileData.getCredibilityScore());
-            long daysSinceUpdate = ChronoUnit.DAYS.between(profileData.getNtrpUpdatedAt(), LocalDateTime.now());
-            if (daysSinceUpdate < cooldown) {
-                ntrpEditable = false;
-                cooldownDays = (int) (cooldown - daysSinceUpdate);
-            }
-        }
+        int lowDays = configGateway.getInt("score.ntrp.cooldown_low_days", 30);
+        int midDays = configGateway.getInt("score.ntrp.cooldown_mid_days", 60);
+        int highDays = configGateway.getInt("score.ntrp.cooldown_high_days", 90);
+        int cooldown = userProfile.calculateNtrpCooldownDays(lowDays, midDays, highDays);
+
+        Object[] editableStatus = userProfile.calculateNtrpEditableStatus(cooldown);
+        Boolean ntrpEditable = (Boolean) editableStatus[0];
+        Integer cooldownDays = (Integer) editableStatus[1];
 
         return ProfileAppConvertMapper.INSTANCE.toMyProfileVO(
-                profileData, userData, reviewRemaining, ntrpEditable, cooldownDays);
+                userProfile.getProfile(), userProfile.getUser(), reviewRemaining, ntrpEditable, cooldownDays);
     }
 
     /**
@@ -94,7 +94,7 @@ public class ProfileAppService {
      * 编辑资料
      */
     @Transactional
-    public TennisProfileVO editProfile(EditProfileCmd cmd) {
+    public MyUserProfileDTO editProfile(EditProfileCmd cmd) {
         String userId = UserContext.get();
         // 更新 users 表（头像/昵称/性别/生日）
         UserData userData = userGateway.findByUserId(userId)
@@ -135,7 +135,7 @@ public class ProfileAppService {
      * 自评修改
      */
     @Transactional
-    public TennisProfileVO updateNtrp(NtrpUpdateCmd cmd) {
+    public MyUserProfileDTO updateNtrp(NtrpUpdateCmd cmd) {
         String userId = UserContext.get();
         // 1. 校验 NTRP 值
         if (cmd.getNtrpScore() == null) {
@@ -151,12 +151,16 @@ public class ProfileAppService {
         }
 
         // 2. 获取档案
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
+        UserProfile userProfile = userProfileService.getProfile(userId);
+        TennisProfileData profileData = userProfile.getProfile();
 
         // 3. 冷却校验（system_suggest 跳过）
         if (profileData.getNtrpUpdatedAt() != null && !Boolean.TRUE.equals(cmd.getConfirmed())) {
-            int cooldown = getNtrpCooldownDays(profileData.getCredibilityScore());
+            int lowDays = configGateway.getInt("score.ntrp.cooldown_low_days", 30);
+            int midDays = configGateway.getInt("score.ntrp.cooldown_mid_days", 60);
+            int highDays = configGateway.getInt("score.ntrp.cooldown_high_days", 90);
+            int cooldown = userProfile.calculateNtrpCooldownDays(lowDays, midDays, highDays);
+
             long daysSinceUpdate = ChronoUnit.DAYS.between(profileData.getNtrpUpdatedAt(), LocalDateTime.now());
             if (daysSinceUpdate < cooldown) {
                 throw new BusinessException(BizErrorCode.NTRP_COOLDOWN, "自评修改冷却中，" + (cooldown - daysSinceUpdate) + " 天后可改");
@@ -357,34 +361,6 @@ public class ProfileAppService {
         profileData.setStatus(ProfileStatusEnum.NORMAL);
         profileData.setIsUnderReview(false);
         tennisProfileGateway.update(profileData);
-    }
-
-    /**
-     * 获取核查期剩余场次
-     */
-    private Integer getReviewRemainingMatches(String userId) {
-        Optional<ProfileChangeLogData> latestLog = profileChangeLogGateway.findLatestUnderReviewLog(userId);
-        if (latestLog.isPresent() && latestLog.get().getAfterValue() != null) {
-            return latestLog.get().getAfterValue().intValue();
-        }
-        return null;
-    }
-
-    /**
-     * 根据可信度获取 NTRP 冷却天数
-     */
-    private int getNtrpCooldownDays(BigDecimal credibilityScore) {
-        if (credibilityScore == null) {
-            return configGateway.getInt("score.ntrp.cooldown_low_days", 30);
-        }
-        float credibility = credibilityScore.floatValue();
-        if (credibility < 30) {
-            return configGateway.getInt("score.ntrp.cooldown_low_days", 30);
-        } else if (credibility < 60) {
-            return configGateway.getInt("score.ntrp.cooldown_mid_days", 60);
-        } else {
-            return configGateway.getInt("score.ntrp.cooldown_high_days", 90);
-        }
     }
 
     /**

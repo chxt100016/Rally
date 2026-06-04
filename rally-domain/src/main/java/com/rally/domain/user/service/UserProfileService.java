@@ -3,10 +3,15 @@ package com.rally.domain.user.service;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.user.enums.ProfileStatusEnum;
+import com.rally.domain.user.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.UserProfileGateway;
+import com.rally.domain.user.model.ProfileChangeLogData;
 import com.rally.domain.user.model.UserProfile;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 /**
  * 用户档案领域服务
@@ -17,6 +22,9 @@ public class UserProfileService {
 
     @Resource
     private UserProfileGateway userProfileGateway;
+
+    @Resource
+    private ProfileChangeLogGateway profileChangeLogGateway;
 
     /**
      * 查询用户档案，不存在则初始化 TBC
@@ -35,9 +43,7 @@ public class UserProfileService {
      */
     public UserProfile getProfile(String userId) {
         UserProfile profile = userProfileGateway.findByUserId(userId);
-        if (profile == null) {
-            throw new BusinessException(BizErrorCode.PROFILE_NOT_FOUND);
-        }
+        profile.assertExist();
         return profile;
     }
 
@@ -46,5 +52,16 @@ public class UserProfileService {
      */
     public void save(UserProfile profile) {
         userProfileGateway.save(profile);
+    }
+
+    /**
+     * 获取核查期剩余场次
+     */
+    public Integer getReviewRemainingMatches(String userId) {
+        Optional<ProfileChangeLogData> latestLog = profileChangeLogGateway.findLatestUnderReviewLog(userId);
+        if (latestLog.isPresent() && latestLog.get().getAfterValue() != null) {
+            return latestLog.get().getAfterValue().intValue();
+        }
+        return null;
     }
 }

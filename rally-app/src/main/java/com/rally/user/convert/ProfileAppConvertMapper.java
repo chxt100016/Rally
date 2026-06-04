@@ -13,35 +13,43 @@ public interface ProfileAppConvertMapper {
 
     ProfileAppConvertMapper INSTANCE = Mappers.getMapper(ProfileAppConvertMapper.class);
 
-    default TennisProfileVO toMyProfileVO(TennisProfileData profileData, UserData userData,
+    default MyUserProfileDTO toMyProfileVO(TennisProfileData profileData, UserData userData,
                                           Integer reviewRemainingMatches, Boolean ntrpEditable,
                                           Integer ntrpCooldownRemainingDays) {
-        TennisProfileVO vo = new TennisProfileVO();
+        MyUserProfileDTO dto = new MyUserProfileDTO();
+
+        // 设置用户基本信息
+        UserVO userVO = new UserVO();
         if (userData != null) {
-            vo.setUserId(userData.getUserId());
-            vo.setNickname(userData.getNickname());
-            vo.setAvatarUrl(userData.getAvatarUrl());
-            vo.setGender(userData.getGender() != null ? userData.getGender().name().toLowerCase() : null);
-            vo.setBirthday(userData.getBirthday());
+            userVO.setUserId(userData.getUserId());
+            userVO.setNickname(userData.getNickname());
+            userVO.setAvatarUrl(userData.getAvatarUrl());
+            userVO.setGender(userData.getGender());
+            userVO.setBirthday(userData.getBirthday());
         }
+        dto.setUser(userVO);
+
+        // 设置网球档案信息
+        TennisProfileVO profileVO = new TennisProfileVO();
         if (profileData != null) {
-            vo.setCityCode(profileData.getCityCode());
-            vo.setBio(profileData.getBio());
-            vo.setNtrpScore(profileData.getNtrpScore());
-            vo.setUtrScore(profileData.getUtrScore());
-            vo.setIsNewbie(profileData.getIsNewbie());
-            vo.setReputationScore(profileData.getReputationScore());
-            vo.setCredibilityScore(profileData.getCredibilityScore());
-            vo.setCalibrationScore(profileData.getCalibrationScore());
-            vo.setStatus(profileData.getStatus() != null ? profileData.getStatus().name().toLowerCase() : null);
-            vo.setIsUnderReview(profileData.getIsUnderReview());
-            vo.setVideoUrls(profileData.getVideoUrls());
-            vo.setNtrpUpdatedAt(profileData.getNtrpUpdatedAt());
+            profileVO.setCityCode(profileData.getCityCode());
+            profileVO.setNtrpScore(profileData.getNtrpScore());
+            profileVO.setUtrScore(profileData.getUtrScore());
+            profileVO.setIsNewbie(profileData.getIsNewbie());
+            profileVO.setReputationScore(profileData.getReputationScore());
+            profileVO.setCredibilityScore(profileData.getCredibilityScore());
+            profileVO.setCalibrationScore(profileData.getCalibrationScore());
+            profileVO.setStatus(profileData.getStatus() != null ? profileData.getStatus().name().toLowerCase() : null);
+            profileVO.setIsUnderReview(profileData.getIsUnderReview());
+            profileVO.setVideoUrls(profileData.getVideoUrls());
+            profileVO.setNtrpUpdatedAt(profileData.getNtrpUpdatedAt());
         }
-        vo.setReviewRemainingMatches(reviewRemainingMatches);
-        vo.setNtrpEditable(ntrpEditable);
-        vo.setNtrpCooldownRemainingDays(ntrpCooldownRemainingDays);
-        return vo;
+        profileVO.setReviewRemainingMatches(reviewRemainingMatches);
+        profileVO.setNtrpEditable(ntrpEditable);
+        profileVO.setNtrpCooldownRemainingDays(ntrpCooldownRemainingDays);
+        dto.setProfile(profileVO);
+
+        return dto;
     }
 
     default PlayerHomeVO toPlayerHomeVO(TennisProfileData profileData, UserData userData,

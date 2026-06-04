@@ -12,13 +12,9 @@ import java.util.List;
  */
 @Data
 public class TennisProfileVO {
-    private String userId;
-    private String nickname;
-    private String avatarUrl;
-    private String gender;
-    private LocalDate birthday;
+
     private String cityCode;
-    private String bio;
+
     private BigDecimal ntrpScore;
     private BigDecimal utrScore;
     private Boolean isNewbie;

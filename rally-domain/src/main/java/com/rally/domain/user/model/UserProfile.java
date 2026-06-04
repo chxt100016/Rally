@@ -6,7 +6,9 @@ import com.rally.domain.user.enums.GenderEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 /**
@@ -31,6 +33,12 @@ public class UserProfile {
         return instance;
     }
 
+    public void assertExist() {
+        if (user == null) {
+            throw new BusinessException(BizErrorCode.TOKEN_INVALID);
+        }
+    }
+
     /**
      * 获取档案状态
      */
@@ -39,6 +47,50 @@ public class UserProfile {
             return ProfileStatusEnum.NONE;
         }
         return profile.getStatus();
+    }
+
+    /**
+     * 是否在核查期
+     */
+    public boolean isUnderReview() {
+        return profile != null && Boolean.TRUE.equals(profile.getIsUnderReview());
+    }
+
+    /**
+     * 计算 NTRP 冷却天数
+     * 根据可信度返回对应的冷却天数
+     */
+    public int calculateNtrpCooldownDays(int lowDays, int midDays, int highDays) {
+        BigDecimal credibilityScore = profile != null ? profile.getCredibilityScore() : null;
+        if (credibilityScore == null) {
+            return lowDays;
+        }
+        float credibility = credibilityScore.floatValue();
+        if (credibility < 30) {
+            return lowDays;
+        } else if (credibility < 60) {
+            return midDays;
+        } else {
+            return highDays;
+        }
+    }
+
+    /**
+     * 计算 NTRP 可编辑状态和冷却剩余天数
+     *
+     * @param cooldownDays 冷却总天数
+     * @return [isEditable, cooldownRemainingDays]
+     */
+    public Object[] calculateNtrpEditableStatus(int cooldownDays) {
+        if (profile == null || profile.getNtrpUpdatedAt() == null) {
+            return new Object[]{true, null};
+        }
+
+        long daysSinceUpdate = ChronoUnit.DAYS.between(profile.getNtrpUpdatedAt(), LocalDateTime.now());
+        if (daysSinceUpdate < cooldownDays) {
+            return new Object[]{false, (int) (cooldownDays - daysSinceUpdate)};
+        }
+        return new Object[]{true, null};
     }
 
     /**
