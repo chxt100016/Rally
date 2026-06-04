@@ -3,7 +3,7 @@ package com.rally.meetup;
 import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.meetup.enums.ActionStateEnum;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
@@ -38,7 +38,6 @@ public class MeetupQueryService {
     private final MeetupGateway meetupGateway;
     private final WaitlistGateway waitlistGateway;
     private final NearbyGateway nearbyGateway;
-    private final ConfigGateway configGateway;
     private final UserGateway userGateway;
     private final TennisProfileGateway tennisProfileGateway;
 
@@ -294,7 +293,7 @@ public class MeetupQueryService {
 
         // 创建人视角
         if (isCreator) {
-            int lockMinutes = configGateway.getInt("meetup.edit_lock_minutes_before_start", 60);
+            int lockMinutes = SystemConfig.getInt("meetup.edit_lock_minutes_before_start", 60);
             boolean locked = LocalDateTime.now().isAfter(data.getStartTime().minusMinutes(lockMinutes));
             return locked ? ActionStateEnum.OWNER_EDIT_LOCKED : ActionStateEnum.OWNER_EDITABLE;
         }

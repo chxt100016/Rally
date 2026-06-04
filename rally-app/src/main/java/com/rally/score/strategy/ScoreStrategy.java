@@ -18,7 +18,7 @@ public interface ScoreStrategy {
 
     /**
      * 计算某用户在本维度的新分与变更明细。
-     * @param ctx    本场计算上下文（meetupId、参与者、是否有比分、各只读 Gateway、ConfigGateway）
+     * @param ctx    本场计算上下文（meetupId、参与者、是否有比分、各只读 Gateway）
      * @param userId 目标用户
      * @return 变更明细；若该维度本次无变化返回 before==after 的 ScoreChange（manager 据此决定是否记日志）
      */

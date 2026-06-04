@@ -1,13 +1,12 @@
 package com.rally.score.strategy;
 
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.review.enums.AttendanceEnum;
 import com.rally.domain.review.gateway.ReviewGateway;
 import com.rally.domain.review.model.ReviewData;
 import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.model.ScoreChange;
 import com.rally.domain.score.model.ScoreContext;
-import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.model.TennisProfileData;
@@ -29,7 +28,6 @@ public class ReputationStrategy implements ScoreStrategy {
 
     private final ReviewGateway reviewGateway;
     private final TennisProfileGateway profileGateway;
-    private final ConfigGateway config;
 
     @Override
     public ScoreDimensionEnum dimension() {
@@ -103,9 +101,9 @@ public class ReputationStrategy implements ScoreStrategy {
      */
     private int resolveDelta(String verdict) {
         return switch (verdict) {
-            case "no_show" -> config.getInt("score.reputation.no_show", -25);
-            case "late" -> config.getInt("score.reputation.late", -10);
-            default -> config.getInt("score.reputation.on_time", 2);
+            case "no_show" -> SystemConfig.getInt("score.reputation.no_show", -25);
+            case "late" -> SystemConfig.getInt("score.reputation.late", -10);
+            default -> SystemConfig.getInt("score.reputation.on_time", 2);
         };
     }
 

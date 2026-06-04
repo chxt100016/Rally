@@ -1,13 +1,14 @@
 package com.rally.user;
 
 import com.rally.cache.UserContext;
+import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.score.ScoreLevelCalculator;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.user.enums.RatingLevelEnum;
 import com.rally.domain.user.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -41,9 +41,6 @@ public class ProfileAppService {
     private UserGateway userGateway;
 
     @Resource
-    private ConfigGateway configGateway;
-
-    @Resource
     private UserProfileService userProfileService;
 
     /**
@@ -53,123 +50,97 @@ public class ProfileAppService {
         String userId = UserContext.get();
         UserProfile userProfile = userProfileService.getProfile(userId);
         TennisProfileData profileData = userProfile.getProfile();
+        UserData userData = userProfile.getUser();
 
         // 计算评分等级
-        String scoreLevel = calculateScoreLevel(profileData);
+        String scoreLevel = ScoreLevelCalculator.calculate(profileData);
 
-        // 构建评分明细
-        List<ScoreItemDTO> scoreItems = buildScoreItems(profileData);
+        // 构建评分明细（领域服务）
+        List<ScoreItemDTO> scoreItems = ScoreLevelCalculator.buildScoreItems(profileData);
 
         // 评价总数（暂时默认99）
         Integer reviewTotal = 99;
 
-        // 计算自评修改剩余冷却天数
-        Integer lockday = null;
-        if (profileData != null && profileData.getNtrpUpdatedAt() != null) {
-            int lowDays = configGateway.getInt("score.ntrp.cooldown_low_days", 30);
-            int midDays = configGateway.getInt("score.ntrp.cooldown_mid_days", 60);
-            int highDays = configGateway.getInt("score.ntrp.cooldown_high_days", 90);
-            int cooldown = userProfile.calculateNtrpCooldownDays(lowDays, midDays, highDays);
-            Object[] editStatus = userProfile.calculateNtrpEditableStatus(cooldown);
-            // editStatus[0]=isEditable, editStatus[1]=cooldownRemainingDays
-            if (!Boolean.TRUE.equals(editStatus[0]) && editStatus[1] != null) {
-                lockday = (Integer) editStatus[1];
+        // 计算自评修改剩余冷却天数（聚合根）
+        Integer lockday = userProfile.calculateNtrpLockday();
+
+        // 获取核查期剩余比赛场次（领域服务）
+        Integer remainingMatches = userProfileService.getReviewRemainingMatches(userId);
+
+        // ========== 构建返回值（直接 new + set） ==========
+        MyProfileDTO dto = new MyProfileDTO();
+
+        // 约球信息（暂时默认99）
+        MyProfileMeetupDTO meetupDTO = new MyProfileMeetupDTO();
+        meetupDTO.setCompletedCount(99);
+        dto.setMeetup(meetupDTO);
+
+        // 评价信息
+        MyProfileReviewDTO reviewDTO = new MyProfileReviewDTO();
+        reviewDTO.setTotal(reviewTotal);
+        List<ReviewTagDTO> tags = new ArrayList<>();
+        ReviewTagDTO tag1 = new ReviewTagDTO();
+        tag1.setName("可爱");
+        tags.add(tag1);
+        ReviewTagDTO tag2 = new ReviewTagDTO();
+        tag2.setName("发球好");
+        tags.add(tag2);
+        reviewDTO.setTags(tags);
+        dto.setReview(reviewDTO);
+
+        // 等级信息
+        MyProfileLevelDTO levelDTO = new MyProfileLevelDTO();
+        if (profileData != null) {
+            levelDTO.setNtrpScore(profileData.getNtrpScore());
+            levelDTO.setIsUnderReview(profileData.getIsUnderReview());
+        }
+        levelDTO.setLockday(lockday);
+        levelDTO.setRemainingMatches(remainingMatches);
+        LevelSuggestionDTO suggestionDTO = new LevelSuggestionDTO();
+        levelDTO.setSuggestion(suggestionDTO);
+        dto.setLevel(levelDTO);
+
+        // 评分信息
+        MyProfileScoreDTO scoreDTO = new MyProfileScoreDTO();
+        scoreDTO.setScoreLevel(scoreLevel);
+        scoreDTO.setData(scoreItems != null ? scoreItems : new ArrayList<>());
+        dto.setScore(scoreDTO);
+
+        // 用户基本信息
+        MyProfileUserDTO userDTO = new MyProfileUserDTO();
+        if (userData != null) {
+            userDTO.setUserId(userData.getUserId());
+            userDTO.setNickname(userData.getNickname());
+            userDTO.setAvatarUrl(userData.getAvatarUrl());
+            userDTO.setGender(userData.getGender());
+            userDTO.setBirthday(userData.getBirthday());
+            userDTO.setCityCode(userData.getCityCode());
+            userDTO.setBio(userData.getBio());
+        }
+        dto.setUser(userDTO);
+
+        // 视频信息
+        MyProfileVideoDTO videoDTO = new MyProfileVideoDTO();
+        if (profileData != null && profileData.getVideoUrls() != null) {
+            List<String> videoKeys = profileData.getVideoUrls();
+            videoDTO.setTotal(videoKeys.size());
+            List<VideoItemDTO> videoItems = new ArrayList<>();
+            for (String key : videoKeys) {
+                VideoItemDTO item = new VideoItemDTO();
+                item.setKey(key);
+                item.setUrl(QiniuConfiguration.buildSignedUrl(key));
+                videoItems.add(item);
             }
-        }
-
-        // 获取核查期剩余比赛场次
-        Integer remainingMatches = null;
-        if (Boolean.TRUE.equals(profileData != null ? profileData.getIsUnderReview() : null)) {
-            Optional<ProfileChangeLogData> latestLog = profileChangeLogGateway.findLatestUnderReviewLog(userId);
-            if (latestLog.isPresent() && latestLog.get().getAfterValue() != null) {
-                remainingMatches = latestLog.get().getAfterValue().intValue();
-            }
-        }
-
-        return ProfileAppConvertMapper.INSTANCE.toMyProfileDTO(
-                profileData, userProfile.getUser(), reviewTotal, scoreLevel, scoreItems,
-                lockday, remainingMatches);
-    }
-
-    /**
-     * 计算评分等级
-     */
-    private String calculateScoreLevel(TennisProfileData profileData) {
-        if (profileData == null) {
-            return RatingLevelEnum.C.getCode();
-        }
-
-        // 获取权重配置
-        int reputationWeight = configGateway.getInt("score.weight.reputation", 50);
-        int credibilityWeight = configGateway.getInt("score.weight.credibility", 30);
-        int calibrationWeight = configGateway.getInt("score.weight.calibration", 20);
-
-        // 获取分值，默认0
-        BigDecimal reputationScore = profileData.getReputationScore() != null ? profileData.getReputationScore() : BigDecimal.ZERO;
-        BigDecimal credibilityScore = profileData.getCredibilityScore() != null ? profileData.getCredibilityScore() : BigDecimal.ZERO;
-        BigDecimal calibrationScore = profileData.getCalibrationScore() != null ? profileData.getCalibrationScore() : BigDecimal.ZERO;
-
-        // 计算加权总分
-        BigDecimal totalScore = BigDecimal.ZERO;
-        totalScore = totalScore.add(reputationScore.multiply(new BigDecimal(reputationWeight)));
-        totalScore = totalScore.add(credibilityScore.multiply(new BigDecimal(credibilityWeight)));
-        totalScore = totalScore.add(calibrationScore.multiply(new BigDecimal(calibrationWeight)));
-        totalScore = totalScore.divide(new BigDecimal(100), 0, RoundingMode.HALF_UP);
-
-        // 根据总分确定等级
-        int score = totalScore.intValue();
-        if (score >= 90) {
-            return RatingLevelEnum.S.getCode();
-        } else if (score >= 75) {
-            return RatingLevelEnum.A.getCode();
-        } else if (score >= 55) {
-            return RatingLevelEnum.B.getCode();
+            videoDTO.setData(videoItems);
         } else {
-            return RatingLevelEnum.C.getCode();
+            videoDTO.setTotal(0);
+            videoDTO.setData(new ArrayList<>());
         }
+        dto.setVideo(videoDTO);
+
+        return dto;
     }
 
-    /**
-     * 构建评分明细列表
-     */
-    private List<ScoreItemDTO> buildScoreItems(TennisProfileData profileData) {
-        List<ScoreItemDTO> items = new ArrayList<>();
-
-        // 信誉分
-        ScoreItemDTO reputationItem = new ScoreItemDTO();
-        reputationItem.setName("信誉分");
-        reputationItem.setKey("reputation_score");
-        reputationItem.setValue(profileData != null && profileData.getReputationScore() != null ?
-                profileData.getReputationScore().toPlainString() : "0");
-        reputationItem.setLabel("权重" + configGateway.getInt("score.weight.reputation", 50) + "%");
-        reputationItem.setInfo(configGateway.getString("score.info.reputation", "信誉分说明你有信誉"));
-        reputationItem.setSort("");
-        items.add(reputationItem);
-
-        // 可信度
-        ScoreItemDTO credibilityItem = new ScoreItemDTO();
-        credibilityItem.setName("可信度");
-        credibilityItem.setKey("credibility_score");
-        credibilityItem.setValue(profileData != null && profileData.getCredibilityScore() != null ?
-                profileData.getCredibilityScore().toPlainString() : "0");
-        credibilityItem.setLabel("权重" + configGateway.getInt("score.weight.credibility", 30) + "%");
-        credibilityItem.setInfo(configGateway.getString("score.info.credibility", "可信度说明你可信"));
-        credibilityItem.setSort("");
-        items.add(credibilityItem);
-
-        // 校准度
-        ScoreItemDTO calibrationItem = new ScoreItemDTO();
-        calibrationItem.setName("校准度");
-        calibrationItem.setKey("calibration_score");
-        calibrationItem.setValue(profileData != null && profileData.getCalibrationScore() != null ?
-                profileData.getCalibrationScore().toPlainString() : "0");
-        calibrationItem.setLabel("权重" + configGateway.getInt("score.weight.calibration", 20) + "%");
-        calibrationItem.setInfo(configGateway.getString("score.info.calibration", "校准度说明你校准"));
-        calibrationItem.setSort("");
-        items.add(calibrationItem);
-
-        return items;
-    }
 
     /**
      * 球员主页
@@ -243,9 +214,9 @@ public class ProfileAppService {
 
         // 3. 冷却校验（system_suggest 跳过）
         if (profileData.getNtrpUpdatedAt() != null && !Boolean.TRUE.equals(cmd.getConfirmed())) {
-            int lowDays = configGateway.getInt("score.ntrp.cooldown_low_days", 30);
-            int midDays = configGateway.getInt("score.ntrp.cooldown_mid_days", 60);
-            int highDays = configGateway.getInt("score.ntrp.cooldown_high_days", 90);
+            int lowDays = SystemConfig.getInt("score.ntrp.cooldown_low_days", 30);
+            int midDays = SystemConfig.getInt("score.ntrp.cooldown_mid_days", 60);
+            int highDays = SystemConfig.getInt("score.ntrp.cooldown_high_days", 90);
             int cooldown = userProfile.calculateNtrpCooldownDays(lowDays, midDays, highDays);
 
             long daysSinceUpdate = ChronoUnit.DAYS.between(profileData.getNtrpUpdatedAt(), LocalDateTime.now());
@@ -257,11 +228,11 @@ public class ProfileAppService {
         // 4. 计算 delta
         BigDecimal oldNtrp = profileData.getNtrpScore();
         BigDecimal delta = oldNtrp != null ? ntrp.subtract(oldNtrp) : BigDecimal.ZERO;
-        BigDecimal triggerDelta = new BigDecimal(configGateway.getString("score.review_period.trigger_ntrp_delta", "0.5"));
+        BigDecimal triggerDelta = new BigDecimal(SystemConfig.getString("score.review_period.trigger_ntrp_delta", "0.5"));
 
         // 5. 向上 >= 0.5 级触发核查期
         if (delta.compareTo(triggerDelta) >= 0) {
-            int requiredMatches = configGateway.getInt("score.review_period.required_matches", 3);
+            int requiredMatches = SystemConfig.getInt("score.review_period.required_matches", 3);
             profileData.setStatus(ProfileStatusEnum.UNDER_REVIEW);
             profileData.setIsUnderReview(true);
 
@@ -318,8 +289,8 @@ public class ProfileAppService {
 
         if (isBad) {
             // 遇差票：重置进度，可信度暂降
-            int requiredMatches = configGateway.getInt("score.review_period.required_matches", 3);
-            int penaltyCredibility = configGateway.getInt("score.review_period.penalty_credibility", 50);
+            int requiredMatches = SystemConfig.getInt("score.review_period.required_matches", 3);
+            int penaltyCredibility = SystemConfig.getInt("score.review_period.penalty_credibility", 50);
 
             ProfileChangeLogData resetLog = new ProfileChangeLogData();
             resetLog.setUserId(userId);

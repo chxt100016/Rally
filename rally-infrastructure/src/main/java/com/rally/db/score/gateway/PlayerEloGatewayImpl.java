@@ -3,7 +3,7 @@ package com.rally.db.score.gateway;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.rally.db.score.entity.PlayerEloPO;
 import com.rally.db.score.repository.PlayerEloRepository;
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.score.gateway.PlayerEloGateway;
 import com.rally.domain.score.model.EloResult;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,6 @@ import java.util.List;
 public class PlayerEloGatewayImpl implements PlayerEloGateway {
 
     private final PlayerEloRepository playerEloRepository;
-    private final ConfigGateway config;
 
     @Override
     public float getEloScore(String userId) {
@@ -31,7 +30,7 @@ public class PlayerEloGatewayImpl implements PlayerEloGateway {
             return po.getEloScore();
         }
         // 不存在则返回初始值
-        return config.getFloat("score.elo.initial", 1500);
+        return SystemConfig.getFloat("score.elo.initial", 1500);
     }
 
     @Override

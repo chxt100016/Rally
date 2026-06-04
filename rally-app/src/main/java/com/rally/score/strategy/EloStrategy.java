@@ -1,6 +1,6 @@
 package com.rally.score.strategy;
 
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.review.gateway.ScoreRecordGateway;
 import com.rally.domain.review.model.ScoreRecordData;
 import com.rally.domain.score.gateway.PlayerEloGateway;
@@ -23,7 +23,6 @@ public class EloStrategy {
 
     private final ScoreRecordGateway scoreRecordGateway;
     private final PlayerEloGateway playerEloGateway;
-    private final ConfigGateway config;
 
     /**
      * 计算一场约球的 ELO 变更（多盘累计）
@@ -51,7 +50,7 @@ public class EloStrategy {
 
         // 3. 从 player_elo 读当前分（无则按 initial 初始化）
         Map<String, Float> currentElo = new HashMap<>();
-        float initialElo = config.getFloat("score.elo.initial", 1500);
+        float initialElo = SystemConfig.getFloat("score.elo.initial", 1500);
         for (String userId : allUserIds) {
             currentElo.put(userId, playerEloGateway.getEloScore(userId));
         }
@@ -63,9 +62,9 @@ public class EloStrategy {
         }
 
         // 5. 逐盘计算 ELO 变更
-        float kFactor = config.getFloat("score.elo.k_factor", 32);
-        float blowoutOffset = config.getFloat("score.elo.blowout_offset", 0.1f);
-        float closeOffset = config.getFloat("score.elo.close_offset", 0.05f);
+        float kFactor = SystemConfig.getFloat("score.elo.k_factor", 32);
+        float blowoutOffset = SystemConfig.getFloat("score.elo.blowout_offset", 0.1f);
+        float closeOffset = SystemConfig.getFloat("score.elo.close_offset", 0.05f);
 
         for (ScoreRecordData set : sets) {
             // A 侧选手

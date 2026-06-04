@@ -2,9 +2,8 @@ package com.rally.client.geo;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +14,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class CityLocator {
-
-    private final ConfigGateway configGateway;
 
     /**
      * 开通城市信息
@@ -54,7 +50,7 @@ public class CityLocator {
      * 获取开通城市列表
      */
     public List<String> getOpenedCities() {
-        String json = configGateway.getString("meetup.city.opened_codes", "[]");
+        String json = SystemConfig.getString("meetup.city.opened_codes", "[]");
         if (json == null || json.isEmpty() || "[]".equals(json)) {
             return List.of();
         }

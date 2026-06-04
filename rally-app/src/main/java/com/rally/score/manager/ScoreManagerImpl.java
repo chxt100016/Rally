@@ -1,10 +1,9 @@
 package com.rally.score.manager;
 
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.review.gateway.ReviewGateway;
 import com.rally.domain.review.gateway.ScoreRecordGateway;
-import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.gateway.PlayerEloGateway;
 import com.rally.domain.score.gateway.ScoreManager;
 import com.rally.domain.score.gateway.ScoreStatusGateway;
@@ -55,8 +54,6 @@ public class ScoreManagerImpl implements ScoreManager {
     private PlayerEloGateway eloGateway;
     @Resource
     private ScoreStatusGateway statusGateway;
-    @Resource
-    private ConfigGateway config;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -132,7 +129,7 @@ public class ScoreManagerImpl implements ScoreManager {
         int delta = resolvePenalty(cmd.getReason());
 
         // 3. 计算新分（下限 0）
-        int minScore = config.getInt("score.reputation.min", 0);
+        int minScore = SystemConfig.getInt("score.reputation.min", 0);
         BigDecimal after = before.add(BigDecimal.valueOf(delta));
         after = after.max(BigDecimal.valueOf(minScore));
 
@@ -176,7 +173,6 @@ public class ScoreManagerImpl implements ScoreManager {
         ctx.setMeetupGateway(meetupGateway);
         ctx.setProfileGateway(profileGateway);
         ctx.setChangeLogGateway(changeLogGateway);
-        ctx.setConfig(config);
         return ctx;
     }
 
@@ -184,7 +180,7 @@ public class ScoreManagerImpl implements ScoreManager {
      * 判断是否新人（收到评价数 < min_reviews）
      */
     private boolean isNewbie(String userId) {
-        int minReviews = config.getInt("score.newbie.min_reviews", 3);
+        int minReviews = SystemConfig.getInt("score.newbie.min_reviews", 3);
         // TODO: 需要统计收到的 ntrp_vote 去重场次数
         // 暂时从 profile 读取 isNewbie 字段
         return profileGateway.findByUserId(userId)
@@ -241,13 +237,13 @@ public class ScoreManagerImpl implements ScoreManager {
      */
     private int resolvePenalty(ChangeReasonEnum reason) {
         return switch (reason) {
-            case CANCEL_24H_OUT -> config.getInt("meetup.cancel.penalty_24h_out", -5);
-            case CANCEL_12_24H -> config.getInt("meetup.cancel.penalty_12_24h", -10);
-            case CANCEL_6_12H -> config.getInt("meetup.cancel.penalty_6_12h", -15);
-            case CANCEL_UNDER_6H -> config.getInt("meetup.cancel.penalty_under_6h", -25);
-            case QUIT_UNDER_6H -> config.getInt("meetup.quit.penalty_under_6h", -25);
-            case NO_SHOW -> config.getInt("score.reputation.no_show", -25);
-            case LATE -> config.getInt("score.reputation.late", -10);
+            case CANCEL_24H_OUT -> SystemConfig.getInt("meetup.cancel.penalty_24h_out", -5);
+            case CANCEL_12_24H -> SystemConfig.getInt("meetup.cancel.penalty_12_24h", -10);
+            case CANCEL_6_12H -> SystemConfig.getInt("meetup.cancel.penalty_6_12h", -15);
+            case CANCEL_UNDER_6H -> SystemConfig.getInt("meetup.cancel.penalty_under_6h", -25);
+            case QUIT_UNDER_6H -> SystemConfig.getInt("meetup.quit.penalty_under_6h", -25);
+            case NO_SHOW -> SystemConfig.getInt("score.reputation.no_show", -25);
+            case LATE -> SystemConfig.getInt("score.reputation.late", -10);
             default -> 0;
         };
     }

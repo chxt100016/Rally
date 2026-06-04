@@ -1,7 +1,7 @@
 package com.rally.db.config.convert;
 
-import com.rally.domain.config.enums.ValueType;
-import com.rally.domain.config.model.ConfigData;
+import com.rally.domain.system.enums.ValueType;
+import com.rally.domain.system.model.ConfigData;
 import com.rally.db.config.entity.SysConfigPO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Named;

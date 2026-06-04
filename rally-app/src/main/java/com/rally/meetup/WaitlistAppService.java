@@ -3,7 +3,7 @@ package com.rally.meetup;
 import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.enums.WaitlistStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
@@ -37,7 +37,6 @@ public class WaitlistAppService {
 
     private final MeetupGateway meetupGateway;
     private final WaitlistGateway waitlistGateway;
-    private final ConfigGateway configGateway;
     private final UserGateway userGateway;
     private final TennisProfileGateway tennisProfileGateway;
 
@@ -175,11 +174,11 @@ public class WaitlistAppService {
 
         // 3. 计算是否扣分
         long hoursUntilStart = ChronoUnit.HOURS.between(LocalDateTime.now(), meetup.getStartTime());
-        int thresholdHours = configGateway.getInt("meetup.quit.penalty_threshold_hours", 6);
+        int thresholdHours = SystemConfig.getInt("meetup.quit.penalty_threshold_hours", 6);
 
         if (hoursUntilStart < thresholdHours) {
             // 扣分
-            int penalty = configGateway.getInt("meetup.quit.penalty_under_6h", 25);
+            int penalty = SystemConfig.getInt("meetup.quit.penalty_under_6h", 25);
             // TODO: 调用评分域扣分
             log.info("退出扣分: userId={}, meetupId={}, penalty={}", userId, meetupId, penalty);
         }
@@ -376,7 +375,7 @@ public class WaitlistAppService {
      */
     private void checkTimeConflict(String userId, LocalDateTime startTime, LocalDateTime endTime,
                                     String excludeMeetupId) {
-        int bufferMinutes = configGateway.getInt("meetup.conflict.buffer_minutes", 30);
+        int bufferMinutes = SystemConfig.getInt("meetup.conflict.buffer_minutes", 30);
         LocalDateTime conflictStart = startTime.minusMinutes(bufferMinutes);
         LocalDateTime conflictEnd = endTime.plusMinutes(bufferMinutes);
 

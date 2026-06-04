@@ -1,6 +1,6 @@
 package com.rally.score.suggest;
 
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.score.model.SuggestResult;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.model.TennisProfileData;
@@ -20,7 +20,6 @@ import java.math.RoundingMode;
 @RequiredArgsConstructor
 public class CalibrationSuggestService {
 
-    private final ConfigGateway config;
     private final TennisProfileGateway profileGateway;
 
     /**
@@ -38,9 +37,9 @@ public class CalibrationSuggestService {
         SuggestResult result = new SuggestResult();
 
         // 读取触发阈值
-        int suggestMinVotes = config.getInt("score.calibration.suggest_min_votes", 8);
-        float suggestDeviation = config.getFloat("score.calibration.suggest_deviation", 0.25f);
-        float suggestConcentration = config.getFloat("score.calibration.suggest_concentration", 0.60f);
+        int suggestMinVotes = SystemConfig.getInt("score.calibration.suggest_min_votes", 8);
+        float suggestDeviation = SystemConfig.getFloat("score.calibration.suggest_deviation", 0.25f);
+        float suggestConcentration = SystemConfig.getFloat("score.calibration.suggest_concentration", 0.60f);
 
         // 判定是否触发
         boolean triggered = totalVotes >= suggestMinVotes

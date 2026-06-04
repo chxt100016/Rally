@@ -3,14 +3,13 @@ package com.rally.review;
 import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.review.enums.AttendanceEnum;
 import com.rally.domain.review.enums.NtrpVoteEnum;
 import com.rally.domain.review.enums.ReviewTypeEnum;
 import com.rally.domain.review.gateway.ReviewGateway;
-import com.rally.domain.review.gateway.ScoreRecordGateway;
 import com.rally.domain.review.model.*;
 import com.rally.domain.score.gateway.ScoreManager;
 import com.rally.domain.user.gateway.UserGateway;
@@ -35,7 +34,6 @@ public class ReviewAppService {
 
     private final ReviewGateway reviewGateway;
     private final MeetupGateway meetupGateway;
-    private final ConfigGateway configGateway;
     private final ScoreManager scoreManager;
     private final UserGateway userGateway;
     private final UserProfileGateway userProfileGateway;
@@ -67,7 +65,7 @@ public class ReviewAppService {
         }
 
         // 4. 截止时间校验
-        int deadlineDays = configGateway.getInt("review.deadline_days", 30);
+        int deadlineDays = SystemConfig.getInt("review.deadline_days", 30);
         LocalDateTime deadlineAt = meetup.getEndTime().plusDays(deadlineDays);
         if (LocalDateTime.now().isAfter(deadlineAt)) {
             throw new BusinessException(BizErrorCode.REVIEW_DEADLINE_PASSED);
@@ -97,8 +95,8 @@ public class ReviewAppService {
         List<String> tags = cmd.getTags();
         if (tags != null && !tags.isEmpty()) {
             // 手动标签长度校验
-            int maxLength = configGateway.getInt("review.tag.max_length", 8);
-            int maxCustom = configGateway.getInt("review.tag.max_custom_per_review", 3);
+            int maxLength = SystemConfig.getInt("review.tag.max_length", 8);
+            int maxCustom = SystemConfig.getInt("review.tag.max_custom_per_review", 3);
             if (tags.size() > maxCustom) {
                 throw new BusinessException(BizErrorCode.PARAM_ERROR, "手动标签数量不超过" + maxCustom + "个");
             }
@@ -137,7 +135,7 @@ public class ReviewAppService {
         }
 
         // 2. 判断截止状态
-        int deadlineDays = configGateway.getInt("review.deadline_days", 30);
+        int deadlineDays = SystemConfig.getInt("review.deadline_days", 30);
         LocalDateTime deadlineAt = meetup.getEndTime().plusDays(deadlineDays);
         boolean deadlinePassed = LocalDateTime.now().isAfter(deadlineAt);
 
@@ -148,7 +146,7 @@ public class ReviewAppService {
                 .toList();
 
         // 4. 系统默认标签池
-        String tagPoolJson = configGateway.getString("review.tag.default_pool",
+        String tagPoolJson = SystemConfig.getString("review.tag.default_pool",
                 "[\"正手稳\",\"反手稳\",\"发球好\",\"底线稳\",\"网前好\",\"移动快\",\"友善\"]");
         List<String> defaultTagPool;
         try {
@@ -157,7 +155,7 @@ public class ReviewAppService {
             defaultTagPool = List.of("正手稳", "反手稳", "发球好", "底线稳", "网前好", "移动快", "友善");
         }
 
-        int suggestCount = configGateway.getInt("review.tag.random_pick_count", 3);
+        int suggestCount = SystemConfig.getInt("review.tag.random_pick_count", 3);
 
         // 5. 构建每个可评价人的信息
         List<ReviewablePersonVO> people = new ArrayList<>();

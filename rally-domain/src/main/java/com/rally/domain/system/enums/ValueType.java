@@ -1,4 +1,4 @@
-package com.rally.domain.config.enums;
+package com.rally.domain.system.enums;
 
 /**
  * 配置值类型枚举

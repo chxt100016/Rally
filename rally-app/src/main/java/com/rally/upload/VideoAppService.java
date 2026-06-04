@@ -6,7 +6,7 @@ import com.rally.cache.UserContext;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.VideoTokenVO;
@@ -25,9 +25,6 @@ public class VideoAppService {
     @Resource
     private TennisProfileGateway tennisProfileGateway;
 
-    @Resource
-    private ConfigGateway configGateway;
-
     /**
      * 获取视频直传凭证
      */
@@ -36,14 +33,14 @@ public class VideoAppService {
         TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
                 .orElse(null);
         if (profileData != null) {
-            int maxCount = configGateway.getInt("user.video.max_count", 3);
+            int maxCount = SystemConfig.getInt("user.video.max_count", 3);
             List<String> currentUrls = profileData.getVideoUrls();
             if (currentUrls != null && currentUrls.size() >= maxCount) {
                 throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED);
             }
         }
 
-        int maxSizeMb = configGateway.getInt("user.video.max_size_mb", 5);
+        int maxSizeMb = SystemConfig.getInt("user.video.max_size_mb", 5);
         return this.generateUploadToken(userId, maxSizeMb);
     }
 

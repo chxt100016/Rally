@@ -1,8 +1,7 @@
 package com.rally.web.system;
 
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.tennis.model.Result;
-import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,9 +21,6 @@ import java.util.Map;
 @RequestMapping("/system")
 public class SystemController {
 
-    @Resource
-    private ConfigGateway configGateway;
-
     /**
      * 根据 key 查询配置值
      *
@@ -33,7 +29,7 @@ public class SystemController {
      */
     @GetMapping("/config")
     public Result<String> getConfig(@RequestParam("key") String key) {
-        String value = configGateway.getString(key, null);
+        String value = SystemConfig.getString(key, null);
         return Result.ok(value);
     }
 
@@ -47,7 +43,7 @@ public class SystemController {
     public Result<Map<String, String>> batchGetConfig(@RequestBody List<String> keys) {
         Map<String, String> result = new LinkedHashMap<>();
         for (String key : keys) {
-            String value = configGateway.getString(key, null);
+            String value = SystemConfig.getString(key, null);
             if (value != null) {
                 result.put(key, value);
             }

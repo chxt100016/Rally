@@ -3,7 +3,7 @@ package com.rally.review;
 import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.review.enums.SetFormatEnum;
@@ -28,7 +28,6 @@ public class ScoreRecordAppService {
 
     private final ScoreRecordGateway scoreRecordGateway;
     private final MeetupGateway meetupGateway;
-    private final ConfigGateway configGateway;
     private final ScoreManager scoreManager;
 
     /**
@@ -228,7 +227,7 @@ public class ScoreRecordAppService {
 
         switch (format) {
             case GAMES_4: {
-                int maxGames = configGateway.getInt("review.score.games4_max", 5);
+                int maxGames = SystemConfig.getInt("review.score.games4_max", 5);
                 if (winner > maxGames) {
                     throw new BusinessException(BizErrorCode.SCORE_FORMAT_INVALID,
                             "4局制单侧最大" + maxGames + "局");
@@ -240,7 +239,7 @@ public class ScoreRecordAppService {
                 break;
             }
             case GAMES_6: {
-                int maxGames = configGateway.getInt("review.score.games6_max", 7);
+                int maxGames = SystemConfig.getInt("review.score.games6_max", 7);
                 if (winner > maxGames) {
                     throw new BusinessException(BizErrorCode.SCORE_FORMAT_INVALID,
                             "6局制单侧最大" + maxGames + "局");
@@ -256,8 +255,8 @@ public class ScoreRecordAppService {
                 break;
             }
             case TIEBREAK: {
-                int minScore = configGateway.getInt("review.score.tiebreak_min", 7);
-                int minLead = configGateway.getInt("review.score.tiebreak_lead", 2);
+                int minScore = SystemConfig.getInt("review.score.tiebreak_min", 7);
+                int minLead = SystemConfig.getInt("review.score.tiebreak_lead", 2);
                 if (winner < minScore) {
                     throw new BusinessException(BizErrorCode.SCORE_FORMAT_INVALID,
                             "抢七胜方至少" + minScore + "分");

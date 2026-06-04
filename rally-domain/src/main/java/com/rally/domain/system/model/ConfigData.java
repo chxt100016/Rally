@@ -1,6 +1,6 @@
-package com.rally.domain.config.model;
+package com.rally.domain.system.model;
 
-import com.rally.domain.config.enums.ValueType;
+import com.rally.domain.system.enums.ValueType;
 import lombok.Data;
 
 import java.time.LocalDateTime;

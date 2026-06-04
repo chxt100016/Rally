@@ -4,7 +4,7 @@ import com.rally.cache.UserContext;
 import com.rally.client.geo.CityLocator;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.config.gateway.ConfigGateway;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
@@ -29,7 +29,6 @@ public class MeetupAppService {
 
     private final MeetupGateway meetupGateway;
     private final NearbyGateway nearbyGateway;
-    private final ConfigGateway configGateway;
     private final CityLocator cityLocator;
     private final MeetupDomainService meetupDomainService;
 
@@ -43,7 +42,7 @@ public class MeetupAppService {
         String userId = UserContext.get();
 
         // 1. 当日发布上限校验
-        int publishLimit = configGateway.getInt("anti_abuse.publish_per_day_limit", 5);
+        int publishLimit = SystemConfig.getInt("anti_abuse.publish_per_day_limit", 5);
         long todayCount = meetupGateway.countTodayActive(userId);
         if (todayCount >= publishLimit) {
             throw new BusinessException(BizErrorCode.PUBLISH_LIMIT_EXCEEDED);
@@ -95,7 +94,7 @@ public class MeetupAppService {
 
         // 2. 权限和状态校验（domain）
         Meetup meetup = new Meetup(data);
-        int lockMinutes = configGateway.getInt("meetup.edit_lock_minutes_before_start", 60);
+        int lockMinutes = SystemConfig.getInt("meetup.edit_lock_minutes_before_start", 60);
         if (!meetup.canEdit(userId, lockMinutes)) {
             throw new BusinessException(BizErrorCode.MEETUP_STATUS_ILLEGAL);
         }
@@ -157,10 +156,10 @@ public class MeetupAppService {
 
         // 3. 阶梯扣分（如果有人报名）
         if (data.getCurrentPlayers() > 1) {
-            int penalty24h = configGateway.getInt("meetup.cancel.penalty_24h_out", 5);
-            int penalty12h = configGateway.getInt("meetup.cancel.penalty_12_24h", 10);
-            int penalty6h = configGateway.getInt("meetup.cancel.penalty_6_12h", 15);
-            int penaltyUnder6h = configGateway.getInt("meetup.cancel.penalty_under_6h", 25);
+            int penalty24h = SystemConfig.getInt("meetup.cancel.penalty_24h_out", 5);
+            int penalty12h = SystemConfig.getInt("meetup.cancel.penalty_12_24h", 10);
+            int penalty6h = SystemConfig.getInt("meetup.cancel.penalty_6_12h", 15);
+            int penaltyUnder6h = SystemConfig.getInt("meetup.cancel.penalty_under_6h", 25);
             int penalty = meetupDomainService.calculateCancelPenalty(
                     data.getStartTime(), penalty24h, penalty12h, penalty6h, penaltyUnder6h);
             if (penalty > 0) {

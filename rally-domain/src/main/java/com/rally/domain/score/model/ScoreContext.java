@@ -1,6 +1,5 @@
 package com.rally.domain.score.model;
 
-import com.rally.domain.config.gateway.ConfigGateway;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.review.gateway.ReviewGateway;
 import com.rally.domain.review.gateway.ScoreRecordGateway;
@@ -42,7 +41,4 @@ public class ScoreContext {
 
     /** 写 Gateway：变更日志 */
     private ProfileChangeLogGateway changeLogGateway;
-
-    /** 配置 Gateway */
-    private ConfigGateway config;
 }
