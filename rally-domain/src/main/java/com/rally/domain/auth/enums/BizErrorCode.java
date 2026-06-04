@@ -51,7 +51,18 @@ public enum BizErrorCode {
     WAITLIST_NOT_FOUND(41015, "报名记录不存在"),
     NOT_CREATOR(41016, "仅发布者可操作"),
     CITY_NOT_OPENED(41017, "该城市暂未开通"),
-    CANNOT_JOIN_OWN(41018, "不能报名自己发布的约球");
+    CANNOT_JOIN_OWN(41018, "不能报名自己发布的约球"),
+
+    // ========== 评价域 42001-42999 ==========
+    REVIEW_DUPLICATE(42001, "重复评价"),
+    REVIEW_DEADLINE_PASSED(42002, "评价已超期"),
+    REVIEW_NOT_PARTICIPANT(42003, "非本场参与者"),
+    REVIEW_SELF_FORBIDDEN(42004, "不可评价自己"),
+    MEETUP_NOT_FINISHED(42005, "约球未结束"),
+    SCORE_FORMAT_INVALID(42010, "比分不合赛制"),
+    SCORE_VERSION_CONFLICT(42011, "比分已被其他参与者更新，请刷新后重试"),
+    SCORE_PLAYER_INVALID(42012, "比分选手非法"),
+    SCORE_SET_DUPLICATE(42013, "盘号重复");
 
     private final int code;
     private final String message;

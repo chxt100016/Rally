@@ -25,6 +25,7 @@ public class UserGatewayImpl implements UserGateway {
         po.setAvatarUrl(user.getAvatarUrl());
         po.setGender(user.getGender() != null ? user.getGender().name().toLowerCase() : GenderEnum.UNDISCLOSED.name().toLowerCase());
         po.setBirthday(user.getBirthday());
+        po.setBio(user.getBio());
         userRepository.save(po);
 
         user.setUserId(po.getUserId());
@@ -53,6 +54,9 @@ public class UserGatewayImpl implements UserGateway {
         if (user.getBirthday() != null) {
             po.setBirthday(user.getBirthday());
         }
+        if (user.getBio() != null) {
+            po.setBio(user.getBio());
+        }
         userRepository.updateById(po);
 
         return toData(po);
@@ -64,6 +68,7 @@ public class UserGatewayImpl implements UserGateway {
         data.setNickname(po.getNickname());
         data.setAvatarUrl(po.getAvatarUrl());
         data.setBirthday(po.getBirthday());
+        data.setBio(po.getBio());
         if (po.getGender() != null) {
             try {
                 data.setGender(GenderEnum.valueOf(po.getGender().toUpperCase()));

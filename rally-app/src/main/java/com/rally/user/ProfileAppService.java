@@ -106,16 +106,16 @@ public class ProfileAppService {
         if (cmd.getBirthday() != null) {
             userData.setBirthday(cmd.getBirthday());
         }
+        if (cmd.getBio() != null) {
+            userData.setBio(cmd.getBio());
+        }
         userGateway.updateUser(userData);
 
-        // 更新 profile 表（城市/简介）
+        // 更新 profile 表（城市）
         TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
         if (cmd.getCityCode() != null) {
             profileData.setCityCode(cmd.getCityCode());
-        }
-        if (cmd.getBio() != null) {
-            profileData.setBio(cmd.getBio());
         }
         tennisProfileGateway.update(profileData);
 

@@ -34,7 +34,6 @@ CREATE TABLE `user_tennis_profile` (
   `biz_id`            VARCHAR(32)  NOT NULL COMMENT '雪花 ID（业务主键）',
   `user_id`           VARCHAR(32)  NOT NULL COMMENT '关联 users.user_id',
   `city_code`         VARCHAR(32)  DEFAULT NULL COMMENT '用户当前城市编码',
-  `bio`               VARCHAR(255) DEFAULT NULL COMMENT '个人简介',
   `video_urls`        JSON         DEFAULT NULL COMMENT '打球视频 key 列表，存储放宽最多 5，交互上限走配置 user.video.max_count 默认 3（裁定 D1）',
   `ntrp_score`        DECIMAL(3,1) DEFAULT NULL COMMENT 'NTRP 自评 1.5~7.0 步长 0.5',
   `utr_score`         DECIMAL(4,2) DEFAULT NULL COMMENT 'UTR 三方接入选填，MVP 预留不实现',
@@ -228,3 +227,103 @@ CREATE TABLE `rally_meetup_waitlist` (
   KEY `idx_user_status` (`user_id`, `status`) COMMENT '查我的报名 + 冲突检测',
   KEY `idx_meetup_status` (`rally_meetup_id`, `status`) COMMENT '审批列表'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='约球报名/审核等待表';
+
+-- ============================================================
+-- 7. 评价域：评价竖表
+-- ============================================================
+
+DROP TABLE IF EXISTS `rally_review`;
+CREATE TABLE `rally_review` (
+  `id`              BIGINT      NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`          VARCHAR(32) NOT NULL COMMENT '业务唯一 ID（雪花算法字符串）',
+  `rally_meetup_id` VARCHAR(32) NOT NULL COMMENT '关联 rally_meetup.biz_id',
+  `from_user_id`    VARCHAR(32) NOT NULL COMMENT '评价人 user_id（仅本人，不可代评）',
+  `to_user_id`      VARCHAR(32) NOT NULL COMMENT '被评价人 user_id',
+  `review_type`     VARCHAR(16) NOT NULL COMMENT '评价维度：ntrp_vote 水平三元投票 / attendance 出勤 / tag 个性化标签',
+  `review_value`    VARCHAR(64) NOT NULL COMMENT '评价值。ntrp_vote: higher/same/lower；attendance: on_time/late/no_show；tag: 标签名（每标签一行）',
+  `create_time`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  -- 裁定 D12：含 review_value。ntrp_vote/attendance 因 value 受限实质每人各一行；tag 允许多行
+  UNIQUE KEY `uk_review_dim` (`rally_meetup_id`,`from_user_id`,`to_user_id`,`review_type`,`review_value`),
+  KEY `idx_to_user` (`to_user_id`,`review_type`) COMMENT '球员主页按被评价人+维度聚合',
+  KEY `idx_meetup_from` (`rally_meetup_id`,`from_user_id`) COMMENT '查我在某场已评状态'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评价竖表（NTRP三元投票/出勤/个性化标签，每维度值一行）';
+
+-- ============================================================
+-- 8. 评价域：比分记录表（按盘）
+-- ============================================================
+
+DROP TABLE IF EXISTS `rally_meetup_score`;
+CREATE TABLE `rally_meetup_score` (
+  `id`              BIGINT      NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`          VARCHAR(32) NOT NULL COMMENT '业务唯一 ID（雪花算法字符串）',
+  `rally_meetup_id` VARCHAR(32) NOT NULL COMMENT '关联 rally_meetup.biz_id',
+  `set_number`      INT         NOT NULL COMMENT '第几盘，从 1 开始',
+  `set_format`      VARCHAR(16) NOT NULL COMMENT '赛制：games_4 / games_6 / tiebreak',
+  `side_a_player1`  VARCHAR(32) NOT NULL COMMENT 'A 侧选手1 user_id（裁定 D13，单个）',
+  `side_a_player2`  VARCHAR(32) DEFAULT NULL COMMENT 'A 侧选手2 user_id，单打为 NULL',
+  `side_b_player1`  VARCHAR(32) NOT NULL COMMENT 'B 侧选手1 user_id',
+  `side_b_player2`  VARCHAR(32) DEFAULT NULL COMMENT 'B 侧选手2 user_id，单打为 NULL',
+  `side_a_score`    INT         NOT NULL COMMENT 'A 侧本盘比分（局数/抢七分）',
+  `side_b_score`    INT         NOT NULL COMMENT 'B 侧本盘比分',
+  `recorded_by`     VARCHAR(32) NOT NULL COMMENT '记录人 user_id（任意参与者可代记）',
+  `version`         INT         NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+  `create_time`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  UNIQUE KEY `uk_meetup_set` (`rally_meetup_id`,`set_number`) COMMENT '同场同盘唯一',
+  KEY `idx_meetup` (`rally_meetup_id`) COMMENT '按场查全部盘'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='比分记录表（按盘，双侧选手，乐观锁）';
+
+-- ============================================================
+-- 9. 评价域：追加配置项
+-- ============================================================
+
+INSERT INTO `sys_config` (`biz_id`, `config_key`, `config_value`, `value_type`, `scope`, `description`, `enabled`, `version`) VALUES
+('cfg0000000000000064', 'review.tag.max_length', '8', 'int', 'global', '手动输入单标签字符上限', 1, 0),
+('cfg0000000000000065', 'review.tag.max_custom_per_review', '3', 'int', 'global', '单次评价手动输入标签数上限', 1, 0),
+('cfg0000000000000066', 'review.score.games4_max', '5', 'int', 'global', '4局制单侧最大局数', 1, 0),
+('cfg0000000000000067', 'review.score.games6_max', '7', 'int', 'global', '6局制单侧最大局数', 1, 0),
+('cfg0000000000000068', 'review.score.tiebreak_min', '7', 'int', 'global', '抢七胜方最低分', 1, 0),
+('cfg0000000000000069', 'review.score.tiebreak_lead', '2', 'int', 'global', '抢七最低领先分', 1, 0);
+
+-- ============================================================
+-- 10. 评分域：ELO 聚合表
+-- ============================================================
+
+DROP TABLE IF EXISTS `player_elo`;
+CREATE TABLE `player_elo` (
+  `id`          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`      VARCHAR(32) NOT NULL COMMENT '业务唯一 ID（雪花算法字符串）',
+  `user_id`     VARCHAR(32) NOT NULL COMMENT '关联 users.user_id',
+  `elo_score`   FLOAT       NOT NULL DEFAULT 1500 COMMENT 'ELO 分，初始 1500（配置 score.elo.initial）',
+  `match_count` INT         NOT NULL DEFAULT 0 COMMENT '已计入 ELO 的对局盘数，便于后续 K 衰减（MVP 仅记录）',
+  `create_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  UNIQUE KEY `uk_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='玩家 ELO 聚合表（后台撮合，不展示）';
+
+-- ============================================================
+-- 11. 评分域：批量评分幂等状态表
+-- ============================================================
+
+DROP TABLE IF EXISTS `rally_meetup_score_status`;
+CREATE TABLE `rally_meetup_score_status` (
+  `id`                BIGINT      NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`            VARCHAR(32) NOT NULL COMMENT '业务唯一 ID（雪花算法字符串）',
+  `meetup_id`         VARCHAR(32) NOT NULL COMMENT '关联 rally_meetup.biz_id（唯一）',
+  `score_version`     INT         NOT NULL DEFAULT 0 COMMENT '重算版本：评价/比分变更时 +1，processed_version 落后则需重算',
+  `processed_version` INT         NOT NULL DEFAULT -1 COMMENT '已处理到的版本号，初始 -1（从未处理）',
+  `processed_at`      DATETIME    DEFAULT NULL COMMENT '最近一次处理完成时间，NULL=从未处理',
+  `create_time`       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  UNIQUE KEY `uk_meetup_id` (`meetup_id`),
+  KEY `idx_pending` (`processed_at`) COMMENT '扫描待处理（processed_at IS NULL 或 version 落后）'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='批量评分幂等状态表（score_version 重算控制）';

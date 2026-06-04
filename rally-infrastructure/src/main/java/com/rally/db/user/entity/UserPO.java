@@ -18,6 +18,8 @@ public class UserPO {
     private String avatarUrl;
     private String gender;
     private LocalDate birthday;
+    /** 个人简介 */
+    private String bio;
     private String phone;
     private String email;
     private LocalDateTime createTime;

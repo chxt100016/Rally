@@ -61,10 +61,10 @@ public interface ProfileAppConvertMapper {
             vo.setAvatarUrl(userData.getAvatarUrl());
             vo.setGender(userData.getGender() != null ? userData.getGender().name().toLowerCase() : null);
             vo.setBirthday(userData.getBirthday());
+            vo.setBio(userData.getBio());
         }
         if (profileData != null) {
             vo.setCityCode(profileData.getCityCode());
-            vo.setBio(profileData.getBio());
             vo.setNtrpScore(profileData.getNtrpScore());
             vo.setIsNewbie(profileData.getIsNewbie());
             vo.setIsUnderReview(profileData.getIsUnderReview());

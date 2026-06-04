@@ -92,4 +92,18 @@ public class WaitlistRepository {
                 .set(WaitlistPO::getCreateTime, LocalDateTime.now())
                 .update();
     }
+
+    /**
+     * 查询约球已批准的参与者 userId 列表
+     */
+    public List<String> listApprovedUserIds(String meetupId) {
+        return waitlistService.lambdaQuery()
+                .select(WaitlistPO::getUserId)
+                .eq(WaitlistPO::getRallyMeetupId, meetupId)
+                .eq(WaitlistPO::getStatus, "approved")
+                .list()
+                .stream()
+                .map(WaitlistPO::getUserId)
+                .toList();
+    }
 }

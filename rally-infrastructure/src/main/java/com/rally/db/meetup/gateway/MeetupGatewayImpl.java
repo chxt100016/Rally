@@ -3,11 +3,14 @@ package com.rally.db.meetup.gateway;
 import com.rally.db.meetup.convert.MeetupConvertMapper;
 import com.rally.db.meetup.entity.MeetupPO;
 import com.rally.db.meetup.repository.MeetupRepository;
+import com.rally.db.meetup.repository.WaitlistRepository;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.MeetupData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +21,7 @@ import java.util.List;
 public class MeetupGatewayImpl implements MeetupGateway {
 
     private final MeetupRepository meetupRepository;
+    private final WaitlistRepository waitlistRepository;
 
 
     @Override
@@ -82,5 +86,53 @@ public class MeetupGatewayImpl implements MeetupGateway {
     @Override
     public int batchUpdateToFinished() {
         return meetupRepository.batchUpdateToFinished();
+    }
+
+    @Override
+    public boolean isParticipant(String meetupId, String userId) {
+        MeetupPO meetup = meetupRepository.findByBizId(meetupId);
+        if (meetup == null) {
+            return false;
+        }
+        // 发布者本身是参与者
+        if (userId.equals(meetup.getCreatorId())) {
+            return true;
+        }
+        // 检查是否在已批准的报名列表中
+        return waitlistRepository.findActiveByMeetupAndUser(meetupId, userId) != null;
+    }
+
+    @Override
+    public List<String> listParticipantUserIds(String meetupId) {
+        MeetupPO meetup = meetupRepository.findByBizId(meetupId);
+        if (meetup == null) {
+            return List.of();
+        }
+        List<String> participants = new ArrayList<>();
+        // 发布者加入列表
+        participants.add(meetup.getCreatorId());
+        // 已批准的报名者加入列表
+        List<String> approved = waitlistRepository.listApprovedUserIds(meetupId);
+        for (String uid : approved) {
+            if (!participants.contains(uid)) {
+                participants.add(uid);
+            }
+        }
+        return participants;
+    }
+
+    @Override
+    public boolean isFinished(String meetupId) {
+        MeetupPO meetup = meetupRepository.findByBizId(meetupId);
+        if (meetup == null) {
+            return false;
+        }
+        // 懒判定：end_time < NOW() 即视为 finished
+        return meetup.getEndTime() != null && meetup.getEndTime().isBefore(LocalDateTime.now());
+    }
+
+    @Override
+    public long countFinishedMatches(String userId, int days) {
+        return meetupRepository.countFinishedMatches(userId, days);
     }
 }

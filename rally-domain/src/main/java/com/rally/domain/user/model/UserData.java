@@ -12,4 +12,6 @@ public class UserData {
     private String avatarUrl;
     private GenderEnum gender;
     private LocalDate birthday;
+    /** 个人简介 */
+    private String bio;
 }

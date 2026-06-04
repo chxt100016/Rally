@@ -87,4 +87,9 @@ public class WaitlistGatewayImpl implements WaitlistGateway {
     public void revive(String bizId, LocalDateTime expiresAt) {
         waitlistRepository.revive(bizId, expiresAt);
     }
+
+    @Override
+    public List<String> listApprovedUserIds(String meetupId) {
+        return waitlistRepository.listApprovedUserIds(meetupId);
+    }
 }

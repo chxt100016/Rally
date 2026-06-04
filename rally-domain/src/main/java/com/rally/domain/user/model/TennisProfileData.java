@@ -15,7 +15,6 @@ public class TennisProfileData {
     private String bizId;
     private String userId;
     private String cityCode;
-    private String bio;
     private List<String> videoUrls;
     private BigDecimal ntrpScore;
     private BigDecimal utrScore;

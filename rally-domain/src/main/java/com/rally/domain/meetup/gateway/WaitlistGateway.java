@@ -59,4 +59,9 @@ public interface WaitlistGateway {
      * 复活已失效的报名记录（rejected/withdrawn/expired → pending）
      */
     void revive(String bizId, java.time.LocalDateTime expiresAt);
+
+    /**
+     * 查询约球已批准的参与者 userId 列表
+     */
+    List<String> listApprovedUserIds(String meetupId);
 }

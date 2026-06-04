@@ -60,4 +60,27 @@ public interface MeetupGateway {
      * @return 影响行数
      */
     int batchUpdateToFinished();
+
+    /**
+     * 判断用户是否为该场参与者（发布者 + 已批准报名者）
+     */
+    boolean isParticipant(String meetupId, String userId);
+
+    /**
+     * 获取该场全部参与者 userId 列表（发布者 + 已批准报名者）
+     */
+    List<String> listParticipantUserIds(String meetupId);
+
+    /**
+     * 懒判定约球是否已结束：end_time < NOW()
+     */
+    boolean isFinished(String meetupId);
+
+    /**
+     * 统计用户近 N 天内完成的约球场数（可信度计算用）
+     * @param userId 用户 ID
+     * @param days 近 N 天
+     * @return 完成场数
+     */
+    long countFinishedMatches(String userId, int days);
 }

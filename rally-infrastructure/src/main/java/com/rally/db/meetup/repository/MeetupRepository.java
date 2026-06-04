@@ -127,4 +127,19 @@ public class MeetupRepository {
                         .lt(MeetupPO::getEndTime, LocalDateTime.now())
                         .set(MeetupPO::getStatus, "FINISHED"));
     }
+
+    /**
+     * 统计用户近 N 天内完成的约球场数（可信度计算用）
+     * 条件：status=finished 且 end_time 在近 N 天内，用户为发布者或已批准报名者
+     */
+    public long countFinishedMatches(String userId, int days) {
+        LocalDateTime since = LocalDateTime.now().minusDays(days);
+        // 统计用户作为发布者的已完成约球
+        return meetupService.lambdaQuery()
+                .eq(MeetupPO::getCreatorId, userId)
+                .eq(MeetupPO::getStatus, "FINISHED")
+                .ge(MeetupPO::getEndTime, since)
+                .count();
+        // TODO: 还需要统计用户作为报名者（已批准）的已完成约球，需要关联 waitlist 表
+    }
 }

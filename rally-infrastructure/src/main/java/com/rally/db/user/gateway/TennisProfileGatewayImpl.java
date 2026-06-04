@@ -34,9 +34,6 @@ public class TennisProfileGatewayImpl implements TennisProfileGateway {
         if (data.getCityCode() != null) {
             po.setCityCode(data.getCityCode());
         }
-        if (data.getBio() != null) {
-            po.setBio(data.getBio());
-        }
         if (data.getVideoUrls() != null) {
             po.setVideoUrls(CONVERTER.stringListToJson(data.getVideoUrls()));
         }

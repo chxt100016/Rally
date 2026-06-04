@@ -14,6 +14,7 @@ CREATE TABLE users (
     avatar_url  VARCHAR(512) DEFAULT NULL COMMENT '头像 URL',
     gender      ENUM('male','female','undisclosed') NOT NULL DEFAULT 'undisclosed' COMMENT '性别',
     birthday    DATE         DEFAULT NULL COMMENT '生日，用于年龄段筛选',
+    bio         VARCHAR(255) DEFAULT NULL COMMENT '个人简介',
     phone       VARCHAR(20)  DEFAULT NULL COMMENT '手机号（MVP 不收集，列保留供后续手机号注册使用）',
     email       VARCHAR(100) DEFAULT NULL COMMENT '邮箱（MVP 不收集，列保留）',
     create_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
