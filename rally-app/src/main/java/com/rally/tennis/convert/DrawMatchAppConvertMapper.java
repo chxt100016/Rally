@@ -61,14 +61,14 @@ public interface DrawMatchAppConvertMapper {
         // 从 ResultInfo 获取 MatchCode
         if (fixture.getResult() != null && fixture.getResult().getMatchCode() != null) {
             String matchCode = fixture.getResult().getMatchCode();
-            if (!"scheduled".equals(matchCode) && !"live".equals(matchCode) && !"finished".equals(matchCode)) {
+            if (!"scheduled".equals(matchCode) && !"live".equals(matchCode) && !"FINISHED".equals(matchCode)) {
                 return matchCode;
             }
         }
         // 从 Fixture 的 MatchCode
         if (fixture.getMatchCode() != null) {
             String matchCode = fixture.getMatchCode();
-            if (!"scheduled".equals(matchCode) && !"live".equals(matchCode) && !"finished".equals(matchCode)) {
+            if (!"scheduled".equals(matchCode) && !"live".equals(matchCode) && !"FINISHED".equals(matchCode)) {
                 return matchCode;
             }
         }

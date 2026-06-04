@@ -58,13 +58,13 @@ public class WaitlistAppService {
 
         // 2. 状态校验（懒判定）
         MeetupStatusEnum realStatus = lazyStatus(meetup);
-        if (realStatus == MeetupStatusEnum.full) {
+        if (realStatus == MeetupStatusEnum.FULL) {
             throw new BusinessException(BizErrorCode.MEETUP_FULL);
         }
-        if (realStatus == MeetupStatusEnum.closed) {
+        if (realStatus == MeetupStatusEnum.CLOSED) {
             throw new BusinessException(BizErrorCode.MEETUP_CLOSED);
         }
-        if (realStatus == MeetupStatusEnum.finished) {
+        if (realStatus == MeetupStatusEnum.FINISHED) {
             throw new BusinessException(BizErrorCode.MEETUP_EXPIRED);
         }
 
@@ -108,7 +108,7 @@ public class WaitlistAppService {
             waitlist.setUserId(userId);
             waitlist.setExpiresAt(autoWithdrawAt);
 
-            if (meetup.getJoinMode() == com.rally.domain.meetup.enums.JoinModeEnum.direct) {
+            if (meetup.getJoinMode() == com.rally.domain.meetup.enums.JoinModeEnum.DIRECT) {
                 // 直接加入
                 waitlist.setStatus(WaitlistStatusEnum.approved);
                 waitlistGateway.save(waitlist);
@@ -224,7 +224,7 @@ public class WaitlistAppService {
 
         // 5. 懒判定
         MeetupStatusEnum realStatus = lazyStatus(meetup);
-        if (realStatus == MeetupStatusEnum.finished || realStatus == MeetupStatusEnum.closed) {
+        if (realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.CLOSED) {
             throw new BusinessException(BizErrorCode.MEETUP_STATUS_ILLEGAL);
         }
 
@@ -328,9 +328,9 @@ public class WaitlistAppService {
      * 懒判定
      */
     private MeetupStatusEnum lazyStatus(MeetupData data) {
-        if ((data.getStatus() == MeetupStatusEnum.open || data.getStatus() == MeetupStatusEnum.full)
+        if ((data.getStatus() == MeetupStatusEnum.OPEN || data.getStatus() == MeetupStatusEnum.FULL)
                 && data.getEndTime().isBefore(LocalDateTime.now())) {
-            return MeetupStatusEnum.finished;
+            return MeetupStatusEnum.FINISHED;
         }
         return data.getStatus();
     }
@@ -339,7 +339,7 @@ public class WaitlistAppService {
      * 性别限制校验
      */
     private void checkGenderLimit(MeetupData meetup, String userId) {
-        if (meetup.getGenderLimit() == com.rally.domain.meetup.enums.GenderLimitEnum.any) {
+        if (meetup.getGenderLimit() == com.rally.domain.meetup.enums.GenderLimitEnum.ANY) {
             return;
         }
 
@@ -349,12 +349,12 @@ public class WaitlistAppService {
         }
 
         String userGender = user.getGender().name().toLowerCase();
-        if (meetup.getGenderLimit() == com.rally.domain.meetup.enums.GenderLimitEnum.male
-                && !"male".equals(userGender)) {
+        if (meetup.getGenderLimit() == com.rally.domain.meetup.enums.GenderLimitEnum.MALE
+                && !"MALE".equals(userGender)) {
             throw new BusinessException(BizErrorCode.GENDER_NOT_MATCH);
         }
-        if (meetup.getGenderLimit() == com.rally.domain.meetup.enums.GenderLimitEnum.female
-                && !"female".equals(userGender)) {
+        if (meetup.getGenderLimit() == com.rally.domain.meetup.enums.GenderLimitEnum.FEMALE
+                && !"FEMALE".equals(userGender)) {
             throw new BusinessException(BizErrorCode.GENDER_NOT_MATCH);
         }
     }

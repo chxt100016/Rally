@@ -65,7 +65,7 @@ public class MeetupQueryService {
         // 构建查询条件
         List<MeetupData> allMeetups = meetupGateway.findByCityCodeAndStatus(
                 query.getCityCode(),
-                List.of(MeetupStatusEnum.open.name(), MeetupStatusEnum.full.name()));
+                List.of(MeetupStatusEnum.OPEN.name(), MeetupStatusEnum.FULL.name()));
 
         // 过滤已结束的
         allMeetups = allMeetups.stream()
@@ -123,7 +123,7 @@ public class MeetupQueryService {
 
         // 3. 过滤状态和筛选条件
         meetups = meetups.stream()
-                .filter(m -> (m.getStatus() == MeetupStatusEnum.open || m.getStatus() == MeetupStatusEnum.full)
+                .filter(m -> (m.getStatus() == MeetupStatusEnum.OPEN || m.getStatus() == MeetupStatusEnum.FULL)
                         && m.getEndTime().isAfter(LocalDateTime.now()))
                 .collect(Collectors.toList());
         meetups = applyFilters(meetups, query);
@@ -275,9 +275,9 @@ public class MeetupQueryService {
      * 懒判定
      */
     private MeetupStatusEnum lazyStatus(MeetupData data) {
-        if ((data.getStatus() == MeetupStatusEnum.open || data.getStatus() == MeetupStatusEnum.full)
+        if ((data.getStatus() == MeetupStatusEnum.OPEN || data.getStatus() == MeetupStatusEnum.FULL)
                 && data.getEndTime().isBefore(LocalDateTime.now())) {
-            return MeetupStatusEnum.finished;
+            return MeetupStatusEnum.FINISHED;
         }
         return data.getStatus();
     }
@@ -288,7 +288,7 @@ public class MeetupQueryService {
     private ActionStateEnum calculateActionState(MeetupStatusEnum realStatus, MeetupData data,
                                                   String currentUserId, boolean isCreator) {
         // 终态判断
-        if (realStatus == MeetupStatusEnum.finished || realStatus == MeetupStatusEnum.closed) {
+        if (realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.CLOSED) {
             return isCreator ? ActionStateEnum.OWNER_DISABLED : ActionStateEnum.DISABLED;
         }
 
@@ -310,11 +310,11 @@ public class MeetupQueryService {
             }
         }
 
-        if (realStatus == MeetupStatusEnum.full) {
+        if (realStatus == MeetupStatusEnum.FULL) {
             return ActionStateEnum.FULL;
         }
 
-        return data.getJoinMode() == com.rally.domain.meetup.enums.JoinModeEnum.direct
+        return data.getJoinMode() == com.rally.domain.meetup.enums.JoinModeEnum.DIRECT
                 ? ActionStateEnum.JOIN_DIRECT : ActionStateEnum.APPLY_APPROVAL;
     }
 

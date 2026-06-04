@@ -46,17 +46,17 @@ public interface MeetupGateway {
     int decrementPlayers(String bizId);
 
     /**
-     * 统计用户当日活跃发布数（status IN open,full）
+     * 统计用户当日活跃发布数（status IN OPEN,FULL）
      */
     long countTodayActive(String userId);
 
     /**
-     * 查询城市下活跃约球 ID 列表（status IN open,full AND end_time > NOW()）
+     * 查询城市下活跃约球 ID 列表（status IN OPEN,FULL AND end_time > NOW()）
      */
     List<String> listActiveIds(String cityCode);
 
     /**
-     * 批量更新状态为 finished（兜底任务用）
+     * 批量更新状态为 FINISHED（兜底任务用）
      * @return 影响行数
      */
     int batchUpdateToFinished();

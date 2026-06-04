@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Data
 public class OnboardingCmd {
-    /** 性别：male/female/undisclosed */
+    /** 性别：MALE/FEMALE/undisclosed */
     private String gender;
     /** 生日（选填） */
     private LocalDate birthday;

@@ -18,11 +18,11 @@ import java.util.List;
 public class MeetupGatewayImpl implements MeetupGateway {
 
     private final MeetupRepository meetupRepository;
-    private static final MeetupConvertMapper MAPPER = MeetupConvertMapper.INSTANCE;
+
 
     @Override
     public void save(MeetupData data) {
-        MeetupPO po = MAPPER.toMeetupPO(data);
+        MeetupPO po = MeetupConvertMapper.INSTANCE.toMeetupPO(data);
         if (data.getBizId() != null) {
             MeetupPO existing = meetupRepository.findByBizId(data.getBizId());
             if (existing != null) {
@@ -37,17 +37,17 @@ public class MeetupGatewayImpl implements MeetupGateway {
     @Override
     public MeetupData findByBizId(String bizId) {
         MeetupPO po = meetupRepository.findByBizId(bizId);
-        return MAPPER.toMeetupData(po);
+        return MeetupConvertMapper.INSTANCE.toMeetupData(po);
     }
 
     @Override
     public List<MeetupData> findByBizIds(List<String> bizIds) {
-        return MAPPER.toMeetupDataList(meetupRepository.findByBizIds(bizIds));
+        return MeetupConvertMapper.INSTANCE.toMeetupDataList(meetupRepository.findByBizIds(bizIds));
     }
 
     @Override
     public List<MeetupData> findByCityCodeAndStatus(String cityCode, List<String> statusList) {
-        return MAPPER.toMeetupDataList(meetupRepository.findByCityCodeAndStatus(cityCode, statusList));
+        return MeetupConvertMapper.INSTANCE.toMeetupDataList(meetupRepository.findByCityCodeAndStatus(cityCode, statusList));
     }
 
     @Override

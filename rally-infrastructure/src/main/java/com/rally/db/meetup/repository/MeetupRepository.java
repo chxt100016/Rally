@@ -70,10 +70,10 @@ public class MeetupRepository {
         return meetupService.getBaseMapper().update(null,
                 new LambdaUpdateWrapper<MeetupPO>()
                         .eq(MeetupPO::getBizId, bizId)
-                        .eq(MeetupPO::getStatus, "open")
+                        .eq(MeetupPO::getStatus, "OPEN")
                         .apply("current_players < max_players")
                         .setSql("current_players = current_players + 1")
-                        .setSql("status = IF(current_players + 1 >= max_players, 'full', status)"));
+                        .setSql("status = IF(current_players + 1 >= max_players, 'FULL', status)"));
     }
 
     /**
@@ -86,17 +86,17 @@ public class MeetupRepository {
                         .eq(MeetupPO::getBizId, bizId)
                         .apply("current_players > 1")
                         .setSql("current_players = current_players - 1")
-                        .setSql("status = IF(status = 'full', 'open', status)"));
+                        .setSql("status = IF(status = 'FULL', 'OPEN', status)"));
     }
 
     /**
-     * 统计用户当日活跃发布数（status IN open,full）
+     * 统计用户当日活跃发布数（status IN OPEN,FULL）
      */
     public long countTodayActive(String userId) {
         LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         return meetupService.lambdaQuery()
                 .eq(MeetupPO::getCreatorId, userId)
-                .in(MeetupPO::getStatus, "open", "full")
+                .in(MeetupPO::getStatus, "OPEN", "full")
                 .ge(MeetupPO::getCreateTime, todayStart)
                 .count();
     }
@@ -108,7 +108,7 @@ public class MeetupRepository {
         return meetupService.lambdaQuery()
                 .select(MeetupPO::getBizId)
                 .eq(MeetupPO::getCityCode, cityCode)
-                .in(MeetupPO::getStatus, "open", "full")
+                .in(MeetupPO::getStatus, "OPEN", "full")
                 .gt(MeetupPO::getEndTime, LocalDateTime.now())
                 .list()
                 .stream()
@@ -117,14 +117,14 @@ public class MeetupRepository {
     }
 
     /**
-     * 批量更新状态为 finished（兜底任务用）
+     * 批量更新状态为 FINISHED（兜底任务用）
      * @return 影响行数
      */
     public int batchUpdateToFinished() {
         return meetupService.getBaseMapper().update(null,
                 new LambdaUpdateWrapper<MeetupPO>()
-                        .in(MeetupPO::getStatus, "open", "full")
+                        .in(MeetupPO::getStatus, "OPEN", "full")
                         .lt(MeetupPO::getEndTime, LocalDateTime.now())
-                        .set(MeetupPO::getStatus, "finished"));
+                        .set(MeetupPO::getStatus, "FINISHED"));
     }
 }

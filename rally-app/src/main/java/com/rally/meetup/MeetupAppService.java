@@ -5,7 +5,6 @@ import com.rally.client.geo.CityLocator;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.config.gateway.ConfigGateway;
-import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
@@ -34,7 +33,7 @@ public class MeetupAppService {
     private final CityLocator cityLocator;
     private final MeetupDomainService meetupDomainService;
 
-    private static final MeetupAppConvertMapper MAPPER = MeetupAppConvertMapper.INSTANCE;
+
 
     /**
      * 发布约球
@@ -73,7 +72,7 @@ public class MeetupAppService {
         }
 
         // 7. 返回详情
-        return MAPPER.toMeetupVO(data);
+        return MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
     }
 
     /**
@@ -134,7 +133,7 @@ public class MeetupAppService {
         }
 
         // 7. 返回详情
-        return MAPPER.toMeetupVO(data);
+        return MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
     }
 
     /**
@@ -171,7 +170,7 @@ public class MeetupAppService {
         }
 
         // 4. 更新状态
-        meetupGateway.updateStatus(meetupId, MeetupStatusEnum.closed.name());
+        meetupGateway.updateStatus(meetupId, MeetupStatusEnum.CLOSED.name());
 
         // 5. GEO 清理
         try {

@@ -15,7 +15,7 @@ public interface NearbyGateway {
     void add(String cityCode, String meetupId, double lng, double lat);
 
     /**
-     * 失效清理（约球进入 closed/finished 时调用）
+     * 失效清理（约球进入 CLOSED/FINISHED 时调用）
      */
     void remove(String cityCode, String meetupId);
 

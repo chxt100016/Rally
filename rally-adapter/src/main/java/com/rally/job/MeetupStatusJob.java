@@ -33,7 +33,7 @@ public class MeetupStatusJob {
 
     /**
      * 约球状态兜底（凌晨 2:00）
-     * 将已过 end_time 但状态仍为 open/full 的约球批量更新为 finished
+     * 将已过 end_time 但状态仍为 OPEN/FULL 的约球批量更新为 FINISHED
      */
     @Scheduled(cron = "${job.meetup.status.cron:0 0 2 * * ?}")
     public void updateFinishedStatus() {
