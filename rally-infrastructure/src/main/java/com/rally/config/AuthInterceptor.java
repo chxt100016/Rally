@@ -1,4 +1,4 @@
-package com.rally.web.auth;
+package com.rally.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rally.domain.auth.enums.BizErrorCode;
@@ -38,13 +38,13 @@ public class AuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        UserContext.set(payload.get().getUserId());
+        com.rally.cache.UserContext.set(payload.get().getUserId());
         return true;
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        UserContext.clear();
+        com.rally.cache.UserContext.clear();
     }
 
     private void writeError(HttpServletResponse response, BizErrorCode errorCode) throws IOException {

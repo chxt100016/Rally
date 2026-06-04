@@ -2,7 +2,6 @@ package com.rally.db.user.convert;
 
 import com.alibaba.fastjson2.JSON;
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.user.enums.RatingLevelEnum;
 import com.rally.domain.user.model.TennisProfileData;
 import com.rally.db.user.entity.TennisProfilePO;
 import org.mapstruct.Mapper;
@@ -43,26 +42,6 @@ public interface TennisProfileConvertMapper {
             return "tbc";
         }
         return status.name().toLowerCase();
-    }
-
-    @Named("stringToRatingLevel")
-    default RatingLevelEnum stringToRatingLevel(String level) {
-        if (level == null) {
-            return RatingLevelEnum.A;
-        }
-        try {
-            return RatingLevelEnum.valueOf(level.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return RatingLevelEnum.A;
-        }
-    }
-
-    @Named("ratingLevelToString")
-    default String ratingLevelToString(RatingLevelEnum level) {
-        if (level == null) {
-            return "a";
-        }
-        return level.name().toLowerCase();
     }
 
     @Named("jsonToStringList")

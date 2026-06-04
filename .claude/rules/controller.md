@@ -11,3 +11,4 @@
    - 如果有渠道专属能力就重写方法或者新增方法。
 4. 每当新增api后都要在完成后 提供新api的curl
 5. RequestParam 一定要带上参数名字`@RequestParam("key")`
+6. 使用`spring-boot-starter-validation`校验入参，而不是自己写if判断

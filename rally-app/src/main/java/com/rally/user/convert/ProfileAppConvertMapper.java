@@ -29,12 +29,10 @@ public interface ProfileAppConvertMapper {
             vo.setBio(profileData.getBio());
             vo.setNtrpScore(profileData.getNtrpScore());
             vo.setUtrScore(profileData.getUtrScore());
-            vo.setRatingLevel(profileData.getRatingLevel() != null ? profileData.getRatingLevel().name() : null);
             vo.setIsNewbie(profileData.getIsNewbie());
             vo.setReputationScore(profileData.getReputationScore());
             vo.setCredibilityScore(profileData.getCredibilityScore());
             vo.setCalibrationScore(profileData.getCalibrationScore());
-            vo.setTotalScore(profileData.getTotalScore());
             vo.setStatus(profileData.getStatus() != null ? profileData.getStatus().name().toLowerCase() : null);
             vo.setIsUnderReview(profileData.getIsUnderReview());
             vo.setVideoUrls(profileData.getVideoUrls());
@@ -60,7 +58,6 @@ public interface ProfileAppConvertMapper {
             vo.setCityCode(profileData.getCityCode());
             vo.setBio(profileData.getBio());
             vo.setNtrpScore(profileData.getNtrpScore());
-            vo.setRatingLevel(profileData.getRatingLevel() != null ? profileData.getRatingLevel().name() : null);
             vo.setIsNewbie(profileData.getIsNewbie());
             vo.setIsUnderReview(profileData.getIsUnderReview());
             vo.setVideoUrls(profileData.getVideoUrls());

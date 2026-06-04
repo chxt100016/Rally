@@ -1,4 +1,4 @@
-package com.rally.web.auth;
+package com.rally.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

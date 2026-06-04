@@ -1,5 +1,6 @@
 package com.rally.upload;
 
+import com.rally.cache.UserContext;
 import com.rally.client.qiniu.QiniuClient;
 import com.qiniu.common.QiniuException;
 import jakarta.annotation.Resource;
@@ -14,8 +15,20 @@ public class UploadAppService {
     @Resource
     private QiniuClient qiniuClient;
 
+    /**
+     * 上传普通图片
+     */
     public String uploadImage(MultipartFile file, String dir, String filename) throws IOException {
         String key = qiniuClient.uploadImage(file.getBytes(), dir, filename);
+        return qiniuClient.buildSignedUrl(key);
+    }
+
+    /**
+     * 上传头像
+     */
+    public String uploadAvatar(MultipartFile file) throws IOException {
+        String userId = UserContext.get();
+        String key = qiniuClient.uploadImage(file.getBytes(), "avatar", userId);
         return qiniuClient.buildSignedUrl(key);
     }
 }

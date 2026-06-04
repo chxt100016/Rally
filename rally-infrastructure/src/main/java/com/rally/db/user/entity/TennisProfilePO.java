@@ -27,9 +27,6 @@ public class TennisProfilePO {
     private BigDecimal reputationScore;
     private BigDecimal credibilityScore;
     private BigDecimal calibrationScore;
-    private BigDecimal totalScore;
-    /** S/A/B/C */
-    private String ratingLevel;
     private Boolean isUnderReview;
     private Boolean isNewbie;
     private LocalDateTime createTime;

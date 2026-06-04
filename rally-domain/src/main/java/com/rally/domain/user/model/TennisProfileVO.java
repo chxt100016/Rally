@@ -21,12 +21,10 @@ public class TennisProfileVO {
     private String bio;
     private BigDecimal ntrpScore;
     private BigDecimal utrScore;
-    private String ratingLevel;
     private Boolean isNewbie;
     private BigDecimal reputationScore;
     private BigDecimal credibilityScore;
     private BigDecimal calibrationScore;
-    private BigDecimal totalScore;
     private String status;
     private Boolean isUnderReview;
     private Integer reviewRemainingMatches;

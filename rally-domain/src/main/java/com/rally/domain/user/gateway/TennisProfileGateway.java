@@ -35,5 +35,5 @@ public interface TennisProfileGateway {
      * 更新评分字段（由评分域调用）
      */
     void updateScoreFields(String userId, BigDecimal reputationScore, BigDecimal credibilityScore,
-                           BigDecimal calibrationScore, BigDecimal totalScore, String ratingLevel, Boolean isNewbie);
+                           BigDecimal calibrationScore, Boolean isNewbie);
 }

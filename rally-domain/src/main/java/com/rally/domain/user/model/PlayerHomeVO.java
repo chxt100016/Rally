@@ -20,7 +20,6 @@ public class PlayerHomeVO {
     private String cityCode;
     private String bio;
     private BigDecimal ntrpScore;
-    private String ratingLevel;
     private Boolean isNewbie;
     private Boolean isUnderReview;
     private List<String> videoUrls;

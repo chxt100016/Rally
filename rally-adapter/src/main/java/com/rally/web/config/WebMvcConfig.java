@@ -1,7 +1,7 @@
 package com.rally.web.config;
 
-import com.rally.web.auth.AuthInterceptor;
-import com.rally.web.auth.LogInterceptor;
+import com.rally.config.AuthInterceptor;
+import com.rally.config.LogInterceptor;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

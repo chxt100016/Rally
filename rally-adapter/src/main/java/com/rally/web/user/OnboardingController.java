@@ -5,7 +5,6 @@ import com.rally.domain.tennis.model.Result;
 import com.rally.domain.user.model.OnboardingCmd;
 import com.rally.domain.user.model.TennisProfileVO;
 import com.rally.user.OnboardingAppService;
-import com.rally.web.auth.UserContext;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +21,7 @@ public class OnboardingController {
     @GetMapping("/status")
     public Result<TennisProfileVO> onboardingStatus() {
         try {
-            String userId = UserContext.get();
-            return Result.ok(onboardingAppService.checkStatus(userId));
+            return Result.ok(onboardingAppService.checkStatus());
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
         }
@@ -35,8 +33,7 @@ public class OnboardingController {
     @PostMapping("/submit")
     public Result<TennisProfileVO> onboardingSubmit(@RequestBody OnboardingCmd cmd) {
         try {
-            String userId = UserContext.get();
-            return Result.ok(onboardingAppService.submit(userId, cmd));
+            return Result.ok(onboardingAppService.submit(cmd));
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
         }

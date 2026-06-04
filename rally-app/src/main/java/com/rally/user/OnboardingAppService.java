@@ -1,11 +1,11 @@
 package com.rally.user;
 
-import com.rally.domain.auth.exception.BusinessException;
+import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.config.gateway.ConfigGateway;
 import com.rally.domain.user.enums.GenderEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.user.enums.RatingLevelEnum;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.OnboardingCmd;
@@ -18,8 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -42,7 +40,8 @@ public class OnboardingAppService {
      * 首次进入生成 tbc 记录，返回 needOnboarding=true
      */
     @Transactional
-    public TennisProfileVO checkStatus(String userId) {
+    public TennisProfileVO checkStatus() {
+        String userId = UserContext.get();
         Optional<TennisProfileData> existing = tennisProfileGateway.findByUserId(userId);
 
         if (existing.isEmpty()) {
@@ -59,7 +58,8 @@ public class OnboardingAppService {
      * 提交 Onboarding，转 normal
      */
     @Transactional
-    public TennisProfileVO submit(String userId, OnboardingCmd cmd) {
+    public TennisProfileVO submit(OnboardingCmd cmd) {
+        String userId = UserContext.get();
         // 1. 校验必填项
 
         if (cmd.getNtrpScore() == null) {
@@ -124,8 +124,6 @@ public class OnboardingAppService {
         data.setReputationScore(new java.math.BigDecimal("100"));
         data.setCredibilityScore(new java.math.BigDecimal("0"));
         data.setCalibrationScore(new java.math.BigDecimal("80"));
-        data.setTotalScore(new java.math.BigDecimal("0"));
-        data.setRatingLevel(RatingLevelEnum.A);
         data.setIsUnderReview(false);
         data.setIsNewbie(true);
         data.setVideoUrls(new ArrayList<>());

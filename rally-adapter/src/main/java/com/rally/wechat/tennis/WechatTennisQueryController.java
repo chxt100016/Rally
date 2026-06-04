@@ -1,4 +1,4 @@
-package com.rally.wechat;
+package com.rally.wechat.tennis;
 
 import com.rally.web.tennis.TennisQueryController;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -73,7 +73,7 @@ public class TennisProfileGatewayImpl implements TennisProfileGateway {
 
     @Override
     public void updateScoreFields(String userId, BigDecimal reputationScore, BigDecimal credibilityScore,
-                                  BigDecimal calibrationScore, BigDecimal totalScore, String ratingLevel, Boolean isNewbie) {
-        repository.updateScoreFields(userId, reputationScore, credibilityScore, calibrationScore, totalScore, ratingLevel, isNewbie);
+                                  BigDecimal calibrationScore, Boolean isNewbie) {
+        repository.updateScoreFields(userId, reputationScore, credibilityScore, calibrationScore, isNewbie);
     }
 }

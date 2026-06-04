@@ -1,7 +1,6 @@
 package com.rally.domain.user.model;
 
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.user.enums.RatingLevelEnum;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -25,8 +24,6 @@ public class TennisProfileData {
     private BigDecimal reputationScore;
     private BigDecimal credibilityScore;
     private BigDecimal calibrationScore;
-    private BigDecimal totalScore;
-    private RatingLevelEnum ratingLevel;
     private Boolean isUnderReview;
     private Boolean isNewbie;
     private LocalDateTime createTime;

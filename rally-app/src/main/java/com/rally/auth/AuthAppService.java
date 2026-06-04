@@ -1,6 +1,7 @@
 package com.rally.auth;
 
 import com.rally.auth.convert.AuthConvertMapper;
+import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.ChannelEnum;
 import com.rally.domain.auth.exception.AuthException;
 import com.rally.domain.auth.gateway.AccountGateway;
@@ -76,8 +77,9 @@ public class AuthAppService {
                 .orElse(true);
     }
 
-    public UserVO completeRegistration(String userId, String nickname, String avatarUrl,
+    public UserVO completeRegistration(String nickname, String avatarUrl,
                                        String birthday, String gender) {
+        String userId = UserContext.get();
         if (StringUtils.isBlank(nickname) || StringUtils.isBlank(avatarUrl)) {
             throw new AuthException(10005, "昵称和头像不能为空");
         }

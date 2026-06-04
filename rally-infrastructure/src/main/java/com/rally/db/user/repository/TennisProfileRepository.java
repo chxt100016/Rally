@@ -27,14 +27,12 @@ public class TennisProfileRepository {
     }
 
     public void updateScoreFields(String userId, BigDecimal reputationScore, BigDecimal credibilityScore,
-                                  BigDecimal calibrationScore, BigDecimal totalScore, String ratingLevel, Boolean isNewbie) {
+                                  BigDecimal calibrationScore, Boolean isNewbie) {
         tennisProfileService.lambdaUpdate()
                 .eq(TennisProfilePO::getUserId, userId)
                 .set(reputationScore != null, TennisProfilePO::getReputationScore, reputationScore)
                 .set(credibilityScore != null, TennisProfilePO::getCredibilityScore, credibilityScore)
                 .set(calibrationScore != null, TennisProfilePO::getCalibrationScore, calibrationScore)
-                .set(totalScore != null, TennisProfilePO::getTotalScore, totalScore)
-                .set(ratingLevel != null, TennisProfilePO::getRatingLevel, ratingLevel)
                 .set(isNewbie != null, TennisProfilePO::getIsNewbie, isNewbie)
                 .update();
     }

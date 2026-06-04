@@ -1,4 +1,4 @@
-package com.rally.wechat;
+package com.rally.wechat.auth;
 
 import com.rally.auth.AuthAppService;
 import com.rally.domain.auth.exception.AuthException;
@@ -7,7 +7,6 @@ import com.rally.domain.auth.model.LoginResultVO;
 import com.rally.domain.auth.model.WechatLoginCmd;
 import com.rally.domain.tennis.model.Result;
 import com.rally.domain.user.model.UserVO;
-import com.rally.web.auth.UserContext;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,9 +32,8 @@ public class WechatAuthController {
     @PostMapping("/complete-registration")
     public Result<UserVO> completeRegistration(@RequestBody CompleteRegistrationCmd cmd) {
         try {
-            String userId = UserContext.get();
             return Result.ok(authAppService.completeRegistration(
-                    userId, cmd.getNickname(), cmd.getAvatarUrl(), cmd.getBirthday(), cmd.getGender()));
+                    cmd.getNickname(), cmd.getAvatarUrl(), cmd.getBirthday(), cmd.getGender()));
         } catch (AuthException e) {
             return Result.fail(e.getCode(), e.getMessage());
         }

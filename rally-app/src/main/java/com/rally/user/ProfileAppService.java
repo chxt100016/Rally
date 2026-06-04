@@ -1,5 +1,6 @@
 package com.rally.user;
 
+import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.config.gateway.ConfigGateway;
@@ -46,7 +47,8 @@ public class ProfileAppService {
     /**
      * 我的档案
      */
-    public TennisProfileVO getMyProfile(String userId) {
+    public TennisProfileVO getMyProfile() {
+        String userId = UserContext.get();
         TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
         UserData userData = userGateway.findByUserId(userId).orElse(null);
@@ -76,7 +78,7 @@ public class ProfileAppService {
     /**
      * 球员主页
      */
-    public PlayerHomeVO getPlayerHome(String userId, String targetUserId) {
+    public PlayerHomeVO getPlayerHome(String targetUserId) {
         TennisProfileData profileData = tennisProfileGateway.findByUserId(targetUserId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
         UserData userData = userGateway.findByUserId(targetUserId).orElse(null);
@@ -92,7 +94,8 @@ public class ProfileAppService {
      * 编辑资料
      */
     @Transactional
-    public TennisProfileVO editProfile(String userId, EditProfileCmd cmd) {
+    public TennisProfileVO editProfile(EditProfileCmd cmd) {
+        String userId = UserContext.get();
         // 更新 users 表（头像/昵称/性别/生日）
         UserData userData = userGateway.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.DATA_NOT_FOUND, "用户不存在"));
@@ -125,14 +128,15 @@ public class ProfileAppService {
         }
         tennisProfileGateway.update(profileData);
 
-        return getMyProfile(userId);
+        return getMyProfile();
     }
 
     /**
      * 自评修改
      */
     @Transactional
-    public TennisProfileVO updateNtrp(String userId, NtrpUpdateCmd cmd) {
+    public TennisProfileVO updateNtrp(NtrpUpdateCmd cmd) {
+        String userId = UserContext.get();
         // 1. 校验 NTRP 值
         if (cmd.getNtrpScore() == null) {
             throw new BusinessException(BizErrorCode.NTRP_INVALID_VALUE, "自评分值不能为空");
@@ -196,13 +200,14 @@ public class ProfileAppService {
         ntrpLog.setReason(ChangeReasonEnum.USER);
         profileChangeLogGateway.save(ntrpLog);
 
-        return getMyProfile(userId);
+        return getMyProfile();
     }
 
     /**
      * 取视频直传凭证
      */
-    public VideoTokenVO getVideoUploadToken(String userId) {
+    public VideoTokenVO getVideoUploadToken() {
+        String userId = UserContext.get();
         TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
                 .orElse(null);
         if (profileData != null) {
@@ -263,7 +268,8 @@ public class ProfileAppService {
      * 删除视频
      */
     @Transactional
-    public void deleteVideo(String userId, String key) {
+    public void deleteVideo(String key) {
+        String userId = UserContext.get();
         // 校验 key 前缀
         if (!key.startsWith("videos/" + userId + "/")) {
             throw new BusinessException(BizErrorCode.VIDEO_NOT_OWNED);
@@ -319,7 +325,7 @@ public class ProfileAppService {
 
             // 冻结可信度为 50
             tennisProfileGateway.updateScoreFields(userId, null,
-                    new BigDecimal(penaltyCredibility), null, null, null, null);
+                    new BigDecimal(penaltyCredibility), null, null);
         } else {
             // 正常推进
             BigDecimal newRemaining = remaining.subtract(BigDecimal.ONE);

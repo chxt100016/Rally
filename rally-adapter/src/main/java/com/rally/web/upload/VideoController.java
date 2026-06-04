@@ -1,11 +1,10 @@
-package com.rally.web.user;
+package com.rally.web.upload;
 
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.tennis.model.Result;
 import com.rally.domain.user.model.VideoCallbackCmd;
 import com.rally.domain.user.model.VideoTokenVO;
 import com.rally.user.ProfileAppService;
-import com.rally.web.auth.UserContext;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +21,7 @@ public class VideoController {
     @PostMapping("/upload-token")
     public Result<VideoTokenVO> getUploadToken() {
         try {
-            String userId = UserContext.get();
-            return Result.ok(profileAppService.getVideoUploadToken(userId));
+            return Result.ok(profileAppService.getVideoUploadToken());
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
         }
@@ -49,8 +47,7 @@ public class VideoController {
     @DeleteMapping("")
     public Result<Void> deleteVideo(@RequestParam String key) {
         try {
-            String userId = UserContext.get();
-            profileAppService.deleteVideo(userId, key);
+            profileAppService.deleteVideo(key);
             return Result.ok(null);
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());

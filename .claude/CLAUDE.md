@@ -7,7 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 mvn clean package -DskipTests
 ```
 ## COLA 架构分层
-项目严格遵循 COLA 5.0 架构，模块依赖方向：`start（聚合启动，@SpringBootApplication 扫包 com.rally） → rally-adapter → rally-app → rally-domain → rally-infrastructure`
+项目严格遵循 COLA 5.0 架构，
+- 模块依赖方向：
+  - `start（聚合启动，@SpringBootApplication 扫包 com.rally） → rally-adapter → rally-app`
+  - `rally-app → rally-infrastructure`
+  - `rally-infrastructure → rally-domain`
 - `rally-adapter`:REST Controller（`com.rally.web`）+ 定时 Job（`com.rally.job`）
 - `rally-app`: 应用服务，编排业务流程，不含领域规则
 - `rally-domain`:领域模型（VO/Data/Enum）、Gateway 接口、工具类
