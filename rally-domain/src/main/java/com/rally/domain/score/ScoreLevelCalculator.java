@@ -1,4 +1,4 @@
-package com.rally.score.strategy;
+package com.rally.domain.score;
 
 import com.rally.domain.config.gateway.ConfigGateway;
 import com.rally.domain.score.model.ScoreResult;
@@ -18,27 +18,26 @@ import java.math.RoundingMode;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TotalScoreCalculator {
+public class ScoreLevelCalculator {
 
     private final ConfigGateway config;
 
     /**
      * 聚合总分 + 等级落档
      */
-    public void aggregate(ScoreResult result) {
+    public RatingLevelEnum aggregate(BigDecimal reputation, BigDecimal credibility, BigDecimal calibration) {
         // 读取权重
         float w1 = config.getFloat("score.weights.reputation", 0.5f);
         float w2 = config.getFloat("score.weights.credibility", 0.3f);
         float w3 = config.getFloat("score.weights.calibration", 0.2f);
 
         // 三维分（缺失则用默认值）
-        BigDecimal rep = result.getReputation() != null ? result.getReputation() : BigDecimal.valueOf(100);
-        BigDecimal cred = result.getCredibility() != null ? result.getCredibility() : BigDecimal.ZERO;
-        BigDecimal cal = result.getCalibration() != null ? result.getCalibration() : BigDecimal.valueOf(80);
+        BigDecimal rep = reputation != null ? reputation : BigDecimal.valueOf(100);
+        BigDecimal cred = credibility != null ? credibility : BigDecimal.ZERO;
+        BigDecimal cal = calibration != null ? calibration : BigDecimal.valueOf(80);
 
         // 计算总分
         float total = rep.floatValue() * w1 + cred.floatValue() * w2 + cal.floatValue() * w3;
-        result.setTotal(BigDecimal.valueOf(total).setScale(2, RoundingMode.HALF_UP));
 
         // 等级落档
         int sThreshold = config.getInt("score.rating.s_threshold", 90);
@@ -55,6 +54,7 @@ public class TotalScoreCalculator {
         } else {
             level = RatingLevelEnum.C;
         }
-        result.setRatingLevel(level);
+
+        return level;
     }
 }

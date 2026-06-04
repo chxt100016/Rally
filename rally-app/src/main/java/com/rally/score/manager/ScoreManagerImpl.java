@@ -40,8 +40,7 @@ public class ScoreManagerImpl implements ScoreManager {
     private CalibrationStrategy calibrationStrategy;
     @Resource
     private EloStrategy eloStrategy;
-    @Resource
-    private TotalScoreCalculator totalCalc;
+
     @Resource
     private MeetupGateway meetupGateway;
     @Resource
@@ -87,8 +86,7 @@ public class ScoreManagerImpl implements ScoreManager {
             ScoreChange calChange = calibrationStrategy.calculate(ctx, userId);
             result.put(calChange);
 
-            // 3. 总分聚合 + 等级落档
-            totalCalc.aggregate(result);
+
 
             // 4. 写 profile 三维分/total/level（经 01 Gateway）
             profileGateway.updateScoreFields(userId,
@@ -234,7 +232,7 @@ public class ScoreManagerImpl implements ScoreManager {
             result.setCalibration(profile.getCalibrationScore());
         });
 
-        totalCalc.aggregate(result);
+
         return result;
     }
 
