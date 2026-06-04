@@ -123,7 +123,7 @@ public class UserProfile {
 
         // 更新档案
         profile.setNtrpScore(cmd.getNtrpScore());
-        profile.setCityCode(cmd.getCityCode());
+        user.setCityCode(cmd.getCityCode());
         profile.setVideoUrls(cmd.getVideoKeys());
         profile.setStatus(ProfileStatusEnum.NORMAL);
         profile.setNtrpUpdatedAt(LocalDateTime.now());

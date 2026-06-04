@@ -109,15 +109,10 @@ public class ProfileAppService {
         if (cmd.getBio() != null) {
             userData.setBio(cmd.getBio());
         }
-        userGateway.updateUser(userData);
-
-        // 更新 profile 表（城市）
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
         if (cmd.getCityCode() != null) {
-            profileData.setCityCode(cmd.getCityCode());
+            userData.setCityCode(cmd.getCityCode());
         }
-        tennisProfileGateway.update(profileData);
+        userGateway.updateUser(userData);
 
         return getMyProfile();
     }

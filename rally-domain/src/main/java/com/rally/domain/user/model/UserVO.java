@@ -12,4 +12,6 @@ public class UserVO {
     private String avatarUrl;
     private GenderEnum gender;
     private LocalDate birthday;
+    /** 用户当前城市编码 */
+    private String cityCode;
 }

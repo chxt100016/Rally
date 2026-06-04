@@ -33,7 +33,6 @@ CREATE TABLE `user_tennis_profile` (
   `id`                BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `biz_id`            VARCHAR(32)  NOT NULL COMMENT '雪花 ID（业务主键）',
   `user_id`           VARCHAR(32)  NOT NULL COMMENT '关联 users.user_id',
-  `city_code`         VARCHAR(32)  DEFAULT NULL COMMENT '用户当前城市编码',
   `video_urls`        JSON         DEFAULT NULL COMMENT '打球视频 key 列表，存储放宽最多 5，交互上限走配置 user.video.max_count 默认 3（裁定 D1）',
   `ntrp_score`        DECIMAL(3,1) DEFAULT NULL COMMENT 'NTRP 自评 1.5~7.0 步长 0.5',
   `utr_score`         DECIMAL(4,2) DEFAULT NULL COMMENT 'UTR 三方接入选填，MVP 预留不实现',

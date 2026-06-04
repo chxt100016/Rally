@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("accounts")
+@TableName("account")
 public class AccountPO {
     @TableId(type = IdType.AUTO)
     private Long id;

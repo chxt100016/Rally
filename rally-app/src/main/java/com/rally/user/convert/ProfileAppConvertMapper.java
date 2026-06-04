@@ -26,13 +26,13 @@ public interface ProfileAppConvertMapper {
             userVO.setAvatarUrl(userData.getAvatarUrl());
             userVO.setGender(userData.getGender());
             userVO.setBirthday(userData.getBirthday());
+            userVO.setCityCode(userData.getCityCode());
         }
         dto.setUser(userVO);
 
         // 设置网球档案信息
         TennisProfileVO profileVO = new TennisProfileVO();
         if (profileData != null) {
-            profileVO.setCityCode(profileData.getCityCode());
             profileVO.setNtrpScore(profileData.getNtrpScore());
             profileVO.setUtrScore(profileData.getUtrScore());
             profileVO.setIsNewbie(profileData.getIsNewbie());
@@ -62,9 +62,9 @@ public interface ProfileAppConvertMapper {
             vo.setGender(userData.getGender() != null ? userData.getGender().name().toLowerCase() : null);
             vo.setBirthday(userData.getBirthday());
             vo.setBio(userData.getBio());
+            vo.setCityCode(userData.getCityCode());
         }
         if (profileData != null) {
-            vo.setCityCode(profileData.getCityCode());
             vo.setNtrpScore(profileData.getNtrpScore());
             vo.setIsNewbie(profileData.getIsNewbie());
             vo.setIsUnderReview(profileData.getIsUnderReview());

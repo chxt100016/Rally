@@ -13,8 +13,6 @@ import java.util.List;
 @Data
 public class TennisProfileVO {
 
-    private String cityCode;
-
     private BigDecimal ntrpScore;
     private BigDecimal utrScore;
     private Boolean isNewbie;

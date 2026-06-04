@@ -31,9 +31,6 @@ public class TennisProfileGatewayImpl implements TennisProfileGateway {
         TennisProfilePO po = repository.findByUserId(data.getUserId())
                 .orElseThrow(() -> new RuntimeException("档案不存在"));
 
-        if (data.getCityCode() != null) {
-            po.setCityCode(data.getCityCode());
-        }
         if (data.getVideoUrls() != null) {
             po.setVideoUrls(CONVERTER.stringListToJson(data.getVideoUrls()));
         }

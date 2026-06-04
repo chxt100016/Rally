@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("users")
+@TableName("user")
 public class UserPO {
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -20,6 +20,8 @@ public class UserPO {
     private LocalDate birthday;
     /** 个人简介 */
     private String bio;
+    /** 用户当前城市编码 */
+    private String cityCode;
     private String phone;
     private String email;
     private LocalDateTime createTime;
