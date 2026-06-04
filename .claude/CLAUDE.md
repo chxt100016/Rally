@@ -26,3 +26,4 @@ mvn clean package -DskipTests
   1. 在 `rally-domain/src/main/java/com/rally/domain/tennis/gateway/` 定义接口
   2. 在 `rally-infrastructure/src/main/java/com/rally/db/tennis/repository/` 用 `@Component` 实现该接口
 - FastJson2 作为 HTTP 消息转换器（`rally-infrastructure/config/FastJsonConfigClass.java`）
+- 枚举的name要使用大写

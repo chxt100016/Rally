@@ -192,19 +192,19 @@ public class MeetupQueryService {
 
         BigDecimal meetupMin, meetupMax;
         switch (meetup.getLevelMode()) {
-            case range:
+            case RANGE:
                 String[] parts = meetup.getLevelValue().split(":");
                 meetupMin = new BigDecimal(parts[0]);
                 meetupMax = new BigDecimal(parts[1]);
                 break;
-            case exact:
+            case EXACT:
                 meetupMin = meetupMax = new BigDecimal(meetup.getLevelValue());
                 break;
-            case above:
+            case ABOVE:
                 meetupMin = new BigDecimal(meetup.getLevelValue());
                 meetupMax = new BigDecimal("7.0");
                 break;
-            case below:
+            case BELOW:
                 meetupMin = new BigDecimal("1.5");
                 meetupMax = new BigDecimal(meetup.getLevelValue());
                 break;

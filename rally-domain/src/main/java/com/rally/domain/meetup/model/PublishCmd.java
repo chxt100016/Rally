@@ -64,6 +64,7 @@ public class PublishCmd {
     private Double lat;
 
     /** 水平要求模式 */
+    @NotNull(message = "请填写水平限制类型")
     private LevelModeEnum levelMode;
 
     /** 水平最小值 */
