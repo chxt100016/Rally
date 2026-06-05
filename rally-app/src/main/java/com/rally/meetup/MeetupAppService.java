@@ -1,10 +1,8 @@
 package com.rally.meetup;
 
 import com.rally.cache.UserContext;
-import com.rally.client.geo.CityLocator;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.system.SystemConfig;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
@@ -13,6 +11,8 @@ import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupVO;
 import com.rally.domain.meetup.model.PublishCmd;
 import com.rally.domain.meetup.service.MeetupDomainService;
+import com.rally.domain.system.CityLocator;
+import com.rally.domain.system.SystemConfig;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,6 @@ public class MeetupAppService {
 
     private final MeetupGateway meetupGateway;
     private final NearbyGateway nearbyGateway;
-    private final CityLocator cityLocator;
     private final MeetupDomainService meetupDomainService;
 
 
@@ -41,18 +40,11 @@ public class MeetupAppService {
     public MeetupVO publish(PublishCmd cmd) {
         String userId = UserContext.get();
 
-        // 1. 当日发布上限校验
-        int publishLimit = SystemConfig.getInt("anti_abuse.publish_per_day_limit", 5);
-        long todayCount = meetupGateway.countTodayActive(userId);
-        if (todayCount >= publishLimit) {
-            throw new BusinessException(BizErrorCode.PUBLISH_LIMIT_EXCEEDED);
-        }
+        // 1. 当日发布上限校验（domain）
+        meetupDomainService.assertPublishLimit(userId);
 
-        // 2. 城市开通校验
-        String cityCode = cityLocator.validateCityCode(cmd.getCityCode());
-        if (cityCode == null) {
-            throw new BusinessException(BizErrorCode.CITY_NOT_OPENED);
-        }
+        // 2. 城市开通校验（domain）
+        String cityCode = CityLocator.assertCityOpened(cmd.getCityCode());
 
         // 3. 字段校验（domain）
         meetupDomainService.validatePublish(cmd);
@@ -63,14 +55,14 @@ public class MeetupAppService {
         // 5. 落库
         meetupGateway.save(data);
 
-        // 6. GEO 双写
+        // 6. GEO 双写（domain）
         try {
             nearbyGateway.add(cityCode, data.getBizId(), cmd.getLng(), cmd.getLat());
         } catch (Exception e) {
             log.warn("GEO 写入失败，不影响主流程: {}", e.getMessage());
         }
 
-        // 7. 返回详情
+        // 7. 返回详情（MapStruct）
         return MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
     }
 
@@ -103,11 +95,7 @@ public class MeetupAppService {
         boolean locationChanged = false;
         String newCityCode = data.getCityCode();
         if (cmd.getCityCode() != null && !cmd.getCityCode().equals(data.getCityCode())) {
-            String cityCode = cityLocator.validateCityCode(cmd.getCityCode());
-            if (cityCode == null) {
-                throw new BusinessException(BizErrorCode.CITY_NOT_OPENED);
-            }
-            newCityCode = cityCode;
+            newCityCode = CityLocator.assertCityOpened(cmd.getCityCode());
             locationChanged = true;
         } else if (cmd.getLng() != null && cmd.getLat() != null) {
             if (!cmd.getLng().equals(data.getCourtLng()) || !cmd.getLat().equals(data.getCourtLat())) {

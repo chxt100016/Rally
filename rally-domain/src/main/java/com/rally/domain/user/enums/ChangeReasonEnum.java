@@ -15,8 +15,6 @@ public enum ChangeReasonEnum {
     USER("user"),
     /** 系统自动计算 */
     SYSTEM("system"),
-    /** 系统建议（校准度建议，跳过核查期） */
-    SYSTEM_SUGGEST("system_suggest"),
     /** 遇差票（核查期重置） */
     REVIEW_BAD("review_bad"),
 

@@ -1,11 +1,9 @@
 package com.rally.domain.system;
 
 import com.alibaba.fastjson2.JSON;
-import com.rally.domain.system.event.ConfigRefreshEvent;
 import com.rally.domain.system.gateway.SysConfigLoader;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -13,12 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 系统配置静态提供者。
- * 启动时通过 SysConfigLoader 全量加载到内存，支持 ConfigRefreshEvent 刷新。
+ * 启动时通过 SysConfigLoader 全量加载到内存。
  * 对外提供静态方法，调用方无需注入。
  */
 @Slf4j
 @Component
-public class SystemConfig implements ApplicationListener<ConfigRefreshEvent> {
+public class SystemConfig {
 
     private final SysConfigLoader loader;
 
@@ -35,11 +33,6 @@ public class SystemConfig implements ApplicationListener<ConfigRefreshEvent> {
     @PostConstruct
     public void init() {
         instance = this;
-        reload();
-    }
-
-    @Override
-    public void onApplicationEvent(ConfigRefreshEvent event) {
         reload();
     }
 

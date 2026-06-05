@@ -3,9 +3,12 @@ package com.rally.domain.meetup.service;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.meetup.enums.*;
+import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.PublishCmd;
+import com.rally.domain.system.SystemConfig;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,7 +22,22 @@ import java.util.Locale;
  * 约球领域服务
  */
 @Service
+@RequiredArgsConstructor
 public class MeetupDomainService {
+
+    private final MeetupGateway meetupGateway;
+
+    /**
+     * 断言当日发布上限未超出
+     * @param userId 用户ID
+     */
+    public void assertPublishLimit(String userId) {
+        int publishLimit = SystemConfig.getInt("anti_abuse.publish_per_day_limit", 5);
+        long todayCount = meetupGateway.countTodayActive(userId);
+        if (todayCount >= publishLimit) {
+            throw new BusinessException(BizErrorCode.PUBLISH_LIMIT_EXCEEDED);
+        }
+    }
 
     /**
      * 校验发布参数
