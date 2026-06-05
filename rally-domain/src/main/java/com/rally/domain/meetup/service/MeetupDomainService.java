@@ -6,6 +6,7 @@ import com.rally.domain.meetup.enums.*;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
+import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupFactory;
@@ -37,6 +38,31 @@ public class MeetupDomainService {
     private final RegistrationGateway registrationGateway;
 
     /**
+     * 获取约球聚合根
+     * @param meetupId 约球ID
+     * @return Meetup 聚合根
+     */
+    public Meetup getMeetup(String meetupId) {
+        MeetupData data = meetupGateway.findByBizId(meetupId);
+        if (data == null) {
+            throw new BusinessException(BizErrorCode.MEETUP_NOT_FOUND);
+        }
+        return new Meetup(data);
+    }
+
+    /**
+     * 编辑约球（更新字段 + 保存）
+     * @param data 约球数据
+     * @param cmd 编辑命令
+     */
+    public void edit(MeetupData data, PublishCmd cmd) {
+        // 1. 更新字段（MapStruct）
+        MeetupDomainConvertMapper.INSTANCE.updateMeetupData(data, cmd);
+        // 2. 保存
+        meetupGateway.save(data);
+    }
+
+    /**
      * 断言
      */
     public void assertPublish(String userId, PublishCmd cmd) {
@@ -50,36 +76,6 @@ public class MeetupDomainService {
 
     }
 
-    /**
-     * 断言编辑参数合法
-     * @param data 约球数据
-     * @param cmd 编辑命令
-     * @param newCityCode 新城市编码（可能为null，表示未修改城市）
-     */
-    public void assertEdit(MeetupData data, PublishCmd cmd, String newCityCode) {
-        // 1. 城市不可修改
-        if (newCityCode != null && !newCityCode.equals(data.getCityCode())) {
-            throw new BusinessException(BizErrorCode.CITY_CHANGE_FORBIDDEN);
-        }
-
-        // 2. 已有参与者时，不可修改时间、地点、持续时长
-        int participantCount = registrationGateway.countApprovedByMeetupId(data.getBizId());
-        // participantCount > 1 表示除了创建者外还有其他参与者
-        if (participantCount > 1) {
-            boolean timeChanged = cmd.getStartTime() != null
-                    && !cmd.getStartTime().equals(data.getStartTime());
-            boolean durationChanged = cmd.getDuration() != null
-                    && cmd.getDuration().compareTo(data.getDuration()) != 0;
-            boolean locationChanged = isLocationChanged(data, cmd);
-
-            if (timeChanged || durationChanged || locationChanged) {
-                throw new BusinessException(BizErrorCode.LOCATION_TIME_CHANGE_FORBIDDEN);
-            }
-        }
-
-        // 3. 字段校验（复用发布校验）
-        this.assertParam(cmd);
-    }
 
     /**
      * 判断场地是否变更（供 app 层 GEO 更新判断使用）
@@ -94,8 +90,8 @@ public class MeetupDomainService {
             return true;
         }
         // 经纬度变更
-        if (cmd.getLng() != null && cmd.getLat() != null) {
-            if (!cmd.getLng().equals(data.getCourtLng()) || !cmd.getLat().equals(data.getCourtLat())) {
+        if (cmd.getCourtLng() != null && cmd.getCourtLat() != null) {
+            if (!cmd.getCourtLng().equals(data.getCourtLng()) || !cmd.getCourtLat().equals(data.getCourtLat())) {
                 return true;
             }
         }
@@ -135,15 +131,44 @@ public class MeetupDomainService {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "持续时长必须是0.5的倍数");
         }
 
-        // level 校验
-        if (cmd.getLevelMode() != null && cmd.getLevelMode() == LevelModeEnum.RANGE) {
-            if (cmd.getLevelMin() == null || cmd.getLevelMax() == null) {
-                throw new BusinessException(BizErrorCode.PARAM_ERROR, "水平范围必须指定最小值和最大值");
+        // level 校验：1.5–7.0，步长 0.5
+        if (cmd.getLevelMode() != null) {
+            if (cmd.getLevelValue() == null || cmd.getLevelValue().isBlank()) {
+                throw new BusinessException(BizErrorCode.PARAM_ERROR, "请填写水平值");
             }
-            if (cmd.getLevelMin().compareTo(cmd.getLevelMax()) > 0) {
-                throw new BusinessException(BizErrorCode.PARAM_ERROR, "水平最小值不能大于最大值");
+            if (cmd.getLevelMode() == LevelModeEnum.RANGE) {
+                String[] parts = cmd.getLevelValue().split(":");
+                if (parts.length != 2) {
+                    throw new BusinessException(BizErrorCode.PARAM_ERROR, "水平范围格式应为 min:max");
+                }
+                BigDecimal min = parseLevel(parts[0], "水平最小值");
+                BigDecimal max = parseLevel(parts[1], "水平最大值");
+                if (min.compareTo(max) > 0) {
+                    throw new BusinessException(BizErrorCode.PARAM_ERROR, "水平最小值不能大于最大值");
+                }
+            } else {
+                parseLevel(cmd.getLevelValue(), "水平值");
             }
         }
+    }
+
+    /**
+     * 校验单个水平值：1.5–7.0，步长 0.5
+     */
+    private BigDecimal parseLevel(String value, String fieldName) {
+        BigDecimal level;
+        try {
+            level = new BigDecimal(value);
+        } catch (NumberFormatException e) {
+            throw new BusinessException(BizErrorCode.PARAM_ERROR, fieldName + "格式不正确");
+        }
+        if (level.compareTo(new BigDecimal("1.5")) < 0 || level.compareTo(new BigDecimal("7.0")) > 0) {
+            throw new BusinessException(BizErrorCode.PARAM_ERROR, fieldName + "范围为1.5~7.0");
+        }
+        if (level.multiply(new BigDecimal("10")).remainder(new BigDecimal("5")).compareTo(BigDecimal.ZERO) != 0) {
+            throw new BusinessException(BizErrorCode.PARAM_ERROR, fieldName + "步长为0.5");
+        }
+        return level;
     }
 
     /**
@@ -157,74 +182,10 @@ public class MeetupDomainService {
         meetupGateway.save(meetup);
 
         // 3. GEO 写入
-        nearbyGateway.add(cmd.getCityCode(), meetup.getData().getBizId(), cmd.getLng(), cmd.getLat());
-    }
-
-    /**
-     * 更新 MeetupData（编辑时）
-     * 注意：城市不可修改，已在 assertEdit 中校验
-     */
-    public void updateMeetupData(MeetupData data, PublishCmd cmd) {
-        if (cmd.getTitle() != null) {
-            data.setTitle(cmd.getTitle());
-        }
-        if (cmd.getMatchType() != null) {
-            data.setMatchType(cmd.getMatchType());
-        }
-        if (cmd.getMaxPlayers() != null) {
-            data.setMaxPlayers(cmd.getMaxPlayers());
-        }
-        if (cmd.getStartTime() != null) {
-            data.setStartTime(cmd.getStartTime());
-            data.setEndTime(calculateEndTime(cmd.getStartTime(), cmd.getDuration()));
-        }
-        if (cmd.getDuration() != null) {
-            data.setDuration(cmd.getDuration());
-        }
-        if (cmd.getCourtName() != null) {
-            data.setCourtName(cmd.getCourtName());
-        }
-        if (cmd.getCourtAddress() != null) {
-            data.setCourtAddress(cmd.getCourtAddress());
-        }
-        if (cmd.getLng() != null && cmd.getLat() != null) {
-            data.setCourtLng(cmd.getLng());
-            data.setCourtLat(cmd.getLat());
-
-        }
-        // 城市不可修改，保持原值
-        if (cmd.getLevelMode() != null) {
-            data.setLevelMode(cmd.getLevelMode());
-        }
-        if (cmd.getLevelMin() != null || cmd.getLevelMax() != null) {
-            data.setLevelValue(buildLevelValue(cmd));
-        }
-        if (cmd.getGenderLimit() != null) {
-            data.setGenderLimit(cmd.getGenderLimit());
-        }
-        if (cmd.getJoinMode() != null) {
-            data.setJoinMode(cmd.getJoinMode());
-        }
-        if (cmd.getCostItems() != null) {
-            data.setCostItems(cmd.getCostItems());
-        }
+        nearbyGateway.add(cmd.getCityCode(), meetup.getData().getBizId(), cmd.getCourtLng(), cmd.getCourtLat());
     }
 
 
-    /**
-     * 构建水平值字符串
-     */
-    public String buildLevelValue(PublishCmd cmd) {
-        if (cmd.getLevelMode() == null) {
-            return null;
-        }
-        return switch (cmd.getLevelMode()) {
-            case RANGE -> cmd.getLevelMin() + ":" + cmd.getLevelMax();
-            case EXACT -> cmd.getLevelMin() != null ? cmd.getLevelMin().toString() : null;
-            case ABOVE -> cmd.getLevelMin() != null ? cmd.getLevelMin().toString() : null;
-            case BELOW -> cmd.getLevelMax() != null ? cmd.getLevelMax().toString() : null;
-        };
-    }
 
     /**
      * 计算关闭约球的阶梯扣分

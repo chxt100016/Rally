@@ -21,7 +21,7 @@ public class MeetupFactory {
      */
     public static Meetup create(PublishCmd cmd, String userId) {
         // 1. 映射 PublishCmd -> MeetupData（currentPlayers 已在 MapStruct 中设为 1）
-        MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId, cmd.getCityCode());
+        MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId);
         data.setBizId(IdWorker.getIdStr());
 
         // 2. 创建者自动加入报名表，状态为 approved

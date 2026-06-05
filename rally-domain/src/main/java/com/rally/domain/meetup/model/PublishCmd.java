@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 public class PublishCmd {
     /** 编辑时传入 */
+    @NotBlank(message = "约球ID不能为空")
     private String meetupId;
 
     /** 标题，选填；不填后端按模板生成 */
@@ -55,27 +56,21 @@ public class PublishCmd {
     @NotNull(message = "请选择场地位置")
     @DecimalMin(value = "-180", message = "经度范围-180~180")
     @DecimalMax(value = "180", message = "经度范围-180~180")
-    private Double lng;
+    private Double courtLng;
 
     /** 纬度 */
     @NotNull(message = "请选择场地位置")
     @DecimalMin(value = "-90", message = "纬度范围-90~90")
     @DecimalMax(value = "90", message = "纬度范围-90~90")
-    private Double lat;
+    private Double courtLat;
 
     /** 水平要求模式 */
     @NotNull(message = "请填写水平限制类型")
     private LevelModeEnum levelMode;
 
-    /** 水平最小值 */
-    @DecimalMin(value = "1.5", message = "水平值范围1.5~7.0")
-    @DecimalMax(value = "7.0", message = "水平值范围1.5~7.0")
-    private BigDecimal levelMin;
-
-    /** 水平最大值 */
-    @DecimalMin(value = "1.5", message = "水平值范围1.5~7.0")
-    @DecimalMax(value = "7.0", message = "水平值范围1.5~7.0")
-    private BigDecimal levelMax;
+    /** 水平值；RANGE 模式格式 "min:max"，其余模式为单值 */
+    @NotBlank(message = "请填写水平值")
+    private String levelValue;
 
     /** 性别限制 */
     @NotNull(message = "请选择性别限制")

@@ -3,8 +3,11 @@ package com.rally.domain.meetup.convert;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupVO;
 import com.rally.domain.meetup.model.PublishCmd;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
@@ -25,9 +28,15 @@ public interface MeetupDomainConvertMapper {
     @Mapping(target = "creatorId", source = "userId")
     @Mapping(target = "title", expression = "java(cmd.getTitle() != null ? cmd.getTitle() : generateTitle(cmd))")
     @Mapping(target = "endTime", expression = "java(calculateEndTime(cmd.getStartTime(), cmd.getDuration()))")
-    @Mapping(target = "levelValue", expression = "java(buildLevelValue(cmd))")
     @Mapping(target = "status", expression = "java(com.rally.domain.meetup.enums.MeetupStatusEnum.OPEN)")
-    MeetupData toMeetupData(PublishCmd cmd, String userId, String cityCode);
+    MeetupData toMeetupData(PublishCmd cmd, String userId);
+
+    /**
+     * 更新 MeetupData（忽略 null 值）
+     */
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "endTime", expression = "java(cmd.getStartTime() != null ? calculateEndTime(cmd.getStartTime(), cmd.getDuration()) : data.getEndTime())")
+    void updateMeetupData(@MappingTarget MeetupData data, PublishCmd cmd);
 
     /**
      * MeetupData -> MeetupVO
@@ -74,21 +83,6 @@ public interface MeetupDomainConvertMapper {
     default LocalDateTime calculateEndTime(LocalDateTime startTime, BigDecimal duration) {
         return startTime.plusHours(duration.longValue())
                 .plusMinutes((duration.remainder(BigDecimal.ONE).multiply(new BigDecimal("60"))).longValue());
-    }
-
-    /**
-     * 构建水平值
-     */
-    default String buildLevelValue(PublishCmd cmd) {
-        if (cmd.getLevelMode() == null) {
-            return null;
-        }
-        return switch (cmd.getLevelMode()) {
-            case RANGE -> cmd.getLevelMin() + ":" + cmd.getLevelMax();
-            case EXACT -> cmd.getLevelMin() != null ? cmd.getLevelMin().toString() : null;
-            case ABOVE -> cmd.getLevelMin() != null ? cmd.getLevelMin().toString() : null;
-            case BELOW -> cmd.getLevelMax() != null ? cmd.getLevelMax().toString() : null;
-        };
     }
 
     /**
