@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,13 +51,11 @@ public class CityLocator {
      * 获取开通城市列表
      */
     public List<String> getOpenedCities() {
-        String json = SystemConfig.getString("meetup.city.opened_codes", "[]");
-        if (json == null || json.isEmpty() || "[]".equals(json)) {
-            return List.of();
-        }
+        String str = SystemConfig.getString("meetup.city.opened_codes", "[]");
+
         try {
-            JSONArray array = JSON.parseArray(json);
-            return array.toJavaList(String.class);
+
+            return Arrays.asList(str.split(","));
         } catch (Exception e) {
             log.error("解析开通城市配置失败: {}", e.getMessage());
             return List.of();

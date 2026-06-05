@@ -5,6 +5,7 @@ import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.review.UserReviewService;
 import com.rally.domain.score.ScoreLevelCalculator;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.model.*;
 import com.rally.domain.user.service.UserProfileService;
 import jakarta.annotation.Resource;
@@ -37,13 +38,16 @@ public class MyProfileAppService {
         String userId = UserContext.get();
         UserProfile userProfile = userProfileService.getProfile(userId);
 
+        boolean isTBC = userProfile.getStatus() == ProfileStatusEnum.TBC;
+
         return new MyProfileDTO()
-                .setMeetup(buildMeetupDTO())
-                .setReview(buildReviewDTO(userId))
-                .setLevel(buildLevelDTO(userProfile))
-                .setScore(buildScoreDTO(userProfile.getProfile()))
+                .setStatus(userProfile.getStatus())
                 .setUser(buildUserDTO(userProfile.getUser()))
-                .setVideo(buildVideoDTO(userProfile.getProfile()));
+                .setMeetup(isTBC ? null : buildMeetupDTO())
+                .setReview(isTBC ? null : buildReviewDTO(userId))
+                .setLevel(isTBC ? null : buildLevelDTO(userProfile))
+                .setScore(isTBC ? null : buildScoreDTO(userProfile.getProfile()))
+                .setVideo(isTBC ? null : buildVideoDTO(userProfile.getProfile()));
     }
 
     // ========== 各子 DTO 构建方法 ==========
@@ -74,8 +78,7 @@ public class MyProfileAppService {
                 .setNtrpScore(profileData != null ? profileData.getNtrpScore() : null)
                 .setIsUnderReview(profileData != null ? profileData.getIsUnderReview() : null)
                 .setLockday(lockday)
-                .setRemainingMatches(remainingMatches)
-                .setSuggestion(new LevelSuggestionDTO());
+                .setRemainingMatches(remainingMatches);
     }
 
     /** 构建评分信息 DTO（评分明细权重从 SystemConfig 读取） */

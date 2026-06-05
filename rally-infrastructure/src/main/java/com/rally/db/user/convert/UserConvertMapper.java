@@ -2,6 +2,7 @@ package com.rally.db.user.convert;
 
 import com.rally.db.user.entity.UserPO;
 import com.rally.domain.user.enums.GenderEnum;
+import com.rally.domain.user.model.EditProfileCmd;
 import com.rally.domain.user.model.UserData;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -18,6 +19,15 @@ public interface UserConvertMapper {
     @Named("toPO")
     @Mapping(target = "gender", expression = "java(genderToString(data.getGender()))")
     UserPO toPO(UserData data);
+
+    /**
+     * 更新 UserData，只更新源对象中非空的字段
+     * 忽略 userId 不应被更新
+     */
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "gender", expression = "java(genderFromString(cmd.getGender()))")
+    void updateData(@MappingTarget UserData data, EditProfileCmd cmd);
 
     /**
      * 更新 PO，只更新源对象中非空的字段
@@ -46,6 +56,18 @@ public interface UserConvertMapper {
             return GenderEnum.valueOf(gender.toUpperCase());
         } catch (IllegalArgumentException e) {
             return GenderEnum.UNDISCLOSED;
+        }
+    }
+
+    @Named("genderFromString")
+    default GenderEnum genderFromString(String gender) {
+        if (gender == null) {
+            return null;
+        }
+        try {
+            return GenderEnum.valueOf(gender.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("性别值非法");
         }
     }
 }

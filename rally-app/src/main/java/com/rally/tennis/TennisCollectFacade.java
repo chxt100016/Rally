@@ -2,6 +2,9 @@ package com.rally.tennis;
 
 import com.rally.db.tennis.entity.TennisTournamentPO;
 import com.rally.db.tennis.repository.TennisTournamentRepository;
+import com.rally.db.user.entity.UserPO;
+import com.rally.db.user.mapper.UserMapper;
+import com.rally.domain.auth.gateway.TokenGateway;
 import com.rally.tennis.model.TourEnums;
 import com.rally.tennis.parser.CollectType;
 import com.rally.tennis.parser.DrawParams;
@@ -10,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -27,6 +32,12 @@ public class TennisCollectFacade {
 
     @Resource
     private TennisTournamentRepository tennisTournamentRepository;
+
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    private TokenGateway tokenGateway;
 
     public void tournaments(int year) {
         tournamentCollectService.collectTournament(year);
@@ -105,5 +116,19 @@ public class TennisCollectFacade {
     public void draws(String tournamentId) {
         TennisTournamentPO byTournamentId = this.tennisTournamentRepository.findByTournamentId(tournamentId);
         this.draws(byTournamentId);
+    }
+
+    /**
+     * 测试接口：查询所有用户并生成token
+     * @return userId -> token 映射
+     */
+    public Map<String, String> getAllUserTokens() {
+        List<UserPO> users = userMapper.selectList(null);
+        Map<String, String> result = new HashMap<>();
+        for (UserPO user : users) {
+            String token = tokenGateway.issue(user.getUserId());
+            result.put(user.getUserId(), token);
+        }
+        return result;
     }
 }

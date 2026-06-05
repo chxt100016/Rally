@@ -4,14 +4,14 @@ import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
-import com.rally.domain.user.enums.ChangeLogTypeEnum;
-import com.rally.domain.user.enums.ChangeReasonEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.*;
+import com.rally.domain.user.service.ProfileChangeLogService;
 import com.rally.domain.user.service.UserProfileService;
+import com.rally.db.user.convert.UserConvertMapper;
 import com.rally.user.convert.ProfileAppConvertMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Slf4j
@@ -32,6 +30,9 @@ public class ProfileAppService {
 
     @Resource
     private ProfileChangeLogGateway profileChangeLogGateway;
+
+    @Resource
+    private ProfileChangeLogService profileChangeLogService;
 
     @Resource
     private UserGateway userGateway;
@@ -57,33 +58,11 @@ public class ProfileAppService {
      * 编辑资料
      */
     @Transactional
-    public MyProfileDTO editProfile(EditProfileCmd cmd) {
+    public MyProfileDTO editUser(EditProfileCmd cmd) {
         String userId = UserContext.get();
-        // 更新 users 表（头像/昵称/性别/生日）
         UserData userData = userGateway.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.DATA_NOT_FOUND, "用户不存在"));
-        if (cmd.getNickname() != null) {
-            userData.setNickname(cmd.getNickname());
-        }
-        if (cmd.getAvatarUrl() != null) {
-            userData.setAvatarUrl(cmd.getAvatarUrl());
-        }
-        if (cmd.getGender() != null) {
-            try {
-                userData.setGender(com.rally.domain.user.enums.GenderEnum.valueOf(cmd.getGender().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                throw new BusinessException(BizErrorCode.PARAM_ERROR, "性别值非法");
-            }
-        }
-        if (cmd.getBirthday() != null) {
-            userData.setBirthday(cmd.getBirthday());
-        }
-        if (cmd.getBio() != null) {
-            userData.setBio(cmd.getBio());
-        }
-        if (cmd.getCityCode() != null) {
-            userData.setCityCode(cmd.getCityCode());
-        }
+        UserConvertMapper.INSTANCE.updateData(userData, cmd);
         userGateway.updateUser(userData);
 
         return myProfileAppService.getMyProfile();
@@ -95,72 +74,8 @@ public class ProfileAppService {
     @Transactional
     public MyProfileDTO updateNtrp(NtrpUpdateCmd cmd) {
         String userId = UserContext.get();
-        // 1. 校验 NTRP 值
-        if (cmd.getNtrpScore() == null) {
-            throw new BusinessException(BizErrorCode.NTRP_INVALID_VALUE, "自评分值不能为空");
-        }
-        BigDecimal ntrp = cmd.getNtrpScore();
-        // 校验 1.5~7.0 步长 0.5
-        if (ntrp.compareTo(new BigDecimal("1.5")) < 0 || ntrp.compareTo(new BigDecimal("7.0")) > 0) {
-            throw new BusinessException(BizErrorCode.NTRP_INVALID_VALUE, "自评分值必须在 1.5-7.0 之间");
-        }
-        if (ntrp.multiply(new BigDecimal("2")).remainder(new BigDecimal("1")).compareTo(BigDecimal.ZERO) != 0) {
-            throw new BusinessException(BizErrorCode.NTRP_INVALID_VALUE, "自评分值步长必须为 0.5");
-        }
-
-        // 2. 获取档案
         UserProfile userProfile = userProfileService.getProfile(userId);
-        TennisProfileData profileData = userProfile.getProfile();
-
-        // 3. 冷却校验（system_suggest 跳过）
-        if (profileData.getNtrpUpdatedAt() != null && !Boolean.TRUE.equals(cmd.getConfirmed())) {
-            int lowDays = SystemConfig.getInt("score.ntrp.cooldown_low_days", 30);
-            int midDays = SystemConfig.getInt("score.ntrp.cooldown_mid_days", 60);
-            int highDays = SystemConfig.getInt("score.ntrp.cooldown_high_days", 90);
-            int cooldown = userProfile.calculateNtrpCooldownDays(lowDays, midDays, highDays);
-
-            long daysSinceUpdate = ChronoUnit.DAYS.between(profileData.getNtrpUpdatedAt(), LocalDateTime.now());
-            if (daysSinceUpdate < cooldown) {
-                throw new BusinessException(BizErrorCode.NTRP_COOLDOWN, "自评修改冷却中，" + (cooldown - daysSinceUpdate) + " 天后可改");
-            }
-        }
-
-        // 4. 计算 delta
-        BigDecimal oldNtrp = profileData.getNtrpScore();
-        BigDecimal delta = oldNtrp != null ? ntrp.subtract(oldNtrp) : BigDecimal.ZERO;
-        BigDecimal triggerDelta = new BigDecimal(SystemConfig.getString("score.review_period.trigger_ntrp_delta", "0.5"));
-
-        // 5. 向上 >= 0.5 级触发核查期
-        if (delta.compareTo(triggerDelta) >= 0) {
-            int requiredMatches = SystemConfig.getInt("score.review_period.required_matches", 3);
-            profileData.setStatus(ProfileStatusEnum.UNDER_REVIEW);
-            profileData.setIsUnderReview(true);
-
-            // 写核查期日志
-            ProfileChangeLogData changeLog = new ProfileChangeLogData();
-            changeLog.setUserId(userId);
-            changeLog.setType(ChangeLogTypeEnum.UNDER_REVIEW);
-            changeLog.setBeforeValue(new BigDecimal(requiredMatches));
-            changeLog.setAfterValue(new BigDecimal(requiredMatches));
-            changeLog.setReason(ChangeReasonEnum.USER);
-            changeLog.setRemark("自评向上修改触发核查期");
-            profileChangeLogGateway.save(changeLog);
-        }
-
-        // 6. 更新 NTRP
-        profileData.setNtrpScore(ntrp);
-        profileData.setNtrpUpdatedAt(LocalDateTime.now());
-        tennisProfileGateway.update(profileData);
-
-        // 7. 写 NTRP 变更日志
-        ProfileChangeLogData ntrpLog = new ProfileChangeLogData();
-        ntrpLog.setUserId(userId);
-        ntrpLog.setType(ChangeLogTypeEnum.NTRP);
-        ntrpLog.setBeforeValue(oldNtrp);
-        ntrpLog.setAfterValue(ntrp);
-        ntrpLog.setValue(delta);
-        ntrpLog.setReason(ChangeReasonEnum.USER);
-        profileChangeLogGateway.save(ntrpLog);
+        userProfileService.updateNtrp(userProfile, cmd.getNtrpScore());
 
         return myProfileAppService.getMyProfile();
     }
@@ -188,37 +103,14 @@ public class ProfileAppService {
         }
 
         if (isBad) {
-            // 遇差票：重置进度，可信度暂降
             int requiredMatches = SystemConfig.getInt("score.review_period.required_matches", 3);
             int penaltyCredibility = SystemConfig.getInt("score.review_period.penalty_credibility", 50);
-
-            ProfileChangeLogData resetLog = new ProfileChangeLogData();
-            resetLog.setUserId(userId);
-            resetLog.setType(ChangeLogTypeEnum.UNDER_REVIEW);
-            resetLog.setBeforeValue(remaining);
-            resetLog.setAfterValue(new BigDecimal(requiredMatches));
-            resetLog.setReason(ChangeReasonEnum.REVIEW_BAD);
-            resetLog.setRefId(meetupId);
-            resetLog.setRemark("遇差票重置核查期进度");
-            profileChangeLogGateway.save(resetLog);
-
-            // 冻结可信度为 50
+            profileChangeLogService.saveReviewResetLog(userId, remaining, requiredMatches, meetupId);
             tennisProfileGateway.updateScoreFields(userId, null,
                     new BigDecimal(penaltyCredibility), null, null);
         } else {
-            // 正常推进
             BigDecimal newRemaining = remaining.subtract(BigDecimal.ONE);
-
-            ProfileChangeLogData advanceLog = new ProfileChangeLogData();
-            advanceLog.setUserId(userId);
-            advanceLog.setType(ChangeLogTypeEnum.UNDER_REVIEW);
-            advanceLog.setBeforeValue(remaining);
-            advanceLog.setAfterValue(newRemaining);
-            advanceLog.setReason(ChangeReasonEnum.SYSTEM);
-            advanceLog.setRefId(meetupId);
-            profileChangeLogGateway.save(advanceLog);
-
-            // 检查是否解除
+            profileChangeLogService.saveReviewAdvanceLog(userId, remaining, newRemaining, meetupId);
             if (newRemaining.compareTo(BigDecimal.ZERO) <= 0) {
                 releaseReview(userId);
             }

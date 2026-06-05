@@ -20,7 +20,7 @@ public class ProfileChangeLogPO {
     private BigDecimal beforeValue;
     private BigDecimal afterValue;
     private BigDecimal value;
-    /** user/system/system_suggest/review_bad */
+    /** user/system/review_bad */
     private String reason;
     private String remark;
     private String refId;

@@ -1,12 +1,15 @@
 package com.rally.web.tennis;
 
 import com.rally.db.tennis.entity.TennisTournamentPO;
-import com.rally.tennis.PlayerCollectService;
 import com.rally.tennis.TennisCollectFacade;
-import com.rally.tennis.TournamentQueryService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -58,5 +61,13 @@ public class TennisCollectController {
         tournament.setYear(year);
         tennisCollectFacade.completed(tournament);
         return "已完成比赛采集完成";
+    }
+
+    /**
+     * 测试接口：查询所有用户并生成token
+     */
+    @GetMapping("/tokens")
+    public Map<String, String> getAllUserTokens() {
+        return tennisCollectFacade.getAllUserTokens();
     }
 }

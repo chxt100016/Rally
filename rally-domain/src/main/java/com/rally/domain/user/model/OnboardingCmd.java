@@ -20,6 +20,7 @@ public class OnboardingCmd {
     private LocalDate birthday;
     /** NTRP 自评 1.5~7.0 步长 0.5 */
     @NotNull(message = "NTRP 自评分不能为空")
+    @NotBlank(message = "NTRP 自评分不能为空")
     private BigDecimal ntrpScore;
     /** 城市编码 */
     @NotBlank(message = "城市编码不能为空")

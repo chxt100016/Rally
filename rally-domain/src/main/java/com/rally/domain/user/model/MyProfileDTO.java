@@ -1,5 +1,6 @@
 package com.rally.domain.user.model;
 
+import com.rally.domain.user.enums.ProfileStatusEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -9,6 +10,8 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class MyProfileDTO {
+
+    private ProfileStatusEnum status;
 
     /** 约球信息 */
     private MyProfileMeetupDTO meetup;

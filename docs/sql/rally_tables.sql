@@ -166,7 +166,7 @@ INSERT INTO `sys_config` (`biz_id`, `config_key`, `config_value`, `value_type`, 
 ('cfg0000000000000062', 'anti_abuse.conflict_buffer_minutes', '30', 'int', 'global', '报名抵冲路上缓冲时间（分钟）', 1, 0),
 
 -- 5.12 约球域 · 城市开通（meetup.city）1 项
-('cfg0000000000000063', 'meetup.city.opened_codes', '["310000","110000","440100"]', 'json', 'global', '后台开通城市 cityCode 列表，发布/报名/推荐限定其中', 1, 0);
+('cfg0000000000000063', 'meetup.city.opened_codes', '310000,110000,440100', 'json', 'global', '后台开通城市 cityCode 列表，发布/报名/推荐限定其中', 1, 0);
 
 -- ============================================================
 -- 5. 约球域：约球主表

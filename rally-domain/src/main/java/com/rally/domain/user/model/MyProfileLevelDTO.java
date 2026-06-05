@@ -23,7 +23,4 @@ public class MyProfileLevelDTO {
 
     /** 核查期剩余比赛场次 */
     private Integer remainingMatches;
-
-    /** 系统建议 */
-    private LevelSuggestionDTO suggestion;
 }

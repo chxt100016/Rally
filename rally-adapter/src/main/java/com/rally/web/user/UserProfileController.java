@@ -6,6 +6,7 @@ import com.rally.domain.user.model.*;
 import com.rally.user.MyProfileAppService;
 import com.rally.user.ProfileAppService;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -44,7 +45,7 @@ public class UserProfileController {
     @PutMapping("")
     public Result<MyProfileDTO> editProfile(@RequestBody EditProfileCmd cmd) {
         try {
-            return Result.ok(profileAppService.editProfile(cmd));
+            return Result.ok(profileAppService.editUser(cmd));
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
         }
@@ -54,7 +55,7 @@ public class UserProfileController {
      * 自评修改
      */
     @PutMapping("/ntrp")
-    public Result<MyProfileDTO> updateNtrp(@RequestBody NtrpUpdateCmd cmd) {
+    public Result<MyProfileDTO> updateNtrp(@RequestBody @Valid NtrpUpdateCmd cmd) {
         try {
             return Result.ok(profileAppService.updateNtrp(cmd));
         } catch (BusinessException e) {
