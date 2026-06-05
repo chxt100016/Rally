@@ -25,8 +25,9 @@ public class MeetupController {
      * 发布约球
      */
     @PostMapping("/publish")
-    public Result<MeetupVO> publish(@Valid @RequestBody PublishCmd cmd) {
-        return Result.ok(meetupAppService.publish(cmd));
+    public Result<?> publish(@Valid @RequestBody PublishCmd cmd) {
+        meetupAppService.publish(cmd);
+        return Result.ok();
     }
 
     /**

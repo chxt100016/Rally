@@ -28,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class MeetupAppService {
 
     private final MeetupGateway meetupGateway;
+
     private final NearbyGateway nearbyGateway;
+
     private final MeetupDomainService meetupDomainService;
 
 
@@ -37,33 +39,16 @@ public class MeetupAppService {
      * 发布约球
      */
     @Transactional
-    public MeetupVO publish(PublishCmd cmd) {
+    public void publish(PublishCmd cmd) {
         String userId = UserContext.get();
 
-        // 1. 当日发布上限校验（domain）
-        meetupDomainService.assertPublishLimit(userId);
+        // 1. 校验
+        meetupDomainService.assertPublish(userId, cmd);
 
-        // 2. 城市开通校验（domain）
+        // 2. 构建 MeetupData（domain）
         String cityCode = CityLocator.assertCityOpened(cmd.getCityCode());
+        MeetupData data = meetupDomainService.add(cmd, userId, cityCode);
 
-        // 3. 字段校验（domain）
-        meetupDomainService.validatePublish(cmd);
-
-        // 4. 构建 MeetupData（domain）
-        MeetupData data = meetupDomainService.buildMeetupData(cmd, userId, cityCode);
-
-        // 5. 落库
-        meetupGateway.save(data);
-
-        // 6. GEO 双写（domain）
-        try {
-            nearbyGateway.add(cityCode, data.getBizId(), cmd.getLng(), cmd.getLat());
-        } catch (Exception e) {
-            log.warn("GEO 写入失败，不影响主流程: {}", e.getMessage());
-        }
-
-        // 7. 返回详情（MapStruct）
-        return MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
     }
 
     /**

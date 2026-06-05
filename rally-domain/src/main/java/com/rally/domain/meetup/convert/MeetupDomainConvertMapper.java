@@ -24,6 +24,7 @@ public interface MeetupDomainConvertMapper {
     @Mapping(target = "bizId", expression = "java(generateBizId())")
     @Mapping(target = "title", expression = "java(cmd.getTitle() != null ? cmd.getTitle() : generateTitle(cmd))")
     @Mapping(target = "endTime", expression = "java(calculateEndTime(cmd.getStartTime(), cmd.getDuration()))")
+    @Mapping(target = "courtGrid", expression = "java(generateCourtGrid(cmd.getCourtName(), cmd.getLng(), cmd.getLat()))")
     @Mapping(target = "levelValue", expression = "java(buildLevelValue(cmd))")
     @Mapping(target = "status", expression = "java(com.rally.domain.meetup.enums.MeetupStatusEnum.OPEN)")
     @Mapping(target = "currentPlayers", expression = "java(1)")
@@ -120,5 +121,21 @@ public interface MeetupDomainConvertMapper {
         }
         long hoursUntilStart = java.time.Duration.between(LocalDateTime.now(), data.getStartTime()).toHours();
         return hoursUntilStart < 6;
+    }
+
+    /**
+     * 生成场地网格键
+     */
+    default String generateCourtGrid(String courtName, Double lng, Double lat) {
+        if (courtName == null || courtName.isEmpty() || lng == null || lat == null) {
+            return null;
+        }
+        // 网格大小约 50m
+        double grid = 0.00045;
+        int gridX = (int) Math.floor(lng / grid);
+        int gridY = (int) Math.floor(lat / grid);
+        String normalized = courtName.trim().toLowerCase();
+        String key = normalized + ":" + gridX + ":" + gridY;
+        return String.valueOf(key.hashCode());
     }
 }

@@ -2,36 +2,50 @@ package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
+import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.enums.*;
 import com.rally.domain.meetup.gateway.MeetupGateway;
+import com.rally.domain.meetup.gateway.NearbyGateway;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.PublishCmd;
+import com.rally.domain.system.CityLocator;
 import com.rally.domain.system.SystemConfig;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.TextStyle;
-import java.util.Locale;
 
 /**
  * 约球领域服务
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MeetupDomainService {
 
     private final MeetupGateway meetupGateway;
 
+    private final NearbyGateway nearbyGateway;
+
     /**
      * 断言当日发布上限未超出
-     * @param userId 用户ID
      */
-    public void assertPublishLimit(String userId) {
+    public void assertPublish(String userId, PublishCmd cmd) {
+
+        // 1. 校验次数
+        this.assertTimes(userId);
+        // 2. 城市开通校验
+        CityLocator.assertCityOpened(cmd.getCityCode());
+        // 3. 字段校验
+        this.assertParam(cmd);
+
+    }
+
+    private void assertTimes(String userId) {
         int publishLimit = SystemConfig.getInt("anti_abuse.publish_per_day_limit", 5);
         long todayCount = meetupGateway.countTodayActive(userId);
         if (todayCount >= publishLimit) {
@@ -42,7 +56,7 @@ public class MeetupDomainService {
     /**
      * 校验发布参数
      */
-    public void validatePublish(PublishCmd cmd) {
+    public void assertParam(PublishCmd cmd) {
         // 开始时间必须大于当前时间
         if (cmd.getStartTime().isBefore(LocalDateTime.now())) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "不能发布过去的约球");
@@ -78,29 +92,16 @@ public class MeetupDomainService {
     /**
      * 构建 MeetupData
      */
-    public MeetupData buildMeetupData(PublishCmd cmd, String userId, String cityCode) {
-        MeetupData data = new MeetupData();
-        data.setBizId(generateBizId());
-        data.setCreatorId(userId);
-        data.setTitle(cmd.getTitle() != null ? cmd.getTitle() : generateTitle(cmd));
-        data.setMatchType(cmd.getMatchType());
-        data.setMaxPlayers(cmd.getMaxPlayers());
-        data.setCurrentPlayers(1); // 发布者占位
-        data.setCityCode(cityCode);
-        data.setStartTime(cmd.getStartTime());
-        data.setEndTime(calculateEndTime(cmd.getStartTime(), cmd.getDuration()));
-        data.setDuration(cmd.getDuration());
-        data.setCourtName(cmd.getCourtName());
-        data.setCourtAddress(cmd.getCourtAddress());
-        data.setCourtLng(cmd.getLng());
-        data.setCourtLat(cmd.getLat());
-        data.setCourtGrid(generateCourtGrid(cmd.getCourtName(), cmd.getLng(), cmd.getLat()));
-        data.setLevelMode(cmd.getLevelMode());
-        data.setLevelValue(buildLevelValue(cmd));
-        data.setGenderLimit(cmd.getGenderLimit());
-        data.setJoinMode(cmd.getJoinMode());
-        data.setCostItems(cmd.getCostItems());
-        data.setStatus(MeetupStatusEnum.OPEN);
+    public MeetupData add(PublishCmd cmd, String userId, String cityCode) {
+        // 使用 MapStruct 映射 PublishCmd -> MeetupData
+        MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId, cityCode);
+
+        meetupGateway.save(data);
+        try {
+            nearbyGateway.add(cityCode, data.getBizId(), cmd.getLng(), cmd.getLat());
+        } catch (Exception e) {
+            log.warn("GEO 写入失败，不影响主流程: {}", e.getMessage());
+        }
         return data;
     }
 
@@ -153,18 +154,6 @@ public class MeetupDomainService {
         if (cmd.getCostItems() != null) {
             data.setCostItems(cmd.getCostItems());
         }
-    }
-
-    /**
-     * 生成标题
-     */
-    public String generateTitle(PublishCmd cmd) {
-        String type = cmd.getMatchType().name();
-        DayOfWeek dayOfWeek = cmd.getStartTime().getDayOfWeek();
-        String dayName = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE);
-        String time = cmd.getStartTime().toLocalTime().toString().substring(0, 5);
-        String court = cmd.getCourtName() != null ? cmd.getCourtName() : "待定";
-        return type + "·" + dayName + " " + time + "·" + court;
     }
 
     /**
@@ -264,13 +253,6 @@ public class MeetupDomainService {
         }
         long hoursUntilStart = Duration.between(LocalDateTime.now(), data.getStartTime()).toHours();
         return hoursUntilStart < 6;
-    }
-
-    /**
-     * 生成 bizId
-     */
-    private String generateBizId() {
-        return String.valueOf(System.currentTimeMillis());
     }
 
     /**
