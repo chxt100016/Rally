@@ -96,14 +96,6 @@ public class Meetup {
                 && LocalDateTime.now().isBefore(data.getStartTime().minusMinutes(lockMinutes));
     }
 
-    /** 是否可关闭 */
-    public boolean canClose(String userId) {
-        MeetupStatusEnum realStatus = getRealStatus();
-        return isCreator(userId)
-                && realStatus != MeetupStatusEnum.FINISHED
-                && realStatus != MeetupStatusEnum.CLOSED;
-    }
-
     /**
      * 判断场地是否变更
      * @param cmd 编辑命令

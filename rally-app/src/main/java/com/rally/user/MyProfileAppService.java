@@ -3,7 +3,8 @@ package com.rally.user;
 import com.rally.cache.UserContext;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.review.UserReviewService;
-import com.rally.domain.score.ProfileLevelCalculator;
+
+import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.model.*;
@@ -83,9 +84,9 @@ public class MyProfileAppService {
 
     /** 构建评分信息 DTO（评分明细权重从 SystemConfig 读取） */
     private MyProfileScoreDTO buildScoreDTO(TennisProfileData profileData) {
-        String scoreLevel = ProfileLevelCalculator.calculate(profileData);
+        String scoreLevel = ProfileLevelManager.calculate(profileData);
         return new MyProfileScoreDTO()
-                .setScoreLevel(scoreLevel)
+                .setProfileLevel(scoreLevel)
                 .setData(buildScoreItemList(profileData));
     }
 

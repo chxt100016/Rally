@@ -1,4 +1,4 @@
-package com.rally.score.strategy;
+package com.rally.domain.score.strategy;
 
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.review.gateway.ScoreRecordGateway;

@@ -13,7 +13,7 @@ import java.math.BigDecimal;
  * 等级落档：S/A/B/C
  */
 @Slf4j
-public class ProfileLevelCalculator {
+public class ProfileLevelManager {
 
     /**
      * 聚合总分 + 等级落档

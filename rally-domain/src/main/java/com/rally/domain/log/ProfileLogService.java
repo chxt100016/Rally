@@ -1,4 +1,4 @@
-package com.rally.domain.user.service;
+package com.rally.domain.log;
 
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  * 负责构建和保存各类变更日志
  */
 @Service
-public class ProfileRecordService {
+public class ProfileLogService {
 
     @Resource
     private ProfileChangeLogGateway profileChangeLogGateway;

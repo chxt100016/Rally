@@ -36,6 +36,8 @@ public class MeetupDomainService {
 
     private final RegistrationGateway registrationGateway;
 
+    private final MeetupAssertService meetupAssertService;
+
     /**
      * 获取约球聚合根
      * @param meetupId 约球ID
@@ -75,6 +77,20 @@ public class MeetupDomainService {
 
         // 3. GEO 写入
         nearbyGateway.add(cmd.getCityCode(), meetup.getData().getBizId(), cmd.getCourtLng(), cmd.getCourtLat());
+    }
+
+    /**
+     * 关闭约球（权限校验 + 状态更新）
+     * @param userId 当前用户
+     * @param meetup 聚合根
+     */
+    public void close(String userId, Meetup meetup) {
+        // 1. 权限和状态校验
+        meetupAssertService.assertClose(userId, meetup);
+
+        // 2. 更新状态
+        meetup.getData().setStatus(MeetupStatusEnum.CLOSED);
+        meetupGateway.save(meetup.getData());
     }
 
 

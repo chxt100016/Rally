@@ -3,6 +3,7 @@ package com.rally.domain.meetup.service;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.meetup.enums.LevelModeEnum;
+import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.Meetup;
@@ -113,6 +114,21 @@ public class MeetupAssertService {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, fieldName + "步长为0.5");
         }
         return level;
+    }
+
+    /**
+     * 断言可以关闭（权限 + 状态校验）
+     * @param userId 当前用户
+     * @param meetup 聚合根
+     */
+    public void assertClose(String userId, Meetup meetup) {
+        if (!meetup.isCreator(userId)) {
+            throw new BusinessException(BizErrorCode.NOT_CREATOR);
+        }
+        MeetupStatusEnum realStatus = meetup.getRealStatus();
+        if (realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.CLOSED) {
+            throw new BusinessException(BizErrorCode.MEETUP_STATUS_ILLEGAL);
+        }
     }
 
     /**

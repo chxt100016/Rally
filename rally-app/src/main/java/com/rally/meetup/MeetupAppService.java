@@ -1,10 +1,6 @@
 package com.rally.meetup;
 
 import com.rally.cache.UserContext;
-import com.rally.domain.auth.enums.BizErrorCode;
-import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.meetup.enums.MeetupStatusEnum;
-import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
@@ -26,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class MeetupAppService {
-
-    private final MeetupGateway meetupGateway;
 
     private final NearbyGateway nearbyGateway;
 
@@ -91,17 +85,12 @@ public class MeetupAppService {
     public void close(String meetupId) {
         String userId = UserContext.get();
 
-        // 1. 查询约球
-        MeetupData data = meetupGateway.findByBizId(meetupId);
-        if (data == null) {
-            throw new BusinessException(BizErrorCode.MEETUP_NOT_FOUND);
-        }
+        // 1. 查询聚合根
+        Meetup meetup = meetupDomainService.getMeetup(meetupId);
+        MeetupData data = meetup.getData();
 
-        // 2. 权限和状态校验（domain）
-        Meetup meetup = new Meetup(data);
-        if (!meetup.canClose(userId)) {
-            throw new BusinessException(BizErrorCode.MEETUP_STATUS_ILLEGAL);
-        }
+        // 2. 权限和状态校验 + 更新状态
+        meetupDomainService.close(userId, meetup);
 
         // 3. 阶梯扣分（如果有人报名）
         if (data.getCurrentPlayers() > 1) {
@@ -117,17 +106,14 @@ public class MeetupAppService {
             }
         }
 
-        // 4. 更新状态
-        meetupGateway.updateStatus(meetupId, MeetupStatusEnum.CLOSED.name());
-
-        // 5. GEO 清理
+        // 4. GEO 清理
         try {
             nearbyGateway.remove(data.getCityCode(), meetupId);
         } catch (Exception e) {
             log.warn("GEO 清理失败: {}", e.getMessage());
         }
 
-        // 6. 发送取消通知（交叉引用 05）
+        // 5. 发送取消通知（交叉引用 05）
         // TODO: 调用通知域发送取消通知
         log.info("约球已关闭: meetupId={}", meetupId);
     }

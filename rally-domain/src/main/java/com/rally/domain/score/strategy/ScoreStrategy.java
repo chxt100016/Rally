@@ -1,4 +1,4 @@
-package com.rally.score.strategy;
+package com.rally.domain.score.strategy;
 
 import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.model.ScoreChange;
@@ -6,7 +6,7 @@ import com.rally.domain.score.model.ScoreContext;
 
 /**
  * 单维度评分计算策略。只负责「算」：输入上下文 + 目标用户，输出该维度的变更明细（before/after/delta）。
- * 不写库、不开事务、不记日志——这些通用能力由 ScoreManagerImpl 沉淀。
+ * 不写库、不开事务、不记日志——这些通用能力由 ScoreManager 沉淀。
  * 便于后续新增维度（如活跃度）时只加一个策略实现，manager 编排里注册即可。
  */
 public interface ScoreStrategy {

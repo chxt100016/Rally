@@ -9,7 +9,7 @@ import com.rally.domain.user.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.*;
-import com.rally.domain.user.service.ProfileRecordService;
+import com.rally.domain.log.ProfileLogService;
 import com.rally.domain.user.service.UserProfileService;
 import com.rally.db.user.convert.UserConvertMapper;
 import com.rally.user.convert.ProfileAppConvertMapper;
@@ -32,7 +32,7 @@ public class ProfileAppService {
     private ProfileChangeLogGateway profileChangeLogGateway;
 
     @Resource
-    private ProfileRecordService profileRecordService;
+    private ProfileLogService profileRecordService;
 
     @Resource
     private UserGateway userGateway;

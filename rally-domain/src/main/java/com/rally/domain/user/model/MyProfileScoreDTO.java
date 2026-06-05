@@ -13,7 +13,7 @@ import java.util.List;
 public class MyProfileScoreDTO {
 
     /** 评分等级 (S/A/B/C) */
-    private String scoreLevel;
+    private String profileLevel;
 
     /** 评分明细列表 */
     private List<ScoreItemDTO> data;

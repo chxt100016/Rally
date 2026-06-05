@@ -1,24 +1,25 @@
-package com.rally.score.manager;
+package com.rally.domain.score;
 
-import com.rally.domain.system.SystemConfig;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.review.gateway.ReviewGateway;
 import com.rally.domain.review.gateway.ScoreRecordGateway;
 import com.rally.domain.score.gateway.PlayerEloGateway;
-import com.rally.domain.score.gateway.ScoreManager;
 import com.rally.domain.score.gateway.ScoreStatusGateway;
 import com.rally.domain.score.model.*;
+import com.rally.domain.score.strategy.CalibrationStrategy;
+import com.rally.domain.score.strategy.CredibilityStrategy;
+import com.rally.domain.score.strategy.EloStrategy;
+import com.rally.domain.score.strategy.ReputationStrategy;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;
 import com.rally.domain.user.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.model.ProfileChangeLogData;
 import com.rally.domain.user.model.TennisProfileData;
-import com.rally.score.strategy.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class ScoreManagerImpl implements ScoreManager {
+public class ScoreManager {
 
     @Resource
     private ReputationStrategy reputationStrategy;
@@ -55,8 +56,7 @@ public class ScoreManagerImpl implements ScoreManager {
     @Resource
     private ScoreStatusGateway statusGateway;
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
+
     public void recalc(String meetupId) {
         log.info("开始全量重算评分，meetupId={}", meetupId);
 
@@ -114,8 +114,7 @@ public class ScoreManagerImpl implements ScoreManager {
         log.info("全量重算评分完成，meetupId={}", meetupId);
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
+
     public void applyReputationPenalty(ReputationPenaltyCmd cmd) {
         log.info("执行单点信誉分扣减，userId={}, reason={}, refMeetupId={}",
                 cmd.getUserId(), cmd.getReason(), cmd.getRefMeetupId());

@@ -1,5 +1,6 @@
 package com.rally.domain.user.service;
 
+import com.rally.domain.log.ProfileLogService;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserProfileGateway;
@@ -23,7 +24,7 @@ public class UserProfileService {
     private TennisProfileGateway tennisProfileGateway;
 
     @Resource
-    private ProfileRecordService profileRecordService;
+    private ProfileLogService profileRecordService;
 
     /**
      * 查询用户档案，不存在则初始化 TBC
