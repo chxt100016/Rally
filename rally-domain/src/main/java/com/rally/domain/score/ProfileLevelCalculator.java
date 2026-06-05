@@ -4,7 +4,6 @@ import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.RatingLevelEnum;
 import com.rally.domain.user.model.TennisProfileData;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
@@ -14,7 +13,7 @@ import java.math.BigDecimal;
  * 等级落档：S/A/B/C
  */
 @Slf4j
-public class ScoreLevelCalculator {
+public class ProfileLevelCalculator {
 
     /**
      * 聚合总分 + 等级落档
