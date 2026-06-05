@@ -1,7 +1,7 @@
 package com.rally.meetup;
 
 import com.rally.cache.UserContext;
-import com.rally.client.geo.CityLocator;
+import com.rally.domain.system.CityLocator;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
@@ -29,7 +29,6 @@ public class MeetupAppService {
 
     private final MeetupGateway meetupGateway;
     private final NearbyGateway nearbyGateway;
-    private final CityLocator cityLocator;
     private final MeetupDomainService meetupDomainService;
 
 
@@ -49,7 +48,7 @@ public class MeetupAppService {
         }
 
         // 2. 城市开通校验
-        String cityCode = cityLocator.validateCityCode(cmd.getCityCode());
+        String cityCode = CityLocator.validateCityCode(cmd.getCityCode());
         if (cityCode == null) {
             throw new BusinessException(BizErrorCode.CITY_NOT_OPENED);
         }
@@ -103,7 +102,7 @@ public class MeetupAppService {
         boolean locationChanged = false;
         String newCityCode = data.getCityCode();
         if (cmd.getCityCode() != null && !cmd.getCityCode().equals(data.getCityCode())) {
-            String cityCode = cityLocator.validateCityCode(cmd.getCityCode());
+            String cityCode = CityLocator.validateCityCode(cmd.getCityCode());
             if (cityCode == null) {
                 throw new BusinessException(BizErrorCode.CITY_NOT_OPENED);
             }

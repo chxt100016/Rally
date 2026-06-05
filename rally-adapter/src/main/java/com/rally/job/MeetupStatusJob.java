@@ -2,7 +2,7 @@ package com.rally.job;
 
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
-import com.rally.client.geo.CityLocator;
+import com.rally.domain.system.CityLocator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -28,9 +28,6 @@ public class MeetupStatusJob {
     @Resource
     private NearbyGateway nearbyGateway;
 
-    @Resource
-    private CityLocator cityLocator;
-
     /**
      * 约球状态兜底（凌晨 2:00）
      * 将已过 end_time 但状态仍为 OPEN/FULL 的约球批量更新为 FINISHED
@@ -54,7 +51,7 @@ public class MeetupStatusJob {
     public void syncGeoData() {
         log.info("开始执行 GEO 一致性校验任务");
         try {
-            List<String> cities = cityLocator.getOpenedCities();
+            List<String> cities = CityLocator.getOpenedCities();
             if (cities == null || cities.isEmpty()) {
                 log.info("无开通城市，跳过 GEO 校验");
                 return;
