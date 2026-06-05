@@ -194,9 +194,7 @@ public class RegistrationAppService {
         }
 
         // 3. 权限校验（委托聚合根）
-        if (!new Meetup(meetup).isCreator(currentUserId)) {
-            throw new BusinessException(BizErrorCode.NOT_CREATOR);
-        }
+        new Meetup(meetup).assertOwner(currentUserId);
 
         // 4. 状态校验（委托聚合根）
         if (!Meetup.canReview(registration)) {
@@ -246,9 +244,7 @@ public class RegistrationAppService {
         }
 
         // 3. 权限校验（委托聚合根）
-        if (!new Meetup(meetup).isCreator(currentUserId)) {
-            throw new BusinessException(BizErrorCode.NOT_CREATOR);
-        }
+        new Meetup(meetup).assertOwner(currentUserId);
 
         // 4. 状态校验（委托聚合根）
         if (!Meetup.canReview(registration)) {
@@ -276,9 +272,7 @@ public class RegistrationAppService {
         }
 
         // 2. 权限校验
-        if (!currentUserId.equals(meetup.getCreatorId())) {
-            throw new BusinessException(BizErrorCode.NOT_CREATOR);
-        }
+        new Meetup(meetup).assertOwner(currentUserId);
 
         // 3. 查询待审批列表
         List<RegistrationData> registrationList = registrationGateway.findPendingByMeetupId(meetupId);

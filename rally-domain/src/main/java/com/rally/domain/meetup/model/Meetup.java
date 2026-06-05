@@ -80,6 +80,13 @@ public class Meetup {
         return userId.equals(data.getCreatorId());
     }
 
+    /** 断言当前用户为创建人，否则抛出异常 */
+    public void assertOwner(String userId) {
+        if (!isCreator(userId)) {
+            throw new BusinessException(BizErrorCode.NOT_CREATOR);
+        }
+    }
+
     /** 是否可编辑 */
     public boolean canEdit(String userId, int lockMinutes) {
         MeetupStatusEnum realStatus = getRealStatus();
@@ -95,6 +102,29 @@ public class Meetup {
         return isCreator(userId)
                 && realStatus != MeetupStatusEnum.FINISHED
                 && realStatus != MeetupStatusEnum.CLOSED;
+    }
+
+    /**
+     * 判断场地是否变更
+     * @param cmd 编辑命令
+     * @return true 表示场地变更
+     */
+    public boolean isLocationChanged(PublishCmd cmd) {
+        // 场地名称变更
+        if (cmd.getCourtName() != null && !cmd.getCourtName().equals(data.getCourtName())) {
+            return true;
+        }
+        // 场地地址变更
+        if (cmd.getCourtAddress() != null && !cmd.getCourtAddress().equals(data.getCourtAddress())) {
+            return true;
+        }
+        // 经纬度变更
+        if (cmd.getCourtLng() != null && cmd.getCourtLat() != null) {
+            if (!cmd.getCourtLng().equals(data.getCourtLng()) || !cmd.getCourtLat().equals(data.getCourtLat())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ======================== 报名记录查询 ========================

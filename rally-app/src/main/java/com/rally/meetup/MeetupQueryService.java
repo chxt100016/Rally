@@ -196,7 +196,6 @@ public class MeetupQueryService {
 
         MeetupVO vo = MAPPER.toMeetupVO(data);
         Meetup meetup = new Meetup(data);
-        boolean isCreator = meetup.isCreator(currentUserId);
 
         // 计算每人费用（委托领域服务）
         vo.setPerPersonCost(meetupDomainService.calculatePerPersonCost(data));

@@ -43,7 +43,7 @@ public class MeetupAppService {
         String userId = UserContext.get();
 
         // 1. 校验（城市开通校验在 assertPublish 中完成）
-        meetupDomainService.assertPublish(userId, cmd);
+        meetupAssertService.assertPublish(userId, cmd);
 
         // 2. 构建 MeetupData 并持久化（含创建者自动报名）
         meetupDomainService.add(userId, cmd);
@@ -55,6 +55,7 @@ public class MeetupAppService {
     @Transactional
     public MeetupVO edit(PublishCmd cmd) {
         String meetupId = cmd.getMeetupId();
+        String userId = UserContext.get();
 
         // 1. 获取聚合根
         Meetup meetup = meetupDomainService.getMeetup(meetupId);
@@ -64,10 +65,10 @@ public class MeetupAppService {
         meetupAssertService.assertEdit(meetup, cmd);
 
         // 3. 场地变更检测（更新前检测）
-        boolean locationChanged = meetupAssertService.isLocationChanged(data, cmd);
+        boolean locationChanged = meetup.isLocationChanged(cmd);
 
         // 4. 更新字段 + 落库
-        meetupDomainService.edit(data, cmd);
+        meetupDomainService.edit(userId, meetup, cmd);
 
         // 5. GEO 更新（如果场地变了）
         if (locationChanged) {

@@ -12,7 +12,6 @@ import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupFactory;
 import com.rally.domain.meetup.model.PublishCmd;
 import com.rally.domain.meetup.model.RegistrationData;
-import com.rally.domain.system.CityLocator;
 import com.rally.domain.system.SystemConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,123 +51,16 @@ public class MeetupDomainService {
 
     /**
      * 编辑约球（更新字段 + 保存）
-     * @param data 约球数据
      * @param cmd 编辑命令
      */
-    public void edit(MeetupData data, PublishCmd cmd) {
+    public void edit(String userId, Meetup meetup, PublishCmd cmd) {
+        meetup.assertOwner(userId);
+
         // 1. 更新字段（MapStruct）
-        MeetupDomainConvertMapper.INSTANCE.updateMeetupData(data, cmd);
+        MeetupDomainConvertMapper.INSTANCE.updateMeetupData(meetup.getData(), cmd);
+
         // 2. 保存
-        meetupGateway.save(data);
-    }
-
-    /**
-     * 断言
-     */
-    public void assertPublish(String userId, PublishCmd cmd) {
-
-        // 1. 当日发布上限
-        this.assertTimes(userId);
-        // 2. 城市开通校验
-        CityLocator.assertCityOpened(cmd.getCityCode());
-        // 3. 字段校验
-        this.assertParam(cmd);
-
-    }
-
-
-    /**
-     * 判断场地是否变更（供 app 层 GEO 更新判断使用）
-     */
-    public boolean isLocationChanged(MeetupData data, PublishCmd cmd) {
-        // 场地名称变更
-        if (cmd.getCourtName() != null && !cmd.getCourtName().equals(data.getCourtName())) {
-            return true;
-        }
-        // 场地地址变更
-        if (cmd.getCourtAddress() != null && !cmd.getCourtAddress().equals(data.getCourtAddress())) {
-            return true;
-        }
-        // 经纬度变更
-        if (cmd.getCourtLng() != null && cmd.getCourtLat() != null) {
-            if (!cmd.getCourtLng().equals(data.getCourtLng()) || !cmd.getCourtLat().equals(data.getCourtLat())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void assertTimes(String userId) {
-        int publishLimit = SystemConfig.getInt("anti_abuse.publish_per_day_limit", 5);
-        long todayCount = meetupGateway.countTodayActive(userId);
-        if (todayCount >= publishLimit) {
-            throw new BusinessException(BizErrorCode.PUBLISH_LIMIT_EXCEEDED);
-        }
-    }
-
-    /**
-     * 校验发布参数
-     */
-    private void assertParam(PublishCmd cmd) {
-        // 开始时间必须大于当前时间
-        if (cmd.getStartTime().isBefore(LocalDateTime.now())) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, "不能发布过去的约球");
-        }
-
-        // duration 校验
-        BigDecimal[] validDurations = {
-                new BigDecimal("0.5"), new BigDecimal("1.0"), new BigDecimal("1.5"),
-                new BigDecimal("2.0"), new BigDecimal("2.5"), new BigDecimal("3.0")
-        };
-        boolean validDuration = false;
-        for (BigDecimal d : validDurations) {
-            if (d.compareTo(cmd.getDuration()) == 0) {
-                validDuration = true;
-                break;
-            }
-        }
-        if (!validDuration) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, "持续时长必须是0.5的倍数");
-        }
-
-        // level 校验：1.5–7.0，步长 0.5
-        if (cmd.getLevelMode() != null) {
-            if (cmd.getLevelValue() == null || cmd.getLevelValue().isBlank()) {
-                throw new BusinessException(BizErrorCode.PARAM_ERROR, "请填写水平值");
-            }
-            if (cmd.getLevelMode() == LevelModeEnum.RANGE) {
-                String[] parts = cmd.getLevelValue().split(":");
-                if (parts.length != 2) {
-                    throw new BusinessException(BizErrorCode.PARAM_ERROR, "水平范围格式应为 min:max");
-                }
-                BigDecimal min = parseLevel(parts[0], "水平最小值");
-                BigDecimal max = parseLevel(parts[1], "水平最大值");
-                if (min.compareTo(max) > 0) {
-                    throw new BusinessException(BizErrorCode.PARAM_ERROR, "水平最小值不能大于最大值");
-                }
-            } else {
-                parseLevel(cmd.getLevelValue(), "水平值");
-            }
-        }
-    }
-
-    /**
-     * 校验单个水平值：1.5–7.0，步长 0.5
-     */
-    private BigDecimal parseLevel(String value, String fieldName) {
-        BigDecimal level;
-        try {
-            level = new BigDecimal(value);
-        } catch (NumberFormatException e) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, fieldName + "格式不正确");
-        }
-        if (level.compareTo(new BigDecimal("1.5")) < 0 || level.compareTo(new BigDecimal("7.0")) > 0) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, fieldName + "范围为1.5~7.0");
-        }
-        if (level.multiply(new BigDecimal("10")).remainder(new BigDecimal("5")).compareTo(BigDecimal.ZERO) != 0) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, fieldName + "步长为0.5");
-        }
-        return level;
+        meetupGateway.save(meetup.getData());
     }
 
     /**
