@@ -104,4 +104,15 @@ public class RegistrationRepository {
                 .map(RegistrationPO::getUserId)
                 .toList();
     }
+
+    /**
+     * 统计约球已批准的参与者数量
+     */
+    public int countApprovedByMeetupId(String meetupId) {
+        Long count = registrationService.lambdaQuery()
+                .eq(RegistrationPO::getRallyMeetupId, meetupId)
+                .eq(RegistrationPO::getStatus, "approved")
+                .count();
+        return count.intValue();
+    }
 }

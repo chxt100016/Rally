@@ -3,14 +3,14 @@ package com.rally.meetup;
 import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.enums.WaitlistStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
-import com.rally.domain.system.SystemConfig;
+import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.RegistrationData;
 import com.rally.domain.meetup.model.RegistrationVO;
+import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.TennisProfileData;
@@ -21,9 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +38,7 @@ public class RegistrationAppService {
     private final RegistrationGateway registrationGateway;
     private final UserGateway userGateway;
     private final TennisProfileGateway tennisProfileGateway;
+    private final MeetupDomainService meetupDomainService;
 
     private static final MeetupAppConvertMapper MAPPER = MeetupAppConvertMapper.INSTANCE;
 
@@ -56,49 +55,34 @@ public class RegistrationAppService {
             throw new BusinessException(BizErrorCode.MEETUP_NOT_FOUND);
         }
 
-        // 2. 状态校验（懒判定）
-        MeetupStatusEnum realStatus = lazyStatus(meetup);
-        if (realStatus == MeetupStatusEnum.FULL) {
-            throw new BusinessException(BizErrorCode.MEETUP_FULL);
-        }
-        if (realStatus == MeetupStatusEnum.CLOSED) {
-            throw new BusinessException(BizErrorCode.MEETUP_CLOSED);
-        }
-        if (realStatus == MeetupStatusEnum.FINISHED) {
-            throw new BusinessException(BizErrorCode.MEETUP_EXPIRED);
-        }
+        // 2. 领域校验：状态、时间、创建人（委托聚合根）
+        new Meetup(meetup).assertCanJoin(userId);
 
-        // 3. 开始时间校验
-        if (meetup.getStartTime().isBefore(LocalDateTime.now())) {
-            throw new BusinessException(BizErrorCode.MEETUP_EXPIRED);
-        }
-
-        // 4. 不能报名自己发布的约球
-        if (userId.equals(meetup.getCreatorId())) {
-            throw new BusinessException(BizErrorCode.CANNOT_JOIN_OWN);
-        }
-
-        // 5. 重复报名校验
+        // 3. 重复报名校验
         RegistrationData existing = registrationGateway.findActiveByMeetupAndUser(meetupId, userId);
         if (existing != null) {
             throw new BusinessException(BizErrorCode.ALREADY_JOINED);
         }
 
-        // 6. 性别限制校验
-        checkGenderLimit(meetup, userId);
+        // 4. 性别限制校验（委托聚合根，app 层负责查询用户数据）
+        UserData user = userGateway.findByUserId(userId).orElse(null);
+        if (user != null && user.getGender() != null) {
+            new Meetup(meetup).checkGenderLimit(user.getGender().name());
+        }
 
-        // 7. 信誉分门槛校验
-        checkReputationScore(userId);
+        // 5. 信誉分门槛校验（委托领域服务，app 层负责查询档案数据）
+        TennisProfileData profile = tennisProfileGateway.findByUserId(userId).orElse(null);
+        if (profile != null) {
+            meetupDomainService.checkReputationScore(profile.getReputationScore());
+        }
 
-        // 8. 报名抵冲校验
-        checkTimeConflict(userId, meetup.getStartTime(), meetup.getEndTime(), null);
+        // 6. 报名抵冲校验（委托领域服务）
+        meetupDomainService.checkTimeConflict(userId, meetup.getStartTime(), meetup.getEndTime(), null);
 
-        // 9. 判断是否可以复活已失效的记录
+        // 7. 判断是否可以复活已失效的记录
         RegistrationData oldRecord = registrationGateway.findByMeetupAndUserAny(meetupId, userId);
 
-        if (oldRecord != null && (oldRecord.getStatus() == WaitlistStatusEnum.rejected
-                || oldRecord.getStatus() == WaitlistStatusEnum.withdrawn
-                || oldRecord.getStatus() == WaitlistStatusEnum.expired)) {
+        if (Meetup.canRevive(oldRecord)) {
             // 复活旧记录
             registrationGateway.revive(oldRecord.getBizId(), autoWithdrawAt);
         } else {
@@ -146,7 +130,8 @@ public class RegistrationAppService {
             throw new BusinessException(BizErrorCode.NOT_JOINED);
         }
 
-        if (registration.getStatus() != WaitlistStatusEnum.pending) {
+        // 状态校验委托聚合根
+        if (!Meetup.canWithdraw(registration)) {
             throw new BusinessException(BizErrorCode.WAITLIST_NOT_PENDING);
         }
 
@@ -167,19 +152,15 @@ public class RegistrationAppService {
             throw new BusinessException(BizErrorCode.MEETUP_NOT_FOUND);
         }
 
-        // 2. 查询报名记录
+        // 2. 查询报名记录并校验状态（委托聚合根）
         RegistrationData registration = registrationGateway.findActiveByMeetupAndUser(meetupId, userId);
-        if (registration == null || registration.getStatus() != WaitlistStatusEnum.approved) {
+        if (registration == null || !Meetup.canQuit(registration)) {
             throw new BusinessException(BizErrorCode.NOT_JOINED);
         }
 
-        // 3. 计算是否扣分
-        long hoursUntilStart = ChronoUnit.HOURS.between(LocalDateTime.now(), meetup.getStartTime());
-        int thresholdHours = SystemConfig.getInt("meetup.quit.penalty_threshold_hours", 6);
-
-        if (hoursUntilStart < thresholdHours) {
-            // 扣分
-            int penalty = SystemConfig.getInt("meetup.quit.penalty_under_6h", 25);
+        // 3. 计算扣分（委托领域服务）
+        int penalty = meetupDomainService.calculateQuitPenalty(meetup, userId);
+        if (penalty > 0) {
             // TODO: 调用评分域扣分
             log.info("退出扣分: userId={}, meetupId={}, penalty={}", userId, meetupId, penalty);
         }
@@ -212,24 +193,24 @@ public class RegistrationAppService {
             throw new BusinessException(BizErrorCode.MEETUP_NOT_FOUND);
         }
 
-        // 3. 权限校验：仅创建人可审批
-        if (!currentUserId.equals(meetup.getCreatorId())) {
+        // 3. 权限校验（委托聚合根）
+        if (!new Meetup(meetup).isCreator(currentUserId)) {
             throw new BusinessException(BizErrorCode.NOT_CREATOR);
         }
 
-        // 4. 状态校验
-        if (registration.getStatus() != WaitlistStatusEnum.pending) {
+        // 4. 状态校验（委托聚合根）
+        if (!Meetup.canReview(registration)) {
             throw new BusinessException(BizErrorCode.WAITLIST_NOT_PENDING);
         }
 
-        // 5. 懒判定
-        MeetupStatusEnum realStatus = lazyStatus(meetup);
-        if (realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.CLOSED) {
+        // 5. 约球状态校验（委托聚合根懒判定）
+        if (!new Meetup(meetup).isActive()) {
             throw new BusinessException(BizErrorCode.MEETUP_STATUS_ILLEGAL);
         }
 
-        // 6. 报名抵冲校验
-        checkTimeConflict(registration.getUserId(), meetup.getStartTime(), meetup.getEndTime(), null);
+        // 6. 报名抵冲校验（委托领域服务）
+        meetupDomainService.checkTimeConflict(registration.getUserId(), meetup.getStartTime(),
+                meetup.getEndTime(), null);
 
         // 7. 更新状态
         registrationGateway.updateStatus(registrationId, WaitlistStatusEnum.approved);
@@ -264,13 +245,13 @@ public class RegistrationAppService {
             throw new BusinessException(BizErrorCode.MEETUP_NOT_FOUND);
         }
 
-        // 3. 权限校验
-        if (!currentUserId.equals(meetup.getCreatorId())) {
+        // 3. 权限校验（委托聚合根）
+        if (!new Meetup(meetup).isCreator(currentUserId)) {
             throw new BusinessException(BizErrorCode.NOT_CREATOR);
         }
 
-        // 4. 状态校验
-        if (registration.getStatus() != WaitlistStatusEnum.pending) {
+        // 4. 状态校验（委托聚合根）
+        if (!Meetup.canReview(registration)) {
             throw new BusinessException(BizErrorCode.WAITLIST_NOT_PENDING);
         }
 
@@ -322,69 +303,5 @@ public class RegistrationAppService {
         }
 
         return voList;
-    }
-
-    /**
-     * 懒判定
-     */
-    private MeetupStatusEnum lazyStatus(MeetupData data) {
-        if ((data.getStatus() == MeetupStatusEnum.OPEN || data.getStatus() == MeetupStatusEnum.FULL)
-                && data.getEndTime().isBefore(LocalDateTime.now())) {
-            return MeetupStatusEnum.FINISHED;
-        }
-        return data.getStatus();
-    }
-
-    /**
-     * 性别限制校验
-     */
-    private void checkGenderLimit(MeetupData meetup, String userId) {
-        if (meetup.getGenderLimit() == com.rally.domain.meetup.enums.GenderLimitEnum.ANY) {
-            return;
-        }
-
-        UserData user = userGateway.findByUserId(userId).orElse(null);
-        if (user == null || user.getGender() == null) {
-            return;
-        }
-
-        String userGender = user.getGender().name().toLowerCase();
-        if (meetup.getGenderLimit() == com.rally.domain.meetup.enums.GenderLimitEnum.MALE
-                && !"MALE".equals(userGender)) {
-            throw new BusinessException(BizErrorCode.GENDER_NOT_MATCH);
-        }
-        if (meetup.getGenderLimit() == com.rally.domain.meetup.enums.GenderLimitEnum.FEMALE
-                && !"FEMALE".equals(userGender)) {
-            throw new BusinessException(BizErrorCode.GENDER_NOT_MATCH);
-        }
-    }
-
-    /**
-     * 信誉分门槛校验
-     */
-    private void checkReputationScore(String userId) {
-        TennisProfileData profile = tennisProfileGateway.findByUserId(userId).orElse(null);
-        if (profile != null && profile.getReputationScore() != null) {
-            if (profile.getReputationScore().compareTo(new BigDecimal("30")) < 0) {
-                throw new BusinessException(BizErrorCode.LOW_REPUTATION_BANNED);
-            }
-        }
-    }
-
-    /**
-     * 报名抵冲校验
-     */
-    private void checkTimeConflict(String userId, LocalDateTime startTime, LocalDateTime endTime,
-                                    String excludeMeetupId) {
-        int bufferMinutes = SystemConfig.getInt("meetup.conflict.buffer_minutes", 30);
-        LocalDateTime conflictStart = startTime.minusMinutes(bufferMinutes);
-        LocalDateTime conflictEnd = endTime.plusMinutes(bufferMinutes);
-
-        List<RegistrationData> conflicts = registrationGateway.findConflict(
-                userId, conflictStart, conflictEnd, excludeMeetupId);
-
-        if (!conflicts.isEmpty()) {
-            throw new BusinessException(BizErrorCode.TIME_CONFLICT);
-        }
     }
 }

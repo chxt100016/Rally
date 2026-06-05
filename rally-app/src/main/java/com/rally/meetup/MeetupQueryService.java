@@ -4,13 +4,13 @@ import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
-import com.rally.domain.meetup.enums.ActionStateEnum;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.model.RegistrationData;
+import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.TennisProfileData;
@@ -41,6 +41,7 @@ public class MeetupQueryService {
     private final NearbyGateway nearbyGateway;
     private final UserGateway userGateway;
     private final TennisProfileGateway tennisProfileGateway;
+    private final MeetupDomainService meetupDomainService;
 
     private static final MeetupAppConvertMapper MAPPER = MeetupAppConvertMapper.INSTANCE;
 
@@ -173,49 +174,13 @@ public class MeetupQueryService {
                     }
                     // 水平筛选
                     if (query.getLevelMin() != null || query.getLevelMax() != null) {
-                        if (!matchLevel(m, query.getLevelMin(), query.getLevelMax())) {
+                        if (!meetupDomainService.matchLevel(m, query.getLevelMin(), query.getLevelMax())) {
                             return false;
                         }
                     }
                     return true;
                 })
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * 水平匹配判断
-     */
-    private boolean matchLevel(MeetupData meetup, BigDecimal userLevelMin, BigDecimal userLevelMax) {
-        if (meetup.getLevelMode() == null || meetup.getLevelValue() == null) {
-            return true; // 无水平要求，匹配所有人
-        }
-
-        BigDecimal meetupMin, meetupMax;
-        switch (meetup.getLevelMode()) {
-            case RANGE:
-                String[] parts = meetup.getLevelValue().split(":");
-                meetupMin = new BigDecimal(parts[0]);
-                meetupMax = new BigDecimal(parts[1]);
-                break;
-            case EXACT:
-                meetupMin = meetupMax = new BigDecimal(meetup.getLevelValue());
-                break;
-            case ABOVE:
-                meetupMin = new BigDecimal(meetup.getLevelValue());
-                meetupMax = new BigDecimal("7.0");
-                break;
-            case BELOW:
-                meetupMin = new BigDecimal("1.5");
-                meetupMax = new BigDecimal(meetup.getLevelValue());
-                break;
-            default:
-                return true;
-        }
-
-        // 用户水平区间与约球水平区间有交集
-        BigDecimal userMin = userLevelMin != null ? userLevelMin : new BigDecimal("1.5");
-        BigDecimal userMax = userLevelMax != null ? userLevelMax : new BigDecimal("7.0");
-        return userMin.compareTo(meetupMax) <= 0 && userMax.compareTo(meetupMin) >= 0;
     }
 
     /**
@@ -230,27 +195,19 @@ public class MeetupQueryService {
         }
 
         MeetupVO vo = MAPPER.toMeetupVO(data);
+        Meetup meetup = new Meetup(data);
+        boolean isCreator = meetup.isCreator(currentUserId);
 
-        // 懒判定
-        MeetupStatusEnum realStatus = lazyStatus(data);
-        boolean isCreator = currentUserId.equals(data.getCreatorId());
+        // 计算每人费用（委托领域服务）
+        vo.setPerPersonCost(meetupDomainService.calculatePerPersonCost(data));
 
-        // 计算每人费用
-        if (data.getCostItems() != null && !data.getCostItems().isEmpty() && data.getMaxPlayers() != null) {
-            int totalAmount = data.getCostItems().stream()
-                    .mapToInt(item -> item.getTotalAmount() != null ? item.getTotalAmount() : 0)
-                    .sum();
-            vo.setPerPersonCost((int) Math.ceil((double) totalAmount / data.getMaxPlayers()));
-        }
+        // 计算 actionState（委托领域服务，含报名记录上下文）
+        RegistrationData userRegistration = registrationGateway.findActiveByMeetupAndUser(meetupId, currentUserId);
+        int lockMinutes = SystemConfig.getInt("meetup.edit_lock_minutes_before_start", 60);
+        vo.setActionState(meetupDomainService.calculateActionState(meetup, currentUserId, lockMinutes, userRegistration));
 
-        // 计算 actionState
-        vo.setActionState(calculateActionState(realStatus, data, currentUserId, isCreator));
-
-        // 计算 quitWillPenalize
-        if (!isCreator) {
-            long hoursUntilStart = java.time.Duration.between(LocalDateTime.now(), data.getStartTime()).toHours();
-            vo.setQuitWillPenalize(hoursUntilStart < 6);
-        }
+        // 计算 quitWillPenalize（委托领域服务）
+        vo.setQuitWillPenalize(meetupDomainService.calculateQuitWillPenalize(data, currentUserId));
 
         // 填充发布者信息
         UserData creator = userGateway.findByUserId(data.getCreatorId()).orElse(null);
@@ -269,73 +226,20 @@ public class MeetupQueryService {
         return vo;
     }
 
-
-
-    /**
-     * 懒判定
-     */
-    private MeetupStatusEnum lazyStatus(MeetupData data) {
-        if ((data.getStatus() == MeetupStatusEnum.OPEN || data.getStatus() == MeetupStatusEnum.FULL)
-                && data.getEndTime().isBefore(LocalDateTime.now())) {
-            return MeetupStatusEnum.FINISHED;
-        }
-        return data.getStatus();
-    }
-
-    /**
-     * 计算 actionState
-     */
-    private ActionStateEnum calculateActionState(MeetupStatusEnum realStatus, MeetupData data,
-                                                  String currentUserId, boolean isCreator) {
-        // 终态判断
-        if (realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.CLOSED) {
-            return isCreator ? ActionStateEnum.OWNER_DISABLED : ActionStateEnum.DISABLED;
-        }
-
-        // 创建人视角
-        if (isCreator) {
-            int lockMinutes = SystemConfig.getInt("meetup.edit_lock_minutes_before_start", 60);
-            boolean locked = LocalDateTime.now().isAfter(data.getStartTime().minusMinutes(lockMinutes));
-            return locked ? ActionStateEnum.OWNER_EDIT_LOCKED : ActionStateEnum.OWNER_EDITABLE;
-        }
-
-        // 访客视角：查询报名状态
-        RegistrationData myRegistration = registrationGateway.findActiveByMeetupAndUser(data.getBizId(), currentUserId);
-        if (myRegistration != null) {
-            if (myRegistration.getStatus() == com.rally.domain.meetup.enums.WaitlistStatusEnum.pending) {
-                return ActionStateEnum.PENDING_REVIEW;
-            }
-            if (myRegistration.getStatus() == com.rally.domain.meetup.enums.WaitlistStatusEnum.approved) {
-                return ActionStateEnum.JOINED;
-            }
-        }
-
-        if (realStatus == MeetupStatusEnum.FULL) {
-            return ActionStateEnum.FULL;
-        }
-
-        return data.getJoinMode() == com.rally.domain.meetup.enums.JoinModeEnum.DIRECT
-                ? ActionStateEnum.JOIN_DIRECT : ActionStateEnum.APPLY_APPROVAL;
-    }
-
     /**
      * 构建 MeetupCardVO
      */
     private MeetupCardVO buildMeetupCardVO(MeetupData data, String currentUserId) {
         MeetupCardVO card = MAPPER.toMeetupCardVO(data);
+        Meetup meetup = new Meetup(data);
 
-        // 计算每人费用
-        if (data.getCostItems() != null && !data.getCostItems().isEmpty() && data.getMaxPlayers() != null) {
-            int totalAmount = data.getCostItems().stream()
-                    .mapToInt(item -> item.getTotalAmount() != null ? item.getTotalAmount() : 0)
-                    .sum();
-            card.setPerPersonCost((int) Math.ceil((double) totalAmount / data.getMaxPlayers()));
-        }
+        // 计算每人费用（委托领域服务）
+        card.setPerPersonCost(meetupDomainService.calculatePerPersonCost(data));
 
-        // 计算 actionState
-        MeetupStatusEnum realStatus = lazyStatus(data);
-        boolean isCreator = currentUserId.equals(data.getCreatorId());
-        card.setActionState(calculateActionState(realStatus, data, currentUserId, isCreator));
+        // 计算 actionState（委托领域服务，含报名记录上下文）
+        RegistrationData userRegistration = registrationGateway.findActiveByMeetupAndUser(data.getBizId(), currentUserId);
+        int lockMinutes = SystemConfig.getInt("meetup.edit_lock_minutes_before_start", 60);
+        card.setActionState(meetupDomainService.calculateActionState(meetup, currentUserId, lockMinutes, userRegistration));
 
         // 填充发布者信息
         UserData creator = userGateway.findByUserId(data.getCreatorId()).orElse(null);

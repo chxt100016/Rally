@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.List;
 import java.time.LocalDateTime;
 
 /**
@@ -47,6 +48,58 @@ public class MeetupDomainService {
         // 3. 字段校验
         this.assertParam(cmd);
 
+    }
+
+    /**
+     * 断言编辑参数合法
+     * @param data 约球数据
+     * @param cmd 编辑命令
+     * @param newCityCode 新城市编码（可能为null，表示未修改城市）
+     */
+    public void assertEdit(MeetupData data, PublishCmd cmd, String newCityCode) {
+        // 1. 城市不可修改
+        if (newCityCode != null && !newCityCode.equals(data.getCityCode())) {
+            throw new BusinessException(BizErrorCode.CITY_CHANGE_FORBIDDEN);
+        }
+
+        // 2. 已有参与者时，不可修改时间、地点、持续时长
+        int participantCount = registrationGateway.countApprovedByMeetupId(data.getBizId());
+        // participantCount > 1 表示除了创建者外还有其他参与者
+        if (participantCount > 1) {
+            boolean timeChanged = cmd.getStartTime() != null
+                    && !cmd.getStartTime().equals(data.getStartTime());
+            boolean durationChanged = cmd.getDuration() != null
+                    && cmd.getDuration().compareTo(data.getDuration()) != 0;
+            boolean locationChanged = isLocationChanged(data, cmd);
+
+            if (timeChanged || durationChanged || locationChanged) {
+                throw new BusinessException(BizErrorCode.LOCATION_TIME_CHANGE_FORBIDDEN);
+            }
+        }
+
+        // 3. 字段校验（复用发布校验）
+        this.assertParam(cmd);
+    }
+
+    /**
+     * 判断场地是否变更（供 app 层 GEO 更新判断使用）
+     */
+    public boolean isLocationChanged(MeetupData data, PublishCmd cmd) {
+        // 场地名称变更
+        if (cmd.getCourtName() != null && !cmd.getCourtName().equals(data.getCourtName())) {
+            return true;
+        }
+        // 场地地址变更
+        if (cmd.getCourtAddress() != null && !cmd.getCourtAddress().equals(data.getCourtAddress())) {
+            return true;
+        }
+        // 经纬度变更
+        if (cmd.getLng() != null && cmd.getLat() != null) {
+            if (!cmd.getLng().equals(data.getCourtLng()) || !cmd.getLat().equals(data.getCourtLat())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void assertTimes(String userId) {
@@ -122,8 +175,9 @@ public class MeetupDomainService {
 
     /**
      * 更新 MeetupData（编辑时）
+     * 注意：城市不可修改，已在 assertEdit 中校验
      */
-    public void updateMeetupData(MeetupData data, PublishCmd cmd, String newCityCode) {
+    public void updateMeetupData(MeetupData data, PublishCmd cmd) {
         if (cmd.getTitle() != null) {
             data.setTitle(cmd.getTitle());
         }
@@ -153,7 +207,7 @@ public class MeetupDomainService {
                     cmd.getCourtName() != null ? cmd.getCourtName() : data.getCourtName(),
                     cmd.getLng(), cmd.getLat()));
         }
-        data.setCityCode(newCityCode);
+        // 城市不可修改，保持原值
         if (cmd.getLevelMode() != null) {
             data.setLevelMode(cmd.getLevelMode());
         }
@@ -268,6 +322,134 @@ public class MeetupDomainService {
         }
         long hoursUntilStart = Duration.between(LocalDateTime.now(), data.getStartTime()).toHours();
         return hoursUntilStart < 6;
+    }
+
+    // ======================== 报名领域逻辑（需要 Gateway 的部分） ========================
+
+    /**
+     * 信誉分门槛校验
+     * @param reputationScore 用户信誉分，可为 null
+     */
+    public void checkReputationScore(BigDecimal reputationScore) {
+        if (reputationScore == null) {
+            return;
+        }
+        BigDecimal threshold = new BigDecimal(SystemConfig.getString("meetup.join.min_reputation_score", "30"));
+        if (reputationScore.compareTo(threshold) < 0) {
+            throw new BusinessException(BizErrorCode.LOW_REPUTATION_BANNED);
+        }
+    }
+
+    /**
+     * 报名时间冲突检测
+     */
+    public void checkTimeConflict(String userId, LocalDateTime startTime, LocalDateTime endTime,
+                                  String excludeMeetupId) {
+        int bufferMinutes = SystemConfig.getInt("meetup.conflict.buffer_minutes", 30);
+        LocalDateTime conflictStart = startTime.minusMinutes(bufferMinutes);
+        LocalDateTime conflictEnd = endTime.plusMinutes(bufferMinutes);
+
+        List<RegistrationData> conflicts = registrationGateway.findConflict(
+                userId, conflictStart, conflictEnd, excludeMeetupId);
+
+        if (!conflicts.isEmpty()) {
+            throw new BusinessException(BizErrorCode.TIME_CONFLICT);
+        }
+    }
+
+    /**
+     * 水平匹配判断（纯领域算法）
+     * @param data 约球数据
+     * @param userLevelMin 用户水平最小值，可为 null
+     * @param userLevelMax 用户水平最大值，可为 null
+     * @return true 表示匹配
+     */
+    public boolean matchLevel(MeetupData data, BigDecimal userLevelMin, BigDecimal userLevelMax) {
+        if (data.getLevelMode() == null || data.getLevelValue() == null) {
+            return true;
+        }
+
+        BigDecimal meetupMin, meetupMax;
+        switch (data.getLevelMode()) {
+            case RANGE:
+                String[] parts = data.getLevelValue().split(":");
+                meetupMin = new BigDecimal(parts[0]);
+                meetupMax = new BigDecimal(parts[1]);
+                break;
+            case EXACT:
+                meetupMin = meetupMax = new BigDecimal(data.getLevelValue());
+                break;
+            case ABOVE:
+                meetupMin = new BigDecimal(data.getLevelValue());
+                meetupMax = new BigDecimal("7.0");
+                break;
+            case BELOW:
+                meetupMin = new BigDecimal("1.5");
+                meetupMax = new BigDecimal(data.getLevelValue());
+                break;
+            default:
+                return true;
+        }
+
+        BigDecimal userMin = userLevelMin != null ? userLevelMin : new BigDecimal("1.5");
+        BigDecimal userMax = userLevelMax != null ? userLevelMax : new BigDecimal("7.0");
+        return userMin.compareTo(meetupMax) <= 0 && userMax.compareTo(meetupMin) >= 0;
+    }
+
+    /**
+     * 计算操作状态（含报名记录上下文，用于详情页等需要区分 PENDING_REVIEW/JOINED 的场景）
+     * @param userRegistration 用户在约球的报名记录，可为 null
+     */
+    public ActionStateEnum calculateActionState(Meetup meetup, String currentUserId, int lockMinutes,
+                                                RegistrationData userRegistration) {
+        MeetupStatusEnum realStatus = meetup.getRealStatus();
+        boolean isCreator = meetup.isCreator(currentUserId);
+
+        // 终态判断
+        if (realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.CLOSED) {
+            return isCreator ? ActionStateEnum.OWNER_DISABLED : ActionStateEnum.DISABLED;
+        }
+
+        // 创建人视角
+        if (isCreator) {
+            boolean locked = LocalDateTime.now().isAfter(meetup.getData().getStartTime().minusMinutes(lockMinutes));
+            return locked ? ActionStateEnum.OWNER_EDIT_LOCKED : ActionStateEnum.OWNER_EDITABLE;
+        }
+
+        // 访客视角：含报名记录上下文
+        if (userRegistration != null) {
+            if (userRegistration.getStatus() == WaitlistStatusEnum.pending) {
+                return ActionStateEnum.PENDING_REVIEW;
+            }
+            if (userRegistration.getStatus() == WaitlistStatusEnum.approved) {
+                return ActionStateEnum.JOINED;
+            }
+        }
+
+        // 满员判断
+        if (realStatus == MeetupStatusEnum.FULL) {
+            return ActionStateEnum.FULL;
+        }
+
+        return meetup.getData().getJoinMode() == JoinModeEnum.DIRECT
+                ? ActionStateEnum.JOIN_DIRECT : ActionStateEnum.APPLY_APPROVAL;
+    }
+
+    /**
+     * 计算退出扣分
+     * @return 扣分值，0 表示不扣分
+     */
+    public int calculateQuitPenalty(MeetupData data, String userId) {
+        // 创建人退出不扣分
+        if (userId.equals(data.getCreatorId())) {
+            return 0;
+        }
+        long hoursUntilStart = Duration.between(LocalDateTime.now(), data.getStartTime()).toHours();
+        int thresholdHours = SystemConfig.getInt("meetup.quit.penalty_threshold_hours", 6);
+        if (hoursUntilStart < thresholdHours) {
+            return SystemConfig.getInt("meetup.quit.penalty_under_6h", 25);
+        }
+        return 0;
     }
 
     /**

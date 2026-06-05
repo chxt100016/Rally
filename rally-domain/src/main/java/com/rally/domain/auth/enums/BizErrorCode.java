@@ -39,6 +39,8 @@ public enum BizErrorCode {
     MEETUP_EXPIRED(41003, "约球已开始或已结束，无法操作"),
     MEETUP_CLOSED(41004, "约球已关闭"),
     MEETUP_STATUS_ILLEGAL(41005, "约球状态不允许该操作"),
+    CITY_CHANGE_FORBIDDEN(41019, "已发布的约球不可修改城市"),
+    LOCATION_TIME_CHANGE_FORBIDDEN(41020, "已有参与者报名，不可修改时间、地点、持续时长"),
     JOIN_FORBIDDEN(41006, "当前不可报名"),
     ALREADY_JOINED(41007, "你已报名该约球"),
     NOT_JOINED(41008, "你未报名该约球"),

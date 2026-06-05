@@ -11,7 +11,6 @@ import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupVO;
 import com.rally.domain.meetup.model.PublishCmd;
 import com.rally.domain.meetup.service.MeetupDomainService;
-import com.rally.domain.system.CityLocator;
 import com.rally.domain.system.SystemConfig;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +32,6 @@ public class MeetupAppService {
 
     private final MeetupDomainService meetupDomainService;
 
-
-
     /**
      * 发布约球
      */
@@ -42,13 +39,11 @@ public class MeetupAppService {
     public void publish(PublishCmd cmd) {
         String userId = UserContext.get();
 
-        // 1. 校验
+        // 1. 校验（城市开通校验在 assertPublish 中完成）
         meetupDomainService.assertPublish(userId, cmd);
 
-        // 2. 构建 MeetupData（domain）
-        String cityCode = CityLocator.assertCityOpened(cmd.getCityCode());
-        meetupDomainService.add(cmd, userId, cityCode);
-
+        // 2. 构建 MeetupData 并持久化（含创建者自动报名）
+        meetupDomainService.add(cmd, userId, cmd.getCityCode());
     }
 
     /**
@@ -76,35 +71,29 @@ public class MeetupAppService {
             throw new BusinessException(BizErrorCode.MEETUP_STATUS_ILLEGAL);
         }
 
-        // 3. 城市开通校验（如果改了场地）
-        boolean locationChanged = false;
-        String newCityCode = data.getCityCode();
-        if (cmd.getCityCode() != null && !cmd.getCityCode().equals(data.getCityCode())) {
-            newCityCode = CityLocator.assertCityOpened(cmd.getCityCode());
-            locationChanged = true;
-        } else if (cmd.getLng() != null && cmd.getLat() != null) {
-            if (!cmd.getLng().equals(data.getCourtLng()) || !cmd.getLat().equals(data.getCourtLat())) {
-                locationChanged = true;
-            }
-        }
+        // 3. 编辑参数校验（城市不可修改、有参与者时不可修改时间地点等）
+        meetupDomainService.assertEdit(data, cmd, cmd.getCityCode());
 
-        // 4. 更新字段（domain）
-        meetupDomainService.updateMeetupData(data, cmd, newCityCode);
+        // 4. 场地变更检测（委托领域服务统一判断）
+        boolean locationChanged = meetupDomainService.isLocationChanged(data, cmd);
 
-        // 5. 落库
+        // 5. 更新字段（domain）
+        meetupDomainService.updateMeetupData(data, cmd);
+
+        // 6. 落库
         meetupGateway.save(data);
 
-        // 6. GEO 更新（如果场地变了）
+        // 7. GEO 更新（如果场地变了）
         if (locationChanged) {
             try {
                 nearbyGateway.remove(data.getCityCode(), meetupId);
-                nearbyGateway.add(newCityCode, meetupId, cmd.getLng(), cmd.getLat());
+                nearbyGateway.add(data.getCityCode(), meetupId, cmd.getLng(), cmd.getLat());
             } catch (Exception e) {
                 log.warn("GEO 更新失败，不影响主流程: {}", e.getMessage());
             }
         }
 
-        // 7. 返回详情
+        // 8. 返回详情
         return MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
     }
 

@@ -96,4 +96,9 @@ public class RegistrationGatewayImpl implements RegistrationGateway {
     public List<String> listApprovedUserIds(String meetupId) {
         return registrationRepository.listApprovedUserIds(meetupId);
     }
+
+    @Override
+    public int countApprovedByMeetupId(String meetupId) {
+        return registrationRepository.countApprovedByMeetupId(meetupId);
+    }
 }
