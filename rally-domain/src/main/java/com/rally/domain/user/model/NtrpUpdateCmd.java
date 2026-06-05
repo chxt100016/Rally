@@ -19,6 +19,4 @@ public class NtrpUpdateCmd {
     @DecimalMax(value = "7.0", message = "自评分值必须在 1.5-7.0 之间")
     @NtrpStep
     private BigDecimal ntrpScore;
-    /** 前端确认后置 true */
-    private Boolean confirmed;
 }

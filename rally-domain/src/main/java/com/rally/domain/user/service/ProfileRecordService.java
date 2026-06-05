@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  * 负责构建和保存各类变更日志
  */
 @Service
-public class ProfileChangeLogService {
+public class ProfileRecordService {
 
     @Resource
     private ProfileChangeLogGateway profileChangeLogGateway;

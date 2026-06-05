@@ -23,6 +23,7 @@ public class TennisProfileData {
     private BigDecimal credibilityScore;
     private BigDecimal calibrationScore;
     private Boolean isUnderReview;
+    private Integer reviewRemainingMatches;
     private Boolean isNewbie;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

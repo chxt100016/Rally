@@ -60,8 +60,8 @@ public class UserProfile {
     /**
      * 校验 NTRP 冷却期，已确认则跳过冷却校验
      */
-    public void assertNtrpCooldown(boolean confirmed) {
-        if (profile == null || profile.getNtrpUpdatedAt() == null || confirmed) {
+    public void assertNtrpCooldown() {
+        if (profile == null || profile.getNtrpUpdatedAt() == null) {
             return;
         }
         int cooldown = calculateNtrpCooldownDays(
@@ -88,6 +88,7 @@ public class UserProfile {
         int requiredMatches = SystemConfig.getInt("score.review_period.required_matches", 3);
         profile.setStatus(ProfileStatusEnum.UNDER_REVIEW);
         profile.setIsUnderReview(true);
+        profile.setReviewRemainingMatches(requiredMatches);
         return requiredMatches;
     }
 
@@ -140,7 +141,7 @@ public class UserProfile {
      * 计算自评修改剩余冷却天数
      * 可编辑时返回 null，不可编辑时返回剩余天数
      */
-    public Integer calculateNtrpLockDays() {
+    public Integer calculateNtrpCooldownDays() {
         if (profile == null || profile.getNtrpUpdatedAt() == null) {
             return null;
         }

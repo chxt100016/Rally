@@ -68,16 +68,16 @@ public class MyProfileAppService {
                         .collect(Collectors.toList()));
     }
 
-    /** 构建等级信息 DTO（聚合根计算 lockday，领域服务查核查期剩余场次） */
+    /** 构建等级信息 DTO */
     private MyProfileLevelDTO buildLevelDTO(UserProfile userProfile) {
         TennisProfileData profileData = userProfile.getProfile();
-        Integer lockday = userProfile.calculateNtrpLockDays();
+        Integer cooldownDays = userProfile.calculateNtrpCooldownDays();
         Integer remainingMatches = userProfile.isUnderReview()
-                ? userProfileService.getReviewRemainingMatches(userProfile.getUser().getUserId()) : null;
+                ? profileData.getReviewRemainingMatches() : null;
         return new MyProfileLevelDTO()
                 .setNtrpScore(profileData != null ? profileData.getNtrpScore() : null)
                 .setIsUnderReview(profileData != null ? profileData.getIsUnderReview() : null)
-                .setLockday(lockday)
+                .setCooldownDays(cooldownDays)
                 .setRemainingMatches(remainingMatches);
     }
 

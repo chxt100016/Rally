@@ -1,16 +1,13 @@
 package com.rally.domain.user.service;
 
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.user.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserProfileGateway;
-import com.rally.domain.user.model.ProfileChangeLogData;
 import com.rally.domain.user.model.UserProfile;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 /**
  * 用户档案领域服务
@@ -26,10 +23,7 @@ public class UserProfileService {
     private TennisProfileGateway tennisProfileGateway;
 
     @Resource
-    private ProfileChangeLogGateway profileChangeLogGateway;
-
-    @Resource
-    private ProfileChangeLogService profileChangeLogService;
+    private ProfileRecordService profileRecordService;
 
     /**
      * 查询用户档案，不存在则初始化 TBC
@@ -71,7 +65,7 @@ public class UserProfileService {
         // 2. 检查是否触发核查期
         int requiredMatches = userProfile.triggerReviewIfNeeded(newNtrp);
         if (requiredMatches > 0) {
-            profileChangeLogService.saveReviewTriggerLog(userProfile.getUser().getUserId(), requiredMatches);
+            profileRecordService.saveReviewTriggerLog(userProfile.getUser().getUserId(), requiredMatches);
         }
 
         // 3. 更新 NTRP
@@ -79,17 +73,6 @@ public class UserProfileService {
         tennisProfileGateway.update(userProfile.getProfile());
 
         // 4. 记录 NTRP 变更日志
-        profileChangeLogService.saveNtrpChangeLog(userProfile.getUser().getUserId(), oldNtrp, newNtrp);
-    }
-
-    /**
-     * 获取核查期剩余场次
-     */
-    public Integer getReviewRemainingMatches(String userId) {
-        Optional<ProfileChangeLogData> latestLog = profileChangeLogGateway.findLatestUnderReviewLog(userId);
-        if (latestLog.isPresent() && latestLog.get().getAfterValue() != null) {
-            return latestLog.get().getAfterValue().intValue();
-        }
-        return null;
+        profileRecordService.saveNtrpChangeLog(userProfile.getUser().getUserId(), oldNtrp, newNtrp);
     }
 }

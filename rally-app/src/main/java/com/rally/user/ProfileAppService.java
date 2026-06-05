@@ -9,7 +9,7 @@ import com.rally.domain.user.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.*;
-import com.rally.domain.user.service.ProfileChangeLogService;
+import com.rally.domain.user.service.ProfileRecordService;
 import com.rally.domain.user.service.UserProfileService;
 import com.rally.db.user.convert.UserConvertMapper;
 import com.rally.user.convert.ProfileAppConvertMapper;
@@ -32,7 +32,7 @@ public class ProfileAppService {
     private ProfileChangeLogGateway profileChangeLogGateway;
 
     @Resource
-    private ProfileChangeLogService profileChangeLogService;
+    private ProfileRecordService profileRecordService;
 
     @Resource
     private UserGateway userGateway;
@@ -105,12 +105,12 @@ public class ProfileAppService {
         if (isBad) {
             int requiredMatches = SystemConfig.getInt("score.review_period.required_matches", 3);
             int penaltyCredibility = SystemConfig.getInt("score.review_period.penalty_credibility", 50);
-            profileChangeLogService.saveReviewResetLog(userId, remaining, requiredMatches, meetupId);
+            profileRecordService.saveReviewResetLog(userId, remaining, requiredMatches, meetupId);
             tennisProfileGateway.updateScoreFields(userId, null,
                     new BigDecimal(penaltyCredibility), null, null);
         } else {
             BigDecimal newRemaining = remaining.subtract(BigDecimal.ONE);
-            profileChangeLogService.saveReviewAdvanceLog(userId, remaining, newRemaining, meetupId);
+            profileRecordService.saveReviewAdvanceLog(userId, remaining, newRemaining, meetupId);
             if (newRemaining.compareTo(BigDecimal.ZERO) <= 0) {
                 releaseReview(userId);
             }

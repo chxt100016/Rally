@@ -56,10 +56,6 @@ public class UserProfileController {
      */
     @PutMapping("/ntrp")
     public Result<MyProfileDTO> updateNtrp(@RequestBody @Valid NtrpUpdateCmd cmd) {
-        try {
-            return Result.ok(profileAppService.updateNtrp(cmd));
-        } catch (BusinessException e) {
-            return Result.fail(e.getErrorCode().getCode(), e.getMessage());
-        }
+        return Result.ok(profileAppService.updateNtrp(cmd));
     }
 }
