@@ -1,5 +1,8 @@
 package com.rally.domain.system;
 
+import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.auth.exception.BusinessException;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,24 +11,24 @@ import java.util.List;
  */
 public class CityLocator {
 
-
     /**
-     * 校验城市编码是否已开通
+     * 断言城市编码已开通，未开通则抛出异常
      * @param cityCode 城市编码
-     * @return 匹配的城市编码，未开通返回 null
+     * @return 匹配的城市编码
      */
-    public static String validateCityCode(String cityCode) {
+    public static String assertCityOpened(String cityCode) {
         if (cityCode == null || cityCode.isEmpty()) {
-            return null;
+            throw new BusinessException(BizErrorCode.CITY_NOT_OPENED);
         }
         List<String> openedCities = getOpenedCities();
         if (openedCities.isEmpty()) {
-            return null;
+            throw new BusinessException(BizErrorCode.CITY_NOT_OPENED);
         }
-        return openedCities.stream()
-                .filter(cityCode::equals)
-                .findFirst()
-                .orElse(null);
+        boolean opened = openedCities.stream().anyMatch(cityCode::equals);
+        if (!opened) {
+            throw new BusinessException(BizErrorCode.CITY_NOT_OPENED);
+        }
+        return cityCode;
     }
 
     /**
