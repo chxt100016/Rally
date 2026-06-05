@@ -1,9 +1,9 @@
 package com.rally.web.meetup;
 
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.meetup.model.WaitlistVO;
+import com.rally.domain.meetup.model.RegistrationVO;
 import com.rally.domain.tennis.model.Result;
-import com.rally.meetup.WaitlistAppService;
+import com.rally.meetup.RegistrationAppService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,14 +11,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 报名/审核接口：报名/撤回/退出/审批
+ * 报名/注册接口：报名/撤回/退出/审批
+ * 对外接口仍使用 waitlist 路径
  */
 @RestController
 @RequestMapping("/wechat/meetup/waitlist")
 public class WaitlistController {
 
     @Resource
-    private WaitlistAppService waitlistAppService;
+    private RegistrationAppService registrationAppService;
 
     /**
      * 报名
@@ -28,7 +29,7 @@ public class WaitlistController {
     public Result<Void> join(@RequestParam("meetupId") String meetupId,
                              @RequestParam(value = "autoWithdrawAt", required = false) LocalDateTime autoWithdrawAt) {
         try {
-            waitlistAppService.join(meetupId, autoWithdrawAt);
+            registrationAppService.join(meetupId, autoWithdrawAt);
             return Result.ok();
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
@@ -42,7 +43,7 @@ public class WaitlistController {
     @PostMapping("/withdraw")
     public Result<Void> withdraw(@RequestParam("meetupId") String meetupId) {
         try {
-            waitlistAppService.withdraw(meetupId);
+            registrationAppService.withdraw(meetupId);
             return Result.ok();
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
@@ -56,7 +57,7 @@ public class WaitlistController {
     @PostMapping("/quit")
     public Result<Void> quit(@RequestParam("meetupId") String meetupId) {
         try {
-            waitlistAppService.quit(meetupId);
+            registrationAppService.quit(meetupId);
             return Result.ok();
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
@@ -68,9 +69,9 @@ public class WaitlistController {
      * POST /api/rally/wechat/meetup/waitlist/approve
      */
     @PostMapping("/approve")
-    public Result<Void> approve(@RequestParam("waitlistId") String waitlistId) {
+    public Result<Void> approve(@RequestParam("registrationId") String registrationId) {
         try {
-            waitlistAppService.approve(waitlistId);
+            registrationAppService.approve(registrationId);
             return Result.ok();
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
@@ -82,9 +83,9 @@ public class WaitlistController {
      * POST /api/rally/wechat/meetup/waitlist/reject
      */
     @PostMapping("/reject")
-    public Result<Void> reject(@RequestParam("waitlistId") String waitlistId) {
+    public Result<Void> reject(@RequestParam("registrationId") String registrationId) {
         try {
-            waitlistAppService.reject(waitlistId);
+            registrationAppService.reject(registrationId);
             return Result.ok();
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
@@ -96,9 +97,9 @@ public class WaitlistController {
      * GET /api/rally/wechat/meetup/waitlist/pending
      */
     @GetMapping("/pending")
-    public Result<List<WaitlistVO>> pendingList(@RequestParam("meetupId") String meetupId) {
+    public Result<List<RegistrationVO>> pendingList(@RequestParam("meetupId") String meetupId) {
         try {
-            return Result.ok(waitlistAppService.pendingList(meetupId));
+            return Result.ok(registrationAppService.pendingList(meetupId));
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
         }

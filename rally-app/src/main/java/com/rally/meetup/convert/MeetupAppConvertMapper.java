@@ -42,14 +42,14 @@ public interface MeetupAppConvertMapper {
 
     List<MeetupCardVO> toMeetupCardVOList(List<MeetupData> dataList);
 
-    // ==================== WaitlistData → WaitlistVO ====================
+    // ==================== RegistrationData → RegistrationVO ====================
 
-    @Mapping(target = "waitlistId", source = "bizId")
+    @Mapping(target = "registrationId", source = "bizId")
     @Mapping(target = "nickname", ignore = true)
     @Mapping(target = "avatarUrl", ignore = true)
     @Mapping(target = "ntrpScore", ignore = true)
     @Mapping(target = "reviewCount", ignore = true)
-    WaitlistVO toWaitlistVO(WaitlistData data);
+    RegistrationVO toRegistrationVO(RegistrationData data);
 
-    List<WaitlistVO> toWaitlistVOList(List<WaitlistData> dataList);
+    List<RegistrationVO> toRegistrationVOList(List<RegistrationData> dataList);
 }

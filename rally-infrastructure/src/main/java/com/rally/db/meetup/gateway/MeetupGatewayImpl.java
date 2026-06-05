@@ -3,14 +3,13 @@ package com.rally.db.meetup.gateway;
 import com.rally.db.meetup.convert.MeetupConvertMapper;
 import com.rally.db.meetup.entity.MeetupPO;
 import com.rally.db.meetup.repository.MeetupRepository;
-import com.rally.db.meetup.repository.WaitlistRepository;
+import com.rally.db.meetup.repository.RegistrationRepository;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.MeetupData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +20,7 @@ import java.util.List;
 public class MeetupGatewayImpl implements MeetupGateway {
 
     private final MeetupRepository meetupRepository;
-    private final WaitlistRepository waitlistRepository;
+    private final RegistrationRepository registrationRepository;
 
 
     @Override
@@ -94,31 +93,14 @@ public class MeetupGatewayImpl implements MeetupGateway {
         if (meetup == null) {
             return false;
         }
-        // 发布者本身是参与者
-        if (userId.equals(meetup.getCreatorId())) {
-            return true;
-        }
-        // 检查是否在已批准的报名列表中
-        return waitlistRepository.findActiveByMeetupAndUser(meetupId, userId) != null;
+        // 检查是否在报名表中（含创建者）
+        return registrationRepository.findActiveByMeetupAndUser(meetupId, userId) != null;
     }
 
     @Override
     public List<String> listParticipantUserIds(String meetupId) {
-        MeetupPO meetup = meetupRepository.findByBizId(meetupId);
-        if (meetup == null) {
-            return List.of();
-        }
-        List<String> participants = new ArrayList<>();
-        // 发布者加入列表
-        participants.add(meetup.getCreatorId());
-        // 已批准的报名者加入列表
-        List<String> approved = waitlistRepository.listApprovedUserIds(meetupId);
-        for (String uid : approved) {
-            if (!participants.contains(uid)) {
-                participants.add(uid);
-            }
-        }
-        return participants;
+        // 所有参与者（含创建者）都在 registration 表中
+        return registrationRepository.listApprovedUserIds(meetupId);
     }
 
     @Override

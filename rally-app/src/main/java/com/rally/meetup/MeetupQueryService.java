@@ -8,8 +8,9 @@ import com.rally.domain.meetup.enums.ActionStateEnum;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
-import com.rally.domain.meetup.gateway.WaitlistGateway;
+import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.*;
+import com.rally.domain.meetup.model.RegistrationData;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.TennisProfileData;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 public class MeetupQueryService {
 
     private final MeetupGateway meetupGateway;
-    private final WaitlistGateway waitlistGateway;
+    private final RegistrationGateway registrationGateway;
     private final NearbyGateway nearbyGateway;
     private final UserGateway userGateway;
     private final TennisProfileGateway tennisProfileGateway;
@@ -299,12 +300,12 @@ public class MeetupQueryService {
         }
 
         // 访客视角：查询报名状态
-        WaitlistData myWaitlist = waitlistGateway.findActiveByMeetupAndUser(data.getBizId(), currentUserId);
-        if (myWaitlist != null) {
-            if (myWaitlist.getStatus() == com.rally.domain.meetup.enums.WaitlistStatusEnum.pending) {
+        RegistrationData myRegistration = registrationGateway.findActiveByMeetupAndUser(data.getBizId(), currentUserId);
+        if (myRegistration != null) {
+            if (myRegistration.getStatus() == com.rally.domain.meetup.enums.WaitlistStatusEnum.pending) {
                 return ActionStateEnum.PENDING_REVIEW;
             }
-            if (myWaitlist.getStatus() == com.rally.domain.meetup.enums.WaitlistStatusEnum.approved) {
+            if (myRegistration.getStatus() == com.rally.domain.meetup.enums.WaitlistStatusEnum.approved) {
                 return ActionStateEnum.JOINED;
             }
         }

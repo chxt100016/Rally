@@ -1,11 +1,11 @@
 package com.rally.db.meetup.convert;
 
 import com.rally.db.meetup.entity.MeetupPO;
-import com.rally.db.meetup.entity.WaitlistPO;
+import com.rally.db.meetup.entity.RegistrationPO;
 import com.rally.domain.meetup.enums.*;
 import com.rally.domain.meetup.model.CostItem;
 import com.rally.domain.meetup.model.MeetupData;
-import com.rally.domain.meetup.model.WaitlistData;
+import com.rally.domain.meetup.model.RegistrationData;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import org.mapstruct.Mapper;
@@ -42,19 +42,6 @@ public interface MeetupConvertMapper {
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     MeetupPO toMeetupPO(MeetupData data);
-
-    // ==================== WaitlistPO ↔ WaitlistData ====================
-
-    @Mapping(target = "status", source = "status", qualifiedByName = "strToWaitlistStatus")
-    WaitlistData toWaitlistData(WaitlistPO po);
-
-    List<WaitlistData> toWaitlistDataList(List<WaitlistPO> poList);
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "status", source = "status", qualifiedByName = "waitlistStatusToStr")
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
-    WaitlistPO toWaitlistPO(WaitlistData data);
 
     // ==================== 枚举转换 ====================
 
@@ -135,4 +122,17 @@ public interface MeetupConvertMapper {
         }
         return JSON.toJSONString(items);
     }
+
+    // ==================== RegistrationPO ↔ RegistrationData ====================
+
+    @Mapping(target = "status", source = "status", qualifiedByName = "strToWaitlistStatus")
+    RegistrationData toRegistrationData(RegistrationPO po);
+
+    List<RegistrationData> toRegistrationDataList(List<RegistrationPO> poList);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", source = "status", qualifiedByName = "waitlistStatusToStr")
+    @Mapping(target = "createTime", ignore = true)
+    @Mapping(target = "updateTime", ignore = true)
+    RegistrationPO toRegistrationPO(RegistrationData data);
 }

@@ -6,9 +6,11 @@ import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.enums.*;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
+import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.PublishCmd;
+import com.rally.domain.meetup.model.RegistrationData;
 import com.rally.domain.system.CityLocator;
 import com.rally.domain.system.SystemConfig;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,8 @@ public class MeetupDomainService {
     private final MeetupGateway meetupGateway;
 
     private final NearbyGateway nearbyGateway;
+
+    private final RegistrationGateway registrationGateway;
 
     /**
      * 断言当日发布上限未超出
@@ -56,7 +60,7 @@ public class MeetupDomainService {
     /**
      * 校验发布参数
      */
-    public void assertParam(PublishCmd cmd) {
+    private void assertParam(PublishCmd cmd) {
         // 开始时间必须大于当前时间
         if (cmd.getStartTime().isBefore(LocalDateTime.now())) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "不能发布过去的约球");
@@ -90,19 +94,30 @@ public class MeetupDomainService {
     }
 
     /**
-     * 构建 MeetupData
+     * 构建 MeetupData 并将创建者加入报名表
      */
-    public MeetupData add(PublishCmd cmd, String userId, String cityCode) {
+    public void add(PublishCmd cmd, String userId, String cityCode) {
         // 使用 MapStruct 映射 PublishCmd -> MeetupData
         MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId, cityCode);
 
         meetupGateway.save(data);
+
+        // 创建者自动加入报名表，状态为 approved
+        RegistrationData creatorRegistration = new RegistrationData();
+        creatorRegistration.setRallyMeetupId(data.getBizId());
+        creatorRegistration.setUserId(userId);
+        creatorRegistration.setStatus(WaitlistStatusEnum.approved);
+        registrationGateway.save(creatorRegistration);
+
+        // 初始人数为1（创建者）
+        data.setCurrentPlayers(1);
+        meetupGateway.save(data);
+
         try {
             nearbyGateway.add(cityCode, data.getBizId(), cmd.getLng(), cmd.getLat());
         } catch (Exception e) {
             log.warn("GEO 写入失败，不影响主流程: {}", e.getMessage());
         }
-        return data;
     }
 
     /**

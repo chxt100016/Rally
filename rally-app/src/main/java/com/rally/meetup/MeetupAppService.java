@@ -47,7 +47,7 @@ public class MeetupAppService {
 
         // 2. 构建 MeetupData（domain）
         String cityCode = CityLocator.assertCityOpened(cmd.getCityCode());
-        MeetupData data = meetupDomainService.add(cmd, userId, cityCode);
+        meetupDomainService.add(cmd, userId, cityCode);
 
     }
 
