@@ -29,3 +29,4 @@ mvn clean package -DskipTests
 - 枚举的name要使用大写
 - 对外返回的对象都以DTO结尾
 - 除了链式调用外，不要随意在一行代码内肆意换行
+- 雪花id使用场景，比如bizId的生成统一用mybatis-plus的IdWorker.getIdStr()

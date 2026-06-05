@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.rally.db.meetup.convert.MeetupConvertMapper;
 import com.rally.db.meetup.entity.RegistrationPO;
 import com.rally.db.meetup.repository.RegistrationRepository;
-import com.rally.domain.meetup.enums.WaitlistStatusEnum;
+import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.RegistrationData;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +59,7 @@ public class RegistrationGatewayImpl implements RegistrationGateway {
     }
 
     @Override
-    public List<RegistrationData> findByUserAndStatus(String userId, WaitlistStatusEnum status) {
+    public List<RegistrationData> findByUserAndStatus(String userId, RegistrationStatusEnum status) {
         return MAPPER.toRegistrationDataList(
                 registrationRepository.findByUserAndStatus(userId, status.name()));
     }
@@ -78,7 +78,7 @@ public class RegistrationGatewayImpl implements RegistrationGateway {
     }
 
     @Override
-    public void updateStatus(String bizId, WaitlistStatusEnum status) {
+    public void updateStatus(String bizId, RegistrationStatusEnum status) {
         RegistrationPO po = registrationRepository.findByBizId(bizId);
         if (po != null) {
             po.setStatus(status.name());

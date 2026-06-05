@@ -1,5 +1,6 @@
 package com.rally.domain.meetup.gateway;
 
+import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
 
 import java.util.List;
@@ -12,6 +13,11 @@ public interface MeetupGateway {
      * 保存约球（新增或更新）
      */
     void save(MeetupData data);
+
+    /**
+     * 一次性保存整个约球聚合根（约球数据 + 报名记录）
+     */
+    void save(Meetup meetup);
 
     /**
      * 根据 bizId 查询

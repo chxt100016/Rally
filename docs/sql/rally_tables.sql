@@ -190,7 +190,7 @@ CREATE TABLE `rally_meetup` (
   `court_address`   VARCHAR(256) NOT NULL COMMENT '场地详细地址，手填或地图点选',
   `court_lng`       DOUBLE       NOT NULL COMMENT '场地经度',
   `court_lat`       DOUBLE       NOT NULL COMMENT '场地纬度',
-  `court_grid`      VARCHAR(64)  DEFAULT NULL COMMENT '场地冷启动去重键：场地名+50m网格（见 §3.4）',
+
   `level_mode`      varchar(8) DEFAULT 'exact' COMMENT '水平要求模式',
   `level_value`     VARCHAR(32)  DEFAULT NULL COMMENT '水平值，多值用冒号分割，如 range 存 "3.0:4.0"，exact 存 "3.5"',
   `gender_limit`    varchar(8) NOT NULL DEFAULT 'any' COMMENT '性别限制',

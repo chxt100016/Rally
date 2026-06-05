@@ -1,6 +1,6 @@
 package com.rally.domain.meetup.gateway;
 
-import com.rally.domain.meetup.enums.WaitlistStatusEnum;
+import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.model.RegistrationData;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public interface RegistrationGateway {
     /**
      * 查询用户的报名状态列表
      */
-    List<RegistrationData> findByUserAndStatus(String userId, WaitlistStatusEnum status);
+    List<RegistrationData> findByUserAndStatus(String userId, RegistrationStatusEnum status);
 
     /**
      * 查询约球的待审批列表
@@ -53,7 +53,7 @@ public interface RegistrationGateway {
     /**
      * 根据 bizId 更新状态
      */
-    void updateStatus(String bizId, WaitlistStatusEnum status);
+    void updateStatus(String bizId, RegistrationStatusEnum status);
 
     /**
      * 复活已失效的报名记录（rejected/withdrawn/expired → pending）

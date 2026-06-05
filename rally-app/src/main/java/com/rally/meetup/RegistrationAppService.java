@@ -3,7 +3,7 @@ package com.rally.meetup;
 import com.rally.cache.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.meetup.enums.WaitlistStatusEnum;
+import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.Meetup;
@@ -94,7 +94,7 @@ public class RegistrationAppService {
 
             if (meetup.getJoinMode() == com.rally.domain.meetup.enums.JoinModeEnum.DIRECT) {
                 // 直接加入
-                registration.setStatus(WaitlistStatusEnum.approved);
+                registration.setStatus(RegistrationStatusEnum.approved);
                 registrationGateway.save(registration);
 
                 // 原子自增人数
@@ -108,7 +108,7 @@ public class RegistrationAppService {
                 log.info("报名通过: userId={}, meetupId={}", userId, meetupId);
             } else {
                 // 审批模式
-                registration.setStatus(WaitlistStatusEnum.pending);
+                registration.setStatus(RegistrationStatusEnum.pending);
                 registrationGateway.save(registration);
 
                 // 发送新申请通知给发布者
@@ -135,7 +135,7 @@ public class RegistrationAppService {
             throw new BusinessException(BizErrorCode.WAITLIST_NOT_PENDING);
         }
 
-        registrationGateway.updateStatus(registration.getBizId(), WaitlistStatusEnum.withdrawn);
+        registrationGateway.updateStatus(registration.getBizId(), RegistrationStatusEnum.withdrawn);
         log.info("撤回报名: userId={}, meetupId={}", userId, meetupId);
     }
 
@@ -169,7 +169,7 @@ public class RegistrationAppService {
         int affected = meetupGateway.decrementPlayers(meetupId);
         if (affected > 0) {
             // 标记 registration 为 withdrawn
-            registrationGateway.updateStatus(registration.getBizId(), WaitlistStatusEnum.withdrawn);
+            registrationGateway.updateStatus(registration.getBizId(), RegistrationStatusEnum.withdrawn);
             log.info("退出成功: userId={}, meetupId={}", userId, meetupId);
         }
     }
@@ -213,7 +213,7 @@ public class RegistrationAppService {
                 meetup.getEndTime(), null);
 
         // 7. 更新状态
-        registrationGateway.updateStatus(registrationId, WaitlistStatusEnum.approved);
+        registrationGateway.updateStatus(registrationId, RegistrationStatusEnum.approved);
 
         // 8. 原子自增人数
         int affected = meetupGateway.incrementPlayers(meetup.getBizId());
@@ -256,7 +256,7 @@ public class RegistrationAppService {
         }
 
         // 5. 更新状态
-        registrationGateway.updateStatus(registrationId, WaitlistStatusEnum.rejected);
+        registrationGateway.updateStatus(registrationId, RegistrationStatusEnum.rejected);
 
         // 6. 发送通知
         // TODO: 调用通知域

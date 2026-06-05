@@ -33,7 +33,7 @@ public class MeetupPO {
     private Double courtLng;
     /** 纬度（从 POINT 解构） */
     private Double courtLat;
-    private String courtGrid;
+
     private String levelMode;
     private String levelValue;
     private String genderLimit;

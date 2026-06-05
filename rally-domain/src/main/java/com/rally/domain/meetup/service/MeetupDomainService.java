@@ -2,13 +2,13 @@ package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.enums.*;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
+import com.rally.domain.meetup.model.MeetupFactory;
 import com.rally.domain.meetup.model.PublishCmd;
 import com.rally.domain.meetup.model.RegistrationData;
 import com.rally.domain.system.CityLocator;
@@ -37,11 +37,11 @@ public class MeetupDomainService {
     private final RegistrationGateway registrationGateway;
 
     /**
-     * 断言当日发布上限未超出
+     * 断言
      */
     public void assertPublish(String userId, PublishCmd cmd) {
 
-        // 1. 校验次数
+        // 1. 当日发布上限
         this.assertTimes(userId);
         // 2. 城市开通校验
         CityLocator.assertCityOpened(cmd.getCityCode());
@@ -147,30 +147,17 @@ public class MeetupDomainService {
     }
 
     /**
-     * 构建 MeetupData 并将创建者加入报名表
+     * 构建约球聚合根（含创建者报名）并一次性持久化
      */
-    public void add(PublishCmd cmd, String userId, String cityCode) {
-        // 使用 MapStruct 映射 PublishCmd -> MeetupData
-        MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId, cityCode);
+    public void add(String userId, PublishCmd cmd) {
+        // 1. 通过聚合根工厂创建（自动将创建者加入报名表）
+        Meetup meetup = MeetupFactory.create(cmd, userId);
 
-        meetupGateway.save(data);
+        // 2. 一次性持久化（约球主表 + 报名记录）
+        meetupGateway.save(meetup);
 
-        // 创建者自动加入报名表，状态为 approved
-        RegistrationData creatorRegistration = new RegistrationData();
-        creatorRegistration.setRallyMeetupId(data.getBizId());
-        creatorRegistration.setUserId(userId);
-        creatorRegistration.setStatus(WaitlistStatusEnum.approved);
-        registrationGateway.save(creatorRegistration);
-
-        // 初始人数为1（创建者）
-        data.setCurrentPlayers(1);
-        meetupGateway.save(data);
-
-        try {
-            nearbyGateway.add(cityCode, data.getBizId(), cmd.getLng(), cmd.getLat());
-        } catch (Exception e) {
-            log.warn("GEO 写入失败，不影响主流程: {}", e.getMessage());
-        }
+        // 3. GEO 写入
+        nearbyGateway.add(cmd.getCityCode(), meetup.getData().getBizId(), cmd.getLng(), cmd.getLat());
     }
 
     /**
@@ -203,9 +190,7 @@ public class MeetupDomainService {
         if (cmd.getLng() != null && cmd.getLat() != null) {
             data.setCourtLng(cmd.getLng());
             data.setCourtLat(cmd.getLat());
-            data.setCourtGrid(generateCourtGrid(
-                    cmd.getCourtName() != null ? cmd.getCourtName() : data.getCourtName(),
-                    cmd.getLng(), cmd.getLat()));
+
         }
         // 城市不可修改，保持原值
         if (cmd.getLevelMode() != null) {
@@ -225,21 +210,6 @@ public class MeetupDomainService {
         }
     }
 
-    /**
-     * 生成场地网格键
-     */
-    public String generateCourtGrid(String courtName, double lng, double lat) {
-        if (courtName == null || courtName.isEmpty()) {
-            return null;
-        }
-        // 网格大小约 50m
-        double grid = 0.00045;
-        int gridX = (int) Math.floor(lng / grid);
-        int gridY = (int) Math.floor(lat / grid);
-        String normalized = courtName.trim().toLowerCase();
-        String key = normalized + ":" + gridX + ":" + gridY;
-        return String.valueOf(key.hashCode());
-    }
 
     /**
      * 构建水平值字符串
@@ -418,10 +388,10 @@ public class MeetupDomainService {
 
         // 访客视角：含报名记录上下文
         if (userRegistration != null) {
-            if (userRegistration.getStatus() == WaitlistStatusEnum.pending) {
+            if (userRegistration.getStatus() == RegistrationStatusEnum.pending) {
                 return ActionStateEnum.PENDING_REVIEW;
             }
-            if (userRegistration.getStatus() == WaitlistStatusEnum.approved) {
+            if (userRegistration.getStatus() == RegistrationStatusEnum.approved) {
                 return ActionStateEnum.JOINED;
             }
         }

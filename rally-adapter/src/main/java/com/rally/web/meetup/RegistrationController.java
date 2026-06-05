@@ -15,8 +15,8 @@ import java.util.List;
  * 对外接口仍使用 waitlist 路径
  */
 @RestController
-@RequestMapping("/wechat/meetup/waitlist")
-public class WaitlistController {
+@RequestMapping("/wechat/meetup/registration")
+public class RegistrationController {
 
     @Resource
     private RegistrationAppService registrationAppService;

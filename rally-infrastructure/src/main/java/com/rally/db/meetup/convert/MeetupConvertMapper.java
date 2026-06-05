@@ -96,12 +96,12 @@ public interface MeetupConvertMapper {
     }
 
     @Named("strToWaitlistStatus")
-    static WaitlistStatusEnum strToWaitlistStatus(String value) {
-        return value == null ? null : WaitlistStatusEnum.valueOf(value);
+    static RegistrationStatusEnum strToWaitlistStatus(String value) {
+        return value == null ? null : RegistrationStatusEnum.valueOf(value);
     }
 
     @Named("waitlistStatusToStr")
-    static String waitlistStatusToStr(WaitlistStatusEnum value) {
+    static String waitlistStatusToStr(RegistrationStatusEnum value) {
         return value == null ? null : value.name();
     }
 

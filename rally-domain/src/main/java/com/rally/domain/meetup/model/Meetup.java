@@ -63,7 +63,16 @@ public class Meetup {
 
     /** 是否已满 */
     public boolean isFull() {
-        return data.getCurrentPlayers() >= data.getMaxPlayers();
+        return countApprovedPlayers() >= data.getMaxPlayers();
+    }
+
+    /**
+     * 统计已批准的参与者数量（含创建者）
+     */
+    public int countApprovedPlayers() {
+        return (int) registrations.stream()
+                .filter(r -> r.getStatus() == RegistrationStatusEnum.approved)
+                .count();
     }
 
     /** 是否为创建人 */
@@ -94,8 +103,8 @@ public class Meetup {
     public RegistrationData findActiveRegistration(String userId) {
         return registrations.stream()
                 .filter(r -> userId.equals(r.getUserId()))
-                .filter(r -> r.getStatus() == WaitlistStatusEnum.pending
-                        || r.getStatus() == WaitlistStatusEnum.approved)
+                .filter(r -> r.getStatus() == RegistrationStatusEnum.pending
+                        || r.getStatus() == RegistrationStatusEnum.approved)
                 .findFirst().orElse(null);
     }
 
@@ -109,7 +118,7 @@ public class Meetup {
     /** 获取待审批的报名列表 */
     public List<RegistrationData> getPendingRegistrations() {
         return registrations.stream()
-                .filter(r -> r.getStatus() == WaitlistStatusEnum.pending)
+                .filter(r -> r.getStatus() == RegistrationStatusEnum.pending)
                 .toList();
     }
 
@@ -163,17 +172,17 @@ public class Meetup {
 
     /** 报名记录是否可撤回（仅 pending） */
     public static boolean canWithdraw(RegistrationData registration) {
-        return registration != null && registration.getStatus() == WaitlistStatusEnum.pending;
+        return registration != null && registration.getStatus() == RegistrationStatusEnum.pending;
     }
 
     /** 报名记录是否可退出（仅 approved） */
     public static boolean canQuit(RegistrationData registration) {
-        return registration != null && registration.getStatus() == WaitlistStatusEnum.approved;
+        return registration != null && registration.getStatus() == RegistrationStatusEnum.approved;
     }
 
     /** 报名记录是否可审批（仅 pending） */
     public static boolean canReview(RegistrationData registration) {
-        return registration != null && registration.getStatus() == WaitlistStatusEnum.pending;
+        return registration != null && registration.getStatus() == RegistrationStatusEnum.pending;
     }
 
     /** 报名记录是否可复活（rejected/withdrawn/expired 可重新报名） */
@@ -181,9 +190,9 @@ public class Meetup {
         if (registration == null) {
             return false;
         }
-        WaitlistStatusEnum status = registration.getStatus();
-        return status == WaitlistStatusEnum.rejected
-                || status == WaitlistStatusEnum.withdrawn
-                || status == WaitlistStatusEnum.expired;
+        RegistrationStatusEnum status = registration.getStatus();
+        return status == RegistrationStatusEnum.rejected
+                || status == RegistrationStatusEnum.withdrawn
+                || status == RegistrationStatusEnum.expired;
     }
 }

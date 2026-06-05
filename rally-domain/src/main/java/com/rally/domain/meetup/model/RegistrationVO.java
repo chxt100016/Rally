@@ -1,6 +1,6 @@
 package com.rally.domain.meetup.model;
 
-import com.rally.domain.meetup.enums.WaitlistStatusEnum;
+import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -14,7 +14,7 @@ public class RegistrationVO {
     private String registrationId;
     private String meetupId;
     private String userId;
-    private WaitlistStatusEnum status;
+    private RegistrationStatusEnum status;
     private LocalDateTime expiresAt;
     private LocalDateTime createTime;
 

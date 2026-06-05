@@ -43,7 +43,7 @@ public class MeetupAppService {
         meetupDomainService.assertPublish(userId, cmd);
 
         // 2. 构建 MeetupData 并持久化（含创建者自动报名）
-        meetupDomainService.add(cmd, userId, cmd.getCityCode());
+        meetupDomainService.add(userId, cmd);
     }
 
     /**

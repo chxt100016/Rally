@@ -3,7 +3,7 @@ package com.rally.domain.meetup.enums;
 /**
  * 报名状态枚举
  */
-public enum WaitlistStatusEnum {
+public enum RegistrationStatusEnum {
     pending,
     approved,
     rejected,

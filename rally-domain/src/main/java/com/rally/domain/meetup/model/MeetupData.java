@@ -26,7 +26,7 @@ public class MeetupData {
     private String courtAddress;
     private Double courtLng;
     private Double courtLat;
-    private String courtGrid;
+
     private LevelModeEnum levelMode;
     private String levelValue;
     private GenderLimitEnum genderLimit;
