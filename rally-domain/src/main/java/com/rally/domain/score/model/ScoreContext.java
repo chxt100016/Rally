@@ -21,9 +21,6 @@ public class ScoreContext {
     /** 参与者 user_id 列表（发布者 + 已批准报名者） */
     private List<String> participants;
 
-    /** 是否存在比分记录 */
-    private boolean hasScoreRecords;
-
     /** 评分状态版本（用于幂等控制） */
     private Integer scoreVersion;
 

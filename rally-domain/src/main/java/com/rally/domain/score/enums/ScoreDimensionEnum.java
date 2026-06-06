@@ -15,9 +15,7 @@ public enum ScoreDimensionEnum {
     /** 可信度（全量重算） */
     CREDIBILITY("credibility"),
     /** 校准度（全量重算） */
-    CALIBRATION("calibration"),
-    /** ELO（仅有比分时触发） */
-    ELO("elo");
+    CALIBRATION("calibration");
 
     private final String value;
 }

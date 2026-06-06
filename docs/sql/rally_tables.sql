@@ -144,13 +144,7 @@ INSERT INTO `sys_config` (`biz_id`, `config_key`, `config_value`, `value_type`, 
 ('cfg0000000000000047', 'score.ntrp.cooldown_mid_days', '60', 'int', 'global', 'NTRP 冷却期：可信度 30–60（裁定 D9 中档）', 1, 0),
 ('cfg0000000000000048', 'score.ntrp.cooldown_high_days', '90', 'int', 'global', 'NTRP 冷却期：可信度 ≥60（裁定 D9 高档）', 1, 0),
 
--- 5.8 评分域 · ELO（score.elo）4 项
-('cfg0000000000000049', 'score.elo.initial', '1500', 'int', 'global', 'ELO 初始分', 1, 0),
-('cfg0000000000000050', 'score.elo.k_factor', '32', 'int', 'global', 'K 系数', 1, 0),
-('cfg0000000000000051', 'score.elo.blowout_offset', '0.1', 'float', 'global', '6-0/6-1 悬殊系数偏移（胜+0.1/负-0.1）', 1, 0),
-('cfg0000000000000052', 'score.elo.close_offset', '0.05', 'float', 'global', '7-6/7-5 接近系数偏移（胜-0.05/负+0.05）', 1, 0),
-
--- 5.9 评价域（review）3 项
+-- 5.8 评价域（review）3 项
 ('cfg0000000000000053', 'review.deadline_days', '30', 'int', 'global', '评价/比分填写截止（finished 后 N 天）', 1, 0),
 ('cfg0000000000000054', 'review.tag.default_pool', '["正手稳","反手稳","发球好","底线稳","网前好","移动快","友善"]', 'json', 'global', '系统默认个性化标签池', 1, 0),
 ('cfg0000000000000055', 'review.tag.random_pick_count', '3', 'int', 'global', '从被评价人已有标签随机挑选展示数', 1, 0),
@@ -290,25 +284,7 @@ INSERT INTO `sys_config` (`biz_id`, `config_key`, `config_value`, `value_type`, 
 ('cfg0000000000000069', 'review.score.tiebreak_lead', '2', 'int', 'global', '抢七最低领先分', 1, 0);
 
 -- ============================================================
--- 10. 评分域：ELO 聚合表
--- ============================================================
-
-DROP TABLE IF EXISTS `player_elo`;
-CREATE TABLE `player_elo` (
-  `id`          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `biz_id`      VARCHAR(32) NOT NULL COMMENT '业务唯一 ID（雪花算法字符串）',
-  `user_id`     VARCHAR(32) NOT NULL COMMENT '关联 users.user_id',
-  `elo_score`   FLOAT       NOT NULL DEFAULT 1500 COMMENT 'ELO 分，初始 1500（配置 score.elo.initial）',
-  `match_count` INT         NOT NULL DEFAULT 0 COMMENT '已计入 ELO 的对局盘数，便于后续 K 衰减（MVP 仅记录）',
-  `create_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_biz_id` (`biz_id`),
-  UNIQUE KEY `uk_user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='玩家 ELO 聚合表（后台撮合，不展示）';
-
--- ============================================================
--- 11. 评分域：批量评分幂等状态表
+-- 10. 评分域：批量评分幂等状态表
 -- ============================================================
 
 DROP TABLE IF EXISTS `rally_meetup_score_status`;

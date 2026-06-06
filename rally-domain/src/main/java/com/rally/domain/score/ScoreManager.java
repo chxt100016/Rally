@@ -3,12 +3,10 @@ package com.rally.domain.score;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.review.gateway.ReviewGateway;
 import com.rally.domain.review.gateway.ScoreRecordGateway;
-import com.rally.domain.score.gateway.PlayerEloGateway;
 import com.rally.domain.score.gateway.ScoreStatusGateway;
 import com.rally.domain.score.model.*;
 import com.rally.domain.score.strategy.CalibrationStrategy;
 import com.rally.domain.score.strategy.CredibilityStrategy;
-import com.rally.domain.score.strategy.EloStrategy;
 import com.rally.domain.score.strategy.ReputationStrategy;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
@@ -38,8 +36,6 @@ public class ScoreManager {
     private CredibilityStrategy credibilityStrategy;
     @Resource
     private CalibrationStrategy calibrationStrategy;
-    @Resource
-    private EloStrategy eloStrategy;
 
     @Resource
     private MeetupGateway meetupGateway;
@@ -51,8 +47,6 @@ public class ScoreManager {
     private TennisProfileGateway profileGateway;
     @Resource
     private ProfileChangeLogGateway changeLogGateway;
-    @Resource
-    private PlayerEloGateway eloGateway;
     @Resource
     private ScoreStatusGateway statusGateway;
 
@@ -101,14 +95,7 @@ public class ScoreManager {
             handleReviewPeriod(ctx, userId);
         }
 
-        // 7. 仅当存在比分时更新 ELO
-        if (ctx.isHasScoreRecords()) {
-            List<EloResult> eloResults = eloStrategy.calculateMatch(ctx);
-            eloGateway.batchUpsert(eloResults);
-            log.info("ELO 更新完成，参与用户数={}", eloResults.size());
-        }
-
-        // 8. 维护幂等状态
+        // 7. 维护幂等状态
         statusGateway.markProcessed(meetupId);
 
         log.info("全量重算评分完成，meetupId={}", meetupId);
@@ -165,8 +152,6 @@ public class ScoreManager {
         ScoreContext ctx = new ScoreContext();
         ctx.setMeetupId(meetupId);
         ctx.setParticipants(meetupGateway.listParticipantUserIds(meetupId));
-        ctx.setHasScoreRecords(scoreRecordGateway.listByMeetupId(meetupId) != null
-                && !scoreRecordGateway.listByMeetupId(meetupId).isEmpty());
         ctx.setReviewGateway(reviewGateway);
         ctx.setScoreRecordGateway(scoreRecordGateway);
         ctx.setMeetupGateway(meetupGateway);
