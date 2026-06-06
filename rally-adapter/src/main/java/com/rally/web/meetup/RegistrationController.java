@@ -1,6 +1,5 @@
 package com.rally.web.meetup;
 
-import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.meetup.model.RegistrationVO;
 import com.rally.domain.tennis.model.Result;
 import com.rally.meetup.RegistrationAppService;
@@ -26,14 +25,9 @@ public class RegistrationController {
      * POST /api/rally/wechat/meetup/waitlist/join
      */
     @PostMapping("/join")
-    public Result<Void> join(@RequestParam("meetupId") String meetupId,
-                             @RequestParam(value = "autoWithdrawAt", required = false) LocalDateTime autoWithdrawAt) {
-        try {
-            registrationAppService.join(meetupId, autoWithdrawAt);
-            return Result.ok();
-        } catch (BusinessException e) {
-            return Result.fail(e.getErrorCode().getCode(), e.getMessage());
-        }
+    public Result<Void> join(@RequestParam("meetupId") String meetupId, @RequestParam(value = "autoWithdrawAt", required = false) LocalDateTime autoWithdrawAt) {
+        registrationAppService.join(meetupId, autoWithdrawAt);
+        return Result.ok();
     }
 
     /**
@@ -42,12 +36,8 @@ public class RegistrationController {
      */
     @PostMapping("/withdraw")
     public Result<Void> withdraw(@RequestParam("meetupId") String meetupId) {
-        try {
-            registrationAppService.withdraw(meetupId);
-            return Result.ok();
-        } catch (BusinessException e) {
-            return Result.fail(e.getErrorCode().getCode(), e.getMessage());
-        }
+        registrationAppService.withdraw(meetupId);
+        return Result.ok();
     }
 
     /**
@@ -56,12 +46,8 @@ public class RegistrationController {
      */
     @PostMapping("/quit")
     public Result<Void> quit(@RequestParam("meetupId") String meetupId) {
-        try {
-            registrationAppService.quit(meetupId);
-            return Result.ok();
-        } catch (BusinessException e) {
-            return Result.fail(e.getErrorCode().getCode(), e.getMessage());
-        }
+        registrationAppService.quit(meetupId);
+        return Result.ok();
     }
 
     /**
@@ -70,12 +56,8 @@ public class RegistrationController {
      */
     @PostMapping("/approve")
     public Result<Void> approve(@RequestParam("registrationId") String registrationId) {
-        try {
-            registrationAppService.approve(registrationId);
-            return Result.ok();
-        } catch (BusinessException e) {
-            return Result.fail(e.getErrorCode().getCode(), e.getMessage());
-        }
+        registrationAppService.approve(registrationId);
+        return Result.ok();
     }
 
     /**
@@ -84,12 +66,8 @@ public class RegistrationController {
      */
     @PostMapping("/reject")
     public Result<Void> reject(@RequestParam("registrationId") String registrationId) {
-        try {
-            registrationAppService.reject(registrationId);
-            return Result.ok();
-        } catch (BusinessException e) {
-            return Result.fail(e.getErrorCode().getCode(), e.getMessage());
-        }
+        registrationAppService.reject(registrationId);
+        return Result.ok();
     }
 
     /**
@@ -98,10 +76,6 @@ public class RegistrationController {
      */
     @GetMapping("/pending")
     public Result<List<RegistrationVO>> pendingList(@RequestParam("meetupId") String meetupId) {
-        try {
-            return Result.ok(registrationAppService.pendingList(meetupId));
-        } catch (BusinessException e) {
-            return Result.fail(e.getErrorCode().getCode(), e.getMessage());
-        }
+        return Result.ok(registrationAppService.pendingList(meetupId));
     }
 }

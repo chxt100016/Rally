@@ -28,7 +28,7 @@ public class RegistrationRepository {
         return registrationService.lambdaQuery()
                 .eq(RegistrationPO::getRallyMeetupId, meetupId)
                 .eq(RegistrationPO::getUserId, userId)
-                .in(RegistrationPO::getStatus, "pending", "approved")
+                .in(RegistrationPO::getStatus, "pending", "APPROVED")
                 .one();
     }
 
@@ -56,6 +56,12 @@ public class RegistrationRepository {
                 .list();
     }
 
+    public List<RegistrationPO> findByMeetupId(String meetupId) {
+        return registrationService.lambdaQuery()
+                .eq(RegistrationPO::getRallyMeetupId, meetupId)
+                .list();
+    }
+
     /**
      * 查询用户在指定时间段内的有效报名（冲突检测用）
      */
@@ -63,7 +69,7 @@ public class RegistrationRepository {
                                               LocalDateTime endTime, String excludeMeetupId) {
         LambdaQueryWrapper<RegistrationPO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(RegistrationPO::getUserId, userId)
-                .in(RegistrationPO::getStatus, "pending", "approved");
+                .in(RegistrationPO::getStatus, "pending", "APPROVED");
         if (excludeMeetupId != null) {
             wrapper.ne(RegistrationPO::getRallyMeetupId, excludeMeetupId);
         }
@@ -84,7 +90,7 @@ public class RegistrationRepository {
     public boolean revive(String bizId, LocalDateTime expiresAt) {
         return registrationService.lambdaUpdate()
                 .eq(RegistrationPO::getBizId, bizId)
-                .in(RegistrationPO::getStatus, "rejected", "withdrawn", "expired")
+                .in(RegistrationPO::getStatus, "REJECTED", "WITHDRAWN", "EXPIRED")
                 .set(RegistrationPO::getStatus, "pending")
                 .set(RegistrationPO::getExpiresAt, expiresAt)
                 .set(RegistrationPO::getCreateTime, LocalDateTime.now())
@@ -98,7 +104,7 @@ public class RegistrationRepository {
         return registrationService.lambdaQuery()
                 .select(RegistrationPO::getUserId)
                 .eq(RegistrationPO::getRallyMeetupId, meetupId)
-                .eq(RegistrationPO::getStatus, "approved")
+                .eq(RegistrationPO::getStatus, "APPROVED")
                 .list()
                 .stream()
                 .map(RegistrationPO::getUserId)
@@ -111,7 +117,7 @@ public class RegistrationRepository {
     public int countApprovedByMeetupId(String meetupId) {
         Long count = registrationService.lambdaQuery()
                 .eq(RegistrationPO::getRallyMeetupId, meetupId)
-                .eq(RegistrationPO::getStatus, "approved")
+                .eq(RegistrationPO::getStatus, "APPROVED")
                 .count();
         return count.intValue();
     }

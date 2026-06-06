@@ -3,8 +3,11 @@ package com.rally.domain.meetup.model;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.meetup.enums.*;
+import com.rally.domain.system.SystemConfig;
+import com.rally.domain.user.model.UserProfile;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +74,7 @@ public class Meetup {
      */
     public int countApprovedPlayers() {
         return (int) registrations.stream()
-                .filter(r -> r.getStatus() == RegistrationStatusEnum.approved)
+                .filter(r -> r.getStatus() == RegistrationStatusEnum.APPROVED)
                 .count();
     }
 
@@ -121,38 +124,57 @@ public class Meetup {
 
     // ======================== 报名记录查询 ========================
 
-    /** 查找用户的有效报名记录（pending/approved） */
+    /** 查找用户的有效报名记录（pending/APPROVED） */
     public RegistrationData findActiveRegistration(String userId) {
         return registrations.stream()
                 .filter(r -> userId.equals(r.getUserId()))
-                .filter(r -> r.getStatus() == RegistrationStatusEnum.pending
-                        || r.getStatus() == RegistrationStatusEnum.approved)
+                .filter(r -> r.getStatus() == RegistrationStatusEnum.PENDING
+                        || r.getStatus() == RegistrationStatusEnum.APPROVED)
                 .findFirst().orElse(null);
     }
 
-    /** 查找用户任意状态的报名记录 */
-    public RegistrationData findAnyRegistration(String userId) {
-        return registrations.stream()
-                .filter(r -> userId.equals(r.getUserId()))
-                .findFirst().orElse(null);
-    }
 
-    /** 获取待审批的报名列表 */
-    public List<RegistrationData> getPendingRegistrations() {
-        return registrations.stream()
-                .filter(r -> r.getStatus() == RegistrationStatusEnum.pending)
-                .toList();
-    }
 
     // ======================== 报名领域行为 ========================
 
     /**
-     * 断言可以报名（校验约球状态、时间、创建人）
+     * 报名（包含校验 + 创建报名记录）
+     * @param userProfile 用户档案领域对象
+     * @param autoWithdrawAt 自动撤回时间，可为 null
+     * @return 报名结果和报名记录
      */
-    public void assertCanJoin(String userId) {
+    public JoinResult join(UserProfile userProfile, LocalDateTime autoWithdrawAt) {
+        // 1. 校验（所有校验逻辑都在 assertCanJoin 中）
+        assertCanJoin(userProfile);
+
+        // 2. 创建报名记录
+        RegistrationData registration = new RegistrationData();
+        registration.setRallyMeetupId(data.getBizId());
+        registration.setUserId(userProfile.getUser().getUserId());
+        registration.setExpiresAt(autoWithdrawAt);
+
+        // 3. 根据加入模式设置状态
+        JoinResult result;
+        if (data.getJoinMode() == JoinModeEnum.DIRECT) {
+            registration.setStatus(RegistrationStatusEnum.APPROVED);
+            result = JoinResult.APPROVED;
+        } else {
+            registration.setStatus(RegistrationStatusEnum.PENDING);
+            result = JoinResult.PENDING;
+        }
+
+        return result;
+    }
+
+    /**
+     * 断言可以报名（校验约球状态、时间、创建人、重复报名、性别限制、信誉分门槛）
+     * @param userProfile 用户档案领域对象
+     */
+    public void assertCanJoin(UserProfile userProfile) {
+        String userId = userProfile.getUser().getUserId();
         MeetupStatusEnum realStatus = getRealStatus();
 
-        // 1. 状态校验
+        // 1. 约球状态校验
         if (realStatus == MeetupStatusEnum.FULL) {
             throw new BusinessException(BizErrorCode.MEETUP_FULL);
         }
@@ -172,16 +194,28 @@ public class Meetup {
         if (isCreator(userId)) {
             throw new BusinessException(BizErrorCode.CANNOT_JOIN_OWN);
         }
+
+        // 4. 重复报名校验
+        if (findActiveRegistration(userId) != null) {
+            throw new BusinessException(BizErrorCode.ALREADY_JOINED);
+        }
+
+        // 5. 性别限制校验
+        checkGenderLimit(userProfile);
+
+        // 6. 信誉分门槛校验
+        checkReputationScore(userProfile);
     }
 
     /**
      * 性别限制校验
-     * @param userGender 用户性别（大写字符串），可为 null
+     * @param userProfile 用户档案领域对象
      */
-    public void checkGenderLimit(String userGender) {
-        if (data.getGenderLimit() == GenderLimitEnum.ANY || userGender == null) {
+    public void checkGenderLimit(UserProfile userProfile) {
+        if (data.getGenderLimit() == GenderLimitEnum.ANY || userProfile.getUser().getGender() == null) {
             return;
         }
+        String userGender = userProfile.getUser().getGender().name();
         if (data.getGenderLimit() == GenderLimitEnum.MALE && !"MALE".equals(userGender)) {
             throw new BusinessException(BizErrorCode.GENDER_NOT_MATCH);
         }
@@ -190,31 +224,37 @@ public class Meetup {
         }
     }
 
+    /**
+     * 信誉分门槛校验
+     * @param userProfile 用户档案领域对象
+     */
+    public void checkReputationScore(UserProfile userProfile) {
+        if (userProfile.getProfile() == null || userProfile.getProfile().getReputationScore() == null) {
+            return;
+        }
+        BigDecimal reputationScore = userProfile.getProfile().getReputationScore();
+        BigDecimal threshold = new BigDecimal(SystemConfig.getString("meetup.join.min_reputation_score", "30"));
+        if (reputationScore.compareTo(threshold) < 0) {
+            throw new BusinessException(BizErrorCode.LOW_REPUTATION_BANNED);
+        }
+    }
+
     // ======================== 报名状态判断（静态工具方法） ========================
 
     /** 报名记录是否可撤回（仅 pending） */
     public static boolean canWithdraw(RegistrationData registration) {
-        return registration != null && registration.getStatus() == RegistrationStatusEnum.pending;
+        return registration != null && registration.getStatus() == RegistrationStatusEnum.PENDING;
     }
 
-    /** 报名记录是否可退出（仅 approved） */
+    /** 报名记录是否可退出（仅 APPROVED） */
     public static boolean canQuit(RegistrationData registration) {
-        return registration != null && registration.getStatus() == RegistrationStatusEnum.approved;
+        return registration != null && registration.getStatus() == RegistrationStatusEnum.APPROVED;
     }
 
     /** 报名记录是否可审批（仅 pending） */
     public static boolean canReview(RegistrationData registration) {
-        return registration != null && registration.getStatus() == RegistrationStatusEnum.pending;
+        return registration != null && registration.getStatus() == RegistrationStatusEnum.PENDING;
     }
 
-    /** 报名记录是否可复活（rejected/withdrawn/expired 可重新报名） */
-    public static boolean canRevive(RegistrationData registration) {
-        if (registration == null) {
-            return false;
-        }
-        RegistrationStatusEnum status = registration.getStatus();
-        return status == RegistrationStatusEnum.rejected
-                || status == RegistrationStatusEnum.withdrawn
-                || status == RegistrationStatusEnum.expired;
-    }
+
 }

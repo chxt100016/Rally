@@ -24,12 +24,12 @@ public class MeetupFactory {
         MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId);
         data.setBizId(IdWorker.getIdStr());
 
-        // 2. 创建者自动加入报名表，状态为 approved
+        // 2. 创建者自动加入报名表，状态为 APPROVED
         RegistrationData creatorRegistration = new RegistrationData();
         creatorRegistration.setBizId(IdWorker.getIdStr());
         creatorRegistration.setRallyMeetupId(data.getBizId());
         creatorRegistration.setUserId(userId);
-        creatorRegistration.setStatus(RegistrationStatusEnum.approved);
+        creatorRegistration.setStatus(RegistrationStatusEnum.APPROVED);
 
         // 3. 组装聚合根
         List<RegistrationData> registrations = new ArrayList<>();

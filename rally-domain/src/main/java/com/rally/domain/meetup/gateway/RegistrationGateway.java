@@ -20,7 +20,7 @@ public interface RegistrationGateway {
     RegistrationData findByBizId(String bizId);
 
     /**
-     * 查询用户在某约球的最新有效报名（pending/approved）
+     * 查询用户在某约球的最新有效报名（pending/APPROVED）
      */
     RegistrationData findActiveByMeetupAndUser(String meetupId, String userId);
 
@@ -56,7 +56,7 @@ public interface RegistrationGateway {
     void updateStatus(String bizId, RegistrationStatusEnum status);
 
     /**
-     * 复活已失效的报名记录（rejected/withdrawn/expired → pending）
+     * 复活已失效的报名记录（REJECTED/WITHDRAWN/EXPIRED → pending）
      */
     void revive(String bizId, java.time.LocalDateTime expiresAt);
 

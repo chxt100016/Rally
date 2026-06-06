@@ -257,10 +257,10 @@ public class MeetupDomainService {
 
         // 访客视角：含报名记录上下文
         if (userRegistration != null) {
-            if (userRegistration.getStatus() == RegistrationStatusEnum.pending) {
+            if (userRegistration.getStatus() == RegistrationStatusEnum.PENDING) {
                 return ActionStateEnum.PENDING_REVIEW;
             }
-            if (userRegistration.getStatus() == RegistrationStatusEnum.approved) {
+            if (userRegistration.getStatus() == RegistrationStatusEnum.APPROVED) {
                 return ActionStateEnum.JOINED;
             }
         }
