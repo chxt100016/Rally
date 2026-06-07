@@ -73,4 +73,42 @@ public class ScoreRecordRepository {
                 .eq(ScoreRecordPO::getSetNumber, setNumber)
                 .count() > 0;
     }
+
+    /**
+     * 绕过 @Version 乐观锁更新（recap 流程用，手动管理 version）
+     */
+    public void updateWithoutVersionCheck(String bizId, ScoreRecordPO newValues, int newVersion) {
+        scoreRecordService.lambdaUpdate()
+                .eq(ScoreRecordPO::getBizId, bizId)
+                .set(ScoreRecordPO::getSetNumber, newValues.getSetNumber())
+                .set(ScoreRecordPO::getSetFormat, newValues.getSetFormat())
+                .set(ScoreRecordPO::getSideAPlayer1, newValues.getSideAPlayer1())
+                .set(ScoreRecordPO::getSideAPlayer2, newValues.getSideAPlayer2())
+                .set(ScoreRecordPO::getSideBPlayer1, newValues.getSideBPlayer1())
+                .set(ScoreRecordPO::getSideBPlayer2, newValues.getSideBPlayer2())
+                .set(ScoreRecordPO::getSideAScore, newValues.getSideAScore())
+                .set(ScoreRecordPO::getSideBScore, newValues.getSideBScore())
+                .set(ScoreRecordPO::getRecordedBy, newValues.getRecordedBy())
+                .set(ScoreRecordPO::getVersion, newVersion)
+                .update();
+    }
+
+    /**
+     * 根据 bizId 删除（不检查 version）
+     */
+    public void deleteByBizId(String bizId) {
+        scoreRecordService.lambdaUpdate()
+                .eq(ScoreRecordPO::getBizId, bizId)
+                .remove();
+    }
+
+    /**
+     * 批量更新某场所有比分的版本号（确保 meetup 级版本一致）
+     */
+    public void updateVersionByMeetupId(String rallyMeetupId, int newVersion) {
+        scoreRecordService.lambdaUpdate()
+                .eq(ScoreRecordPO::getRallyMeetupId, rallyMeetupId)
+                .set(ScoreRecordPO::getVersion, newVersion)
+                .update();
+    }
 }

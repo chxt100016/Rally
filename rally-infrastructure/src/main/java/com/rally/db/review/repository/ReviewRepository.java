@@ -105,4 +105,38 @@ public class ReviewRepository {
                 .eq(ReviewPO::getToUserId, toUserId)
                 .list();
     }
+
+    /**
+     * 新增单条评价
+     */
+    public void save(ReviewPO po) {
+        reviewService.save(po);
+    }
+
+    /**
+     * 按维度更新评价值（meetupId + fromUser + toUser + type）
+     */
+    public void updateValue(String rallyMeetupId, String fromUserId,
+                            String toUserId, String reviewType, String newValue) {
+        reviewService.lambdaUpdate()
+                .eq(ReviewPO::getRallyMeetupId, rallyMeetupId)
+                .eq(ReviewPO::getFromUserId, fromUserId)
+                .eq(ReviewPO::getToUserId, toUserId)
+                .eq(ReviewPO::getReviewType, reviewType)
+                .set(ReviewPO::getReviewValue, newValue)
+                .update();
+    }
+
+    /**
+     * 按维度删除评价（meetupId + fromUser + toUser + type）
+     */
+    public void deleteByDimension(String rallyMeetupId, String fromUserId,
+                                  String toUserId, String reviewType) {
+        reviewService.lambdaUpdate()
+                .eq(ReviewPO::getRallyMeetupId, rallyMeetupId)
+                .eq(ReviewPO::getFromUserId, fromUserId)
+                .eq(ReviewPO::getToUserId, toUserId)
+                .eq(ReviewPO::getReviewType, reviewType)
+                .remove();
+    }
 }

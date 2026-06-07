@@ -35,3 +35,5 @@ mvn clean package -DskipTests
 - 业务校验场景使用工具类`com.rally.domain.utils.Assert`, 
   - 不如果能力不够可以拓展实现 
   - 使用例子`Assert.notNull(data, BizErrorCode.MEETUP_NOT_FOUND)`
+- 接口出入参数转换放在app层并且使用mapstruct 
+- app层不要try catch，将这个放在业务操作里

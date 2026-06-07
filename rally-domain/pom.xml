@@ -88,5 +88,11 @@
             <artifactId>mybatis-plus-core</artifactId>
             <version>3.5.12</version>
         </dependency>
+
+        <!-- Spring 事务注解 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
     </dependencies>
 </project>
