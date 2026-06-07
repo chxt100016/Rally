@@ -2,22 +2,14 @@ package com.rally.domain.recap.model;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 赛后收集详情（detail 接口出参）
+ * 赛后收集详情（合并到 MeetupVO.recap 中）
  */
 @Data
 public class RecapDetailVO {
-
-    // ==================== 活动信息 ====================
-    private String meetupId;
-    private String title;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private String courtName;
 
     // ==================== 参与人列表 ====================
     private List<ParticipantItem> participants;

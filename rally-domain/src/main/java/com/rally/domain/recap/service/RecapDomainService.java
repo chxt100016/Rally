@@ -134,14 +134,6 @@ public class RecapDomainService {
      */
     public RecapDetailVO detail(Recap recap) {
         RecapDetailVO vo = new RecapDetailVO();
-        MeetupData meetup = recap.getMeetup();
-
-        // 活动信息
-        vo.setMeetupId(recap.getMeetupId());
-        vo.setTitle(meetup.getTitle());
-        vo.setStartTime(meetup.getStartTime());
-        vo.setEndTime(meetup.getEndTime());
-        vo.setCourtName(meetup.getCourtName());
 
         // 参与人列表（排除自己）
         List<RecapDetailVO.ParticipantItem> participantItems = buildParticipants(recap);

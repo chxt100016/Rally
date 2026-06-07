@@ -28,7 +28,6 @@ public class RecapAppService {
 
     private final RecapDomainService recapDomainService;
 
-    private static final RecapAppConvertMapper MAPPER = RecapAppConvertMapper.INSTANCE;
 
     /**
      * 提交赛后收集
@@ -50,19 +49,6 @@ public class RecapAppService {
         return scoreSuccess ? RecapOverallStatus.ALL_SUCCESS : RecapOverallStatus.PARTIAL;
     }
 
-    /**
-     * 查询赛后收集详情
-     */
-    public RecapDetailDTO detail(String meetupId) {
-        String userId = UserContext.get();
 
-        // 1. 加载聚合根（含业务校验）
-        Recap recap = recapDomainService.get(userId, meetupId);
 
-        // 2. 领域服务构建 VO
-        RecapDetailVO vo = recapDomainService.detail(recap);
-
-        // 3. VO -> DTO（MapStruct）
-        return MAPPER.toDetailDTO(vo);
-    }
 }

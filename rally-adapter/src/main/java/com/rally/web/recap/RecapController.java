@@ -5,7 +5,6 @@ import com.rally.domain.recap.model.RecapCmd;
 import com.rally.domain.tennis.model.Result;
 import com.rally.recap.RecapAppService;
 import com.rally.recap.convert.RecapAppConvertMapper;
-import com.rally.recap.model.RecapDetailDTO;
 import com.rally.recap.model.RecapSubmitDTO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -33,14 +32,5 @@ public class RecapController {
         RecapCmd cmd = MAPPER.toCmd(req);
         RecapOverallStatus status = recapAppService.submit(cmd);
         return Result.ok(status);
-    }
-
-    /**
-     * 查询赛后收集详情
-     * GET /api/rally/recap/detail?meetupId=xxx
-     */
-    @GetMapping("/detail")
-    public Result<RecapDetailDTO> detail(@RequestParam("meetupId") String meetupId) {
-        return Result.ok(recapAppService.detail(meetupId));
     }
 }

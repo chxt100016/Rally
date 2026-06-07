@@ -26,6 +26,7 @@ public interface MeetupAppConvertMapper {
     @Mapping(target = "creatorAvatarUrl", ignore = true)
     @Mapping(target = "creatorNtrp", ignore = true)
     @Mapping(target = "participants", ignore = true)
+    @Mapping(target = "recap", ignore = true)
     MeetupVO toMeetupVO(MeetupData data);
 
     List<MeetupVO> toMeetupVOList(List<MeetupData> dataList);

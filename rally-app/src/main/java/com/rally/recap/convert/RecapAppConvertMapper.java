@@ -37,7 +37,6 @@ public interface RecapAppConvertMapper {
 
     RecapDetailDTO.ReviewDTO toReviewDTO(RecapDetailVO.ReviewItem item);
 
-    @Mapping(target = "setNum", source = "setNum")
     RecapDetailDTO.ScoreDTO toScoreDTO(RecapDetailVO.ScoreItem item);
 
     /**

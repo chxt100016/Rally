@@ -1,6 +1,7 @@
 package com.rally.domain.meetup.model;
 
 import com.rally.domain.meetup.enums.*;
+import com.rally.domain.recap.model.RecapDetailVO;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -51,4 +52,7 @@ public class MeetupVO {
 
     // 参与者列表
     private List<ParticipantVO> participants;
+
+    // 赛后收集（活动结束时返回）
+    private RecapDetailVO recap;
 }
