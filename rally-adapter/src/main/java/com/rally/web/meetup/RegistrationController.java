@@ -1,13 +1,18 @@
 package com.rally.web.meetup;
 
-import com.rally.domain.meetup.model.RegistrationVO;
+import com.rally.domain.meetup.model.MeetupJoinCmd;
+import com.rally.domain.meetup.model.MeetupQuitCmd;
+import com.rally.domain.meetup.model.MeetupWithdrawCmd;
+import com.rally.domain.meetup.model.RegistrationApproveCmd;
+import com.rally.domain.meetup.model.RegistrationRejectCmd;
 import com.rally.domain.tennis.model.Result;
 import com.rally.meetup.RegistrationAppService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 报名/注册接口：报名/撤回/退出/审批
@@ -22,60 +27,51 @@ public class RegistrationController {
 
     /**
      * 报名
-     * POST /api/rally/wechat/meetup/waitlist/join
+     * POST /api/rally/wechat/meetup/registration/join
      */
     @PostMapping("/join")
-    public Result<Void> join(@RequestParam("meetupId") String meetupId, @RequestParam(value = "autoWithdrawAt", required = false) LocalDateTime autoWithdrawAt) {
-        registrationAppService.join(meetupId, autoWithdrawAt);
+    public Result<Void> join(@RequestBody @Valid MeetupJoinCmd cmd) {
+        registrationAppService.join(cmd.getMeetupId(), cmd.getAutoWithdrawAt());
         return Result.ok();
     }
 
     /**
      * 撤回（仅 pending 可撤）
-     * POST /api/rally/wechat/meetup/waitlist/withdraw
+     * POST /api/rally/wechat/meetup/registration/withdraw
      */
     @PostMapping("/withdraw")
-    public Result<Void> withdraw(@RequestParam("meetupId") String meetupId) {
-        registrationAppService.withdraw(meetupId);
+    public Result<Void> withdraw(@RequestBody @Valid MeetupWithdrawCmd cmd) {
+        registrationAppService.withdraw(cmd.getMeetupId());
         return Result.ok();
     }
 
     /**
      * 退出（已加入）
-     * POST /api/rally/wechat/meetup/waitlist/quit
+     * POST /api/rally/wechat/meetup/registration/quit
      */
     @PostMapping("/quit")
-    public Result<Void> quit(@RequestParam("meetupId") String meetupId) {
-        registrationAppService.quit(meetupId);
+    public Result<Void> quit(@RequestBody @Valid MeetupQuitCmd cmd) {
+        registrationAppService.quit(cmd.getMeetupId());
         return Result.ok();
     }
 
     /**
      * 审批通过
-     * POST /api/rally/wechat/meetup/waitlist/approve
+     * POST /api/rally/wechat/meetup/registration/approve
      */
     @PostMapping("/approve")
-    public Result<Void> approve(@RequestParam("registrationId") String registrationId) {
-        registrationAppService.approve(registrationId);
+    public Result<Void> approve(@RequestBody @Valid RegistrationApproveCmd cmd) {
+        registrationAppService.approve(cmd.getRegistrationId());
         return Result.ok();
     }
 
     /**
      * 审批拒绝（仅创建人）
-     * POST /api/rally/wechat/meetup/waitlist/reject
+     * POST /api/rally/wechat/meetup/registration/reject
      */
     @PostMapping("/reject")
-    public Result<Void> reject(@RequestParam("registrationId") String registrationId) {
-        registrationAppService.reject(registrationId);
+    public Result<Void> reject(@RequestBody @Valid RegistrationRejectCmd cmd) {
+        registrationAppService.reject(cmd.getRegistrationId());
         return Result.ok();
-    }
-
-    /**
-     * 审批列表（仅创建人）
-     * GET /api/rally/wechat/meetup/waitlist/pending
-     */
-    @GetMapping("/pending")
-    public Result<List<RegistrationVO>> pendingList(@RequestParam("meetupId") String meetupId) {
-        return Result.ok(registrationAppService.pendingList(meetupId));
     }
 }

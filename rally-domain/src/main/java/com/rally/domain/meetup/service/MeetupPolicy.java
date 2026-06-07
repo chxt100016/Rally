@@ -8,7 +8,7 @@ import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
-import com.rally.domain.meetup.model.PublishCmd;
+import com.rally.domain.meetup.model.MeetupPublishCmd;
 import com.rally.domain.system.CityLocator;
 import com.rally.domain.system.SystemConfig;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
  */
 @Service
 @RequiredArgsConstructor
-public class MeetupAssertService {
+public class MeetupPolicy {
 
     private final MeetupGateway meetupGateway;
 
@@ -31,7 +31,7 @@ public class MeetupAssertService {
     /**
      * 发布前校验：发布上限 + 城市开通 + 字段校验
      */
-    public void assertPublish(String userId, PublishCmd cmd) {
+    public void assertPublish(String userId, MeetupPublishCmd cmd) {
         // 1. 当日发布上限
         assertTimes(userId);
         // 2. 城市开通校验
@@ -54,7 +54,7 @@ public class MeetupAssertService {
     /**
      * 校验发布参数
      */
-    private void assertParam(PublishCmd cmd) {
+    private void assertParam(MeetupPublishCmd cmd) {
         // 开始时间必须大于当前时间
         if (cmd.getStartTime().isBefore(LocalDateTime.now())) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "不能发布过去的约球");
@@ -136,7 +136,7 @@ public class MeetupAssertService {
      * @param meetup 聚合根
      * @param cmd 编辑命令
      */
-    public void assertEdit(Meetup meetup, PublishCmd cmd) {
+    public void assertEdit(Meetup meetup, MeetupPublishCmd cmd) {
         MeetupData data = meetup.getData();
         int lockMinutes = SystemConfig.getInt("meetup.edit_lock_minutes_before_start", 60);
 

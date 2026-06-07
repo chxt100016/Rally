@@ -19,8 +19,8 @@ public class MeetupFactory {
      * @param userId 创建者 ID
      * @return 完整的 Meetup 聚合根（含创建者报名记录）
      */
-    public static Meetup create(PublishCmd cmd, String userId) {
-        // 1. 映射 PublishCmd -> MeetupData（currentPlayers 已在 MapStruct 中设为 1）
+    public static Meetup create(MeetupPublishCmd cmd, String userId) {
+        // 1. 映射 MeetupPublishCmd -> MeetupData（currentPlayers 已在 MapStruct 中设为 1）
         MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId);
         data.setBizId(IdWorker.getIdStr());
 

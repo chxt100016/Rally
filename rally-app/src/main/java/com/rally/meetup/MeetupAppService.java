@@ -2,11 +2,9 @@ package com.rally.meetup;
 
 import com.rally.cache.UserContext;
 import com.rally.domain.meetup.gateway.NearbyGateway;
-import com.rally.domain.meetup.model.Meetup;
-import com.rally.domain.meetup.model.MeetupData;
-import com.rally.domain.meetup.model.MeetupVO;
-import com.rally.domain.meetup.model.PublishCmd;
-import com.rally.domain.meetup.service.MeetupAssertService;
+import com.rally.domain.meetup.model.*;
+import com.rally.domain.meetup.model.MeetupEditCmd;
+import com.rally.domain.meetup.service.MeetupPolicy;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.system.SystemConfig;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
@@ -27,17 +25,17 @@ public class MeetupAppService {
 
     private final MeetupDomainService meetupDomainService;
 
-    private final MeetupAssertService meetupAssertService;
+    private final MeetupPolicy meetupPolicy;
 
     /**
      * 发布约球
      */
     @Transactional
-    public void publish(PublishCmd cmd) {
+    public void publish(MeetupPublishCmd cmd) {
         String userId = UserContext.get();
 
-        // 1. 校验（城市开通校验在 assertPublish 中完成）
-        meetupAssertService.assertPublish(userId, cmd);
+        // 1. 校验
+        meetupPolicy.assertPublish(userId, cmd);
 
         // 2. 构建 MeetupData 并持久化（含创建者自动报名）
         meetupDomainService.add(userId, cmd);
@@ -47,16 +45,16 @@ public class MeetupAppService {
      * 编辑约球
      */
     @Transactional
-    public MeetupVO edit(PublishCmd cmd) {
+    public MeetupVO edit(MeetupEditCmd cmd) {
         String meetupId = cmd.getMeetupId();
         String userId = UserContext.get();
 
         // 1. 获取聚合根
-        Meetup meetup = meetupDomainService.getMeetup(meetupId);
+        Meetup meetup = meetupDomainService.get(meetupId);
         MeetupData data = meetup.getData();
 
         // 2. 编辑校验
-        meetupAssertService.assertEdit(meetup, cmd);
+        meetupPolicy.assertEdit(meetup, cmd);
 
         // 3. 场地变更检测（更新前检测）
         boolean locationChanged = meetup.isLocationChanged(cmd);
@@ -86,7 +84,7 @@ public class MeetupAppService {
         String userId = UserContext.get();
 
         // 1. 查询聚合根
-        Meetup meetup = meetupDomainService.getMeetup(meetupId);
+        Meetup meetup = meetupDomainService.get(meetupId);
         MeetupData data = meetup.getData();
 
         // 2. 权限和状态校验 + 更新状态

@@ -1,5 +1,6 @@
 package com.rally.domain.meetup.model;
 
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import lombok.Data;
 
@@ -18,4 +19,8 @@ public class RegistrationData {
     private LocalDateTime optTime;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+
+    public RegistrationData() {
+        bizId = IdWorker.getIdStr();
+    }
 }

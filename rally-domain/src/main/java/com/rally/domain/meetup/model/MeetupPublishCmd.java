@@ -9,13 +9,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 发布/编辑入参（三阶段表单聚合）
+ * 发布约球入参
  */
 @Data
-public class PublishCmd {
-    /** 编辑时传入 */
-    @NotBlank(message = "约球ID不能为空")
-    private String meetupId;
+public class MeetupPublishCmd {
 
     /** 标题，选填；不填后端按模板生成 */
     @Size(max = 128, message = "标题不超过128字符")

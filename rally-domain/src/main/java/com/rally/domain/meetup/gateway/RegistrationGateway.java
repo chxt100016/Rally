@@ -69,4 +69,9 @@ public interface RegistrationGateway {
      * 统计约球已批准的参与者数量（含创建者）
      */
     int countApprovedByMeetupId(String meetupId);
+
+    /**
+     * 查询约球的所有报名记录（加载聚合根用）
+     */
+    List<RegistrationData> findByMeetupId(String meetupId);
 }

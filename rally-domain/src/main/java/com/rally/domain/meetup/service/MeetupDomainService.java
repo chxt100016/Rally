@@ -7,12 +7,10 @@ import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
-import com.rally.domain.meetup.model.Meetup;
-import com.rally.domain.meetup.model.MeetupData;
-import com.rally.domain.meetup.model.MeetupFactory;
-import com.rally.domain.meetup.model.PublishCmd;
-import com.rally.domain.meetup.model.RegistrationData;
+import com.rally.domain.meetup.model.*;
+import com.rally.domain.meetup.model.MeetupPublishCmd;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,26 +34,36 @@ public class MeetupDomainService {
 
     private final RegistrationGateway registrationGateway;
 
-    private final MeetupAssertService meetupAssertService;
+    private final MeetupPolicy meetupPolicy;
 
     /**
-     * 获取约球聚合根
+     * 获取约球聚合根（仅约球数据，适用于编辑/关闭等场景）
      * @param meetupId 约球ID
      * @return Meetup 聚合根
      */
-    public Meetup getMeetup(String meetupId) {
+    public Meetup get(String meetupId) {
         MeetupData data = meetupGateway.findByBizId(meetupId);
-        if (data == null) {
-            throw new BusinessException(BizErrorCode.MEETUP_NOT_FOUND);
-        }
+        Assert.notNull(data, BizErrorCode.MEETUP_NOT_FOUND);
         return new Meetup(data);
+    }
+
+    /**
+     * 获取约球聚合根（含全部报名记录，适用于报名/审批等场景）
+     * @param meetupId 约球ID
+     * @return Meetup 聚合根（含全部报名记录）
+     */
+    public Meetup getAggregate(String meetupId) {
+        MeetupData data = meetupGateway.findByBizId(meetupId);
+        Assert.notNull(data, BizErrorCode.MEETUP_NOT_FOUND);
+        List<RegistrationData> registrations = registrationGateway.findByMeetupId(meetupId);
+        return new Meetup(data, registrations);
     }
 
     /**
      * 编辑约球（更新字段 + 保存）
      * @param cmd 编辑命令
      */
-    public void edit(String userId, Meetup meetup, PublishCmd cmd) {
+    public void edit(String userId, Meetup meetup, MeetupEditCmd cmd) {
         meetup.assertOwner(userId);
 
         // 1. 更新字段（MapStruct）
@@ -68,7 +76,7 @@ public class MeetupDomainService {
     /**
      * 构建约球聚合根（含创建者报名）并一次性持久化
      */
-    public void add(String userId, PublishCmd cmd) {
+    public void add(String userId, MeetupPublishCmd cmd) {
         // 1. 通过聚合根工厂创建（自动将创建者加入报名表）
         Meetup meetup = MeetupFactory.create(cmd, userId);
 
@@ -86,7 +94,7 @@ public class MeetupDomainService {
      */
     public void close(String userId, Meetup meetup) {
         // 1. 权限和状态校验
-        meetupAssertService.assertClose(userId, meetup);
+        meetupPolicy.assertClose(userId, meetup);
 
         // 2. 更新状态
         meetup.getData().setStatus(MeetupStatusEnum.CLOSED);
@@ -110,33 +118,6 @@ public class MeetupDomainService {
         } else {
             return penaltyUnder6h;
         }
-    }
-
-    /**
-     * 计算操作状态
-     */
-    public ActionStateEnum calculateActionState(Meetup meetup, String currentUserId, int lockMinutes) {
-        MeetupStatusEnum realStatus = meetup.getRealStatus();
-        boolean isCreator = meetup.isCreator(currentUserId);
-
-        // 终态判断
-        if (realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.CLOSED) {
-            return isCreator ? ActionStateEnum.OWNER_DISABLED : ActionStateEnum.DISABLED;
-        }
-
-        // 创建人视角
-        if (isCreator) {
-            boolean locked = LocalDateTime.now().isAfter(meetup.getData().getStartTime().minusMinutes(lockMinutes));
-            return locked ? ActionStateEnum.OWNER_EDIT_LOCKED : ActionStateEnum.OWNER_EDITABLE;
-        }
-
-        // 访客视角
-        if (realStatus == MeetupStatusEnum.FULL) {
-            return ActionStateEnum.FULL;
-        }
-        return meetup.getData().getJoinMode() == JoinModeEnum.DIRECT
-                ? ActionStateEnum.JOIN_DIRECT
-                : ActionStateEnum.APPLY_APPROVAL;
     }
 
     /**
@@ -165,36 +146,7 @@ public class MeetupDomainService {
 
     // ======================== 报名领域逻辑（需要 Gateway 的部分） ========================
 
-    /**
-     * 信誉分门槛校验
-     * @param reputationScore 用户信誉分，可为 null
-     */
-    public void checkReputationScore(BigDecimal reputationScore) {
-        if (reputationScore == null) {
-            return;
-        }
-        BigDecimal threshold = new BigDecimal(SystemConfig.getString("meetup.join.min_reputation_score", "30"));
-        if (reputationScore.compareTo(threshold) < 0) {
-            throw new BusinessException(BizErrorCode.LOW_REPUTATION_BANNED);
-        }
-    }
 
-    /**
-     * 报名时间冲突检测
-     */
-    public void checkTimeConflict(String userId, LocalDateTime startTime, LocalDateTime endTime,
-                                  String excludeMeetupId) {
-        int bufferMinutes = SystemConfig.getInt("meetup.conflict.buffer_minutes", 30);
-        LocalDateTime conflictStart = startTime.minusMinutes(bufferMinutes);
-        LocalDateTime conflictEnd = endTime.plusMinutes(bufferMinutes);
-
-        List<RegistrationData> conflicts = registrationGateway.findConflict(
-                userId, conflictStart, conflictEnd, excludeMeetupId);
-
-        if (!conflicts.isEmpty()) {
-            throw new BusinessException(BizErrorCode.TIME_CONFLICT);
-        }
-    }
 
     /**
      * 水平匹配判断（纯领域算法）
@@ -274,28 +226,4 @@ public class MeetupDomainService {
                 ? ActionStateEnum.JOIN_DIRECT : ActionStateEnum.APPLY_APPROVAL;
     }
 
-    /**
-     * 计算退出扣分
-     * @return 扣分值，0 表示不扣分
-     */
-    public int calculateQuitPenalty(MeetupData data, String userId) {
-        // 创建人退出不扣分
-        if (userId.equals(data.getCreatorId())) {
-            return 0;
-        }
-        long hoursUntilStart = Duration.between(LocalDateTime.now(), data.getStartTime()).toHours();
-        int thresholdHours = SystemConfig.getInt("meetup.quit.penalty_threshold_hours", 6);
-        if (hoursUntilStart < thresholdHours) {
-            return SystemConfig.getInt("meetup.quit.penalty_under_6h", 25);
-        }
-        return 0;
-    }
-
-    /**
-     * 计算结束时间
-     */
-    private LocalDateTime calculateEndTime(LocalDateTime startTime, BigDecimal duration) {
-        return startTime.plusHours(duration.longValue())
-                .plusMinutes((duration.remainder(BigDecimal.ONE).multiply(new BigDecimal("60"))).longValue());
-    }
 }

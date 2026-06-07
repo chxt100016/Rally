@@ -1,10 +1,15 @@
 package com.rally.domain.auth.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * 业务错误码枚举
  * 前缀 1xxxx 表示认证相关错误
  * 前缀 2xxxx 表示业务相关错误
  */
+@Getter
+@AllArgsConstructor
 public enum BizErrorCode {
 
     // ========== 认证相关 10001-19999 ==========
@@ -69,16 +74,4 @@ public enum BizErrorCode {
     private final int code;
     private final String message;
 
-    BizErrorCode(int code, String message) {
-        this.code = code;
-        this.message = message;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 }

@@ -25,13 +25,6 @@ public interface MeetupGateway {
     MeetupData findByBizId(String bizId);
 
     /**
-     * 根据 bizId 查询聚合根（包含报名记录）
-     * @param bizId 约球 ID
-     * @return Meetup 聚合根，不存在时抛出异常
-     */
-    Meetup findMeetupByBizId(String bizId);
-
-    /**
      * 根据 bizId 列表批量查询
      */
     List<MeetupData> findByBizIds(List<String> bizIds);

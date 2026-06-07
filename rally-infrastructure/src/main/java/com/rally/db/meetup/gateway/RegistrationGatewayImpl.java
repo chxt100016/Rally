@@ -101,4 +101,9 @@ public class RegistrationGatewayImpl implements RegistrationGateway {
     public int countApprovedByMeetupId(String meetupId) {
         return registrationRepository.countApprovedByMeetupId(meetupId);
     }
+
+    @Override
+    public List<RegistrationData> findByMeetupId(String meetupId) {
+        return MAPPER.toRegistrationDataList(registrationRepository.findByMeetupId(meetupId));
+    }
 }

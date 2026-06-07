@@ -75,17 +75,6 @@ public class MeetupGatewayImpl implements MeetupGateway {
         return MeetupConvertMapper.INSTANCE.toMeetupData(po);
     }
 
-    @Override
-    public Meetup findMeetupByBizId(String bizId) {
-        MeetupPO meetupPO = meetupRepository.findByBizId(bizId);
-        if (meetupPO == null) {
-            return null;
-        }
-        MeetupData meetupData = MeetupConvertMapper.INSTANCE.toMeetupData(meetupPO);
-        List<RegistrationPO> registrationPOList = registrationRepository.findByMeetupId(bizId);
-        List<RegistrationData> registrationDataList = MeetupConvertMapper.INSTANCE.toRegistrationDataList(registrationPOList);
-        return new Meetup(meetupData, registrationDataList);
-    }
 
     @Override
     public List<MeetupData> findByBizIds(List<String> bizIds) {
