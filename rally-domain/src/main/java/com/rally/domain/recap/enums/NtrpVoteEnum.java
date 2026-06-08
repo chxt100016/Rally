@@ -1,4 +1,4 @@
-package com.rally.domain.review.enums;
+package com.rally.domain.recap.enums;
 
 /**
  * NTRP 三元投票枚举

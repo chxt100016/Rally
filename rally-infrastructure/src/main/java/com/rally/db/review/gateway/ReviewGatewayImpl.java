@@ -3,8 +3,8 @@ package com.rally.db.review.gateway;
 import com.rally.db.review.convert.ReviewConvertMapper;
 import com.rally.db.review.entity.ReviewPO;
 import com.rally.db.review.repository.ReviewRepository;
-import com.rally.domain.review.gateway.ReviewGateway;
-import com.rally.domain.review.model.ReviewData;
+import com.rally.domain.recap.gateway.ReviewGateway;
+import com.rally.domain.recap.model.ReviewData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -75,5 +75,10 @@ public class ReviewGatewayImpl implements ReviewGateway {
     @Override
     public List<String> listDistinctValuesByToUserAndType(String toUserId, String reviewType) {
         return reviewRepository.listDistinctValuesByToUserAndType(toUserId, reviewType);
+    }
+
+    @Override
+    public List<ReviewData> listAllByToUser(String toUserId) {
+        return MAPPER.toReviewDataList(reviewRepository.listAllByToUser(toUserId));
     }
 }

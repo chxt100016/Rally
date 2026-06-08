@@ -2,10 +2,10 @@ package com.rally.db.review.convert;
 
 import com.rally.db.review.entity.ReviewPO;
 import com.rally.db.review.entity.ScoreRecordPO;
-import com.rally.domain.review.enums.ReviewTypeEnum;
-import com.rally.domain.review.enums.SetFormatEnum;
-import com.rally.domain.review.model.ReviewData;
-import com.rally.domain.review.model.ScoreRecordData;
+import com.rally.domain.recap.enums.ReviewTypeEnum;
+import com.rally.domain.recap.enums.SetFormatEnum;
+import com.rally.domain.recap.model.ReviewData;
+import com.rally.domain.recap.model.ScoreRecordData;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

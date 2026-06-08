@@ -1,4 +1,4 @@
-package com.rally.domain.review.enums;
+package com.rally.domain.recap.enums;
 
 /**
  * 评价维度枚举

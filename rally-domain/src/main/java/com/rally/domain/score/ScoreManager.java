@@ -1,8 +1,8 @@
 package com.rally.domain.score;
 
 import com.rally.domain.meetup.gateway.MeetupGateway;
-import com.rally.domain.review.gateway.ReviewGateway;
-import com.rally.domain.review.gateway.ScoreRecordGateway;
+import com.rally.domain.recap.gateway.ReviewGateway;
+import com.rally.domain.recap.gateway.ScoreRecordGateway;
 import com.rally.domain.score.gateway.ScoreStatusGateway;
 import com.rally.domain.score.model.*;
 import com.rally.domain.score.strategy.CalibrationStrategy;

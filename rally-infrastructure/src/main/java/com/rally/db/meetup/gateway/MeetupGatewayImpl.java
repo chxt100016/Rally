@@ -172,4 +172,9 @@ public class MeetupGatewayImpl implements MeetupGateway {
     public long countByCreatorId(String userId) {
         return meetupRepository.countByCreatorId(userId);
     }
+
+    @Override
+    public long countFinishedByCreatorId(String userId) {
+        return meetupRepository.countFinishedByCreatorId(userId);
+    }
 }

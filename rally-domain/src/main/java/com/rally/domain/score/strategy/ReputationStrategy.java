@@ -1,9 +1,9 @@
 package com.rally.domain.score.strategy;
 
 import com.rally.domain.system.SystemConfig;
-import com.rally.domain.review.enums.AttendanceEnum;
-import com.rally.domain.review.gateway.ReviewGateway;
-import com.rally.domain.review.model.ReviewData;
+import com.rally.domain.recap.enums.AttendanceEnum;
+import com.rally.domain.recap.gateway.ReviewGateway;
+import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.model.ScoreChange;
 import com.rally.domain.score.model.ScoreContext;

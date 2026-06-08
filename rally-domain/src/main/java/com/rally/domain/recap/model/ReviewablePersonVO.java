@@ -1,7 +1,7 @@
-package com.rally.domain.review.model;
+package com.rally.domain.recap.model;
 
-import com.rally.domain.review.enums.AttendanceEnum;
-import com.rally.domain.review.enums.NtrpVoteEnum;
+import com.rally.domain.recap.enums.AttendanceEnum;
+import com.rally.domain.recap.enums.NtrpVoteEnum;
 import lombok.Data;
 
 import java.util.List;

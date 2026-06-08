@@ -8,13 +8,13 @@ import com.rally.db.review.repository.ScoreRecordRepository;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.MeetupData;
-import com.rally.domain.recap.enums.RecapTypeEnum;
+import com.rally.domain.recap.enums.ReviewTypeEnum;
 import com.rally.domain.recap.gateway.RecapGateway;
 import com.rally.domain.recap.model.RecapSubmitCmd;
 import com.rally.domain.recap.model.RecapFactory;
 import com.rally.domain.recap.model.ScoreConflictException;
-import com.rally.domain.review.model.ReviewData;
-import com.rally.domain.review.model.ScoreRecordData;
+import com.rally.domain.recap.model.ReviewData;
+import com.rally.domain.recap.model.ScoreRecordData;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -216,6 +216,7 @@ public class RecapGatewayImpl implements RecapGateway {
      */
     private ScoreRecordPO buildScorePO(String meetupId, String userId, RecapSubmitCmd.ScoreItem item) {
         ScoreRecordPO po = new ScoreRecordPO();
+        po.setBizId(IdWorker.getIdStr());
         po.setRallyMeetupId(meetupId);
         po.setSetNumber(item.getSetNum());
         po.setSetFormat(item.getSetFormat());

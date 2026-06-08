@@ -139,4 +139,13 @@ public class ReviewRepository {
                 .eq(ReviewPO::getReviewType, reviewType)
                 .remove();
     }
+
+    /**
+     * 查询某人收到的全部评价（一次查库，聚合计算总数+标签用）
+     */
+    public List<ReviewPO> listAllByToUser(String toUserId) {
+        return reviewService.lambdaQuery()
+                .eq(ReviewPO::getToUserId, toUserId)
+                .list();
+    }
 }

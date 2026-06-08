@@ -27,7 +27,6 @@ public class MeetupQueryDomainService {
 
     private final MeetupGateway meetupGateway;
     private final NearbyGateway nearbyGateway;
-    private final RegistrationGateway registrationGateway;
     private final MeetupQueryPlanner queryPlanner;
 
     /**

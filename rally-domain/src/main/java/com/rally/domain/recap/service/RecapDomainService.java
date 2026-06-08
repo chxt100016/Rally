@@ -9,8 +9,8 @@ import com.rally.domain.recap.model.Recap;
 import com.rally.domain.recap.model.RecapSubmitCmd;
 import com.rally.domain.recap.model.RecapFactory;
 import com.rally.domain.recap.model.ScoreConflictException;
-import com.rally.domain.review.model.ReviewData;
-import com.rally.domain.review.model.ScoreRecordData;
+import com.rally.domain.recap.model.ReviewData;
+import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.score.ScoreManager;
 import com.rally.domain.system.SystemConfig;
 import lombok.RequiredArgsConstructor;
@@ -93,10 +93,13 @@ public class RecapDomainService {
      */
     @Transactional
     public void submitReviews(Recap recap, List<RecapSubmitCmd.ReviewItem> targetReviews) {
-        recapGateway.submitReviews(
-                recap.getMeetupId(), recap.getUserId(),
-                new ArrayList<>(recap.getMyReviews().values()),
-                targetReviews);
+        // 校验每条评价的 value 是否在对应类型枚举范围内
+        if (targetReviews != null) {
+            for (RecapSubmitCmd.ReviewItem item : targetReviews) {
+                RecapSubmitCmd.assertValidReviewValue(item.getType(), item.getValue());
+            }
+        }
+        recapGateway.submitReviews(recap.getMeetupId(), recap.getUserId(), new ArrayList<>(recap.getMyReviews().values()), targetReviews);
     }
 
     /**

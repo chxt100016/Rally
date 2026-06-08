@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
  * 赛后收集接口：提交、详情
  */
 @RestController
-@RequestMapping("/recap")
+@RequestMapping("/wechat/recap")
 public class RecapController {
 
     @Resource

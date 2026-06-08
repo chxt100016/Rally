@@ -112,4 +112,9 @@ public interface MeetupGateway {
      * @return 发布次数
      */
     long countByCreatorId(String userId);
+
+    /**
+     * 统计用户已完成的约球次数（status=FINISHED）
+     */
+    long countFinishedByCreatorId(String userId);
 }

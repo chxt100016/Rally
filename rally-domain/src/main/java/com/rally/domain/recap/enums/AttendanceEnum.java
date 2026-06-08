@@ -1,4 +1,4 @@
-package com.rally.domain.review.enums;
+package com.rally.domain.recap.enums;
 
 /**
  * 出勤标签枚举

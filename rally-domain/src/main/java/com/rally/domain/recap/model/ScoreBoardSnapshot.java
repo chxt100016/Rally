@@ -1,6 +1,6 @@
 package com.rally.domain.recap.model;
 
-import com.rally.domain.review.model.ScoreRecordData;
+import com.rally.domain.recap.model.ScoreRecordData;
 import lombok.Data;
 
 import java.util.List;

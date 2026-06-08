@@ -3,8 +3,8 @@ package com.rally.domain.recap.model;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.RegistrationData;
-import com.rally.domain.review.model.ReviewData;
-import com.rally.domain.review.model.ScoreRecordData;
+import com.rally.domain.recap.model.ReviewData;
+import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.utils.Assert;
 import lombok.Getter;
 

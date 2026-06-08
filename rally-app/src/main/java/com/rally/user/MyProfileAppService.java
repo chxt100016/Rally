@@ -2,8 +2,9 @@ package com.rally.user;
 
 import com.rally.utils.UserContext;
 import com.rally.config.property.QiniuConfiguration;
-import com.rally.domain.review.UserReviewService;
-
+import com.rally.domain.meetup.service.MeetupDomainService;
+import com.rally.domain.recap.UserReviewDomainService;
+import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.ProfileStatusEnum;
@@ -30,7 +31,10 @@ public class MyProfileAppService {
     private UserProfileService userProfileService;
 
     @Resource
-    private UserReviewService userReviewService;
+    private MeetupDomainService meetupDomainService;
+
+    @Resource
+    private UserReviewDomainService userReviewDomainService;
 
     /**
      * 我的档案（新版）
@@ -44,7 +48,7 @@ public class MyProfileAppService {
         return new MyProfileDTO()
                 .setStatus(userProfile.getStatus())
                 .setUser(buildUserDTO(userProfile.getUser()))
-                .setMeetup(isTBC ? null : buildMeetupDTO())
+                .setMeetup(isTBC ? null : buildMeetupDTO(userId))
                 .setReview(isTBC ? null : buildReviewDTO(userId))
                 .setLevel(isTBC ? null : buildLevelDTO(userProfile))
                 .setScore(isTBC ? null : buildScoreDTO(userProfile.getProfile()))
@@ -53,18 +57,18 @@ public class MyProfileAppService {
 
     // ========== 各子 DTO 构建方法 ==========
 
-    /** 构建约球信息 DTO（暂时默认99） */
-    private MyProfileMeetupDTO buildMeetupDTO() {
-        return new MyProfileMeetupDTO().setCompletedCount(99);
+    /** 构建约球信息 DTO（通过领域服务查询已完成约球次数） */
+    private MyProfileMeetupDTO buildMeetupDTO(String userId) {
+        long completedCount = meetupDomainService.countFinishedMeetups(userId);
+        return new MyProfileMeetupDTO().setCompletedCount((int) completedCount);
     }
 
-    /** 构建评价信息 DTO（查询领域服务获取评价总数和标签） */
+    /** 构建评价信息 DTO（一次查库聚合评价总数+标签） */
     private MyProfileReviewDTO buildReviewDTO(String userId) {
-        int reviewTotal = userReviewService.countByToUser(userId);
-        List<String> topTags = userReviewService.getTopTags(userId, 2);
+        ReviewSummaryDTO summary = userReviewDomainService.getReviewSummary(userId, 2);
         return new MyProfileReviewDTO()
-                .setTotal(reviewTotal)
-                .setTags(topTags.stream()
+                .setTotal(summary.total())
+                .setTags(summary.topTags().stream()
                         .map(tag -> new ReviewTagDTO().setName(tag))
                         .collect(Collectors.toList()));
     }
@@ -139,9 +143,7 @@ public class MyProfileAppService {
     }
 
     /** 构建单个评分明细项 */
-    private ScoreItemDTO buildOneScoreItem(String name, String key, BigDecimal score,
-                                           String weightConfigKey, int defaultWeight,
-                                           String infoConfigKey, String defaultInfo) {
+    private ScoreItemDTO buildOneScoreItem(String name, String key, BigDecimal score, String weightConfigKey, int defaultWeight, String infoConfigKey, String defaultInfo) {
         return new ScoreItemDTO()
                 .setName(name)
                 .setKey(key)

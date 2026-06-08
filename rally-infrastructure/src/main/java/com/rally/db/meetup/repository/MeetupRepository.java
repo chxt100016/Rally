@@ -248,4 +248,14 @@ public class MeetupRepository {
                 .eq(MeetupPO::getCreatorId, userId)
                 .count();
     }
+
+    /**
+     * 统计用户已完成的约球次数（status=FINISHED）
+     */
+    public long countFinishedByCreatorId(String userId) {
+        return meetupService.lambdaQuery()
+                .eq(MeetupPO::getCreatorId, userId)
+                .eq(MeetupPO::getStatus, "FINISHED")
+                .count();
+    }
 }

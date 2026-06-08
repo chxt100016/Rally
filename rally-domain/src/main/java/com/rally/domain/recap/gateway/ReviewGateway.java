@@ -1,6 +1,6 @@
-package com.rally.domain.review.gateway;
+package com.rally.domain.recap.gateway;
 
-import com.rally.domain.review.model.ReviewData;
+import com.rally.domain.recap.model.ReviewData;
 
 import java.util.List;
 
@@ -41,4 +41,9 @@ public interface ReviewGateway {
      * 查询某人收到的指定维度指定值的评价（标签推荐用）
      */
     List<String> listDistinctValuesByToUserAndType(String toUserId, String reviewType);
+
+    /**
+     * 查询某人收到的全部评价（一次查库，聚合计算总数+标签用）
+     */
+    List<ReviewData> listAllByToUser(String toUserId);
 }

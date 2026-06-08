@@ -1,4 +1,4 @@
-package com.rally.domain.review.model;
+package com.rally.domain.recap.model;
 
 import lombok.Data;
 

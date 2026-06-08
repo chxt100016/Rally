@@ -1,6 +1,6 @@
-package com.rally.domain.review.gateway;
+package com.rally.domain.recap.gateway;
 
-import com.rally.domain.review.model.ScoreRecordData;
+import com.rally.domain.recap.model.ScoreRecordData;
 
 import java.util.List;
 

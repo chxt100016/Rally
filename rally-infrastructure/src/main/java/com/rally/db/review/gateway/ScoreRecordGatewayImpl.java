@@ -3,8 +3,8 @@ package com.rally.db.review.gateway;
 import com.rally.db.review.convert.ReviewConvertMapper;
 import com.rally.db.review.entity.ScoreRecordPO;
 import com.rally.db.review.repository.ScoreRecordRepository;
-import com.rally.domain.review.gateway.ScoreRecordGateway;
-import com.rally.domain.review.model.ScoreRecordData;
+import com.rally.domain.recap.gateway.ScoreRecordGateway;
+import com.rally.domain.recap.model.ScoreRecordData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

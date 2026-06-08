@@ -1,6 +1,6 @@
-package com.rally.domain.review.model;
+package com.rally.domain.recap.model;
 
-import com.rally.domain.review.enums.ReviewTypeEnum;
+import com.rally.domain.recap.enums.ReviewTypeEnum;
 import lombok.Data;
 
 import java.time.LocalDateTime;

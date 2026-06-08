@@ -74,7 +74,8 @@ public enum BizErrorCode {
     // ========== 赛后收集域 43001-43999 ==========
     RECAP_NOT_FOUND(43001, "赛后收集数据不存在"),
     RECAP_SCORE_CONFLICT(43002, "比分已被其他参与者更新，请刷新后重试"),
-    RECAP_REVIEW_INVALID_TYPE(43003, "评价类型不合法");
+    RECAP_REVIEW_INVALID_TYPE(43003, "评价类型不合法"),
+    RECAP_REVIEW_INVALID_VALUE(43004, "评价值不合法");
 
     private final int code;
     private final String message;
