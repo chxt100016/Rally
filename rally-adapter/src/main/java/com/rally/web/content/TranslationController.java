@@ -1,4 +1,4 @@
-package com.rally.web.translation;
+package com.rally.web.content;
 
 import com.rally.domain.tennis.model.Result;
 import com.rally.domain.translation.TranslationPromptBuilder;
