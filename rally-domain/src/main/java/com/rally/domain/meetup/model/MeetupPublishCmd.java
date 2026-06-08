@@ -72,9 +72,15 @@ public class MeetupPublishCmd {
     @NotNull(message = "请填写水平限制类型")
     private LevelModeEnum levelMode;
 
-    /** 水平值；RANGE 模式格式 "min:max"，其余模式为单值 */
-    @NotBlank(message = "请填写水平值")
-    private String levelValue;
+    /** 水平最小值，RANGE/EXACT/ABOVE 必填 */
+    @DecimalMin(value = "1.5", message = "水平最小值范围为1.5~7.0")
+    @DecimalMax(value = "7.0", message = "水平最小值范围为1.5~7.0")
+    private BigDecimal levelMin;
+
+    /** 水平最大值，RANGE/EXACT/BELOW 必填 */
+    @DecimalMin(value = "1.5", message = "水平最大值范围为1.5~7.0")
+    @DecimalMax(value = "7.0", message = "水平最大值范围为1.5~7.0")
+    private BigDecimal levelMax;
 
     /** 性别限制 */
     @NotNull(message = "请选择性别限制")

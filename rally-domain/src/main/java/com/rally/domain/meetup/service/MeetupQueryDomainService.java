@@ -82,7 +82,7 @@ public class MeetupQueryDomainService {
         List<MeetupData> sortedData = nearbyIds.stream()
                 .filter(dataMap::containsKey)
                 .map(dataMap::get)
-                .collect(Collectors.toList());
+                .toList();
 
         // 5. 内存分页
         int start = (query.getPageNo() - 1) * query.getPageSize();
@@ -113,23 +113,5 @@ public class MeetupQueryDomainService {
         return new PageDTO<>(cardList, pageResult.getTotal(), pageResult.getHasMore());
     }
 
-    /**
-     * 查询约球详情（核心数据）
-     * @param meetupId 约球ID
-     * @return 约球数据
-     */
-    public MeetupData getDetail(String meetupId) {
-        MeetupData data = meetupGateway.findByBizId(meetupId);
-        Assert.notNull(data, BizErrorCode.MEETUP_NOT_FOUND);
-        return data;
-    }
 
-    /**
-     * 查询已批准的参与者 userId 列表（含创建者）
-     * @param meetupId 约球ID
-     * @return 参与者 userId 列表
-     */
-    public List<String> listParticipantUserIds(String meetupId) {
-        return registrationGateway.listApprovedUserIds(meetupId);
-    }
 }

@@ -80,6 +80,11 @@ public class Meetup {
                 .count();
     }
 
+    /** 获取创建人 userId */
+    public String getCreatorId() {
+        return data.getCreatorId();
+    }
+
     /** 是否为创建人 */
     public boolean isCreator(String userId) {
         return userId.equals(data.getCreatorId());
@@ -143,9 +148,9 @@ public class Meetup {
      * 报名（包含校验 + 创建报名记录）
      * @param userProfile 用户档案领域对象
      * @param autoWithdrawAt 自动撤回时间，可为 null
-     * @return 报名结果和报名记录
+     * @return 新增的报名记录
      */
-    public JoinResult join(UserProfile userProfile, LocalDateTime autoWithdrawAt) {
+    public RegistrationData join(UserProfile userProfile, LocalDateTime autoWithdrawAt) {
         // 1. 校验
         assertCanJoin(userProfile);
 
@@ -156,18 +161,11 @@ public class Meetup {
         registration.setExpiresAt(autoWithdrawAt);
 
         // 3. 根据加入模式设置状态
-        JoinResult result;
-        if (data.getJoinMode() == JoinModeEnum.DIRECT) {
-            registration.setStatus(RegistrationStatusEnum.APPROVED);
-            result = JoinResult.APPROVED;
-        } else {
-            registration.setStatus(RegistrationStatusEnum.PENDING);
-            result = JoinResult.PENDING;
-        }
+        registration.setStatus(data.getJoinMode() == JoinModeEnum.DIRECT ? RegistrationStatusEnum.APPROVED : RegistrationStatusEnum.PENDING);
 
         this.registrations.add(registration);
 
-        return result;
+        return registration;
     }
 
     /**
@@ -346,9 +344,12 @@ public class Meetup {
         MeetupStatusEnum realStatus = getRealStatus();
         boolean isCreator = isCreator(currentUserId);
 
-        // 终态：全部置灰
-        if (realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.CLOSED) {
-            return isCreator ? ActionStateEnum.OWNER_DISABLED : ActionStateEnum.DISABLED;
+        // 终态：全部置灰（不区分创建人/访客）
+        if (realStatus == MeetupStatusEnum.FINISHED) {
+            return ActionStateEnum.FINISHED;
+        }
+        if (realStatus == MeetupStatusEnum.CLOSED) {
+            return ActionStateEnum.CLOSED;
         }
 
         // 创建人视角
@@ -377,36 +378,33 @@ public class Meetup {
                 ? ActionStateEnum.JOIN_DIRECT : ActionStateEnum.APPLY_APPROVAL;
     }
 
-    // ======================== 参与者 userId 提取 ========================
+
 
     /**
-     * 获取所有参与者 userId（创建者 + 已批准报名者），去重
-     * @return 去重后的 userId 列表
+     * 按视角获取参与者 userId 列表（排除创建人）
+     * <ul>
+     *   <li>创建人视角：已批准 + 待审批</li>
+     *   <li>非创建人视角：仅已批准</li>
+     * </ul>
+     * @param userId 当前用户 ID，内部判断是否为创建人
+     * @return 参与者 userId 列表
      */
-    public List<String> getAllParticipantUserIds() {
+    public List<String> getParticipantUserIds(String userId) {
         List<String> userIds = new ArrayList<>();
-        // 创建者
-        if (data.getCreatorId() != null) {
-            userIds.add(data.getCreatorId());
-        }
-        // 已批准的报名者
+        // 已批准的报名者（排除创建人）
         registrations.stream()
                 .filter(r -> r.getStatus() == RegistrationStatusEnum.APPROVED)
                 .map(RegistrationData::getUserId)
-                .filter(uid -> !userIds.contains(uid))
+                .filter(uid -> !uid.equals(data.getCreatorId()))
                 .forEach(userIds::add);
+        // 创建人视角额外包含待审批
+        if (isCreator(userId)) {
+            registrations.stream()
+                    .filter(r -> r.getStatus() == RegistrationStatusEnum.PENDING)
+                    .map(RegistrationData::getUserId)
+                    .forEach(userIds::add);
+        }
         return userIds;
-    }
-
-    /**
-     * 获取待审批的报名者 userId 列表
-     * @return 待审批用户 ID 列表
-     */
-    public List<String> getPendingUserIds() {
-        return registrations.stream()
-                .filter(r -> r.getStatus() == RegistrationStatusEnum.PENDING)
-                .map(RegistrationData::getUserId)
-                .toList();
     }
 
 }

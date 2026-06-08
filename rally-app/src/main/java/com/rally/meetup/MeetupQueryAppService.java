@@ -1,7 +1,7 @@
 package com.rally.meetup;
 
 import com.rally.utils.UserContext;
-import com.rally.domain.meetup.enums.MeetupStatusEnum;
+import com.rally.domain.meetup.enums.ActionStateEnum;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.*;
@@ -36,7 +36,7 @@ public class MeetupQueryAppService {
     private final UserProfileService userProfileService;
     private final RecapDomainService recapDomainService;
 
-    private static final MeetupAppConvertMapper MAPPER = MeetupAppConvertMapper.INSTANCE;
+
 
     /**
      * 约球列表查询（按时间/距离）
@@ -58,31 +58,20 @@ public class MeetupQueryAppService {
         // 1 获取聚合根（含报名记录）
         Meetup meetup = meetupDomainService.get(meetupId);
         MeetupData data = meetup.getData();
-        boolean isCreator = meetup.isCreator(currentUserId);
 
-        // 2 批量查询所有参与者用户信息
-        List<String> allUserIds = meetup.getAllParticipantUserIds();
-        List<String> pendingUserIds = meetup.getPendingUserIds();
-        List<String> queryUserIds = new ArrayList<>(allUserIds);
-        pendingUserIds.stream().filter(uid -> !queryUserIds.contains(uid)).forEach(queryUserIds::add);
-        Map<String, UserProfile> profileMap = userProfileService.listProfiles(queryUserIds);
+        // 2 按视角获取参与者列表，批量查询用户信息
+        List<String> participantUserIds = meetup.getParticipantUserIds(currentUserId);
+        List<String> allQueryUserIds = new ArrayList<>(participantUserIds);
+        allQueryUserIds.add(meetup.getCreatorId());
+        Map<String, UserProfile> profileMap = userProfileService.listProfiles(allQueryUserIds);
 
-        MeetupDetailDTO detailDTO = new MeetupDetailDTO();
-        detailDTO.setMeetup(MAPPER.toMeetupDTO(data));
-        detailDTO.setActionState(meetup.getActionState(currentUserId));
-        detailDTO.setCreator(buildCreatorDTO(data.getCreatorId(), profileMap));
-
-        // 3 构建参与者列表：创建人视角包含待审批，非创建人只看已批准
-        if (isCreator) {
-            detailDTO.setParticipants(buildCreatorViewParticipantVOList(meetup, profileMap));
-        } else {
-            detailDTO.setParticipants(buildParticipantVOList(allUserIds, data.getCreatorId(), profileMap));
-        }
-
-        if (data.getStatus() == MeetupStatusEnum.FINISHED) {
-            detailDTO.setRecap(buildRecap(meetupId));
-        }
-        return detailDTO;
+        ActionStateEnum actionState = meetup.getActionState(currentUserId);
+        return new MeetupDetailDTO()
+                .setMeetup(MeetupAppConvertMapper.INSTANCE.toMeetupDTO(data))
+                .setActionState(actionState)
+                .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
+                .setParticipants(buildParticipantVOList(meetup, participantUserIds, profileMap))
+                .setRecap(actionState == ActionStateEnum.FINISHED ? buildRecap(meetupId) : null);
     }
 
 
@@ -108,34 +97,21 @@ public class MeetupQueryAppService {
     }
 
     /**
-     * 构建参与者列表（排除创建人，无状态）
+     * 构建参与者列表（统一方法，展示报名状态）
+     * @param participantUserIds 领域层按视角返回的参与者 userId 列表
      */
-    private List<ParticipantDTO> buildParticipantVOList(List<String> allUserIds, String creatorId,
-                                                        Map<String, UserProfile> profileMap) {
-        return allUserIds.stream()
-                .filter(uid -> !uid.equals(creatorId))
-                .map(uid -> toParticipantVO(uid, profileMap, null))
+    private List<ParticipantDTO> buildParticipantVOList(Meetup meetup, List<String> participantUserIds, Map<String, UserProfile> profileMap) {
+        return participantUserIds.stream()
+                .map(uid -> toParticipantVO(uid, profileMap, resolveStatus(meetup, uid)))
                 .toList();
     }
 
-    /**
-     * 创建人视角：构建参与者列表（已批准 + 待审批，排除创建人，带状态）
-     */
-    private List<ParticipantDTO> buildCreatorViewParticipantVOList(Meetup meetup, Map<String, UserProfile> profileMap) {
-        List<ParticipantDTO> result = new ArrayList<>();
-        String creatorId = meetup.getData().getCreatorId();
-        // 已批准
-        meetup.getRegistrations().stream()
-                .filter(r -> r.getStatus() == RegistrationStatusEnum.APPROVED)
-                .map(RegistrationData::getUserId)
-                .filter(uid -> !uid.equals(creatorId))
-                .forEach(uid -> result.add(toParticipantVO(uid, profileMap, RegistrationStatusEnum.APPROVED)));
-        // 待审批
-        meetup.getRegistrations().stream()
-                .filter(r -> r.getStatus() == RegistrationStatusEnum.PENDING)
-                .map(RegistrationData::getUserId)
-                .forEach(uid -> result.add(toParticipantVO(uid, profileMap, RegistrationStatusEnum.PENDING)));
-        return result;
+    /** 查询用户在该约球中的报名状态（用于创建人视角展示） */
+    private RegistrationStatusEnum resolveStatus(Meetup meetup, String userId) {
+        return meetup.getRegistrations().stream()
+                .filter(r -> userId.equals(r.getUserId()))
+                .map(RegistrationData::getStatus)
+                .findFirst().orElse(null);
     }
 
     /**

@@ -37,7 +37,8 @@ public class MeetupPO {
     private Double courtLat;
 
     private String levelMode;
-    private String levelValue;
+    private BigDecimal levelMin;
+    private BigDecimal levelMax;
     private String genderLimit;
     private String joinMode;
     /** 费用明细 JSON */

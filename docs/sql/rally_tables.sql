@@ -188,7 +188,8 @@ CREATE TABLE `rally_meetup` (
   `court_lat`       DOUBLE       NOT NULL COMMENT '场地纬度',
 
   `level_mode`      varchar(8) DEFAULT 'exact' COMMENT '水平要求模式',
-  `level_value`     VARCHAR(32)  DEFAULT NULL COMMENT '水平值，多值用冒号分割，如 range 存 "3.0:4.0"，exact 存 "3.5"',
+  `level_min`       DECIMAL(3,1) DEFAULT NULL COMMENT '水平最小值，RANGE/EXACT/ABOVE 必填',
+  `level_max`       DECIMAL(3,1) DEFAULT NULL COMMENT '水平最大值，RANGE/EXACT/BELOW 必填',
   `gender_limit`    varchar(8) NOT NULL DEFAULT 'any' COMMENT '性别限制',
   `join_mode`       varchar(8) NOT NULL DEFAULT 'direct' COMMENT '加入模式：直接/审批',
   `cost_items`      JSON         DEFAULT NULL COMMENT '费用明细 [{name,totalAmount(分)}]，纯展示',
@@ -218,7 +219,6 @@ CREATE TABLE `rally_meetup_registration` (
   `update_time`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_biz_id` (`biz_id`),
-  UNIQUE KEY `uk_meetup_user_active` (`rally_meetup_id`, `user_id`) COMMENT '同人同场仅一条有效报名（撤回/拒绝后复报名见 §6.2 说明）',
   KEY `idx_user_status` (`user_id`, `status`) COMMENT '查我的报名 + 冲突检测',
   KEY `idx_meetup_status` (`rally_meetup_id`, `status`) COMMENT '审批列表'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='约球报名/注册表（记录所有参与者：创建者、等待审批、已通过等）';

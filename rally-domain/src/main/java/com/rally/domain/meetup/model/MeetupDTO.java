@@ -28,7 +28,8 @@ public class MeetupDTO {
     private Double courtLng;
     private Double courtLat;
     private LevelModeEnum levelMode;
-    private String levelValue;
+    private BigDecimal levelMin;
+    private BigDecimal levelMax;
     private GenderLimitEnum genderLimit;
     private JoinModeEnum joinMode;
     private List<CostItem> costItems;

@@ -76,44 +76,43 @@ public class MeetupPolicy {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "持续时长必须是0.5的倍数");
         }
 
-        // level 校验：1.5–7.0，步长 0.5
+        // level 校验：按模式校验必填 + 步长 0.5
         if (cmd.getLevelMode() != null) {
-            if (cmd.getLevelValue() == null || cmd.getLevelValue().isBlank()) {
-                throw new BusinessException(BizErrorCode.PARAM_ERROR, "请填写水平值");
-            }
-            if (cmd.getLevelMode() == LevelModeEnum.RANGE) {
-                String[] parts = cmd.getLevelValue().split(":");
-                if (parts.length != 2) {
-                    throw new BusinessException(BizErrorCode.PARAM_ERROR, "水平范围格式应为 min:max");
-                }
-                BigDecimal min = parseLevel(parts[0], "水平最小值");
-                BigDecimal max = parseLevel(parts[1], "水平最大值");
-                if (min.compareTo(max) > 0) {
-                    throw new BusinessException(BizErrorCode.PARAM_ERROR, "水平最小值不能大于最大值");
-                }
-            } else {
-                parseLevel(cmd.getLevelValue(), "水平值");
+            switch (cmd.getLevelMode()) {
+                case RANGE:
+                    if (cmd.getLevelMin() == null) throw new BusinessException(BizErrorCode.PARAM_ERROR, "请填写水平最小值");
+                    if (cmd.getLevelMax() == null) throw new BusinessException(BizErrorCode.PARAM_ERROR, "请填写水平最大值");
+                    validateLevelStep(cmd.getLevelMin(), "水平最小值");
+                    validateLevelStep(cmd.getLevelMax(), "水平最大值");
+                    if (cmd.getLevelMin().compareTo(cmd.getLevelMax()) > 0) {
+                        throw new BusinessException(BizErrorCode.PARAM_ERROR, "水平最小值不能大于最大值");
+                    }
+                    break;
+                case EXACT:
+                    if (cmd.getLevelMin() == null) throw new BusinessException(BizErrorCode.PARAM_ERROR, "请填写水平值");
+                    validateLevelStep(cmd.getLevelMin(), "水平值");
+                    // EXACT 模式：levelMax 未传时默认等于 levelMin
+                    if (cmd.getLevelMax() == null) cmd.setLevelMax(cmd.getLevelMin());
+                    break;
+                case ABOVE:
+                    if (cmd.getLevelMin() == null) throw new BusinessException(BizErrorCode.PARAM_ERROR, "请填写水平最小值");
+                    validateLevelStep(cmd.getLevelMin(), "水平最小值");
+                    break;
+                case BELOW:
+                    if (cmd.getLevelMax() == null) throw new BusinessException(BizErrorCode.PARAM_ERROR, "请填写水平最大值");
+                    validateLevelStep(cmd.getLevelMax(), "水平最大值");
+                    break;
             }
         }
     }
 
     /**
-     * 校验单个水平值：1.5–7.0，步长 0.5
+     * 校验水平值步长：必须是 0.5 的倍数
      */
-    private BigDecimal parseLevel(String value, String fieldName) {
-        BigDecimal level;
-        try {
-            level = new BigDecimal(value);
-        } catch (NumberFormatException e) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, fieldName + "格式不正确");
-        }
-        if (level.compareTo(new BigDecimal("1.5")) < 0 || level.compareTo(new BigDecimal("7.0")) > 0) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, fieldName + "范围为1.5~7.0");
-        }
+    private void validateLevelStep(BigDecimal level, String fieldName) {
         if (level.multiply(new BigDecimal("10")).remainder(new BigDecimal("5")).compareTo(BigDecimal.ZERO) != 0) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, fieldName + "步长为0.5");
         }
-        return level;
     }
 
     /**

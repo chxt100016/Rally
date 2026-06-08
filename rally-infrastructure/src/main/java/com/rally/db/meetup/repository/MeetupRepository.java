@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -178,31 +179,13 @@ public class MeetupRepository {
 
         // 水平筛选（判断查询范围与约球水平是否有交集）
         if (param.getLevelMin() != null && param.getLevelMax() != null) {
-            String queryMin = param.getLevelMin().toPlainString();
-            String queryMax = param.getLevelMax().toPlainString();
+            BigDecimal queryMin = param.getLevelMin();
+            BigDecimal queryMax = param.getLevelMax();
+            // 统一区间交集：约球的 [level_min, level_max] 与查询的 [queryMin, queryMax] 有重叠
+            // null 边界表示无限制（ABOVE 无 max，BELOW 无 min），跳过该侧比较
             wrapper.and(w -> w
-                    // RANGE 模式：levelValue 格式为 "min:max"，判断区间是否有交集
-                    .and(inner -> inner
-                            .eq(MeetupPO::getLevelMode, "RANGE")
-                            .apply("SUBSTRING_INDEX(level_value, ':', 1) <= {0}", queryMax)
-                            .apply("SUBSTRING_INDEX(level_value, ':', -1) >= {0}", queryMin)
-                    )
-                    // EXACT 模式：levelValue 为精确值，判断是否在查询范围内
-                    .or(inner -> inner
-                            .eq(MeetupPO::getLevelMode, "EXACT")
-                            .ge(MeetupPO::getLevelValue, queryMin)
-                            .le(MeetupPO::getLevelValue, queryMax)
-                    )
-                    // ABOVE 模式：levelValue 为下限，判断下限 <= queryMax
-                    .or(inner -> inner
-                            .eq(MeetupPO::getLevelMode, "ABOVE")
-                            .le(MeetupPO::getLevelValue, queryMax)
-                    )
-                    // BELOW 模式：levelValue 为上限，判断上限 >= queryMin
-                    .or(inner -> inner
-                            .eq(MeetupPO::getLevelMode, "BELOW")
-                            .ge(MeetupPO::getLevelValue, queryMin)
-                    )
+                    .and(inner -> inner.isNull(MeetupPO::getLevelMin).or(le -> le.le(MeetupPO::getLevelMin, queryMax)))
+                    .and(inner -> inner.isNull(MeetupPO::getLevelMax).or(ge -> ge.ge(MeetupPO::getLevelMax, queryMin)))
             );
         }
 
@@ -243,29 +226,13 @@ public class MeetupRepository {
             wrapper.le(MeetupPO::getStartTime, param.getStartTimeTo());
         }
 
-        // 水平筛选
+        // 水平筛选（判断查询范围与约球水平是否有交集）
         if (param.getLevelMin() != null && param.getLevelMax() != null) {
-            String queryMin = param.getLevelMin().toPlainString();
-            String queryMax = param.getLevelMax().toPlainString();
+            BigDecimal queryMin = param.getLevelMin();
+            BigDecimal queryMax = param.getLevelMax();
             wrapper.and(w -> w
-                    .and(inner -> inner
-                            .eq(MeetupPO::getLevelMode, "RANGE")
-                            .apply("SUBSTRING_INDEX(level_value, ':', 1) <= {0}", queryMax)
-                            .apply("SUBSTRING_INDEX(level_value, ':', -1) >= {0}", queryMin)
-                    )
-                    .or(inner -> inner
-                            .eq(MeetupPO::getLevelMode, "EXACT")
-                            .ge(MeetupPO::getLevelValue, queryMin)
-                            .le(MeetupPO::getLevelValue, queryMax)
-                    )
-                    .or(inner -> inner
-                            .eq(MeetupPO::getLevelMode, "ABOVE")
-                            .le(MeetupPO::getLevelValue, queryMax)
-                    )
-                    .or(inner -> inner
-                            .eq(MeetupPO::getLevelMode, "BELOW")
-                            .ge(MeetupPO::getLevelValue, queryMin)
-                    )
+                    .and(inner -> inner.isNull(MeetupPO::getLevelMin).or(le -> le.le(MeetupPO::getLevelMin, queryMax)))
+                    .and(inner -> inner.isNull(MeetupPO::getLevelMax).or(ge -> ge.ge(MeetupPO::getLevelMax, queryMin)))
             );
         }
 

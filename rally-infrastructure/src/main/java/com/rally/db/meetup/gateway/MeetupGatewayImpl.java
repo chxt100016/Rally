@@ -45,14 +45,14 @@ public class MeetupGatewayImpl implements MeetupGateway {
 
     @Override
     public void save(Meetup meetup) {
-        MeetupConvertMapper mapper = MeetupConvertMapper.INSTANCE;
+
 
         // 1. 通过聚合根计算 currentPlayers 并回写
         MeetupData data = meetup.getData();
         data.setCurrentPlayers(meetup.countApprovedPlayers());
 
         // 2. 保存约球主表
-        MeetupPO meetupPO = mapper.toMeetupPO(data);
+        MeetupPO meetupPO = MeetupConvertMapper.INSTANCE.toMeetupPO(data);
         if (data.getBizId() != null) {
             MeetupPO existing = meetupRepository.findByBizId(data.getBizId());
             if (existing != null) {
@@ -67,7 +67,7 @@ public class MeetupGatewayImpl implements MeetupGateway {
 
         // 3. 保存报名记录（bizId 已在聚合根工厂中生成）
         for (RegistrationData regData : meetup.getRegistrations()) {
-            RegistrationPO regPO = mapper.toRegistrationPO(regData);
+            RegistrationPO regPO = MeetupConvertMapper.INSTANCE.toRegistrationPO(regData);
             registrationRepository.save(regPO);
         }
     }

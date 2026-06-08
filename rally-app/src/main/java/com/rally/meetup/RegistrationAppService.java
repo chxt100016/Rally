@@ -4,6 +4,7 @@ import com.rally.utils.UserContext;
 import com.rally.domain.meetup.model.JoinResult;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.QuitResult;
+import com.rally.domain.meetup.model.RegistrationData;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.RegistrationDomainService;
 import com.rally.domain.system.SystemConfig;
@@ -41,9 +42,12 @@ public class RegistrationAppService {
         UserProfile userProfile = userProfileService.getProfile(userId);
 
         // 2. 报名（聚合根校验 + 创建报名记录 + 持久化）
-        JoinResult result = registrationDomainService.join(meetup, userProfile, autoWithdrawAt);
+        RegistrationData registration = registrationDomainService.join(meetup, userProfile, autoWithdrawAt);
 
-        // 3. 发送通知（app 层负责）
+        // 3. 根据报名记录状态判断结果
+        JoinResult result = JoinResult.fromRegistration(registration);
+
+        // 4. 发送通知（app 层负责）
         if (result == JoinResult.APPROVED) {
             // TODO: 调用通知域
             log.info("报名通过: userId={}, meetupId={}", userId, meetupId);
