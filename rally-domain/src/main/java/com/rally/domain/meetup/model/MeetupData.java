@@ -19,6 +19,8 @@ public class MeetupData {
     private Integer maxPlayers;
     private Integer currentPlayers;
     private String cityCode;
+    private String cityName;
+    private String districtName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private BigDecimal duration;

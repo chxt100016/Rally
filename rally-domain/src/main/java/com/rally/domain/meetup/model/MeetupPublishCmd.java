@@ -49,6 +49,13 @@ public class MeetupPublishCmd {
     @NotBlank(message = "请选择城市")
     private String cityCode;
 
+    /** 城市名称 */
+    @NotBlank(message = "城市名称不能为空")
+    private String cityName;
+
+    /** 区域名称，选填 */
+    private String districtName;
+
     /** 经度 */
     @NotNull(message = "请选择场地位置")
     @DecimalMin(value = "-180", message = "经度范围-180~180")

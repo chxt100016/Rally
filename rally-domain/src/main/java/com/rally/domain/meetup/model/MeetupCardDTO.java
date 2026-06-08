@@ -19,6 +19,8 @@ public class MeetupCardDTO {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private BigDecimal duration;
+    private String cityName;
+    private String districtName;
     private String courtName;
     private String courtAddress;
     private Double courtLng;

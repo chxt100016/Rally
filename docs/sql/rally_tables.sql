@@ -177,6 +177,8 @@ CREATE TABLE `rally_meetup` (
   `max_players`     INT          NOT NULL COMMENT '人数上限',
   `current_players` INT          NOT NULL DEFAULT 1 COMMENT '已加入人数（含发布者，发布即 1）',
   `city_code`       VARCHAR(32)  NOT NULL COMMENT '城市编码，由 court_location 反查后端写入',
+  `city_name`       VARCHAR(64)  NOT NULL COMMENT '城市名称',
+  `district_name`   VARCHAR(64)  DEFAULT NULL COMMENT '区域名称，选填',
   `start_time`      DATETIME     NOT NULL COMMENT '活动开始时间（含日期，+08:00）',
   `end_time`        DATETIME     NOT NULL COMMENT '结束时间 = start_time + duration 小时，懒判定/兜底查询用（裁定 D3/D4）',
   `duration`        DECIMAL(3,1) NOT NULL COMMENT '持续小时：0.5/1.0/1.5/2.0/2.5/3.0',
