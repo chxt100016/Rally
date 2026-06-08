@@ -28,4 +28,6 @@ public class MeetupCardDTO {
     private GenderLimitEnum genderLimit;
     private JoinModeEnum joinMode;
     private MeetupStatusEnum status;
+    /** 距离（米），距离排序时返回 */
+    private Double distanceMeters;
 }

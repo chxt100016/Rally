@@ -79,6 +79,12 @@ public class RedisNearbyGateway implements NearbyGateway {
     }
 
     @Override
+    public List<NearbyResult> searchAllByDistance(String cityCode, double lng, double lat) {
+        // 使用 200km 半径覆盖整个城市范围
+        return searchByRadius(cityCode, lng, lat, 200_000);
+    }
+
+    @Override
     public Set<String> members(String cityCode) {
         try {
             String key = KEY_PREFIX + cityCode;

@@ -98,4 +98,11 @@ public interface MeetupGateway {
      * @return 分页结果
      */
     PageDTO<MeetupData> listAvailable(MeetupListQueryParam param);
+
+    /**
+     * 按 meetupId 列表 + 筛选条件查询（不分页，距离排序用）
+     * @param param 查询参数（meetupIds 用于 IN 查询）
+     * @return 符合筛选条件的结果列表
+     */
+    List<MeetupData> listByMeetupIdsWithFilter(MeetupListQueryParam param);
 }

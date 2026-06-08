@@ -32,7 +32,7 @@ public class MeetupQueryPlanner {
     }
 
     /**
-     * 构建查询参数
+     * 构建查询参数（含 Redis GEO 查询，listByTime 用）
      * @param query 查询命令
      * @return 查询参数，如果 radiusKm 查询无结果返回 null
      */
@@ -57,6 +57,25 @@ public class MeetupQueryPlanner {
         }
 
         return builder.build();
+    }
+
+    /**
+     * 只构建筛选条件（不查 Redis，listByDistance 用）
+     * @param query 查询命令
+     * @return 查询参数
+     */
+    public MeetupListQueryParam buildFilterParam(MeetupListCmd query) {
+        return MeetupListQueryParam.builder()
+                .cityCode(query.getCityCode())
+                .matchType(query.getMatchType())
+                .startTimeFrom(query.getStartTime())
+                .startTimeTo(query.getEndTime())
+                .levelMode(query.getLevelMode())
+                .levelMin(query.getLevelMin())
+                .levelMax(query.getLevelMax())
+                .pageNo(query.getPageNo())
+                .pageSize(query.getPageSize())
+                .build();
     }
 
     /**

@@ -213,4 +213,63 @@ public class MeetupRepository {
         Page<MeetupPO> page = new Page<>(param.getPageNo(), param.getPageSize());
         return meetupService.page(page, wrapper);
     }
+
+    /**
+     * 按 meetupId 列表 + 筛选条件查询（不分页，距离排序用）
+     */
+    public List<MeetupPO> listByMeetupIdsWithFilter(MeetupListQueryParam param) {
+        LambdaQueryWrapper<MeetupPO> wrapper = new LambdaQueryWrapper<>();
+
+        // 基础条件：城市 + 状态 + 未结束
+        wrapper.eq(MeetupPO::getCityCode, param.getCityCode())
+                .in(MeetupPO::getStatus, "OPEN", "FULL")
+                .gt(MeetupPO::getEndTime, LocalDateTime.now());
+
+        // 约球ID列表筛选
+        if (!CollectionUtils.isEmpty(param.getMeetupIds())) {
+            wrapper.in(MeetupPO::getBizId, param.getMeetupIds());
+        }
+
+        // 类型筛选
+        if (param.getMatchType() != null) {
+            wrapper.eq(MeetupPO::getMatchType, param.getMatchType().name());
+        }
+
+        // 时间范围筛选
+        if (param.getStartTimeFrom() != null) {
+            wrapper.ge(MeetupPO::getStartTime, param.getStartTimeFrom());
+        }
+        if (param.getStartTimeTo() != null) {
+            wrapper.le(MeetupPO::getStartTime, param.getStartTimeTo());
+        }
+
+        // 水平筛选
+        if (param.getLevelMin() != null && param.getLevelMax() != null) {
+            String queryMin = param.getLevelMin().toPlainString();
+            String queryMax = param.getLevelMax().toPlainString();
+            wrapper.and(w -> w
+                    .and(inner -> inner
+                            .eq(MeetupPO::getLevelMode, "RANGE")
+                            .apply("SUBSTRING_INDEX(level_value, ':', 1) <= {0}", queryMax)
+                            .apply("SUBSTRING_INDEX(level_value, ':', -1) >= {0}", queryMin)
+                    )
+                    .or(inner -> inner
+                            .eq(MeetupPO::getLevelMode, "EXACT")
+                            .ge(MeetupPO::getLevelValue, queryMin)
+                            .le(MeetupPO::getLevelValue, queryMax)
+                    )
+                    .or(inner -> inner
+                            .eq(MeetupPO::getLevelMode, "ABOVE")
+                            .le(MeetupPO::getLevelValue, queryMax)
+                    )
+                    .or(inner -> inner
+                            .eq(MeetupPO::getLevelMode, "BELOW")
+                            .ge(MeetupPO::getLevelValue, queryMin)
+                    )
+            );
+        }
+
+        // 不分页，返回所有结果
+        return meetupService.list(wrapper);
+    }
 }

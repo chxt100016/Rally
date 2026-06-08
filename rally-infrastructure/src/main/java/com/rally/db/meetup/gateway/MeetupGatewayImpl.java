@@ -161,4 +161,10 @@ public class MeetupGatewayImpl implements MeetupGateway {
         boolean hasMore = page.getCurrent() < page.getPages();
         return new PageDTO<>(dataList, page.getTotal(), hasMore);
     }
+
+    @Override
+    public List<MeetupData> listByMeetupIdsWithFilter(MeetupListQueryParam param) {
+        List<MeetupPO> poList = meetupRepository.listByMeetupIdsWithFilter(param);
+        return MeetupConvertMapper.INSTANCE.toMeetupDataList(poList);
+    }
 }
