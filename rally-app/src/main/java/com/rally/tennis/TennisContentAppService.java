@@ -45,7 +45,15 @@ public class TennisContentAppService {
         // 1. 查询当天的赛事
         List<TennisTournamentPO> tournaments = tennisTournamentRepository.findCurrentTournaments(date);
         if (CollectionUtils.isEmpty(tournaments)) {
-            return "# " + date.format(MONTH_DAY_FMT) + " 赛事安排\n\n当日无赛事";
+            return "";
+        }
+
+        // 过滤赛事：category 不为数字或者为数字但是 >=250
+        tournaments = tournaments.stream()
+                .filter(this::isCategoryKept)
+                .toList();
+        if (CollectionUtils.isEmpty(tournaments)) {
+            return "";
         }
 
         // 2. 查询各赛事当天的比赛
@@ -54,7 +62,7 @@ public class TennisContentAppService {
                 .toList();
         List<TennisMatchPO> matches = tennisMatchRepository.findByTournamentIdsAndDate(tournamentIds, date);
         if (CollectionUtils.isEmpty(matches)) {
-            return "# " + date.format(MONTH_DAY_FMT) + " 赛事安排\n\n当日无比赛";
+            return "";
         }
 
         // 3. 查询种子信息 (drawId -> playerId -> seed)
@@ -82,46 +90,132 @@ public class TennisContentAppService {
         // 6. 收集需要翻译的内容并翻译
         Map<String, String> translations = collectAndTranslate(tournaments, matches, players, language);
 
-        // 7. 按赛事分组，再按球场分组
+        // 7. 按赛事分组
         Map<String, List<TennisMatchPO>> matchesByTournament = matches.stream()
                 .collect(Collectors.groupingBy(TennisMatchPO::getTournamentId));
 
-        // 8. 组装MD内容
+        // 8. 合并相同赛事（城市相同且时间重合）
+        List<List<TennisTournamentPO>> tournamentGroups = groupByCityAndTime(tournaments);
+
+        // 9. 每个赛事组生成MD，用换行分隔
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (List<TennisTournamentPO> group : tournamentGroups) {
+            // 收集该组所有比赛
+            List<TennisMatchPO> groupMatches = new ArrayList<>();
+            for (TennisTournamentPO tournament : group) {
+                List<TennisMatchPO> tournamentMatches = matchesByTournament.get(tournament.getTournamentId());
+                if (CollectionUtils.isNotEmpty(tournamentMatches)) {
+                    groupMatches.addAll(tournamentMatches);
+                }
+            }
+            if (CollectionUtils.isEmpty(groupMatches)) continue;
+
+            if (!first) {
+                sb.append("\n\n");
+            }
+            // 使用第一个赛事作为代表
+            sb.append(buildTournamentMd(group.get(0), groupMatches, playerMap, seedMap, translations, date));
+            first = false;
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * 按城市和时间分组：city 不区分大小写相同 且 startDate 和 endDate 时间重合算作同一分组
+     */
+    private List<List<TennisTournamentPO>> groupByCityAndTime(List<TennisTournamentPO> list) {
+        List<List<TennisTournamentPO>> groups = new ArrayList<>();
+
+        for (TennisTournamentPO po : list) {
+            boolean added = false;
+            for (List<TennisTournamentPO> group : groups) {
+                TennisTournamentPO first = group.get(0);
+                if (isSameGroup(first, po)) {
+                    group.add(po);
+                    added = true;
+                    break;
+                }
+            }
+            if (!added) {
+                List<TennisTournamentPO> newGroup = new ArrayList<>();
+                newGroup.add(po);
+                groups.add(newGroup);
+            }
+        }
+
+        // 组内按 startDate 排序
+        for (List<TennisTournamentPO> group : groups) {
+            group.sort(Comparator.comparing(TennisTournamentPO::getStartDate,
+                    Comparator.nullsLast(Comparator.naturalOrder())));
+        }
+
+        return groups;
+    }
+
+    /**
+     * 判断两个赛事是否属于同一分组：city 不区分大小写相同 且 startDate 和 endDate 时间重合
+     */
+    private boolean isSameGroup(TennisTournamentPO a, TennisTournamentPO b) {
+        String cityA = a.getCity() != null ? a.getCity().toLowerCase() : "";
+        String cityB = b.getCity() != null ? b.getCity().toLowerCase() : "";
+        if (!cityA.equals(cityB)) {
+            return false;
+        }
+
+        if (a.getStartDate() == null || b.getStartDate() == null ||
+            a.getEndDate() == null || b.getEndDate() == null) {
+            return false;
+        }
+
+        // 时间重合判断：a.start <= b.end && b.start <= a.end
+        return !a.getStartDate().isAfter(b.getEndDate()) && !b.getStartDate().isAfter(a.getEndDate());
+    }
+
+    private boolean isCategoryKept(TennisTournamentPO tournament) {
+        String category = tournament.getCategory();
+        if (category == null || category.isBlank()) {
+            return true;
+        }
+        try {
+            return Integer.parseInt(category.trim()) >= 250;
+        } catch (NumberFormatException e) {
+            return true;
+        }
+    }
+
+    private String buildTournamentMd(TennisTournamentPO tournament, List<TennisMatchPO> matches,
+                                      Map<String, TennisPlayerPO> playerMap, Map<String, Short> seedMap,
+                                      Map<String, String> translations, LocalDate date) {
         StringBuilder sb = new StringBuilder();
 
-        for (String tournamentId : matchesByTournament.keySet()) {
-            TennisTournamentPO tournament = tournamentMap.get(tournamentId);
-            if (tournament == null) continue;
+        // 赛事标题: 赛事名称 月份日期 赛程安排
+        String tournamentName = translations.getOrDefault(
+                TranslationEntityTypeEnum.TOURNAMENT + ":" + tournament.getName(),
+                tournament.getName()
+        );
+        sb.append("# ").append(tournamentName)
+          .append(" ").append(date.format(MONTH_DAY_FMT))
+          .append(" 赛程安排\n");
+        sb.append(buildTournamentInfo(tournament, translations)).append("\n");
 
-            List<TennisMatchPO> tournamentMatches = matchesByTournament.get(tournamentId);
+        // 按球场分组
+        Map<String, List<TennisMatchPO>> matchesByCourt = matches.stream()
+                .collect(Collectors.groupingBy(
+                        m -> m.getCourt() != null ? m.getCourt() : "未知球场",
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
 
-            // 赛事标题: 赛事名称 月份日期 赛事安排
-            String tournamentName = translations.getOrDefault(
-                    TranslationEntityTypeEnum.TOURNAMENT + ":" + tournament.getName(),
-                    tournament.getName()
+        for (Map.Entry<String, List<TennisMatchPO>> entry : matchesByCourt.entrySet()) {
+            String courtName = translations.getOrDefault(
+                    TranslationEntityTypeEnum.COURT + ":" + entry.getKey(),
+                    entry.getKey()
             );
-            sb.append("# ").append(tournamentName)
-              .append(" ").append(date.format(MONTH_DAY_FMT))
-              .append(" 赛事安排\n");
-            sb.append(buildTournamentInfo(tournament, translations)).append("\n");
-
-            // 按球场分组
-            Map<String, List<TennisMatchPO>> matchesByCourt = tournamentMatches.stream()
-                    .collect(Collectors.groupingBy(
-                            m -> m.getCourt() != null ? m.getCourt() : "未知球场",
-                            LinkedHashMap::new,
-                            Collectors.toList()
-                    ));
-
-            for (Map.Entry<String, List<TennisMatchPO>> entry : matchesByCourt.entrySet()) {
-                String courtName = translations.getOrDefault(
-                        TranslationEntityTypeEnum.COURT + ":" + entry.getKey(),
-                        entry.getKey()
-                );
-                sb.append("\n").append(courtName).append("\n");
-                for (TennisMatchPO match : entry.getValue()) {
-                    sb.append(buildMatchLine(match, playerMap, seedMap, translations)).append("\n");
-                }
+            sb.append("\n").append(courtName).append("\n");
+            for (TennisMatchPO match : entry.getValue()) {
+                sb.append(buildMatchLine(match, playerMap, seedMap, translations)).append("\n");
             }
         }
 
