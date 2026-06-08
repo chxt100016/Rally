@@ -37,3 +37,4 @@ mvn clean package -DskipTests
   - 使用例子`Assert.notNull(data, BizErrorCode.MEETUP_NOT_FOUND)`
 - 接口出入参数转换放在app层并且使用mapstruct 
 - app层不要try catch，将这个放在领域层的业务操作里
+- 通过api对外返回的对象创建专门DTO对象， 通过api接收的参数以Cmd结尾

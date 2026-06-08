@@ -2,6 +2,8 @@ package com.rally.domain.meetup.gateway;
 
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
+import com.rally.domain.meetup.model.MeetupListQueryParam;
+import com.rally.domain.meetup.model.PageDTO;
 
 import java.util.List;
 
@@ -89,4 +91,11 @@ public interface MeetupGateway {
      * @return 完成场数
      */
     long countFinishedMatches(String userId, int days);
+
+    /**
+     * 查询可报名的约球列表（带筛选、排序、分页）
+     * @param param 查询参数
+     * @return 分页结果
+     */
+    PageDTO<MeetupData> listAvailable(MeetupListQueryParam param);
 }

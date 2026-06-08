@@ -1,6 +1,7 @@
 package com.rally.domain.meetup.model;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.rally.domain.meetup.enums.LevelModeEnum;
 import com.rally.domain.meetup.enums.MeetupSortEnum;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import jakarta.validation.constraints.Min;
@@ -15,12 +16,13 @@ import java.util.List;
  * 列表筛选+排序+分页入参
  */
 @Data
-public class MeetupListQuery {
+public class MeetupListCmd {
     /** 城市编码（必传） */
     @NotBlank(message = "请选择城市")
     private String cityCode;
 
     /** 排序方式 */
+    @NotBlank(message = "请选择排序方式")
     private MeetupSortEnum sort;
 
     /** 页码，默认1 */
@@ -40,6 +42,9 @@ public class MeetupListQuery {
     /** 半径（km） */
     private BigDecimal radiusKm;
 
+    /** 水平模式 */
+    private LevelModeEnum levelMode;
+
     /** 水平最小值 */
     private BigDecimal levelMin;
 
@@ -51,11 +56,11 @@ public class MeetupListQuery {
 
     /** 开始时间起，格式 yyyy-MM-dd HH:mm:ss */
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime startFrom;
+    private LocalDateTime startTime;
 
     /** 开始时间止，格式 yyyy-MM-dd HH:mm:ss */
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime startTo;
+    private LocalDateTime endTime;
 
     /** 标签 */
     private List<String> tags;

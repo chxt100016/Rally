@@ -21,6 +21,8 @@ public class MeetupCardDTO {
     private BigDecimal duration;
     private String courtName;
     private String courtAddress;
+    private Double courtLng;
+    private Double courtLat;
     private LevelModeEnum levelMode;
     private String levelValue;
     private GenderLimitEnum genderLimit;

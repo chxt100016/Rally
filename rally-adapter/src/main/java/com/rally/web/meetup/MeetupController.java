@@ -51,8 +51,8 @@ public class MeetupController {
      * 约球列表
      */
     @PostMapping("/list")
-    public Result<PageDTO<MeetupCardVO>> list(@Valid @RequestBody MeetupListQuery query) {
-        return Result.ok(meetupQueryAppService.list(query));
+    public Result<PageDTO<MeetupCardDTO>> list(@Valid @RequestBody MeetupListCmd query) {
+        return Result.ok(meetupQueryAppService.queryMeetupList(query));
     }
 
     /**

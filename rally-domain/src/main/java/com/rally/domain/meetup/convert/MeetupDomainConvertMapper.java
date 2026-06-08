@@ -1,5 +1,6 @@
 package com.rally.domain.meetup.convert;
 
+import com.rally.domain.meetup.model.MeetupCardDTO;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupPublishCmd;
 import org.mapstruct.*;
@@ -34,13 +35,17 @@ public interface MeetupDomainConvertMapper {
 
 
     /**
+     * MeetupData -> MeetupCardDTO
+     */
+    @Mapping(target = "meetupId", source = "bizId")
+    MeetupCardDTO toMeetupCardDTO(MeetupData data);
+
+    /**
      * 计算结束时间
      */
     default LocalDateTime calculateEndTime(LocalDateTime startTime, BigDecimal duration) {
         return startTime.plusHours(duration.longValue())
                 .plusMinutes((duration.remainder(BigDecimal.ONE).multiply(new BigDecimal("60"))).longValue());
     }
-
-
 
 }

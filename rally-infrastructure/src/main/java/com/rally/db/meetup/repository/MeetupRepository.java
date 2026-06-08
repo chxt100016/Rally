@@ -2,10 +2,14 @@ package com.rally.db.meetup.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rally.db.meetup.entity.MeetupPO;
 import com.rally.db.meetup.service.MeetupService;
+import com.rally.domain.meetup.model.MeetupListQueryParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -141,5 +145,72 @@ public class MeetupRepository {
                 .ge(MeetupPO::getEndTime, since)
                 .count();
         // TODO: 还需要统计用户作为报名者（已批准）的已完成约球，需要关联 waitlist 表
+    }
+
+    /**
+     * 查询可报名的约球列表（带筛选、排序、分页）
+     */
+    public IPage<MeetupPO> listNew(MeetupListQueryParam param) {
+        LambdaQueryWrapper<MeetupPO> wrapper = new LambdaQueryWrapper<>();
+
+        // 基础条件：城市 + 状态 + 未结束
+        wrapper.eq(MeetupPO::getCityCode, param.getCityCode())
+                .in(MeetupPO::getStatus, "OPEN", "FULL")
+                .gt(MeetupPO::getEndTime, LocalDateTime.now());
+
+        // 约球ID列表筛选（距离查询时使用）
+        if (!CollectionUtils.isEmpty(param.getMeetupIds())) {
+            wrapper.in(MeetupPO::getBizId, param.getMeetupIds());
+        }
+
+        // 类型筛选
+        if (param.getMatchType() != null) {
+            wrapper.eq(MeetupPO::getMatchType, param.getMatchType().name());
+        }
+
+        // 时间范围筛选
+        if (param.getStartTimeFrom() != null) {
+            wrapper.ge(MeetupPO::getStartTime, param.getStartTimeFrom());
+        }
+        if (param.getStartTimeTo() != null) {
+            wrapper.le(MeetupPO::getStartTime, param.getStartTimeTo());
+        }
+
+        // 水平筛选（判断查询范围与约球水平是否有交集）
+        if (param.getLevelMin() != null && param.getLevelMax() != null) {
+            String queryMin = param.getLevelMin().toPlainString();
+            String queryMax = param.getLevelMax().toPlainString();
+            wrapper.and(w -> w
+                    // RANGE 模式：levelValue 格式为 "min:max"，判断区间是否有交集
+                    .and(inner -> inner
+                            .eq(MeetupPO::getLevelMode, "RANGE")
+                            .apply("SUBSTRING_INDEX(level_value, ':', 1) <= {0}", queryMax)
+                            .apply("SUBSTRING_INDEX(level_value, ':', -1) >= {0}", queryMin)
+                    )
+                    // EXACT 模式：levelValue 为精确值，判断是否在查询范围内
+                    .or(inner -> inner
+                            .eq(MeetupPO::getLevelMode, "EXACT")
+                            .ge(MeetupPO::getLevelValue, queryMin)
+                            .le(MeetupPO::getLevelValue, queryMax)
+                    )
+                    // ABOVE 模式：levelValue 为下限，判断下限 <= queryMax
+                    .or(inner -> inner
+                            .eq(MeetupPO::getLevelMode, "ABOVE")
+                            .le(MeetupPO::getLevelValue, queryMax)
+                    )
+                    // BELOW 模式：levelValue 为上限，判断上限 >= queryMin
+                    .or(inner -> inner
+                            .eq(MeetupPO::getLevelMode, "BELOW")
+                            .ge(MeetupPO::getLevelValue, queryMin)
+                    )
+            );
+        }
+
+        // 排序
+        wrapper.orderByDesc(MeetupPO::getCreateTime);
+
+        // 分页
+        Page<MeetupPO> page = new Page<>(param.getPageNo(), param.getPageSize());
+        return meetupService.page(page, wrapper);
     }
 }

@@ -1,5 +1,6 @@
 package com.rally.db.meetup.gateway;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.rally.db.meetup.convert.MeetupConvertMapper;
 import com.rally.db.meetup.entity.MeetupPO;
 import com.rally.db.meetup.entity.RegistrationPO;
@@ -8,6 +9,8 @@ import com.rally.db.meetup.repository.RegistrationRepository;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
+import com.rally.domain.meetup.model.MeetupListQueryParam;
+import com.rally.domain.meetup.model.PageDTO;
 import com.rally.domain.meetup.model.RegistrationData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -149,5 +152,13 @@ public class MeetupGatewayImpl implements MeetupGateway {
     @Override
     public long countFinishedMatches(String userId, int days) {
         return meetupRepository.countFinishedMatches(userId, days);
+    }
+
+    @Override
+    public PageDTO<MeetupData> listAvailable(MeetupListQueryParam param) {
+        IPage<MeetupPO> page = meetupRepository.listNew(param);
+        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(page.getRecords());
+        boolean hasMore = page.getCurrent() < page.getPages();
+        return new PageDTO<>(dataList, page.getTotal(), hasMore);
     }
 }

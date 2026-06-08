@@ -1,5 +1,6 @@
 ## 对象映射
-- 两个对象转换不用手动set值， 统一使用 MapStruct（`org.mapstruct`） 
+- 两个对象转换不用手动set值， 统一使用 MapStruct（`org.mapstruct`）
+  - `private MeetupCardDTO toMeetupCardDTO(MeetupData data) {` 比如这种类型的代码转换。
 - MapStruct 用单例模式。 
   - 在创建接口：MatchAppConvertMapper INSTANCE = Mappers.getMapper(MatchAppConvertMapper.class);
   - 在使用的时候，不要在使用类注册属性，而是直接调用类来访问实例： `MatchAppConvertMapper.INSTANCE.toPO`
