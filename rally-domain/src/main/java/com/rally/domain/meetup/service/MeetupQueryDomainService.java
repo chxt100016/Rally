@@ -4,6 +4,7 @@ import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
+import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class MeetupQueryDomainService {
 
     private final MeetupGateway meetupGateway;
     private final NearbyGateway nearbyGateway;
+    private final RegistrationGateway registrationGateway;
     private final MeetupQueryPlanner queryPlanner;
 
     /**
@@ -120,5 +122,14 @@ public class MeetupQueryDomainService {
         MeetupData data = meetupGateway.findByBizId(meetupId);
         Assert.notNull(data, BizErrorCode.MEETUP_NOT_FOUND);
         return data;
+    }
+
+    /**
+     * 查询已批准的参与者 userId 列表（含创建者）
+     * @param meetupId 约球ID
+     * @return 参与者 userId 列表
+     */
+    public List<String> listParticipantUserIds(String meetupId) {
+        return registrationGateway.listApprovedUserIds(meetupId);
     }
 }

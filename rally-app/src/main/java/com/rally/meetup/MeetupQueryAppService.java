@@ -2,22 +2,26 @@ package com.rally.meetup;
 
 import com.rally.cache.UserContext;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
-import com.rally.domain.meetup.gateway.RegistrationGateway;
+import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.MeetupQueryDomainService;
+import com.rally.domain.recap.enums.RecapTypeEnum;
 import com.rally.domain.recap.model.Recap;
-import com.rally.domain.recap.model.RecapDetailVO;
+import com.rally.domain.recap.model.RecapDTO;
 import com.rally.domain.recap.service.RecapDomainService;
-import com.rally.domain.system.SystemConfig;
-import com.rally.domain.user.gateway.TennisProfileGateway;
+import com.rally.domain.review.model.ReviewData;
+import com.rally.domain.review.model.ScoreRecordData;
 import com.rally.domain.user.gateway.UserGateway;
-import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.UserData;
+import com.rally.domain.user.model.UserProfile;
+import com.rally.domain.user.service.UserProfileService;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 /**
  * 约球查询应用服务
@@ -30,10 +34,10 @@ public class MeetupQueryAppService {
 
     private final MeetupQueryDomainService meetupQueryDomainService;
     private final MeetupDomainService meetupDomainService;
-    private final RegistrationGateway registrationGateway;
-    private final UserGateway userGateway;
-    private final TennisProfileGateway tennisProfileGateway;
+    private final MeetupGateway meetupGateway;
+    private final UserProfileService userProfileService;
     private final RecapDomainService recapDomainService;
+    private final UserGateway userGateway;
 
     private static final MeetupAppConvertMapper MAPPER = MeetupAppConvertMapper.INSTANCE;
 
@@ -49,71 +53,182 @@ public class MeetupQueryAppService {
     }
 
     /**
-     * 查询约球详情
+     * 查询约球详情（重构后返回 MeetupDetailDTO）
      */
-    public MeetupVO detail(String meetupId) {
+    public MeetupDetailDTO detail(String meetupId) {
         String currentUserId = UserContext.get();
 
-        // 1. 获取核心数据
-        MeetupData data = meetupQueryDomainService.getDetail(meetupId);
-        MeetupVO vo = MAPPER.toMeetupVO(data);
-        Meetup meetup = new Meetup(data);
+        // 1 获取聚合根（含报名记录）
+        Meetup meetup = meetupDomainService.getAggregate(meetupId);
+        MeetupData data = meetup.getData();
 
-        // 2. 计算每人费用（委托领域服务）
-        vo.setPerPersonCost(meetupDomainService.calculatePerPersonCost(data));
+        // 2 批量查询所有参与者用户信息（创建者 + 已批准报名者，去重）
+        List<String> allUserIds = meetup.getAllParticipantUserIds();
+        Map<String, UserProfile> profileMap = userProfileService.listProfiles(allUserIds);
 
-        // 3. 计算 actionState（委托领域服务，含报名记录上下文）
-        RegistrationData userRegistration = registrationGateway.findActiveByMeetupAndUser(meetupId, currentUserId);
-        int lockMinutes = SystemConfig.getInt("meetup.edit_lock_minutes_before_start", 60);
-        vo.setActionState(meetupDomainService.calculateActionState(meetup, currentUserId, lockMinutes, userRegistration));
+        return new MeetupDetailDTO()
+                .setMeetup(MAPPER.toMeetupDTO(data))
+                .setActionState(meetup.getActionState(currentUserId))
+                .setCreator(buildCreatorDTO(data.getCreatorId(), profileMap))
+                .setParticipants(buildParticipantVOList(allUserIds, data.getCreatorId(), profileMap))
+                .setRecap(data.getStatus() == MeetupStatusEnum.FINISHED ? buildRecap(meetupId) : null)
+                ;
+    }
 
-        // 4. 计算 quitWillPenalize（委托领域服务）
-        vo.setQuitWillPenalize(meetupDomainService.calculateQuitWillPenalize(data, currentUserId));
 
-        // 5. 填充发布者信息
-        fillCreatorInfo(vo, data.getCreatorId());
-
-        // 6. 活动已结束时，查询赛后收集数据
-        if (data.getStatus() == MeetupStatusEnum.FINISHED) {
-            try {
-                RecapDetailVO recap = this.detail2(meetupId);
-                vo.setRecap(recap);
-            } catch (Exception e) {
-                log.warn("查询赛后收集失败，meetupId={}", meetupId, e);
-            }
+    /**
+     * 构建创建人信息 DTO
+     */
+    private CreatorDTO buildCreatorDTO(String creatorId, Map<String, UserProfile> profileMap) {
+        CreatorDTO creator = new CreatorDTO();
+        if (creatorId == null) {
+            return creator;
         }
+        creator.setUserId(creatorId);
+        UserProfile profile = profileMap.get(creatorId);
+        if (profile != null && profile.getUser() != null) {
+            creator.setNickname(profile.getUser().getNickname());
+            creator.setAvatarUrl(profile.getUser().getAvatarUrl());
+        }
+        if (profile != null && profile.getProfile() != null) {
+            creator.setNtrpScore(profile.getProfile().getNtrpScore());
+        }
+        creator.setPublishMeetupCount(meetupGateway.countByCreatorId(creatorId));
+        return creator;
+    }
+
+    /**
+     * 构建参与者列表（排除创建人）
+     */
+    private List<ParticipantVO> buildParticipantVOList(List<String> allUserIds, String creatorId,
+                                                       Map<String, UserProfile> profileMap) {
+        return allUserIds.stream()
+                .filter(uid -> !uid.equals(creatorId))
+                .map(uid -> {
+                    ParticipantVO vo = new ParticipantVO();
+                    vo.setUserId(uid);
+                    UserProfile profile = profileMap.get(uid);
+                    if (profile != null && profile.getUser() != null) {
+                        vo.setNickname(profile.getUser().getNickname());
+                        vo.setAvatarUrl(profile.getUser().getAvatarUrl());
+                    }
+                    if (profile != null && profile.getProfile() != null) {
+                        vo.setNtrpScore(profile.getProfile().getNtrpScore());
+                    }
+                    return vo;
+                })
+                .toList();
+    }
+
+    /**
+     * 构建赛后收集详情 VO
+     */
+    public RecapDTO buildRecap(String meetupId) {
+        Recap recap = recapDomainService.get(UserContext.get(), meetupId);
+
+        RecapDTO vo = new RecapDTO();
+
+        // 参与人列表（排除自己）
+        List<RecapDTO.ParticipantItem> participantItems = buildParticipants(recap);
+        vo.setParticipants(participantItems);
+
+        // 当前用户已填评价（按 toUser 分组）
+        Map<String, List<RecapDTO.ReviewItem>> myReviewsMap = buildMyReviewsMap(recap);
+        vo.setMyReviews(myReviewsMap);
+
+        // 比分
+        List<RecapDTO.ScoreItem> scoreItems = buildScoreItems(recap);
+        vo.setScores(scoreItems);
+        vo.setScoreVersion(recap.getScoreBoard() != null ? recap.getScoreBoard().getVersion() : 0);
+
+        // 填写状态
+        vo.setScoreFilled(!scoreItems.isEmpty());
+        vo.setReviewFilled(isReviewFilled(participantItems));
 
         return vo;
     }
 
-    /**
-     * 查询赛后收集详情
-     */
-    public RecapDetailVO detail2(String meetupId) {
-        String userId = UserContext.get();
+    // ==================== 内部方法 ====================
 
-        // 1. 加载聚合根（含业务校验）
-        Recap recap = recapDomainService.get(userId, meetupId);
+    private List<RecapDTO.ParticipantItem> buildParticipants(Recap recap) {
+        String currentUserId = recap.getUserId();
+        Set<String> reviewedKeys = recap.getMyReviews().keySet();
+        List<RecapDTO.ParticipantItem> items = new ArrayList<>();
 
-        // 2. 领域服务构建 VO
-        return recapDomainService.detail(recap);
+        for (RegistrationData reg : recap.getParticipants()) {
+            String uid = reg.getUserId();
+            if (uid.equals(currentUserId)) {
+                continue;
+            }
+
+            RecapDTO.ParticipantItem item = new RecapDTO.ParticipantItem();
+            item.setUserId(uid);
+
+            UserData userData = userGateway.findByUserId(uid).orElse(null);
+            if (userData != null) {
+                item.setNickname(userData.getNickname());
+                item.setAvatarUrl(userData.getAvatarUrl());
+            }
+
+            List<String> reviewedTypes = new ArrayList<>();
+            for (RecapTypeEnum type : RecapTypeEnum.values()) {
+                String key = uid + ":" + type.name();
+                if (reviewedKeys.contains(key)) {
+                    reviewedTypes.add(type.name());
+                }
+            }
+            item.setReviewedTypes(reviewedTypes);
+
+            items.add(item);
+        }
+        return items;
     }
 
-    /**
-     * 填充发布者信息到 MeetupVO
-     */
-    private void fillCreatorInfo(MeetupVO vo, String creatorId) {
-        if (creatorId == null) {
-            return;
+    private Map<String, List<RecapDTO.ReviewItem>> buildMyReviewsMap(Recap recap) {
+        Map<String, List<RecapDTO.ReviewItem>> map = new LinkedHashMap<>();
+        for (ReviewData review : recap.getMyReviews().values()) {
+            RecapDTO.ReviewItem item = new RecapDTO.ReviewItem();
+            item.setToUserId(review.getToUserId());
+            item.setType(review.getReviewType().name());
+            item.setValue(review.getReviewValue());
+            map.computeIfAbsent(review.getToUserId(), k -> new ArrayList<>()).add(item);
         }
-        UserData user = userGateway.findByUserId(creatorId).orElse(null);
-        if (user != null) {
-            vo.setCreatorNickname(user.getNickname());
-            vo.setCreatorAvatarUrl(user.getAvatarUrl());
+        return map;
+    }
+
+    private List<RecapDTO.ScoreItem> buildScoreItems(Recap recap) {
+        if (recap.getScoreBoard() == null || recap.getScoreBoard().getScores() == null) {
+            return new ArrayList<>();
         }
-        TennisProfileData profile = tennisProfileGateway.findByUserId(creatorId).orElse(null);
-        if (profile != null) {
-            vo.setCreatorNtrp(profile.getNtrpScore());
+        return recap.getScoreBoard().getScores().stream()
+                .map(this::toScoreItem)
+                .toList();
+    }
+
+    private boolean isReviewFilled(List<RecapDTO.ParticipantItem> participants) {
+        if (participants.isEmpty()) {
+            return true;
         }
+        for (RecapDTO.ParticipantItem p : participants) {
+            List<String> reviewed = p.getReviewedTypes();
+            if (reviewed == null || reviewed.size() < RecapTypeEnum.values().length) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private RecapDTO.ScoreItem toScoreItem(ScoreRecordData data) {
+        RecapDTO.ScoreItem item = new RecapDTO.ScoreItem();
+        item.setBizId(data.getBizId());
+        item.setSetNum(data.getSetNumber());
+        item.setSetFormat(data.getSetFormat() != null ? data.getSetFormat().name() : null);
+        item.setSideAPlayer1(data.getSideAPlayer1());
+        item.setSideAPlayer2(data.getSideAPlayer2());
+        item.setSideBPlayer1(data.getSideBPlayer1());
+        item.setSideBPlayer2(data.getSideBPlayer2());
+        item.setSideAScore(data.getSideAScore());
+        item.setSideBScore(data.getSideBScore());
+        return item;
     }
 }

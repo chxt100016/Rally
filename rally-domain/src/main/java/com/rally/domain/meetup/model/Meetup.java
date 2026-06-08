@@ -335,5 +335,67 @@ public class Meetup {
                 .findFirst().orElse(null);
     }
 
+    // ======================== 操作状态计算 ========================
+
+    /**
+     * 计算当前用户的操作状态（沉淀到聚合根，内部已有所有数据）
+     * @param currentUserId 当前用户 ID
+     * @return 操作状态枚举
+     */
+    public ActionStateEnum getActionState(String currentUserId) {
+        MeetupStatusEnum realStatus = getRealStatus();
+        boolean isCreator = isCreator(currentUserId);
+
+        // 终态：全部置灰
+        if (realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.CLOSED) {
+            return isCreator ? ActionStateEnum.OWNER_DISABLED : ActionStateEnum.DISABLED;
+        }
+
+        // 创建人视角
+        if (isCreator) {
+            int lockMinutes = SystemConfig.getInt("meetup.edit_lock_minutes_before_start", 60);
+            boolean locked = LocalDateTime.now().isAfter(data.getStartTime().minusMinutes(lockMinutes));
+            return locked ? ActionStateEnum.OWNER_EDIT_LOCKED : ActionStateEnum.OWNER_EDITABLE;
+        }
+
+        // 访客视角：根据报名状态判断
+        RegistrationData userRegistration = findActiveRegistration(currentUserId);
+        if (userRegistration != null) {
+            if (userRegistration.getStatus() == RegistrationStatusEnum.PENDING) {
+                return ActionStateEnum.PENDING_REVIEW;
+            }
+            if (userRegistration.getStatus() == RegistrationStatusEnum.APPROVED) {
+                return ActionStateEnum.JOINED;
+            }
+        }
+
+        // 未报名：根据满员和加入模式判断
+        if (realStatus == MeetupStatusEnum.FULL) {
+            return ActionStateEnum.FULL;
+        }
+        return data.getJoinMode() == JoinModeEnum.DIRECT
+                ? ActionStateEnum.JOIN_DIRECT : ActionStateEnum.APPLY_APPROVAL;
+    }
+
+    // ======================== 参与者 userId 提取 ========================
+
+    /**
+     * 获取所有参与者 userId（创建者 + 已批准报名者），去重
+     * @return 去重后的 userId 列表
+     */
+    public List<String> getAllParticipantUserIds() {
+        List<String> userIds = new ArrayList<>();
+        // 创建者
+        if (data.getCreatorId() != null) {
+            userIds.add(data.getCreatorId());
+        }
+        // 已批准的报名者
+        registrations.stream()
+                .filter(r -> r.getStatus() == RegistrationStatusEnum.APPROVED)
+                .map(RegistrationData::getUserId)
+                .filter(uid -> !userIds.contains(uid))
+                .forEach(userIds::add);
+        return userIds;
+    }
 
 }

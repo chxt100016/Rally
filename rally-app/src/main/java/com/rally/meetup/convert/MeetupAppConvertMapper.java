@@ -38,6 +38,11 @@ public interface MeetupAppConvertMapper {
 
     List<MeetupCardDTO> toMeetupCardDTOList(List<MeetupData> dataList);
 
+    // ==================== MeetupData → MeetupDTO ====================
+
+    @Mapping(target = "meetupId", source = "bizId")
+    MeetupDTO toMeetupDTO(MeetupData data);
+
     // ==================== RegistrationData → RegistrationVO ====================
 
     @Mapping(target = "registrationId", source = "bizId")

@@ -9,7 +9,7 @@ import java.util.Map;
  * 赛后收集详情（合并到 MeetupVO.recap 中）
  */
 @Data
-public class RecapDetailVO {
+public class RecapDTO {
 
     // ==================== 参与人列表 ====================
     private List<ParticipantItem> participants;

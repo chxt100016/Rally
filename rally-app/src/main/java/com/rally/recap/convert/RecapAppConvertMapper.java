@@ -1,7 +1,7 @@
 package com.rally.recap.convert;
 
 import com.rally.domain.recap.model.RecapCmd;
-import com.rally.domain.recap.model.RecapDetailVO;
+import com.rally.domain.recap.model.RecapDTO;
 import com.rally.recap.model.RecapDetailDTO;
 import com.rally.recap.model.RecapSubmitDTO;
 import org.mapstruct.Mapper;
@@ -31,24 +31,24 @@ public interface RecapAppConvertMapper {
     // ==================== Detail VO -> DTO ====================
 
     @Mapping(target = "myReviews", expression = "java(flattenReviewMap(vo.getMyReviews()))")
-    RecapDetailDTO toDetailDTO(RecapDetailVO vo);
+    RecapDetailDTO toDetailDTO(RecapDTO vo);
 
-    RecapDetailDTO.ParticipantDTO toParticipantDTO(RecapDetailVO.ParticipantItem item);
+    RecapDetailDTO.ParticipantDTO toParticipantDTO(RecapDTO.ParticipantItem item);
 
-    RecapDetailDTO.ReviewDTO toReviewDTO(RecapDetailVO.ReviewItem item);
+    RecapDetailDTO.ReviewDTO toReviewDTO(RecapDTO.ReviewItem item);
 
-    RecapDetailDTO.ScoreDTO toScoreDTO(RecapDetailVO.ScoreItem item);
+    RecapDetailDTO.ScoreDTO toScoreDTO(RecapDTO.ScoreItem item);
 
     /**
      * 将 Map<String, List<ReviewItem>> 展平为 List<ReviewDTO>
      */
-    default List<RecapDetailDTO.ReviewDTO> flattenReviewMap(Map<String, List<RecapDetailVO.ReviewItem>> reviewMap) {
+    default List<RecapDetailDTO.ReviewDTO> flattenReviewMap(Map<String, List<RecapDTO.ReviewItem>> reviewMap) {
         if (reviewMap == null) {
             return new ArrayList<>();
         }
         List<RecapDetailDTO.ReviewDTO> result = new ArrayList<>();
-        for (List<RecapDetailVO.ReviewItem> items : reviewMap.values()) {
-            for (RecapDetailVO.ReviewItem item : items) {
+        for (List<RecapDTO.ReviewItem> items : reviewMap.values()) {
+            for (RecapDTO.ReviewItem item : items) {
                 result.add(toReviewDTO(item));
             }
         }

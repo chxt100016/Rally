@@ -272,4 +272,13 @@ public class MeetupRepository {
         // 不分页，返回所有结果
         return meetupService.list(wrapper);
     }
+
+    /**
+     * 统计用户发布的比赛次数
+     */
+    public long countByCreatorId(String userId) {
+        return meetupService.lambdaQuery()
+                .eq(MeetupPO::getCreatorId, userId)
+                .count();
+    }
 }

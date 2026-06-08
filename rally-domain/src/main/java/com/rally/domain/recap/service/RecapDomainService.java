@@ -4,22 +4,23 @@ import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.RegistrationData;
-import com.rally.domain.recap.enums.RecapTypeEnum;
 import com.rally.domain.recap.gateway.RecapGateway;
-import com.rally.domain.recap.model.*;
+import com.rally.domain.recap.model.Recap;
+import com.rally.domain.recap.model.RecapCmd;
+import com.rally.domain.recap.model.RecapFactory;
+import com.rally.domain.recap.model.ScoreConflictException;
 import com.rally.domain.review.model.ReviewData;
 import com.rally.domain.review.model.ScoreRecordData;
 import com.rally.domain.score.ScoreManager;
 import com.rally.domain.system.SystemConfig;
-import com.rally.domain.user.gateway.UserGateway;
-import com.rally.domain.user.model.UserData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 赛后收集领域服务
@@ -38,7 +39,6 @@ import java.util.*;
 public class RecapDomainService {
 
     private final RecapGateway recapGateway;
-    private final UserGateway userGateway;
     private final ScoreManager scoreManager;
 
     /**
@@ -129,113 +129,5 @@ public class RecapDomainService {
         return true;
     }
 
-    /**
-     * 构建赛后收集详情 VO
-     */
-    public RecapDetailVO detail(Recap recap) {
-        RecapDetailVO vo = new RecapDetailVO();
 
-        // 参与人列表（排除自己）
-        List<RecapDetailVO.ParticipantItem> participantItems = buildParticipants(recap);
-        vo.setParticipants(participantItems);
-
-        // 当前用户已填评价（按 toUser 分组）
-        Map<String, List<RecapDetailVO.ReviewItem>> myReviewsMap = buildMyReviewsMap(recap);
-        vo.setMyReviews(myReviewsMap);
-
-        // 比分
-        List<RecapDetailVO.ScoreItem> scoreItems = buildScoreItems(recap);
-        vo.setScores(scoreItems);
-        vo.setScoreVersion(recap.getScoreBoard() != null ? recap.getScoreBoard().getVersion() : 0);
-
-        // 填写状态
-        vo.setScoreFilled(!scoreItems.isEmpty());
-        vo.setReviewFilled(isReviewFilled(participantItems));
-
-        return vo;
-    }
-
-    // ==================== 内部方法 ====================
-
-    private List<RecapDetailVO.ParticipantItem> buildParticipants(Recap recap) {
-        String currentUserId = recap.getUserId();
-        Set<String> reviewedKeys = recap.getMyReviews().keySet();
-        List<RecapDetailVO.ParticipantItem> items = new ArrayList<>();
-
-        for (RegistrationData reg : recap.getParticipants()) {
-            String uid = reg.getUserId();
-            if (uid.equals(currentUserId)) {
-                continue;
-            }
-
-            RecapDetailVO.ParticipantItem item = new RecapDetailVO.ParticipantItem();
-            item.setUserId(uid);
-
-            UserData userData = userGateway.findByUserId(uid).orElse(null);
-            if (userData != null) {
-                item.setNickname(userData.getNickname());
-                item.setAvatarUrl(userData.getAvatarUrl());
-            }
-
-            List<String> reviewedTypes = new ArrayList<>();
-            for (RecapTypeEnum type : RecapTypeEnum.values()) {
-                String key = uid + ":" + type.name();
-                if (reviewedKeys.contains(key)) {
-                    reviewedTypes.add(type.name());
-                }
-            }
-            item.setReviewedTypes(reviewedTypes);
-
-            items.add(item);
-        }
-        return items;
-    }
-
-    private Map<String, List<RecapDetailVO.ReviewItem>> buildMyReviewsMap(Recap recap) {
-        Map<String, List<RecapDetailVO.ReviewItem>> map = new LinkedHashMap<>();
-        for (ReviewData review : recap.getMyReviews().values()) {
-            RecapDetailVO.ReviewItem item = new RecapDetailVO.ReviewItem();
-            item.setToUserId(review.getToUserId());
-            item.setType(review.getReviewType().name());
-            item.setValue(review.getReviewValue());
-            map.computeIfAbsent(review.getToUserId(), k -> new ArrayList<>()).add(item);
-        }
-        return map;
-    }
-
-    private List<RecapDetailVO.ScoreItem> buildScoreItems(Recap recap) {
-        if (recap.getScoreBoard() == null || recap.getScoreBoard().getScores() == null) {
-            return new ArrayList<>();
-        }
-        return recap.getScoreBoard().getScores().stream()
-                .map(this::toScoreItem)
-                .toList();
-    }
-
-    private boolean isReviewFilled(List<RecapDetailVO.ParticipantItem> participants) {
-        if (participants.isEmpty()) {
-            return true;
-        }
-        for (RecapDetailVO.ParticipantItem p : participants) {
-            List<String> reviewed = p.getReviewedTypes();
-            if (reviewed == null || reviewed.size() < RecapTypeEnum.values().length) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private RecapDetailVO.ScoreItem toScoreItem(ScoreRecordData data) {
-        RecapDetailVO.ScoreItem item = new RecapDetailVO.ScoreItem();
-        item.setBizId(data.getBizId());
-        item.setSetNum(data.getSetNumber());
-        item.setSetFormat(data.getSetFormat() != null ? data.getSetFormat().name() : null);
-        item.setSideAPlayer1(data.getSideAPlayer1());
-        item.setSideAPlayer2(data.getSideAPlayer2());
-        item.setSideBPlayer1(data.getSideBPlayer1());
-        item.setSideBPlayer2(data.getSideBPlayer2());
-        item.setSideAScore(data.getSideAScore());
-        item.setSideBScore(data.getSideBScore());
-        return item;
-    }
 }

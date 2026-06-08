@@ -14,7 +14,11 @@ import com.rally.domain.user.model.UserProfile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -32,6 +36,32 @@ public class UserProfileGatewayImpl implements UserProfileGateway {
         TennisProfileData profileData = profileOpt.map(TennisProfileConvertMapper.INSTANCE::toData).orElse(null);
 
         return UserProfile.create(userData, profileData);
+    }
+
+    @Override
+    public List<UserProfile> findByUserIds(List<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return List.of();
+        }
+        // 批量查询用户和网球档案
+        Map<String, UserPO> userMap = userRepository.findByUserIds(userIds).stream()
+                .collect(Collectors.toMap(UserPO::getUserId, u -> u, (a, b) -> a));
+        Map<String, TennisProfilePO> profileMap = tennisProfileRepository.findByUserIds(userIds).stream()
+                .collect(Collectors.toMap(TennisProfilePO::getUserId, p -> p, (a, b) -> a));
+        // 按 userIds 顺序组装 UserProfile
+        List<UserProfile> result = new ArrayList<>(userIds.size());
+        for (String uid : userIds) {
+            UserPO userPO = userMap.get(uid);
+            TennisProfilePO profilePO = profileMap.get(uid);
+            if (userPO == null) {
+                result.add(null);
+                continue;
+            }
+            UserData userData = UserConvertMapper.INSTANCE.toData(userPO);
+            TennisProfileData profileData = profilePO != null ? TennisProfileConvertMapper.INSTANCE.toData(profilePO) : null;
+            result.add(UserProfile.create(userData, profileData));
+        }
+        return result;
     }
 
     @Override

@@ -105,4 +105,11 @@ public interface MeetupGateway {
      * @return 符合筛选条件的结果列表
      */
     List<MeetupData> listByMeetupIdsWithFilter(MeetupListQueryParam param);
+
+    /**
+     * 统计用户发布的比赛次数
+     * @param userId 用户 ID
+     * @return 发布次数
+     */
+    long countByCreatorId(String userId);
 }

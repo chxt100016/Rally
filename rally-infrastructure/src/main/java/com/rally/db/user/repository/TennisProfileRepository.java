@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,6 +21,18 @@ public class TennisProfileRepository {
 
     public Optional<TennisProfilePO> findByUserId(String userId) {
         return tennisProfileService.findByUserId(userId);
+    }
+
+    /**
+     * 批量查询网球档案（按 userId 列表）
+     */
+    public List<TennisProfilePO> findByUserIds(List<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return List.of();
+        }
+        return tennisProfileService.lambdaQuery()
+                .in(TennisProfilePO::getUserId, userIds)
+                .list();
     }
 
     public boolean updateById(TennisProfilePO profile) {

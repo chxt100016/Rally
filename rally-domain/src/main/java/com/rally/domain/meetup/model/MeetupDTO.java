@@ -1,7 +1,6 @@
 package com.rally.domain.meetup.model;
 
 import com.rally.domain.meetup.enums.*;
-import com.rally.domain.recap.model.RecapDTO;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -9,12 +8,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 约球详情/卡片视图
+ * 约球基本信息 DTO（不含计算字段和关联信息）
  */
 @Data
-public class MeetupVO {
+public class MeetupDTO {
     private String meetupId;
-    private String creatorId;
     private String title;
     private MatchTypeEnum matchType;
     private Integer maxPlayers;
@@ -36,25 +34,4 @@ public class MeetupVO {
     private List<CostItem> costItems;
     private MeetupStatusEnum status;
     private LocalDateTime createTime;
-
-    // 计算字段
-    /** 每人费用（分） */
-    private Integer perPersonCost;
-    /** 距离（米），距离排序时返回 */
-    private Double distanceMeters;
-    /** 操作状态 */
-    private ActionStateEnum actionState;
-    /** 退出是否扣分 */
-    private Boolean quitWillPenalize;
-
-    // 发布者信息
-    private String creatorNickname;
-    private String creatorAvatarUrl;
-    private BigDecimal creatorNtrp;
-
-    // 参与者列表
-    private List<ParticipantVO> participants;
-
-    // 赛后收集（活动结束时返回）
-    private RecapDTO recap;
 }

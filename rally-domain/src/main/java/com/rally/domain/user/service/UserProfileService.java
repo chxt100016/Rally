@@ -9,6 +9,9 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 用户档案领域服务
@@ -45,6 +48,20 @@ public class UserProfileService {
         UserProfile profile = userProfileGateway.findByUserId(userId);
         profile.assertExist();
         return profile;
+    }
+
+    /**
+     * 批量查询用户档案（key = userId, value = UserProfile，过滤掉不存在的用户）
+     * @param userIds 用户 ID 列表
+     * @return userId → UserProfile 映射
+     */
+    public Map<String, UserProfile> listProfiles(List<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Map.of();
+        }
+        return userProfileGateway.findByUserIds(userIds).stream()
+                .filter(p -> p != null && p.getUser() != null)
+                .collect(Collectors.toMap(p -> p.getUser().getUserId(), p -> p, (a, b) -> a));
     }
 
     /**

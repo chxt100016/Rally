@@ -167,4 +167,9 @@ public class MeetupGatewayImpl implements MeetupGateway {
         List<MeetupPO> poList = meetupRepository.listByMeetupIdsWithFilter(param);
         return MeetupConvertMapper.INSTANCE.toMeetupDataList(poList);
     }
+
+    @Override
+    public long countByCreatorId(String userId) {
+        return meetupRepository.countByCreatorId(userId);
+    }
 }
