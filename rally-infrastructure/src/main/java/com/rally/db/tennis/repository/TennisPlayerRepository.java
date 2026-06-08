@@ -24,4 +24,8 @@ public class TennisPlayerRepository {
                 .orderByAsc(TennisPlayerPO::getRank)
                 .list();
     }
+
+    public List<TennisPlayerPO> listByPlayerIds(List<String> playerIds) {
+        return tennisPlayerService.listByPlayerIds(playerIds);
+    }
 }

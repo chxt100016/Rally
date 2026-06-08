@@ -5,6 +5,7 @@ import com.rally.db.tennis.service.TennisMatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -33,5 +34,9 @@ public class TennisMatchRepository {
 
     public boolean hasActiveMatches() {
         return tennisMatchService.hasActiveMatches();
+    }
+
+    public List<TennisMatchPO> findByTournamentIdsAndDate(List<String> tournamentIds, LocalDate date) {
+        return tennisMatchService.findByTournamentIdsAndDate(tournamentIds, date);
     }
 }

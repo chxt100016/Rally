@@ -82,4 +82,13 @@ public class TennisPlayerService extends ServiceImpl<TennisPlayerMapper, TennisP
     private static String playerKey(TennisPlayerPO po) {
         return po.getTour() + ":" + po.getPlayerId();
     }
+
+    public List<TennisPlayerPO> listByPlayerIds(List<String> playerIds) {
+        if (CollectionUtils.isEmpty(playerIds)) {
+            return List.of();
+        }
+        return this.lambdaQuery()
+                .in(TennisPlayerPO::getPlayerId, playerIds)
+                .list();
+    }
 }

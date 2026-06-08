@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -15,5 +17,16 @@ public class TennisTournamentEntryRepository {
 
     public void saveEntries(List<TennisTournamentEntryPO> entries) {
         tennisTournamentEntryService.saveEntries(entries);
+    }
+
+    public Map<String, Short> listSeedMapByDrawIds(List<Long> drawIds) {
+        return tennisTournamentEntryService.listByDrawIds(drawIds)
+                .stream()
+                .filter(e -> e.getSeed() != null && e.getSeed() > 0)
+                .collect(Collectors.toMap(
+                        e -> e.getDrawId() + ":" + e.getPlayerId(),
+                        TennisTournamentEntryPO::getSeed,
+                        (a, b) -> a
+                ));
     }
 }

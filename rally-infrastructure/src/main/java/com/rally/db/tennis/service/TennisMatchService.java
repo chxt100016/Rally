@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -70,5 +71,15 @@ public class TennisMatchService extends ServiceImpl<TennisMatchMapper, TennisMat
         return this.lambdaQuery()
                 .in(TennisMatchPO::getStatus, "live", "scheduled")
                 .exists();
+    }
+
+    public List<TennisMatchPO> findByTournamentIdsAndDate(List<String> tournamentIds, LocalDate date) {
+        if (CollectionUtils.isEmpty(tournamentIds) || date == null) {
+            return List.of();
+        }
+        return this.lambdaQuery()
+                .in(TennisMatchPO::getTournamentId, tournamentIds)
+                .eq(TennisMatchPO::getMatchDate, date)
+                .list();
     }
 }

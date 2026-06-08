@@ -111,6 +111,16 @@ public class TennisTranslationService {
     }
 
     /**
+     * 批量翻译：赛事名、球场名、球员名等
+     */
+    public Map<TranslationKey, String> translate(Set<TranslationKey> keys, TranslationLanguageEnum language) {
+        if (keys == null || keys.isEmpty()) {
+            return Map.of();
+        }
+        return this.translationQueryService.query(keys);
+    }
+
+    /**
      * 翻译球员弹窗 VO：主球员姓名 + 所有对手姓名（晋级路线、前方对手、出局信息）
      */
     public void playerTournament(PlayerTournamentVO vo, TranslationLanguageEnum language) {
