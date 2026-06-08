@@ -28,7 +28,7 @@ mvn clean package -DskipTests
 - FastJson2 作为 HTTP 消息转换器（`rally-infrastructure/config/FastJsonConfigClass.java`）
 - 枚举的name要使用大写
 - 对外返回的对象都以DTO结尾
-- 除了链式调用外，不要随意在一行代码内肆意换行
+- 除了链式调用外，一行代码不要换行，不要因为方法参数过多在调用方法的时候换行。
 - 雪花id使用场景，比如bizId的生成统一用mybatis-plus的IdWorker.getIdStr()
 - 获取领域对象，不要调用gateway 而是用对应的领域service
 - 异常码`com.rally.domain.auth.enums.BizErrorCode`
