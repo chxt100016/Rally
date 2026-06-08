@@ -3,7 +3,7 @@ package com.rally.recap;
 import com.rally.utils.UserContext;
 import com.rally.domain.recap.enums.RecapOverallStatus;
 import com.rally.domain.recap.model.Recap;
-import com.rally.domain.recap.model.RecapCmd;
+import com.rally.domain.recap.model.RecapSubmitCmd;
 import com.rally.domain.recap.service.RecapDomainService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class RecapAppService {
      *
      * @return 整体状态枚举
      */
-    public RecapOverallStatus submit(RecapCmd cmd) {
+    public RecapOverallStatus submit(RecapSubmitCmd cmd) {
         String userId = UserContext.get();
 
         // 1. 加载聚合根（含业务校验）

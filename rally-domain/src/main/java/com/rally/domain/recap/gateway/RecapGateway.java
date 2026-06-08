@@ -2,7 +2,7 @@ package com.rally.domain.recap.gateway;
 
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.recap.model.Recap;
-import com.rally.domain.recap.model.RecapCmd;
+import com.rally.domain.recap.model.RecapSubmitCmd;
 import com.rally.domain.review.model.ReviewData;
 import com.rally.domain.review.model.ScoreRecordData;
 
@@ -51,7 +51,7 @@ public interface RecapGateway {
      * @param targetReviews 前端提交的目标评价
      */
     void submitReviews(String meetupId, String fromUserId,
-                       List<ReviewData> myReviews, List<RecapCmd.ReviewItem> targetReviews);
+                       List<ReviewData> myReviews, List<RecapSubmitCmd.ReviewItem> targetReviews);
 
     // ==================== 比分提交 ====================
 
@@ -68,6 +68,6 @@ public interface RecapGateway {
      */
     void submitScores(String meetupId, String userId,
                       List<ScoreRecordData> currentScores,
-                      List<RecapCmd.ScoreItem> targetScores,
+                      List<RecapSubmitCmd.ScoreItem> targetScores,
                       Integer clientVersion);
 }

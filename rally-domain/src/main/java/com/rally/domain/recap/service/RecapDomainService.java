@@ -6,7 +6,7 @@ import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.RegistrationData;
 import com.rally.domain.recap.gateway.RecapGateway;
 import com.rally.domain.recap.model.Recap;
-import com.rally.domain.recap.model.RecapCmd;
+import com.rally.domain.recap.model.RecapSubmitCmd;
 import com.rally.domain.recap.model.RecapFactory;
 import com.rally.domain.recap.model.ScoreConflictException;
 import com.rally.domain.review.model.ReviewData;
@@ -92,7 +92,7 @@ public class RecapDomainService {
      * 提交评价（独立事务，调用 gateway 完成 diff 落库）
      */
     @Transactional
-    public void submitReviews(Recap recap, List<RecapCmd.ReviewItem> targetReviews) {
+    public void submitReviews(Recap recap, List<RecapSubmitCmd.ReviewItem> targetReviews) {
         recapGateway.submitReviews(
                 recap.getMeetupId(), recap.getUserId(),
                 new ArrayList<>(recap.getMyReviews().values()),
@@ -105,7 +105,7 @@ public class RecapDomainService {
      * @return true=保存成功，false=版本冲突（比分未保存）
      */
     @Transactional
-    public boolean submitScores(Recap recap, List<RecapCmd.ScoreItem> targetScores, Integer clientVersion) {
+    public boolean submitScores(Recap recap, List<RecapSubmitCmd.ScoreItem> targetScores, Integer clientVersion) {
         List<ScoreRecordData> currentScores = recap.getScoreBoard() != null
                 ? recap.getScoreBoard().getScores() : null;
 

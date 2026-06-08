@@ -10,7 +10,7 @@ import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.recap.enums.RecapTypeEnum;
 import com.rally.domain.recap.gateway.RecapGateway;
-import com.rally.domain.recap.model.RecapCmd;
+import com.rally.domain.recap.model.RecapSubmitCmd;
 import com.rally.domain.recap.model.RecapFactory;
 import com.rally.domain.recap.model.ScoreConflictException;
 import com.rally.domain.review.model.ReviewData;
@@ -67,7 +67,7 @@ public class RecapGatewayImpl implements RecapGateway {
 
     @Override
     public void submitReviews(String meetupId, String fromUserId,
-                              List<ReviewData> myReviews, List<RecapCmd.ReviewItem> targetReviews) {
+                              List<ReviewData> myReviews, List<RecapSubmitCmd.ReviewItem> targetReviews) {
         // 1. 构建当前评价 map，键 = (toUser, type)
         Map<String, ReviewData> existingMap = new LinkedHashMap<>();
         if (myReviews != null) {
@@ -78,18 +78,18 @@ public class RecapGatewayImpl implements RecapGateway {
         }
 
         // 2. 构建目标 map
-        Map<String, RecapCmd.ReviewItem> targetMap = new LinkedHashMap<>();
+        Map<String, RecapSubmitCmd.ReviewItem> targetMap = new LinkedHashMap<>();
         if (targetReviews != null) {
-            for (RecapCmd.ReviewItem item : targetReviews) {
+            for (RecapSubmitCmd.ReviewItem item : targetReviews) {
                 String key = item.getToUserId() + ":" + item.getType().name();
                 targetMap.put(key, item);
             }
         }
 
         // 3. 遍历目标：找新增和更新
-        for (Map.Entry<String, RecapCmd.ReviewItem> entry : targetMap.entrySet()) {
+        for (Map.Entry<String, RecapSubmitCmd.ReviewItem> entry : targetMap.entrySet()) {
             String key = entry.getKey();
-            RecapCmd.ReviewItem target = entry.getValue();
+            RecapSubmitCmd.ReviewItem target = entry.getValue();
             ReviewData existing = existingMap.get(key);
 
             if (existing == null) {
@@ -124,7 +124,7 @@ public class RecapGatewayImpl implements RecapGateway {
     @Override
     public void submitScores(String meetupId, String userId,
                              List<ScoreRecordData> currentScores,
-                             List<RecapCmd.ScoreItem> targetScores,
+                             List<RecapSubmitCmd.ScoreItem> targetScores,
                              Integer clientVersion) {
         // 1. 版本校验
         int serverVersion = 0;
@@ -155,9 +155,9 @@ public class RecapGatewayImpl implements RecapGateway {
             }
         }
 
-        Map<Integer, RecapCmd.ScoreItem> targetMap = new LinkedHashMap<>();
+        Map<Integer, RecapSubmitCmd.ScoreItem> targetMap = new LinkedHashMap<>();
         if (targetScores != null) {
-            for (RecapCmd.ScoreItem item : targetScores) {
+            for (RecapSubmitCmd.ScoreItem item : targetScores) {
                 targetMap.put(item.getSetNum(), item);
             }
         }
@@ -166,9 +166,9 @@ public class RecapGatewayImpl implements RecapGateway {
         int newVersion = serverVersion + 1;
 
         // 4. 遍历目标：找新增和更新
-        for (Map.Entry<Integer, RecapCmd.ScoreItem> entry : targetMap.entrySet()) {
+        for (Map.Entry<Integer, RecapSubmitCmd.ScoreItem> entry : targetMap.entrySet()) {
             Integer setNum = entry.getKey();
-            RecapCmd.ScoreItem target = entry.getValue();
+            RecapSubmitCmd.ScoreItem target = entry.getValue();
             ScoreRecordData existing = existingMap.get(setNum);
 
             if (existing == null) {
@@ -199,7 +199,7 @@ public class RecapGatewayImpl implements RecapGateway {
     /**
      * 比分是否有变化
      */
-    private boolean isScoreChanged(ScoreRecordData existing, RecapCmd.ScoreItem target) {
+    private boolean isScoreChanged(ScoreRecordData existing, RecapSubmitCmd.ScoreItem target) {
         String existingFormat = existing.getSetFormat() != null ? existing.getSetFormat().name() : null;
         if (!Objects.equals(existingFormat, target.getSetFormat())) return true;
         if (!Objects.equals(existing.getSideAPlayer1(), target.getSideAPlayer1())) return true;
@@ -214,7 +214,7 @@ public class RecapGatewayImpl implements RecapGateway {
     /**
      * 构建 ScoreRecordPO
      */
-    private ScoreRecordPO buildScorePO(String meetupId, String userId, RecapCmd.ScoreItem item) {
+    private ScoreRecordPO buildScorePO(String meetupId, String userId, RecapSubmitCmd.ScoreItem item) {
         ScoreRecordPO po = new ScoreRecordPO();
         po.setRallyMeetupId(meetupId);
         po.setSetNumber(item.getSetNum());
