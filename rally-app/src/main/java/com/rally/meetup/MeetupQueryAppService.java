@@ -57,9 +57,8 @@ public class MeetupQueryAppService {
 
         // 1 获取聚合根（含报名记录）
         Meetup meetup = meetupDomainService.get(meetupId);
-        MeetupData data = meetup.getData();
 
-        // 2 按视角获取参与者列表，批量查询用户信息
+        // 2 按视角获取参与者列表，批量查询用户信息（creatorId 兜底，确保创建人信息可查）
         List<String> participantUserIds = meetup.getParticipantUserIds(currentUserId);
         List<String> allQueryUserIds = new ArrayList<>(participantUserIds);
         allQueryUserIds.add(meetup.getCreatorId());
@@ -67,7 +66,7 @@ public class MeetupQueryAppService {
 
         ActionStateEnum actionState = meetup.getActionState(currentUserId);
         return new MeetupDetailDTO()
-                .setMeetup(MeetupAppConvertMapper.INSTANCE.toMeetupDTO(data))
+                .setMeetup(MeetupAppConvertMapper.INSTANCE.toMeetupDTO(meetup.getData()))
                 .setActionState(actionState)
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
                 .setParticipants(buildParticipantVOList(meetup, participantUserIds, profileMap))

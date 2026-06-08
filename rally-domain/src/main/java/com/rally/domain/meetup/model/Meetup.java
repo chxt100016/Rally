@@ -381,28 +381,22 @@ public class Meetup {
 
 
     /**
-     * 按视角获取参与者 userId 列表（排除创建人）
+     * 按视角获取报名参与者 userId 列表
      * <ul>
      *   <li>创建人视角：已批准 + 待审批</li>
      *   <li>非创建人视角：仅已批准</li>
      * </ul>
      * @param userId 当前用户 ID，内部判断是否为创建人
-     * @return 参与者 userId 列表
+     * @return 报名参与者 userId 列表
      */
     public List<String> getParticipantUserIds(String userId) {
         List<String> userIds = new ArrayList<>();
-        // 已批准的报名者（排除创建人）
-        registrations.stream()
-                .filter(r -> r.getStatus() == RegistrationStatusEnum.APPROVED)
-                .map(RegistrationData::getUserId)
-                .filter(uid -> !uid.equals(data.getCreatorId()))
-                .forEach(userIds::add);
-        // 创建人视角额外包含待审批
-        if (isCreator(userId)) {
-            registrations.stream()
-                    .filter(r -> r.getStatus() == RegistrationStatusEnum.PENDING)
-                    .map(RegistrationData::getUserId)
-                    .forEach(userIds::add);
+        for (RegistrationData r : registrations) {
+            if (r.getStatus() == RegistrationStatusEnum.APPROVED) {
+                userIds.add(r.getUserId());
+            } else if (isCreator(userId) && r.getStatus() == RegistrationStatusEnum.PENDING) {
+                userIds.add(r.getUserId());
+            }
         }
         return userIds;
     }

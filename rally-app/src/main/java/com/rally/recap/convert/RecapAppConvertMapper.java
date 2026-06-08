@@ -1,9 +1,7 @@
 package com.rally.recap.convert;
 
-import com.rally.domain.recap.model.RecapCmd;
 import com.rally.domain.recap.model.RecapDTO;
 import com.rally.recap.model.RecapDetailDTO;
-import com.rally.recap.model.RecapSubmitDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -19,14 +17,6 @@ import java.util.Map;
 public interface RecapAppConvertMapper {
 
     RecapAppConvertMapper INSTANCE = Mappers.getMapper(RecapAppConvertMapper.class);
-
-    // ==================== Submit DTO -> Cmd ====================
-
-    RecapCmd toCmd(RecapSubmitDTO dto);
-
-    RecapCmd.ScoreItem toScoreItemCmd(RecapSubmitDTO.ScoreItem dto);
-
-    RecapCmd.ReviewItem toReviewItemCmd(RecapSubmitDTO.ReviewItem dto);
 
     // ==================== Detail VO -> DTO ====================
 
