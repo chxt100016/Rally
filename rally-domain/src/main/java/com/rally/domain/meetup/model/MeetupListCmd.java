@@ -6,6 +6,7 @@ import com.rally.domain.meetup.enums.MeetupSortEnum;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class MeetupListCmd {
     private String cityCode;
 
     /** 排序方式 */
-    @NotBlank(message = "请选择排序方式")
+    @NotNull(message = "请选择排序方式")
     private MeetupSortEnum sort;
 
     /** 页码，默认1 */
