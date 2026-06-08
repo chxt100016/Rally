@@ -1,0 +1,29 @@
+package com.rally.domain.meetup.model;
+
+import com.rally.domain.meetup.enums.*;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+/**
+ * 约球列表卡片 DTO（纯数据，不含计算字段）
+ */
+@Data
+public class MeetupCardDTO {
+    private String meetupId;
+    private String title;
+    private MatchTypeEnum matchType;
+    private Integer maxPlayers;
+    private Integer currentPlayers;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private BigDecimal duration;
+    private String courtName;
+    private String courtAddress;
+    private LevelModeEnum levelMode;
+    private String levelValue;
+    private GenderLimitEnum genderLimit;
+    private JoinModeEnum joinMode;
+    private MeetupStatusEnum status;
+}

@@ -31,17 +31,12 @@ public interface MeetupAppConvertMapper {
 
     List<MeetupVO> toMeetupVOList(List<MeetupData> dataList);
 
-    // ==================== MeetupData → MeetupCardVO ====================
+    // ==================== MeetupData → MeetupCardDTO ====================
 
     @Mapping(target = "meetupId", source = "bizId")
-    @Mapping(target = "perPersonCost", ignore = true)
-    @Mapping(target = "distanceMeters", ignore = true)
-    @Mapping(target = "actionState", ignore = true)
-    @Mapping(target = "creatorNickname", ignore = true)
-    @Mapping(target = "creatorAvatarUrl", ignore = true)
-    MeetupCardVO toMeetupCardVO(MeetupData data);
+    MeetupCardDTO toMeetupCardDTO(MeetupData data);
 
-    List<MeetupCardVO> toMeetupCardVOList(List<MeetupData> dataList);
+    List<MeetupCardDTO> toMeetupCardDTOList(List<MeetupData> dataList);
 
     // ==================== RegistrationData → RegistrationVO ====================
 

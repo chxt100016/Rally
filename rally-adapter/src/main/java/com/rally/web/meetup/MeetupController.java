@@ -58,8 +58,8 @@ public class MeetupController {
     /**
      * 约球详情
      */
-    @GetMapping("/detail")
-    public Result<MeetupVO> detail(@RequestParam("meetupId") String meetupId) {
+    @GetMapping("/detail/{meetupId}")
+    public Result<MeetupVO> detail(@PathVariable("meetupId") String meetupId) {
         return Result.ok(meetupQueryService.detail(meetupId));
     }
 }

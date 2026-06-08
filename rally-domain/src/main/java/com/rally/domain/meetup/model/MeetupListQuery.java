@@ -1,6 +1,7 @@
 package com.rally.domain.meetup.model;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.rally.domain.meetup.enums.MeetupSortEnum;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -19,8 +20,8 @@ public class MeetupListQuery {
     @NotBlank(message = "请选择城市")
     private String cityCode;
 
-    /** 排序方式：time / distance */
-    private String sort;
+    /** 排序方式 */
+    private MeetupSortEnum sort;
 
     /** 页码，默认1 */
     @Min(value = 1, message = "页码最小为1")
