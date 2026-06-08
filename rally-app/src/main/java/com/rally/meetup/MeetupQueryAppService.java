@@ -6,14 +6,11 @@ import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.MeetupQueryDomainService;
-import com.rally.domain.recap.enums.RecapTypeEnum;
 import com.rally.domain.recap.model.Recap;
 import com.rally.domain.recap.model.RecapDTO;
 import com.rally.domain.recap.service.RecapDomainService;
 import com.rally.domain.review.model.ReviewData;
 import com.rally.domain.review.model.ScoreRecordData;
-import com.rally.domain.user.gateway.UserGateway;
-import com.rally.domain.user.model.UserData;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileService;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
@@ -37,7 +34,6 @@ public class MeetupQueryAppService {
     private final MeetupGateway meetupGateway;
     private final UserProfileService userProfileService;
     private final RecapDomainService recapDomainService;
-    private final UserGateway userGateway;
 
     private static final MeetupAppConvertMapper MAPPER = MeetupAppConvertMapper.INSTANCE;
 
@@ -66,13 +62,15 @@ public class MeetupQueryAppService {
         List<String> allUserIds = meetup.getAllParticipantUserIds();
         Map<String, UserProfile> profileMap = userProfileService.listProfiles(allUserIds);
 
-        return new MeetupDetailDTO()
-                .setMeetup(MAPPER.toMeetupDTO(data))
-                .setActionState(meetup.getActionState(currentUserId))
-                .setCreator(buildCreatorDTO(data.getCreatorId(), profileMap))
-                .setParticipants(buildParticipantVOList(allUserIds, data.getCreatorId(), profileMap))
-                .setRecap(data.getStatus() == MeetupStatusEnum.FINISHED ? buildRecap(meetupId) : null)
-                ;
+        MeetupDetailDTO detailDTO = new MeetupDetailDTO();
+        detailDTO.setMeetup(MAPPER.toMeetupDTO(data));
+        detailDTO.setActionState(meetup.getActionState(currentUserId));
+        detailDTO.setCreator(buildCreatorDTO(data.getCreatorId(), profileMap));
+        detailDTO.setParticipants(buildParticipantVOList(allUserIds, data.getCreatorId(), profileMap));
+        if (data.getStatus() == MeetupStatusEnum.FINISHED) {
+            detailDTO.setRecap(buildRecap(meetupId));
+        }
+        return detailDTO;
     }
 
 
@@ -126,96 +124,27 @@ public class MeetupQueryAppService {
     public RecapDTO buildRecap(String meetupId) {
         Recap recap = recapDomainService.get(UserContext.get(), meetupId);
 
-        RecapDTO vo = new RecapDTO();
-
-        // 参与人列表（排除自己）
-        List<RecapDTO.ParticipantItem> participantItems = buildParticipants(recap);
-        vo.setParticipants(participantItems);
-
         // 当前用户已填评价（按 toUser 分组）
-        Map<String, List<RecapDTO.ReviewItem>> myReviewsMap = buildMyReviewsMap(recap);
-        vo.setMyReviews(myReviewsMap);
-
-        // 比分
-        List<RecapDTO.ScoreItem> scoreItems = buildScoreItems(recap);
-        vo.setScores(scoreItems);
-        vo.setScoreVersion(recap.getScoreBoard() != null ? recap.getScoreBoard().getVersion() : 0);
-
-        // 填写状态
-        vo.setScoreFilled(!scoreItems.isEmpty());
-        vo.setReviewFilled(isReviewFilled(participantItems));
-
-        return vo;
-    }
-
-    // ==================== 内部方法 ====================
-
-    private List<RecapDTO.ParticipantItem> buildParticipants(Recap recap) {
-        String currentUserId = recap.getUserId();
-        Set<String> reviewedKeys = recap.getMyReviews().keySet();
-        List<RecapDTO.ParticipantItem> items = new ArrayList<>();
-
-        for (RegistrationData reg : recap.getParticipants()) {
-            String uid = reg.getUserId();
-            if (uid.equals(currentUserId)) {
-                continue;
-            }
-
-            RecapDTO.ParticipantItem item = new RecapDTO.ParticipantItem();
-            item.setUserId(uid);
-
-            UserData userData = userGateway.findByUserId(uid).orElse(null);
-            if (userData != null) {
-                item.setNickname(userData.getNickname());
-                item.setAvatarUrl(userData.getAvatarUrl());
-            }
-
-            List<String> reviewedTypes = new ArrayList<>();
-            for (RecapTypeEnum type : RecapTypeEnum.values()) {
-                String key = uid + ":" + type.name();
-                if (reviewedKeys.contains(key)) {
-                    reviewedTypes.add(type.name());
-                }
-            }
-            item.setReviewedTypes(reviewedTypes);
-
-            items.add(item);
-        }
-        return items;
-    }
-
-    private Map<String, List<RecapDTO.ReviewItem>> buildMyReviewsMap(Recap recap) {
-        Map<String, List<RecapDTO.ReviewItem>> map = new LinkedHashMap<>();
+        Map<String, List<RecapDTO.ReviewItem>> myReviewsMap = new LinkedHashMap<>();
         for (ReviewData review : recap.getMyReviews().values()) {
             RecapDTO.ReviewItem item = new RecapDTO.ReviewItem();
             item.setToUserId(review.getToUserId());
             item.setType(review.getReviewType().name());
             item.setValue(review.getReviewValue());
-            map.computeIfAbsent(review.getToUserId(), k -> new ArrayList<>()).add(item);
+            myReviewsMap.computeIfAbsent(review.getToUserId(), k -> new ArrayList<>()).add(item);
         }
-        return map;
-    }
 
-    private List<RecapDTO.ScoreItem> buildScoreItems(Recap recap) {
-        if (recap.getScoreBoard() == null || recap.getScoreBoard().getScores() == null) {
-            return new ArrayList<>();
-        }
-        return recap.getScoreBoard().getScores().stream()
-                .map(this::toScoreItem)
-                .toList();
-    }
+        // 比分
+        List<RecapDTO.ScoreItem> scoreItems = recap.getScoreBoard() != null && recap.getScoreBoard().getScores() != null
+                ? recap.getScoreBoard().getScores().stream().map(this::toScoreItem).toList()
+                : List.of();
 
-    private boolean isReviewFilled(List<RecapDTO.ParticipantItem> participants) {
-        if (participants.isEmpty()) {
-            return true;
-        }
-        for (RecapDTO.ParticipantItem p : participants) {
-            List<String> reviewed = p.getReviewedTypes();
-            if (reviewed == null || reviewed.size() < RecapTypeEnum.values().length) {
-                return false;
-            }
-        }
-        return true;
+        RecapDTO dto = new RecapDTO();
+        dto.setMyReviews(myReviewsMap);
+        dto.setScores(scoreItems);
+        dto.setScoreVersion(recap.getScoreBoard() != null ? recap.getScoreBoard().getVersion() : 0);
+        dto.setScoreFilled(!scoreItems.isEmpty());
+        return dto;
     }
 
     private RecapDTO.ScoreItem toScoreItem(ScoreRecordData data) {

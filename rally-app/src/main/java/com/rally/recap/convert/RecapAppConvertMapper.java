@@ -33,8 +33,6 @@ public interface RecapAppConvertMapper {
     @Mapping(target = "myReviews", expression = "java(flattenReviewMap(vo.getMyReviews()))")
     RecapDetailDTO toDetailDTO(RecapDTO vo);
 
-    RecapDetailDTO.ParticipantDTO toParticipantDTO(RecapDTO.ParticipantItem item);
-
     RecapDetailDTO.ReviewDTO toReviewDTO(RecapDTO.ReviewItem item);
 
     RecapDetailDTO.ScoreDTO toScoreDTO(RecapDTO.ScoreItem item);

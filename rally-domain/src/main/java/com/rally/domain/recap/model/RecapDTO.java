@@ -6,13 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 赛后收集详情（合并到 MeetupVO.recap 中）
+ * 赛后收集详情
  */
 @Data
 public class RecapDTO {
-
-    // ==================== 参与人列表 ====================
-    private List<ParticipantItem> participants;
 
     // ==================== 当前用户已填评价（按 toUser 分组） ====================
     /** key = toUserId, value = 该用户对应的评价列表 */
@@ -26,20 +23,6 @@ public class RecapDTO {
     // ==================== 填写状态 ====================
     /** 当前用户是否已填比分 */
     private boolean scoreFilled;
-    /** 当前用户是否已填全部评价 */
-    private boolean reviewFilled;
-
-    /**
-     * 参与人条目
-     */
-    @Data
-    public static class ParticipantItem {
-        private String userId;
-        private String nickname;
-        private String avatarUrl;
-        /** 当前用户已对该人评价的 type 列表 */
-        private List<String> reviewedTypes;
-    }
 
     /**
      * 评价条目

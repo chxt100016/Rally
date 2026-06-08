@@ -5,13 +5,10 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * 赛后收集详情 DTO（嵌套在 MeetupDetail 返回中）
+ * 赛后收集详情 DTO
  */
 @Data
 public class RecapDetailDTO {
-
-    // ==================== 参与人列表 ====================
-    private List<ParticipantDTO> participants;
 
     // ==================== 当前用户已填评价 ====================
     private List<ReviewDTO> myReviews;
@@ -22,15 +19,6 @@ public class RecapDetailDTO {
 
     // ==================== 填写状态 ====================
     private boolean scoreFilled;
-    private boolean reviewFilled;
-
-    @Data
-    public static class ParticipantDTO {
-        private String userId;
-        private String nickname;
-        private String avatarUrl;
-        private List<String> reviewedTypes;
-    }
 
     @Data
     public static class ReviewDTO {
