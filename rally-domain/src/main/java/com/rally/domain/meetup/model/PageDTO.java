@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PageVO<T> {
+public class PageDTO<T> {
     /** 数据列表 */
     private List<T> list;
     /** 总数 */

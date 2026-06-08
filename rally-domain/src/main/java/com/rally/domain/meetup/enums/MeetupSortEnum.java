@@ -7,5 +7,6 @@ public enum MeetupSortEnum {
     /** 按时间排序 */
     TIME,
     /** 按距离排序 */
-    DISTANCE
+    DISTANCE,
+    RECOMMEND
 }

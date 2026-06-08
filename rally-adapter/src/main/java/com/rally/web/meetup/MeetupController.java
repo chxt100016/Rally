@@ -3,7 +3,7 @@ package com.rally.web.meetup;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.tennis.model.Result;
 import com.rally.meetup.MeetupAppService;
-import com.rally.meetup.MeetupQueryService;
+import com.rally.meetup.MeetupQueryAppService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +19,7 @@ public class MeetupController {
     private MeetupAppService meetupAppService;
 
     @Resource
-    private MeetupQueryService meetupQueryService;
+    private MeetupQueryAppService meetupQueryAppService;
 
     /**
      * 发布约球
@@ -51,8 +51,8 @@ public class MeetupController {
      * 约球列表
      */
     @PostMapping("/list")
-    public Result<PageVO<MeetupCardVO>> list(@Valid @RequestBody MeetupListQuery query) {
-        return Result.ok(meetupQueryService.list(query));
+    public Result<PageDTO<MeetupCardVO>> list(@Valid @RequestBody MeetupListQuery query) {
+        return Result.ok(meetupQueryAppService.list(query));
     }
 
     /**
@@ -60,6 +60,6 @@ public class MeetupController {
      */
     @GetMapping("/detail/{meetupId}")
     public Result<MeetupVO> detail(@PathVariable("meetupId") String meetupId) {
-        return Result.ok(meetupQueryService.detail(meetupId));
+        return Result.ok(meetupQueryAppService.detail(meetupId));
     }
 }

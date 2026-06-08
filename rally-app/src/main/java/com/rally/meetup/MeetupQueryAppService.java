@@ -1,6 +1,7 @@
 package com.rally.meetup;
 
 import com.rally.cache.UserContext;
+import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.*;
@@ -16,6 +17,7 @@ import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.UserData;
+import com.rally.domain.utils.Assert;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +34,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MeetupQueryService {
+public class MeetupQueryAppService {
 
     private final RegistrationGateway registrationGateway;
     private final UserGateway userGateway;
@@ -46,21 +48,21 @@ public class MeetupQueryService {
     /**
      * 约球列表
      */
-    public PageVO<MeetupCardVO> list(MeetupListQuery query) {
+    public PageDTO<MeetupCardVO> list(MeetupListQuery query) {
         String currentUserId = UserContext.get();
 
-        // 委托领域服务判断查询策略（参数校验在领域层）
-        if (meetupQueryDomainService.isDistanceSort(query)) {
-            return listByDistance(query, currentUserId);
-        } else {
-            return listByTime(query, currentUserId);
-        }
+        return switch (query.getSort()) {
+            case DISTANCE -> listByDistance(query, currentUserId);
+            case TIME -> listByTime(query, currentUserId);
+            default -> null;
+        };
+
     }
 
     /**
      * 按时间排序的列表
      */
-    private PageVO<MeetupCardVO> listByTime(MeetupListQuery query, String currentUserId) {
+    private PageDTO<MeetupCardVO> listByTime(MeetupListQuery query, String currentUserId) {
         // 1. 调用领域服务查询
         QueryResult<MeetupData> result = meetupQueryDomainService.listByTime(query);
 
@@ -72,13 +74,17 @@ public class MeetupQueryService {
                 .map(m -> buildMeetupCardVO(m, currentUserId))
                 .collect(Collectors.toList());
 
-        return new PageVO<>(cardVOs, result.getTotal(), hasMore(result.getList(), query.getPageNo(), query.getPageSize()));
+        return new PageDTO<>(cardVOs, result.getTotal(), hasMore(result.getList(), query.getPageNo(), query.getPageSize()));
     }
 
     /**
      * 按距离排序的列表
      */
-    private PageVO<MeetupCardVO> listByDistance(MeetupListQuery query, String currentUserId) {
+    private PageDTO<MeetupCardVO> listByDistance(MeetupListQuery query, String currentUserId) {
+        // 距离排序必须提供经纬度
+        Assert.notNull(query.getLng(), BizErrorCode.PARAM_ERROR);
+        Assert.notNull(query.getLat(), BizErrorCode.PARAM_ERROR);
+
         // 1. 调用领域服务查询
         QueryResult<NearbyMeetupData> result = meetupQueryDomainService.listByDistance(query);
 
@@ -94,7 +100,7 @@ public class MeetupQueryService {
                 })
                 .collect(Collectors.toList());
 
-        return new PageVO<>(cardVOs, result.getTotal(), hasMore(result.getList(), query.getPageNo(), query.getPageSize()));
+        return new PageDTO<>(cardVOs, result.getTotal(), hasMore(result.getList(), query.getPageNo(), query.getPageSize()));
     }
 
     /**

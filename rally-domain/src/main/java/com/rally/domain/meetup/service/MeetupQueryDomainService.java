@@ -39,9 +39,7 @@ public class MeetupQueryDomainService {
         if (query.getSort() != MeetupSortEnum.DISTANCE) {
             return false;
         }
-        // 距离排序必须提供经纬度
-        Assert.notNull(query.getLng(), BizErrorCode.PARAM_ERROR);
-        Assert.notNull(query.getLat(), BizErrorCode.PARAM_ERROR);
+
         return true;
     }
 
