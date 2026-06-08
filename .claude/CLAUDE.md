@@ -13,8 +13,8 @@ mvn clean package -DskipTests
   - `rally-app → rally-infrastructure`
   - `rally-infrastructure → rally-domain`
 - `rally-adapter`:REST Controller（`com.rally.web`）+ 定时 Job（`com.rally.job`）
-- `rally-app`: 应用服务，编排业务流程，不含领域能力。
-- `rally-domain`:领域层， 领域业务核心规则抽象（通过service和聚合根向外暴露）、仅用Gateway操作数据库
+- `rally-app`: 应用层，编排领域层业务流程，不含领域能力。
+- `rally-domain`:领域层，领域业务核心规则抽象（通过service和聚合根向外暴露）、仅用Gateway操作数据库
 - `rally-infrastructure`:Gateway 实现操作数据库、MyBatis-Plus ORM、外部 API Client、FastJson 配置
 - `start`: Spring Boot 入口，`@MapperScan("com.rally.db")` |
 
@@ -36,4 +36,4 @@ mvn clean package -DskipTests
   - 不如果能力不够可以拓展实现 
   - 使用例子`Assert.notNull(data, BizErrorCode.MEETUP_NOT_FOUND)`
 - 接口出入参数转换放在app层并且使用mapstruct 
-- app层不要try catch，将这个放在业务操作里
+- app层不要try catch，将这个放在领域层的业务操作里
