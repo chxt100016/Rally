@@ -27,7 +27,6 @@ public class RegistrationController {
 
     /**
      * 报名
-     * POST /api/rally/wechat/meetup/registration/join
      */
     @PostMapping("/join")
     public Result<Void> join(@RequestBody @Valid MeetupJoinCmd cmd) {
@@ -37,7 +36,6 @@ public class RegistrationController {
 
     /**
      * 撤回（仅 pending 可撤）
-     * POST /api/rally/wechat/meetup/registration/withdraw
      */
     @PostMapping("/withdraw")
     public Result<Void> withdraw(@RequestBody @Valid MeetupWithdrawCmd cmd) {
@@ -47,7 +45,6 @@ public class RegistrationController {
 
     /**
      * 退出（已加入）
-     * POST /api/rally/wechat/meetup/registration/quit
      */
     @PostMapping("/quit")
     public Result<Void> quit(@RequestBody @Valid MeetupQuitCmd cmd) {
@@ -57,7 +54,6 @@ public class RegistrationController {
 
     /**
      * 审批通过
-     * POST /api/rally/wechat/meetup/registration/approve
      */
     @PostMapping("/approve")
     public Result<Void> approve(@RequestBody @Valid RegistrationApproveCmd cmd) {
@@ -67,7 +63,6 @@ public class RegistrationController {
 
     /**
      * 审批拒绝（仅创建人）
-     * POST /api/rally/wechat/meetup/registration/reject
      */
     @PostMapping("/reject")
     public Result<Void> reject(@RequestBody @Valid RegistrationRejectCmd cmd) {
