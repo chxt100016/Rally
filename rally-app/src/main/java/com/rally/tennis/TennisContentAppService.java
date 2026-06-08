@@ -45,7 +45,7 @@ public class TennisContentAppService {
         // 1. 查询当天的赛事
         List<TennisTournamentPO> tournaments = tennisTournamentRepository.findCurrentTournaments(date);
         if (CollectionUtils.isEmpty(tournaments)) {
-            return "# " + date.format(MONTH_DAY_FMT) + " 赛程安排\n\n当日无赛事";
+            return "# " + date.format(MONTH_DAY_FMT) + " 赛事安排\n\n当日无赛事";
         }
 
         // 2. 查询各赛事当天的比赛
@@ -54,7 +54,7 @@ public class TennisContentAppService {
                 .toList();
         List<TennisMatchPO> matches = tennisMatchRepository.findByTournamentIdsAndDate(tournamentIds, date);
         if (CollectionUtils.isEmpty(matches)) {
-            return "# " + date.format(MONTH_DAY_FMT) + " 赛程安排\n\n当日无比赛";
+            return "# " + date.format(MONTH_DAY_FMT) + " 赛事安排\n\n当日无比赛";
         }
 
         // 3. 查询种子信息 (drawId -> playerId -> seed)
@@ -95,14 +95,14 @@ public class TennisContentAppService {
 
             List<TennisMatchPO> tournamentMatches = matchesByTournament.get(tournamentId);
 
-            // 赛事标题: 赛事名称 月份日期 赛程安排
+            // 赛事标题: 赛事名称 月份日期 赛事安排
             String tournamentName = translations.getOrDefault(
                     TranslationEntityTypeEnum.TOURNAMENT + ":" + tournament.getName(),
                     tournament.getName()
             );
             sb.append("# ").append(tournamentName)
               .append(" ").append(date.format(MONTH_DAY_FMT))
-              .append(" 赛程安排\n");
+              .append(" 赛事安排\n");
             sb.append(buildTournamentInfo(tournament, translations)).append("\n");
 
             // 按球场分组
