@@ -75,7 +75,7 @@ public class RegistrationAppService {
         String userId = UserContext.get();
 
         // 1. 查询约球聚合根（含报名记录）
-        Meetup meetup = meetupDomainService.getAggregate(meetupId);
+        Meetup meetup = meetupDomainService.get(meetupId);
 
         // 2. 退出（聚合根校验 + 持久化），返回是否需扣分
         QuitResult result = registrationDomainService.quit(meetup, userId);
@@ -100,7 +100,7 @@ public class RegistrationAppService {
 
         // 1. 获取约球 ID 并加载聚合根
         String meetupId = registrationDomainService.getMeetupIdByRegistration(registrationId);
-        Meetup meetup = meetupDomainService.getAggregate(meetupId);
+        Meetup meetup = meetupDomainService.get(meetupId);
 
         // 2. 审批通过（聚合根校验 + 持久化）
         registrationDomainService.approve(meetup, registrationId, currentUserId);
@@ -119,7 +119,7 @@ public class RegistrationAppService {
 
         // 1. 获取约球 ID 并加载聚合根
         String meetupId = registrationDomainService.getMeetupIdByRegistration(registrationId);
-        Meetup meetup = meetupDomainService.getAggregate(meetupId);
+        Meetup meetup = meetupDomainService.get(meetupId);
 
         // 2. 审批拒绝（聚合根校验 + 持久化）
         registrationDomainService.reject(meetup, registrationId, currentUserId);

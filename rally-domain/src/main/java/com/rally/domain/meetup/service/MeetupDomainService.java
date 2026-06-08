@@ -1,15 +1,15 @@
 package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
-import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.meetup.enums.*;
+import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
+import com.rally.domain.meetup.enums.ActionStateEnum;
+import com.rally.domain.meetup.enums.JoinModeEnum;
+import com.rally.domain.meetup.enums.MeetupStatusEnum;
+import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
-import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.model.*;
-import com.rally.domain.meetup.model.MeetupPublishCmd;
-import com.rally.domain.system.SystemConfig;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.List;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 约球领域服务
@@ -37,22 +37,11 @@ public class MeetupDomainService {
     private final MeetupPolicy meetupPolicy;
 
     /**
-     * 获取约球聚合根（仅约球数据，适用于编辑/关闭等场景）
-     * @param meetupId 约球ID
-     * @return Meetup 聚合根
-     */
-    public Meetup get(String meetupId) {
-        MeetupData data = meetupGateway.findByBizId(meetupId);
-        Assert.notNull(data, BizErrorCode.MEETUP_NOT_FOUND);
-        return new Meetup(data);
-    }
-
-    /**
      * 获取约球聚合根（含全部报名记录，适用于报名/审批等场景）
      * @param meetupId 约球ID
      * @return Meetup 聚合根（含全部报名记录）
      */
-    public Meetup getAggregate(String meetupId) {
+    public Meetup get(String meetupId) {
         MeetupData data = meetupGateway.findByBizId(meetupId);
         Assert.notNull(data, BizErrorCode.MEETUP_NOT_FOUND);
         List<RegistrationData> registrations = registrationGateway.findByMeetupId(meetupId);

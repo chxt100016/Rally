@@ -55,7 +55,7 @@ public class MeetupQueryAppService {
         String currentUserId = UserContext.get();
 
         // 1 获取聚合根（含报名记录）
-        Meetup meetup = meetupDomainService.getAggregate(meetupId);
+        Meetup meetup = meetupDomainService.get(meetupId);
         MeetupData data = meetup.getData();
 
         // 2 批量查询所有参与者用户信息（创建者 + 已批准报名者，去重）
