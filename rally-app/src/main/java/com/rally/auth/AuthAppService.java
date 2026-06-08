@@ -1,11 +1,11 @@
 package com.rally.auth;
 
 import com.rally.auth.convert.AuthConvertMapper;
-import com.rally.cache.UserContext;
+import com.rally.utils.TokenUtils;
+import com.rally.utils.UserContext;
 import com.rally.domain.auth.enums.ChannelEnum;
 import com.rally.domain.auth.exception.AuthException;
 import com.rally.domain.auth.gateway.AccountGateway;
-import com.rally.domain.auth.gateway.TokenGateway;
 import com.rally.domain.auth.gateway.WechatGateway;
 import com.rally.domain.auth.model.AccountData;
 import com.rally.domain.auth.model.LoginResultVO;
@@ -31,9 +31,6 @@ public class AuthAppService {
 
     @Resource
     private UserGateway userGateway;
-
-    @Resource
-    private TokenGateway tokenGateway;
 
     public LoginResultVO login(WechatLoginCmd cmd) {
         if (StringUtils.isBlank(cmd.getCode())) {
@@ -67,7 +64,7 @@ public class AuthAppService {
         }
 
         boolean needCompleteInfo = needCompleteInfo(userId);
-        String token = tokenGateway.issue(userId);
+        String token = TokenUtils.issue(userId);
         return new LoginResultVO(token, userId, isNewUser, needCompleteInfo);
     }
 

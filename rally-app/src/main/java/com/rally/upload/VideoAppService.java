@@ -2,7 +2,7 @@ package com.rally.upload;
 
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
-import com.rally.cache.UserContext;
+import com.rally.utils.UserContext;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;

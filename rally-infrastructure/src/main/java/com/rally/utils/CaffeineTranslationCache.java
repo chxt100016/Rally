@@ -1,4 +1,4 @@
-package com.rally.cache;
+package com.rally.utils;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;

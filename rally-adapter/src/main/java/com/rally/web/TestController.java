@@ -1,6 +1,10 @@
 package com.rally.web;
 
+import com.rally.db.user.entity.UserPO;
+import com.rally.db.user.mapper.UserMapper;
 import com.rally.domain.utils.ImageCompressor;
+import com.rally.utils.TokenUtils;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -10,6 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -53,5 +60,23 @@ public class TestController {
         headers.setContentLength(compressed.length);
 
         return ResponseEntity.ok().headers(headers).body(compressed);
+    }
+
+    @Resource
+    private UserMapper userMapper;
+
+    /**
+     * 测试接口：查询所有用户并生成token
+     */
+    @GetMapping("/tokens")
+    public Map<String, String> getAllUserTokens() {
+        List<UserPO> users = userMapper.selectList(null);
+        Map<String, String> result = new HashMap<>();
+        for (UserPO user : users) {
+            String token = TokenUtils.issue(user.getUserId());
+            result.put(user.getUserId(), token);
+        }
+        return result;
+
     }
 }

@@ -1,8 +1,7 @@
 package com.rally.upload;
 
-import com.rally.cache.UserContext;
+import com.rally.utils.UserContext;
 import com.rally.client.qiniu.QiniuClient;
-import com.qiniu.common.QiniuException;
 import com.rally.config.property.QiniuConfiguration;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;

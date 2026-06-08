@@ -1,6 +1,6 @@
 package com.rally.user;
 
-import com.rally.cache.UserContext;
+import com.rally.utils.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;

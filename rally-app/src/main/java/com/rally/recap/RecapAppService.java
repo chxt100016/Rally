@@ -1,6 +1,6 @@
 package com.rally.recap;
 
-import com.rally.cache.UserContext;
+import com.rally.utils.UserContext;
 import com.rally.domain.recap.enums.RecapOverallStatus;
 import com.rally.domain.recap.model.Recap;
 import com.rally.domain.recap.model.RecapCmd;

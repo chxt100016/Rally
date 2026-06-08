@@ -1,4 +1,4 @@
-package com.rally.cache;
+package com.rally.utils;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.AuthException;

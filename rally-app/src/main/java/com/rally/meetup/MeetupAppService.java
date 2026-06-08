@@ -1,6 +1,6 @@
 package com.rally.meetup;
 
-import com.rally.cache.UserContext;
+import com.rally.utils.UserContext;
 import com.rally.domain.meetup.gateway.NearbyGateway;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.model.MeetupEditCmd;

@@ -1,6 +1,6 @@
 package com.rally.user;
 
-import com.rally.cache.UserContext;
+import com.rally.utils.UserContext;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.model.MyProfileDTO;

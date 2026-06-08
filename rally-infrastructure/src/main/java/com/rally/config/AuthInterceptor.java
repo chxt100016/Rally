@@ -2,9 +2,9 @@ package com.rally.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rally.domain.auth.enums.BizErrorCode;
-import com.rally.domain.auth.gateway.TokenGateway;
 import com.rally.domain.auth.model.TokenPayload;
 import com.rally.domain.tennis.model.Result;
+import com.rally.utils.TokenUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,9 +18,6 @@ import java.util.Optional;
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
-    @Resource
-    private TokenGateway tokenGateway;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -32,19 +29,19 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         String token = authHeader.substring(7);
-        Optional<TokenPayload> payload = tokenGateway.verify(token);
+        Optional<TokenPayload> payload = TokenUtils.verify(token);
         if (payload.isEmpty()) {
             writeError(response, BizErrorCode.TOKEN_INVALID);
             return false;
         }
 
-        com.rally.cache.UserContext.set(payload.get().getUserId());
+        com.rally.utils.UserContext.set(payload.get().getUserId());
         return true;
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        com.rally.cache.UserContext.clear();
+        com.rally.utils.UserContext.clear();
     }
 
     private void writeError(HttpServletResponse response, BizErrorCode errorCode) throws IOException {

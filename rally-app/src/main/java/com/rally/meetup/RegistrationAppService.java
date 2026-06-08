@@ -1,6 +1,6 @@
 package com.rally.meetup;
 
-import com.rally.cache.UserContext;
+import com.rally.utils.UserContext;
 import com.rally.domain.meetup.model.JoinResult;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.QuitResult;
