@@ -398,4 +398,15 @@ public class Meetup {
         return userIds;
     }
 
+    /**
+     * 获取待审批的报名者 userId 列表
+     * @return 待审批用户 ID 列表
+     */
+    public List<String> getPendingUserIds() {
+        return registrations.stream()
+                .filter(r -> r.getStatus() == RegistrationStatusEnum.PENDING)
+                .map(RegistrationData::getUserId)
+                .toList();
+    }
+
 }

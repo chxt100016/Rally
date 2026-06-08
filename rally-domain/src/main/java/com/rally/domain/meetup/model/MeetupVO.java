@@ -53,7 +53,7 @@ public class MeetupVO {
     private BigDecimal creatorNtrp;
 
     // 参与者列表
-    private List<ParticipantVO> participants;
+    private List<ParticipantDTO> participants;
 
     // 赛后收集（活动结束时返回）
     private RecapDTO recap;
