@@ -50,6 +50,10 @@ public class UserProfile {
         return profile.getStatus();
     }
 
+    public boolean hasProfile() {
+        return this.getStatus() != ProfileStatusEnum.TBC && this.getStatus() != ProfileStatusEnum.NONE;
+    }
+
     /**
      * 是否在核查期
      */

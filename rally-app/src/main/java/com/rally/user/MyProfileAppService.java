@@ -43,15 +43,16 @@ public class MyProfileAppService {
         String userId = UserContext.get();
         UserProfile userProfile = userProfileDomainService.get(userId);
 
-        boolean isTBC = userProfile.getStatus() == ProfileStatusEnum.TBC;
+
+        boolean hasProfile = userProfile.hasProfile();
         return new MyProfileDTO()
                 .setStatus(userProfile.getStatus())
                 .setUser(buildUserDTO(userProfile.getUser()))
-                .setMeetup(isTBC ? null : buildMeetupDTO(userId))
-                .setReview(isTBC ? null : buildReviewDTO(userId))
-                .setLevel(isTBC ? null : buildLevelDTO(userProfile))
-                .setScore(isTBC ? null : buildScoreDTO(userProfile.getProfile()))
-                .setVideo(isTBC ? null : buildVideoDTO(userProfile.getProfile()));
+                .setMeetup(hasProfile ? buildMeetupDTO(userId) : null)
+                .setReview(hasProfile ? buildReviewDTO(userId) : null)
+                .setLevel(hasProfile ? buildLevelDTO(userProfile) : null)
+                .setScore(hasProfile ? buildScoreDTO(userProfile.getProfile()) : null)
+                .setVideo(hasProfile ? buildVideoDTO(userProfile.getProfile()) : null);
     }
 
     // ========== 各子 DTO 构建方法 ==========
