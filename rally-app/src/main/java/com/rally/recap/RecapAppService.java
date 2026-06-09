@@ -43,7 +43,7 @@ public class RecapAppService {
         // 3. 提交比分（独立事务，冲突返回 false）
         boolean scoreSuccess = recapDomainService.submitScores(recap, cmd.getScores(), cmd.getScoreVersion());
 
-        return scoreSuccess ? RecapOverallStatus.ALL_SUCCESS : RecapOverallStatus.PARTIAL;
+        return scoreSuccess ? RecapOverallStatus.SUCCESS : RecapOverallStatus.SCORE_FAIL;
     }
 
 

@@ -5,9 +5,9 @@ package com.rally.domain.recap.enums;
  */
 public enum RecapOverallStatus {
     /** 全部成功 */
-    ALL_SUCCESS,
+    SUCCESS,
     /** 评价成功、比分冲突 */
-    PARTIAL,
+    SCORE_FAIL,
     /** 全部失败 */
-    ALL_FAIL
+    FAIL
 }
