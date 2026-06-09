@@ -30,10 +30,10 @@ public class WechatAuthController {
     }
 
     @PostMapping("/complete-registration")
-    public Result<UserVO> completeRegistration(@RequestBody CompleteRegistrationCmd cmd) {
+    public Result<?> completeRegistration(@RequestBody CompleteRegistrationCmd cmd) {
         try {
-            return Result.ok(authAppService.completeRegistration(
-                    cmd.getNickname(), cmd.getAvatarUrl(), cmd.getBirthday(), cmd.getGender()));
+            authAppService.completeRegistration(cmd.getNickname(), cmd.getAvatarUrl(), cmd.getBirthday(), cmd.getGender());
+            return Result.ok();
         } catch (AuthException e) {
             return Result.fail(e.getCode(), e.getMessage());
         }

@@ -1,8 +1,5 @@
 package com.rally.auth;
 
-import com.rally.auth.convert.AuthConvertMapper;
-import com.rally.utils.TokenUtils;
-import com.rally.utils.UserContext;
 import com.rally.domain.auth.enums.ChannelEnum;
 import com.rally.domain.auth.exception.AuthException;
 import com.rally.domain.auth.gateway.AccountGateway;
@@ -13,7 +10,8 @@ import com.rally.domain.auth.model.WechatLoginCmd;
 import com.rally.domain.auth.model.WechatSession;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.UserData;
-import com.rally.domain.user.model.UserVO;
+import com.rally.utils.TokenUtils;
+import com.rally.utils.UserContext;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -74,7 +72,7 @@ public class AuthAppService {
                 .orElse(true);
     }
 
-    public UserVO completeRegistration(String nickname, String avatarUrl,
+    public void completeRegistration(String nickname, String avatarUrl,
                                        String birthday, String gender) {
         String userId = UserContext.get();
         if (StringUtils.isBlank(nickname) || StringUtils.isBlank(avatarUrl)) {
@@ -97,6 +95,5 @@ public class AuthAppService {
         }
 
         userGateway.updateUser(userData);
-        return AuthConvertMapper.INSTANCE.toVO(userGateway.findByUserId(userId).orElseThrow());
     }
 }
