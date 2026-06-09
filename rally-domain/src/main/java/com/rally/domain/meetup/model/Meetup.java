@@ -76,7 +76,7 @@ public class Meetup {
      */
     public int countApprovedPlayers() {
         return (int) registrations.stream()
-                .filter(r -> r.getStatus() == RegistrationStatusEnum.JOINED)
+                .filter(Meetup::isActiveParticipant)
                 .count();
     }
 
@@ -131,12 +131,12 @@ public class Meetup {
 
     // ======================== 报名记录查询 ========================
 
-    /** 查找用户的有效报名记录（pending/JOINED） */
+    /** 查找用户的有效报名记录（pending/JOINED/REVIEWED） */
     public RegistrationData findActiveRegistration(String userId) {
         return registrations.stream()
                 .filter(r -> userId.equals(r.getUserId()))
                 .filter(r -> r.getStatus() == RegistrationStatusEnum.PENDING
-                        || r.getStatus() == RegistrationStatusEnum.JOINED)
+                        || isActiveParticipant(r))
                 .findFirst().orElse(null);
     }
 
@@ -243,14 +243,20 @@ public class Meetup {
 
     // ======================== 报名状态判断（静态工具方法） ========================
 
+    /** 是否为有效参与者状态（JOINED 或 REVIEWED） */
+    private static boolean isActiveParticipant(RegistrationData registration) {
+        return registration.getStatus() == RegistrationStatusEnum.JOINED
+                || registration.getStatus() == RegistrationStatusEnum.REVIEWED;
+    }
+
     /** 报名记录是否可撤回（仅 pending） */
     public static boolean canWithdraw(RegistrationData registration) {
         return registration != null && registration.getStatus() == RegistrationStatusEnum.PENDING;
     }
 
-    /** 报名记录是否可退出（仅 JOINED） */
+    /** 报名记录是否可退出（JOINED 或 REVIEWED） */
     public static boolean canQuit(RegistrationData registration) {
-        return registration != null && registration.getStatus() == RegistrationStatusEnum.JOINED;
+        return registration != null && isActiveParticipant(registration);
     }
 
     /** 报名记录是否可审批（仅 pending） */
@@ -365,7 +371,7 @@ public class Meetup {
             if (userRegistration.getStatus() == RegistrationStatusEnum.PENDING) {
                 return ActionStateEnum.PENDING_REVIEW;
             }
-            if (userRegistration.getStatus() == RegistrationStatusEnum.JOINED) {
+            if (isActiveParticipant(userRegistration)) {
                 return ActionStateEnum.JOINED;
             }
         }
@@ -392,7 +398,7 @@ public class Meetup {
     public List<String> getParticipantUserIds(String userId) {
         List<String> userIds = new ArrayList<>();
         for (RegistrationData r : registrations) {
-            if (r.getStatus() == RegistrationStatusEnum.JOINED) {
+            if (isActiveParticipant(r)) {
                 userIds.add(r.getUserId());
             } else if (isCreator(userId) && r.getStatus() == RegistrationStatusEnum.PENDING) {
                 userIds.add(r.getUserId());

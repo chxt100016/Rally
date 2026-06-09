@@ -31,16 +31,16 @@ public class RegistrationDomainService {
      * @param meetup 约球聚合根
      * @param userProfile 用户档案领域对象
      * @param autoWithdrawAt 自动撤回时间，可为 null
-     * @return 新增的报名记录
+     * @return 报名状态
      */
-    public RegistrationData join(Meetup meetup, UserProfile userProfile, LocalDateTime autoWithdrawAt) {
+    public RegistrationStatusEnum join(Meetup meetup, UserProfile userProfile, LocalDateTime autoWithdrawAt) {
         // 1. 调用聚合根 join 方法（校验 + 创建报名记录）
         RegistrationData registration = meetup.join(userProfile, autoWithdrawAt);
 
         // 2. 只保存新增的报名记录
         registrationGateway.save(registration);
 
-        return registration;
+        return registration.getStatus();
     }
 
     /**
