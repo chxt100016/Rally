@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rally.db.meetup.mapper.MeetupMapper">
+
+    <!-- 用户维度约球列表（IN_PROGRESS / COMPLETED / MY_PUBLISH） -->
+    <select id="listByUserFilter" resultType="com.rally.db.meetup.entity.MeetupPO">
+        SELECT * FROM rally_meetup
+        <where>
+            <if test="param.creatorId != null">
+                AND creator_id = #{param.creatorId}
+            </if>
+            <if test="param.userId != null">
+                AND biz_id IN (
+                    SELECT rally_meetup_id FROM rally_meetup_registration
+                    WHERE user_id = #{param.userId} AND status IN ('JOINED','REVIEWED')
+                )
+            </if>
+            <!-- IN_PROGRESS: OPEN/FULL 且未到结束时间 -->
+            <if test="param.statusList != null and param.statusList.contains('OPEN')">
+                AND status IN ('OPEN','FULL') AND end_time &gt; NOW()
+            </if>
+            <!-- COMPLETED: FINISHED/CLOSED 或懒判定已结束 -->
+            <if test="param.statusList != null and param.statusList.contains('FINISHED')">
+                AND (
+                    status IN ('FINISHED','CLOSED')
+                    OR (status IN ('OPEN','FULL') AND end_time &lt; NOW())
+                )
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 创建人有待审批报名的约球 -->
+    <select id="listCreatorPending" resultType="com.rally.db.meetup.entity.MeetupPO">
+        SELECT * FROM rally_meetup
+        WHERE creator_id = #{creatorId}
+          AND status IN ('OPEN','FULL')
+          AND end_time &gt; NOW()
+          AND biz_id IN (
+              SELECT rally_meetup_id FROM rally_meetup_registration WHERE status = 'pending'
+          )
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- PENDING tab：创建人有待审批 + 参与者已结束未录比分，UNION 分页 -->
+    <select id="listPendingMeetups" resultType="com.rally.db.meetup.entity.MeetupPO">
+        SELECT * FROM (
+            (SELECT m.* FROM rally_meetup m
+             WHERE m.creator_id = #{userId}
+               AND m.status IN ('OPEN','FULL') AND m.end_time &gt; NOW()
+               AND EXISTS (
+                   SELECT 1 FROM rally_meetup_registration r
+                   WHERE r.rally_meetup_id = m.biz_id AND r.status = 'pending'
+               ))
+            UNION
+            (SELECT m.* FROM rally_meetup m
+             WHERE (m.status = 'FINISHED' OR (m.status IN ('OPEN','FULL') AND m.end_time &lt; NOW()))
+               AND m.end_time + INTERVAL #{deadlineDays} DAY &gt; NOW()
+               AND EXISTS (
+                   SELECT 1 FROM rally_meetup_registration r
+                   WHERE r.rally_meetup_id = m.biz_id
+                     AND r.user_id = #{userId} AND r.status = 'JOINED'
+               )
+               AND NOT EXISTS (
+                   SELECT 1 FROM rally_meetup_score s WHERE s.rally_meetup_id = m.biz_id
+               ))
+        ) t
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

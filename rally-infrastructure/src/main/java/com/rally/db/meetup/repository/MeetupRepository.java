@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rally.db.meetup.entity.MeetupPO;
+import com.rally.db.meetup.mapper.MeetupMapper;
 import com.rally.db.meetup.service.MeetupService;
 import com.rally.domain.meetup.model.MeetupListQueryParam;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.List;
 public class MeetupRepository {
 
     private final MeetupService meetupService;
+    private final MeetupMapper meetupMapper;
 
     public MeetupPO findByBizId(String bizId) {
         return meetupService.lambdaQuery()
@@ -259,66 +261,18 @@ public class MeetupRepository {
                 .count();
     }
 
-    /**
-     * 查询用户相关的约球列表（按状态+参与关系筛选，分页）
-     * 用于 IN_PROGRESS / COMPLETED / MY_PUBLISH tab
-     */
+    /** 用户维度约球列表（IN_PROGRESS / COMPLETED / MY_PUBLISH），XML mapper */
     public IPage<MeetupPO> listByUserFilter(MeetupListQueryParam param) {
-        LambdaQueryWrapper<MeetupPO> wrapper = new LambdaQueryWrapper<>();
-        // MY_PUBLISH：直接按 creatorId 筛选
-        if (param.getCreatorId() != null) {
-            wrapper.eq(MeetupPO::getCreatorId, param.getCreatorId());
-        }
-        // IN_PROGRESS / COMPLETED：按参与关系 + 状态筛选
-        if (param.getUserId() != null) {
-            String userId = param.getUserId();
-            if (param.getStatusList() != null && param.getStatusList().contains("OPEN")
-                    && !param.getStatusList().contains("FINISHED")) {
-                // IN_PROGRESS: status IN (OPEN,FULL) AND end_time > now()
-                wrapper.and(w -> w
-                        .and(inner -> inner.eq(MeetupPO::getCreatorId, userId))
-                        .or(inner -> inner.apply("EXISTS (SELECT 1 FROM rally_meetup_registration r WHERE r.rally_meetup_id = biz_id AND r.user_id = {0} AND r.status = ''JOINED'')", userId))
-                );
-                wrapper.in(MeetupPO::getStatus, "OPEN", "FULL")
-                        .gt(MeetupPO::getEndTime, LocalDateTime.now());
-            } else if (param.getStatusList() != null && param.getStatusList().contains("FINISHED")) {
-                // COMPLETED: (status IN (FINISHED,CLOSED)) OR (status IN (OPEN,FULL) AND end_time < now())
-                wrapper.and(w -> w
-                        .and(inner -> inner.eq(MeetupPO::getCreatorId, userId))
-                        .or(inner -> inner.apply("EXISTS (SELECT 1 FROM rally_meetup_registration r WHERE r.rally_meetup_id = biz_id AND r.user_id = {0} AND r.status = ''JOINED'')", userId))
-                );
-                wrapper.and(w -> w
-                        .in(MeetupPO::getStatus, "FINISHED", "CLOSED")
-                        .or(inner -> inner.in(MeetupPO::getStatus, "OPEN", "FULL")
-                                .lt(MeetupPO::getEndTime, LocalDateTime.now()))
-                );
-            }
-        }
-        wrapper.orderByDesc(MeetupPO::getCreateTime);
-        Page<MeetupPO> page = new Page<>(param.getPageNo(), param.getPageSize());
-        return meetupService.page(page, wrapper);
+        return meetupMapper.listByUserFilter(new Page<>(param.getPageNo(), param.getPageSize()), param);
     }
 
-    /**
-     * 查询创建人有 pending 报名的约球列表（分页）
-     * 用于 PENDING tab（创建人待审批子集）
-     */
+    /** 创建人有待审批报名的约球，XML mapper */
     public IPage<MeetupPO> listCreatorPending(String creatorId, int pageNo, int pageSize) {
-        LambdaQueryWrapper<MeetupPO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(MeetupPO::getCreatorId, creatorId)
-                .in(MeetupPO::getStatus, "OPEN", "FULL")
-                .gt(MeetupPO::getEndTime, LocalDateTime.now())
-                .apply("EXISTS (SELECT 1 FROM rally_meetup_registration r WHERE r.rally_meetup_id = biz_id AND r.status = ''pending'')")
-                .orderByDesc(MeetupPO::getCreateTime);
-        Page<MeetupPO> page = new Page<>(pageNo, pageSize);
-        return meetupService.page(page, wrapper);
+        return meetupMapper.listCreatorPending(new Page<>(pageNo, pageSize), creatorId);
     }
 
-    /**
-     * PENDING tab：创建人有待审批 + 参与者已结束未录比分，UNION 分页
-     */
+    /** PENDING tab：UNION 分页，XML mapper */
     public IPage<MeetupPO> listPendingMeetups(String userId, int deadlineDays, int pageNo, int pageSize) {
-        return meetupService.getBaseMapper().selectPendingMeetups(
-                new Page<>(pageNo, pageSize), userId, deadlineDays);
+        return meetupMapper.listPendingMeetups(new Page<>(pageNo, pageSize), userId, deadlineDays);
     }
 }
