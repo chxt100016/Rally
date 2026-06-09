@@ -11,16 +11,15 @@ import com.rally.domain.score.strategy.ReputationStrategy;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;
-import com.rally.domain.user.gateway.ProfileChangeLogGateway;
+import com.rally.domain.log.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
-import com.rally.domain.user.model.ProfileChangeLogData;
+import com.rally.domain.log.model.ProfileChangeLogData;
 import com.rally.domain.user.model.TennisProfileData;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * 评分管理器实现（事务入口）

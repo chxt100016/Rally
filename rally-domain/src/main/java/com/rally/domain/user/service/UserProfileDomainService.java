@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * 封装档案查询、初始化等业务逻辑
  */
 @Service
-public class UserProfileService {
+public class UserProfileDomainService {
 
     @Resource
     private UserProfileGateway userProfileGateway;
@@ -44,7 +44,7 @@ public class UserProfileService {
     /**
      * 查询用户档案，不自动初始化
      */
-    public UserProfile getProfile(String userId) {
+    public UserProfile get(String userId) {
         UserProfile profile = userProfileGateway.findByUserId(userId);
         profile.assertExist();
         return profile;
@@ -55,7 +55,7 @@ public class UserProfileService {
      * @param userIds 用户 ID 列表
      * @return userId → UserProfile 映射
      */
-    public Map<String, UserProfile> listProfiles(List<String> userIds) {
+    public Map<String, UserProfile> listMap(List<String> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return Map.of();
         }

@@ -9,7 +9,7 @@ import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.model.*;
-import com.rally.domain.user.service.UserProfileService;
+import com.rally.domain.user.service.UserProfileDomainService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class MyProfileAppService {
 
     @Resource
-    private UserProfileService userProfileService;
+    private UserProfileDomainService userProfileDomainService;
 
     @Resource
     private MeetupDomainService meetupDomainService;
@@ -41,10 +41,9 @@ public class MyProfileAppService {
      */
     public MyProfileDTO getMyProfile() {
         String userId = UserContext.get();
-        UserProfile userProfile = userProfileService.getProfile(userId);
+        UserProfile userProfile = userProfileDomainService.get(userId);
 
         boolean isTBC = userProfile.getStatus() == ProfileStatusEnum.TBC;
-
         return new MyProfileDTO()
                 .setStatus(userProfile.getStatus())
                 .setUser(buildUserDTO(userProfile.getUser()))

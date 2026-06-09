@@ -13,7 +13,7 @@ import com.rally.domain.recap.service.RecapDomainService;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.user.model.UserProfile;
-import com.rally.domain.user.service.UserProfileService;
+import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ public class MeetupQueryAppService {
     private final MeetupQueryDomainService meetupQueryDomainService;
     private final MeetupDomainService meetupDomainService;
     private final MeetupGateway meetupGateway;
-    private final UserProfileService userProfileService;
+    private final UserProfileDomainService userProfileDomainService;
     private final RecapDomainService recapDomainService;
 
 
@@ -62,7 +62,7 @@ public class MeetupQueryAppService {
         List<String> participantUserIds = meetup.getParticipantUserIds(currentUserId);
         List<String> allQueryUserIds = new ArrayList<>(participantUserIds);
         allQueryUserIds.add(meetup.getCreatorId());
-        Map<String, UserProfile> profileMap = userProfileService.listProfiles(allQueryUserIds);
+        Map<String, UserProfile> profileMap = userProfileDomainService.listMap(allQueryUserIds);
 
         ActionStateEnum actionState = meetup.getActionState(currentUserId);
         return new MeetupDetailDTO()

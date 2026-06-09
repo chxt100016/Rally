@@ -16,7 +16,5 @@ public @interface NtrpStep {
 
     String message() default "NTRP 分值步长必须为 0.5";
 
-    Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default {};
 }

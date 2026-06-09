@@ -2,8 +2,8 @@ package com.rally.domain.log;
 
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;
-import com.rally.domain.user.gateway.ProfileChangeLogGateway;
-import com.rally.domain.user.model.ProfileChangeLogData;
+import com.rally.domain.log.gateway.ProfileChangeLogGateway;
+import com.rally.domain.log.model.ProfileChangeLogData;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

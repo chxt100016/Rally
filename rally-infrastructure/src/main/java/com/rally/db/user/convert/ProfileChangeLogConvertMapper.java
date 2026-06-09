@@ -2,7 +2,7 @@ package com.rally.db.user.convert;
 
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;
-import com.rally.domain.user.model.ProfileChangeLogData;
+import com.rally.domain.log.model.ProfileChangeLogData;
 import com.rally.db.user.entity.ProfileChangeLogPO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Named;

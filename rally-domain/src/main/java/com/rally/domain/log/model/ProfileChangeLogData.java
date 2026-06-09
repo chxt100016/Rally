@@ -1,4 +1,4 @@
-package com.rally.domain.user.model;
+package com.rally.domain.log.model;
 
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;

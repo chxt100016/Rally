@@ -1,9 +1,7 @@
-package com.rally.domain.user.gateway;
+package com.rally.domain.log.gateway;
 
-import com.rally.domain.user.enums.ChangeLogTypeEnum;
-import com.rally.domain.user.model.ProfileChangeLogData;
+import com.rally.domain.log.model.ProfileChangeLogData;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -16,10 +14,6 @@ public interface ProfileChangeLogGateway {
      */
     ProfileChangeLogData save(ProfileChangeLogData data);
 
-    /**
-     * 查询用户指定类型的变更日志
-     */
-    List<ProfileChangeLogData> findByUserIdAndType(String userId, ChangeLogTypeEnum type);
 
     /**
      * 查询用户最新的 under_review 日志（用于获取核查期进度）

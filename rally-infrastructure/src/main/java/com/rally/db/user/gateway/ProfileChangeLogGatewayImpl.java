@@ -5,8 +5,8 @@ import com.rally.db.user.convert.ProfileChangeLogConvertMapper;
 import com.rally.db.user.entity.ProfileChangeLogPO;
 import com.rally.db.user.repository.ProfileChangeLogRepository;
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
-import com.rally.domain.user.gateway.ProfileChangeLogGateway;
-import com.rally.domain.user.model.ProfileChangeLogData;
+import com.rally.domain.log.gateway.ProfileChangeLogGateway;
+import com.rally.domain.log.model.ProfileChangeLogData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

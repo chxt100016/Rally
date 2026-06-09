@@ -1,16 +1,17 @@
 package com.rally.user;
 
+import com.rally.domain.log.model.ProfileChangeLogData;
 import com.rally.utils.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.user.gateway.ProfileChangeLogGateway;
+import com.rally.domain.log.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.*;
 import com.rally.domain.log.ProfileLogService;
-import com.rally.domain.user.service.UserProfileService;
+import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.db.user.convert.UserConvertMapper;
 import com.rally.user.convert.ProfileAppConvertMapper;
 import jakarta.annotation.Resource;
@@ -38,7 +39,7 @@ public class ProfileAppService {
     private UserGateway userGateway;
 
     @Resource
-    private UserProfileService userProfileService;
+    private UserProfileDomainService userProfileDomainService;
 
     @Resource
     private MyProfileAppService myProfileAppService;
@@ -74,8 +75,8 @@ public class ProfileAppService {
     @Transactional
     public MyProfileDTO updateNtrp(NtrpUpdateCmd cmd) {
         String userId = UserContext.get();
-        UserProfile userProfile = userProfileService.getProfile(userId);
-        userProfileService.updateNtrp(userProfile, cmd.getNtrpScore());
+        UserProfile userProfile = userProfileDomainService.get(userId);
+        userProfileDomainService.updateNtrp(userProfile, cmd.getNtrpScore());
 
         return myProfileAppService.getMyProfile();
     }

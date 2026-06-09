@@ -6,7 +6,7 @@ import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.model.MyProfileDTO;
 import com.rally.domain.user.model.OnboardingCmd;
 import com.rally.domain.user.model.UserProfile;
-import com.rally.domain.user.service.UserProfileService;
+import com.rally.domain.user.service.UserProfileDomainService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class OnboardingAppService {
 
     @Resource
-    private UserProfileService userProfileService;
+    private UserProfileDomainService userProfileDomainService;
 
     @Resource
     private MyProfileAppService myProfileAppService;
@@ -28,10 +28,10 @@ public class OnboardingAppService {
      */
     public ProfileStatusEnum checkStatus() {
         String userId = UserContext.get();
-        UserProfile profile = userProfileService.getProfile(userId);
+        UserProfile profile = userProfileDomainService.get(userId);
 
         if (ProfileStatusEnum.NONE == profile.getStatus()) {
-            this.userProfileService.init(profile);
+            this.userProfileDomainService.init(profile);
             return ProfileStatusEnum.NONE;
         }
         return profile.getStatus();
@@ -43,13 +43,13 @@ public class OnboardingAppService {
     @Transactional
     public MyProfileDTO submit(OnboardingCmd cmd) {
         String userId = UserContext.get();
-        UserProfile profile = userProfileService.getProfile(userId);
+        UserProfile profile = userProfileDomainService.get(userId);
         if (ProfileStatusEnum.NONE == profile.getStatus()) {
-            this.userProfileService.init(profile);
+            this.userProfileDomainService.init(profile);
         }
         cmd.getVideoKeys().forEach(QiniuConfiguration::buildSignedUrl);
         profile.completeOnboarding(cmd);
-        userProfileService.save(profile);
+        userProfileDomainService.save(profile);
 
         return myProfileAppService.getMyProfile();
     }

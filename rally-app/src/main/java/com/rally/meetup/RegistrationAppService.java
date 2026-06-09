@@ -9,7 +9,7 @@ import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.RegistrationDomainService;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.model.UserProfile;
-import com.rally.domain.user.service.UserProfileService;
+import com.rally.domain.user.service.UserProfileDomainService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class RegistrationAppService {
 
     private final MeetupDomainService meetupDomainService;
     private final RegistrationDomainService registrationDomainService;
-    private final UserProfileService userProfileService;
+    private final UserProfileDomainService userProfileDomainService;
 
     /**
      * 报名
@@ -39,7 +39,7 @@ public class RegistrationAppService {
 
         // 1. 查询领域对象
         Meetup meetup = meetupDomainService.get(meetupId);
-        UserProfile userProfile = userProfileService.getProfile(userId);
+        UserProfile userProfile = userProfileDomainService.get(userId);
 
         // 2. 报名（聚合根校验 + 创建报名记录 + 持久化）
         RegistrationData registration = registrationDomainService.join(meetup, userProfile, autoWithdrawAt);
