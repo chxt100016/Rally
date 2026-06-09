@@ -31,6 +31,12 @@ public class MeetupListQueryParam {
     private BigDecimal levelMax;
     /** 约球ID列表（距离筛选时使用） */
     private List<String> meetupIds;
+    /** 创建人 ID（我发布 tab 用） */
+    private String creatorId;
+    /** 状态列表筛选（进行中/已完成 tab 用） */
+    private List<String> statusList;
+    /** 当前用户 ID（参与人关联查询用） */
+    private String userId;
     /** 页码 */
     private Integer pageNo;
     /** 每页数量 */

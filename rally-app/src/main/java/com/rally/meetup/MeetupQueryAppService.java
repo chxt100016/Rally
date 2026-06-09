@@ -50,6 +50,14 @@ public class MeetupQueryAppService {
     }
 
     /**
+     * 用户约球列表查询（按 Tab 筛选：待处理/进行中/我发布/已完成）
+     */
+    public PageDTO<MeetupCardDTO> queryUserMeetupList(UserMeetupListCmd cmd) {
+        String userId = UserContext.get();
+        return meetupQueryDomainService.listByUser(cmd, userId);
+    }
+
+    /**
      * 查询约球详情（重构后返回 MeetupDetailDTO）
      */
     public MeetupDetailDTO detail(String meetupId) {

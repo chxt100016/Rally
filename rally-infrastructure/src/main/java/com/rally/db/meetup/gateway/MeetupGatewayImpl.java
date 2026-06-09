@@ -177,4 +177,20 @@ public class MeetupGatewayImpl implements MeetupGateway {
     public long countFinishedByCreatorId(String userId) {
         return meetupRepository.countFinishedByCreatorId(userId);
     }
+
+    @Override
+    public PageDTO<MeetupData> listByUserFilter(MeetupListQueryParam param) {
+        IPage<MeetupPO> page = meetupRepository.listByUserFilter(param);
+        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(page.getRecords());
+        boolean hasMore = page.getCurrent() < page.getPages();
+        return new PageDTO<>(dataList, page.getTotal(), hasMore);
+    }
+
+    @Override
+    public PageDTO<MeetupData> listPendingMeetups(String userId, int deadlineDays, int pageNo, int pageSize) {
+        IPage<MeetupPO> page = meetupRepository.listPendingMeetups(userId, deadlineDays, pageNo, pageSize);
+        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(page.getRecords());
+        boolean hasMore = page.getCurrent() < page.getPages();
+        return new PageDTO<>(dataList, page.getTotal(), hasMore);
+    }
 }

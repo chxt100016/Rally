@@ -2,6 +2,8 @@ package com.rally.domain.recap.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
+import com.rally.domain.meetup.enums.RegistrationStatusEnum;
+import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.RegistrationData;
 import com.rally.domain.recap.gateway.RecapGateway;
@@ -39,6 +41,7 @@ import java.util.List;
 public class RecapDomainService {
 
     private final RecapGateway recapGateway;
+    private final RegistrationGateway registrationGateway;
     private final ScoreManager scoreManager;
 
     /**
@@ -90,16 +93,21 @@ public class RecapDomainService {
 
     /**
      * 提交评价（独立事务，调用 gateway 完成 diff 落库）
+     * 提交后将 registration 状态从 JOINED → REVIEWED，用于 PENDING tab 判断待办
      */
     @Transactional
     public void submitReviews(Recap recap, List<RecapSubmitCmd.ReviewItem> targetReviews) {
-        // 校验每条评价的 value 是否在对应类型枚举范围内
         if (targetReviews != null) {
             for (RecapSubmitCmd.ReviewItem item : targetReviews) {
                 RecapSubmitCmd.assertValidReviewValue(item.getType(), item.getValue());
             }
         }
         recapGateway.submitReviews(recap.getMeetupId(), recap.getUserId(), new ArrayList<>(recap.getMyReviews().values()), targetReviews);
+        // 评价已提交，标记 registration 状态为 REVIEWED
+        RegistrationData registration = registrationGateway.findActiveByMeetupAndUser(recap.getMeetupId(), recap.getUserId());
+        if (registration != null && registration.getStatus() == RegistrationStatusEnum.JOINED) {
+            registrationGateway.updateStatus(registration.getBizId(), RegistrationStatusEnum.REVIEWED);
+        }
     }
 
     /**

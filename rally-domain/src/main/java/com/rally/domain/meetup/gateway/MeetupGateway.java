@@ -117,4 +117,22 @@ public interface MeetupGateway {
      * 统计用户已完成的约球次数（status=FINISHED）
      */
     long countFinishedByCreatorId(String userId);
+
+    /**
+     * 查询用户相关的约球列表（按状态+参与关系筛选，分页）
+     * 用于 IN_PROGRESS / COMPLETED / MY_PUBLISH tab
+     * @param param 查询参数（含 creatorId 或 userId + statusList）
+     * @return 分页结果
+     */
+    PageDTO<MeetupData> listByUserFilter(MeetupListQueryParam param);
+
+    /**
+     * PENDING tab：创建人有待审批 + 参与者已结束未录比分，UNION 分页
+     * @param userId 当前用户 ID
+     * @param deadlineDays review deadline 天数
+     * @param pageNo 页码
+     * @param pageSize 每页数量
+     * @return 分页结果
+     */
+    PageDTO<MeetupData> listPendingMeetups(String userId, int deadlineDays, int pageNo, int pageSize);
 }
