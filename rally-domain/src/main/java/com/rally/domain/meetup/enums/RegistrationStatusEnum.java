@@ -5,8 +5,9 @@ package com.rally.domain.meetup.enums;
  */
 public enum RegistrationStatusEnum {
     PENDING,
-    APPROVED,
+    JOINED,
     REJECTED,
     EXPIRED,
-    WITHDRAWN
+    WITHDRAWN,
+
 }

@@ -20,7 +20,7 @@ public interface RegistrationGateway {
     RegistrationData findByBizId(String bizId);
 
     /**
-     * 查询用户在某约球的最新有效报名（pending/APPROVED）
+     * 查询用户在某约球的最新有效报名（pending/JOINED）
      */
     RegistrationData findActiveByMeetupAndUser(String meetupId, String userId);
 

@@ -28,7 +28,7 @@ public class RegistrationRepository {
         return registrationService.lambdaQuery()
                 .eq(RegistrationPO::getRallyMeetupId, meetupId)
                 .eq(RegistrationPO::getUserId, userId)
-                .in(RegistrationPO::getStatus, "pending", "APPROVED")
+                .in(RegistrationPO::getStatus, "pending", "JOINED")
                 .one();
     }
 
@@ -69,7 +69,7 @@ public class RegistrationRepository {
                                               LocalDateTime endTime, String excludeMeetupId) {
         LambdaQueryWrapper<RegistrationPO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(RegistrationPO::getUserId, userId)
-                .in(RegistrationPO::getStatus, "pending", "APPROVED");
+                .in(RegistrationPO::getStatus, "pending", "JOINED");
         if (excludeMeetupId != null) {
             wrapper.ne(RegistrationPO::getRallyMeetupId, excludeMeetupId);
         }
@@ -104,7 +104,7 @@ public class RegistrationRepository {
         return registrationService.lambdaQuery()
                 .select(RegistrationPO::getUserId)
                 .eq(RegistrationPO::getRallyMeetupId, meetupId)
-                .eq(RegistrationPO::getStatus, "APPROVED")
+                .eq(RegistrationPO::getStatus, "JOINED")
                 .list()
                 .stream()
                 .map(RegistrationPO::getUserId)
@@ -117,7 +117,7 @@ public class RegistrationRepository {
     public int countApprovedByMeetupId(String meetupId) {
         Long count = registrationService.lambdaQuery()
                 .eq(RegistrationPO::getRallyMeetupId, meetupId)
-                .eq(RegistrationPO::getStatus, "APPROVED")
+                .eq(RegistrationPO::getStatus, "JOINED")
                 .count();
         return count.intValue();
     }

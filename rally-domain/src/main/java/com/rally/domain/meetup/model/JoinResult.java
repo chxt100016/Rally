@@ -23,6 +23,6 @@ public enum JoinResult {
      * @return 报名结果
      */
     public static JoinResult fromRegistration(RegistrationData registration) {
-        return registration.getStatus() == RegistrationStatusEnum.APPROVED ? APPROVED : PENDING;
+        return registration.getStatus() == RegistrationStatusEnum.JOINED ? APPROVED : PENDING;
     }
 }

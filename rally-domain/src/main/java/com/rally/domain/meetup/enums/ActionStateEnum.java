@@ -7,7 +7,7 @@ package com.rally.domain.meetup.enums;
  * - JOIN_DIRECT: 招募中 + 未报名 + join_mode=DIRECT → 「立即报名」
  * - APPLY_APPROVAL: 招募中 + 未报名 + join_mode=APPROVAL → 「申请加入」
  * - PENDING_REVIEW: 我的报名 status=pending → 「待审核」+「撤销」
- * - JOINED: 我的报名 status=APPROVED → 「退出」+「群聊」
+ * - JOINED: 我的报名 status=JOINED → 「退出」+「群聊」
  * - FULL: 已满员且我未加入 → 「已满员」(灰)
  * <p>
  * 创建人视角：
