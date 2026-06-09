@@ -4,6 +4,7 @@ import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.tennis.model.Result;
 import com.rally.domain.user.model.*;
 import com.rally.user.MyProfileAppService;
+import com.rally.user.PlayerHomeAppService;
 import com.rally.user.ProfileAppService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -19,6 +20,9 @@ public class UserProfileController {
     @Resource
     private MyProfileAppService myProfileAppService;
 
+    @Resource
+    private PlayerHomeAppService playerHomeAppService;
+
     /**
      * 我的信息
      */
@@ -31,12 +35,8 @@ public class UserProfileController {
      * 球员主页
      */
     @GetMapping("/{userId}")
-    public Result<PlayerHomeVO> playerHome(@PathVariable String userId) {
-        try {
-            return Result.ok(profileAppService.getPlayerHome(userId));
-        } catch (BusinessException e) {
-            return Result.fail(e.getErrorCode().getCode(), e.getMessage());
-        }
+    public Result<PlayerHomeDTO> playerHome(@PathVariable("userId") String userId) {
+        return Result.ok(playerHomeAppService.getPlayerHome(userId));
     }
 
     /**

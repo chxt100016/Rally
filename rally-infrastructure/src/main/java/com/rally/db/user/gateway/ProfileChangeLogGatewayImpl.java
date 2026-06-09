@@ -28,7 +28,6 @@ public class ProfileChangeLogGatewayImpl implements ProfileChangeLogGateway {
         return CONVERTER.toData(po);
     }
 
-    @Override
     public List<ProfileChangeLogData> findByUserIdAndType(String userId, ChangeLogTypeEnum type) {
         return repository.findByUserIdAndType(userId, type.name().toLowerCase())
                 .stream()

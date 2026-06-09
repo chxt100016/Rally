@@ -1,4 +1,4 @@
-package com.rally.web;
+package com.rally.web.tennis;
 
 import com.rally.tennis.TennisUploadAppService;
 import jakarta.annotation.Resource;

@@ -13,7 +13,6 @@ import com.rally.domain.user.model.*;
 import com.rally.domain.log.ProfileLogService;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.db.user.convert.UserConvertMapper;
-import com.rally.user.convert.ProfileAppConvertMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,17 +42,6 @@ public class ProfileAppService {
 
     @Resource
     private MyProfileAppService myProfileAppService;
-
-    /**
-     * 球员主页
-     */
-    public PlayerHomeVO getPlayerHome(String targetUserId) {
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(targetUserId)
-                .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
-        UserData userData = userGateway.findByUserId(targetUserId).orElse(null);
-
-        return ProfileAppConvertMapper.INSTANCE.toPlayerHomeVO(profileData, userData, null);
-    }
 
     /**
      * 编辑资料
