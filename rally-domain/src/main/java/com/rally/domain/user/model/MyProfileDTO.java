@@ -11,23 +11,27 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class MyProfileDTO {
 
+    /** 文档状态 */
     private ProfileStatusEnum status;
 
-    /** 约球信息 */
+    /** 基础用户信息 */
+    private MyProfileUserDTO user;
+
     private MyProfileMeetupDTO meetup;
 
-    /** 评价信息 */
-    private MyProfileReviewDTO review;
 
+    /* 四格快捷入口 */
     /** 等级信息 */
     private MyProfileLevelDTO level;
 
     /** 评分信息 */
     private MyProfileScoreDTO score;
 
-    /** 基础用户信息 */
-    private MyProfileUserDTO user;
+    /** 评价信息 */
+    private MyProfileReviewDTO review;
 
     /** 视频信息 */
     private MyProfileVideoDTO video;
+
+
 }
