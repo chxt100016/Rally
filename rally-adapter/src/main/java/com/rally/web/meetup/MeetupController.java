@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
  * 约球接口：发布/编辑/关闭/列表/详情
  */
 @RestController
-@RequestMapping("/wechat/meetup")
+@RequestMapping("/meetup")
 public class MeetupController {
 
     @Resource
