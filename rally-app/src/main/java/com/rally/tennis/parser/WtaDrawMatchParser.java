@@ -52,6 +52,7 @@ public class WtaDrawMatchParser extends MatchParser<WtaDrawsResponse, WtaDrawsRe
             for (WtaDrawsResponse.MatchResult m : roundResult.getMatches()) {
                 Match match = new Match();
                 match.setMatchId(m.getMatchId());
+                match.setMatchIndex(parseMatchIndex(m.getMatchId()));
                 match.setTournamentId(tournamentId);
                 match.setDrawId(drawId);
                 match.setYear(draw.getYear());

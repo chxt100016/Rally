@@ -94,6 +94,7 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
 
                     Match match = new Match();
                     match.setMatchId(m.getMatchId());
+                    match.setMatchIndex(parseMatchIndex(m.getMatchId()));
                     match.setTournamentId(tournamentId);
                     match.setYear(draw.getYear());
                     match.setDrawId(drawId);

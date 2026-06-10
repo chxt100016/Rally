@@ -53,4 +53,19 @@ public abstract class MatchParser<R, S> {
 
     /** 标识当前 Parser 对应的采集类型，用于 Manager 构建路由 Map */
     public abstract CollectType collectType();
+
+    /**
+     * 从 matchId 中提取数字部分作为 matchIndex
+     * 例如 "LS1234" -> 1234, "LD5678" -> 5678
+     */
+    protected Integer parseMatchIndex(String matchId) {
+        if (matchId == null || matchId.isEmpty()) return null;
+        String digits = matchId.replaceAll("[^0-9]", "");
+        if (digits.isEmpty()) return null;
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }
