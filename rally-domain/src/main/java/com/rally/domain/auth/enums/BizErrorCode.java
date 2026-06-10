@@ -71,6 +71,9 @@ public enum BizErrorCode {
     SCORE_PLAYER_INVALID(42012, "比分选手非法"),
     SCORE_SET_DUPLICATE(42013, "盘号重复"),
 
+    // ========== 球场域 44001-44999 ==========
+    COURT_NOT_FOUND(44001, "球场不存在"),
+
     // ========== 赛后收集域 43001-43999 ==========
     RECAP_NOT_FOUND(43001, "赛后收集数据不存在"),
     RECAP_SCORE_CONFLICT(43002, "比分已被其他参与者更新，请刷新后重试"),
