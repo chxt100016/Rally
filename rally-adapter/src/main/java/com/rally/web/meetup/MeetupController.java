@@ -5,8 +5,12 @@ import com.rally.domain.tennis.model.Result;
 import com.rally.meetup.MeetupAppService;
 import com.rally.meetup.MeetupDetailAppService;
 import com.rally.meetup.MeetupQueryAppService;
+import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -14,13 +18,15 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/meetup")
-@RequiredArgsConstructor
 public class MeetupController {
 
 
-    private final MeetupAppService meetupAppService;
-    private final MeetupQueryAppService meetupQueryAppService;
-    private final MeetupDetailAppService meetupDetailAppService;
+    @Resource
+    private MeetupAppService meetupAppService;
+    @Resource
+    private MeetupQueryAppService meetupQueryAppService;
+    @Resource
+    private MeetupDetailAppService meetupDetailAppService;
 
     /**
      * 发布约球
