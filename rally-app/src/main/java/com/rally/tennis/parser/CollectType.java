@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum CollectType {
+
     ATP_DRAW(Phase.DRAW),
     ATP_APP_DRAW(Phase.DRAW),
     WTA_DRAW(Phase.DRAW),
