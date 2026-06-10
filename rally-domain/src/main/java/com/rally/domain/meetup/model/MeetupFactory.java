@@ -3,6 +3,7 @@ package com.rally.domain.meetup.model;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
+import com.rally.domain.system.CityConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class MeetupFactory {
     public static Meetup create(MeetupPublishCmd cmd, String userId) {
         // 1. 映射 MeetupPublishCmd -> MeetupData（currentPlayers 已在 MapStruct 中设为 1）
         MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId);
+        data.setCityName(CityConfig.getCityName(data.getCityCode()));
         data.setBizId(IdWorker.getIdStr());
 
         // 2. 创建者自动加入报名表，状态为 JOINED
