@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,7 +81,7 @@ public class MyProfileAppService {
         Integer remainingMatches = userProfile.isUnderReview()
                 ? profileData.getReviewRemainingMatches() : null;
         return new MyProfileLevelDTO()
-                .setNtrpScore(profileData != null ? profileData.getNtrpScore() : null)
+                .setNtrpScore(profileData != null ? profileData.getNtrpScore().setScale(1, RoundingMode.HALF_UP).toString() : null)
                 .setIsUnderReview(profileData != null ? profileData.getIsUnderReview() : null)
                 .setCooldownDays(cooldownDays)
                 .setRemainingMatches(remainingMatches);

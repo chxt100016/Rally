@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 public class MyProfileLevelDTO {
 
     /** NTRP 评分 */
-    private BigDecimal ntrpScore;
+    private String ntrpScore;
 
     /** 自评修改剩余冷却天数 */
     private Integer cooldownDays;
