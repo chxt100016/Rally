@@ -11,5 +11,7 @@ public enum UserMeetupTabEnum {
     /** 我发布：创建人是当前用户 */
     MY_PUBLISH,
     /** 已完成：status=FINISHED/CLOSED 或懒判定已结束 */
-    COMPLETED
+    COMPLETED,
+    /** 最近：用户最近完成的约球（球员主页用） */
+    RECENT
 }

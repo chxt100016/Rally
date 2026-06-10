@@ -7,15 +7,10 @@ import com.rally.db.meetup.entity.RegistrationPO;
 import com.rally.db.meetup.repository.MeetupRepository;
 import com.rally.db.meetup.repository.RegistrationRepository;
 import com.rally.domain.meetup.gateway.MeetupGateway;
-import com.rally.domain.meetup.model.Meetup;
-import com.rally.domain.meetup.model.MeetupData;
-import com.rally.domain.meetup.model.MeetupListQueryParam;
-import com.rally.domain.meetup.model.PageDTO;
-import com.rally.domain.meetup.model.RegistrationData;
+import com.rally.domain.meetup.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -79,34 +74,7 @@ public class MeetupGatewayImpl implements MeetupGateway {
     }
 
 
-    @Override
-    public List<MeetupData> findByBizIds(List<String> bizIds) {
-        return MeetupConvertMapper.INSTANCE.toMeetupDataList(meetupRepository.findByBizIds(bizIds));
-    }
 
-    @Override
-    public List<MeetupData> findByCityCodeAndStatus(String cityCode, List<String> statusList) {
-        return MeetupConvertMapper.INSTANCE.toMeetupDataList(meetupRepository.findByCityCodeAndStatus(cityCode, statusList));
-    }
-
-    @Override
-    public void updateStatus(String bizId, String status) {
-        MeetupPO po = meetupRepository.findByBizId(bizId);
-        if (po != null) {
-            po.setStatus(status);
-            meetupRepository.updateById(po);
-        }
-    }
-
-    @Override
-    public int incrementPlayers(String bizId) {
-        return meetupRepository.incrementPlayers(bizId);
-    }
-
-    @Override
-    public int decrementPlayers(String bizId) {
-        return meetupRepository.decrementPlayers(bizId);
-    }
 
     @Override
     public long countTodayActive(String userId) {
@@ -123,15 +91,7 @@ public class MeetupGatewayImpl implements MeetupGateway {
         return meetupRepository.batchUpdateToFinished();
     }
 
-    @Override
-    public boolean isParticipant(String meetupId, String userId) {
-        MeetupPO meetup = meetupRepository.findByBizId(meetupId);
-        if (meetup == null) {
-            return false;
-        }
-        // 检查是否在报名表中（含创建者）
-        return registrationRepository.findActiveByMeetupAndUser(meetupId, userId) != null;
-    }
+
 
     @Override
     public List<String> listParticipantUserIds(String meetupId) {
@@ -139,15 +99,7 @@ public class MeetupGatewayImpl implements MeetupGateway {
         return registrationRepository.listApprovedUserIds(meetupId);
     }
 
-    @Override
-    public boolean isFinished(String meetupId) {
-        MeetupPO meetup = meetupRepository.findByBizId(meetupId);
-        if (meetup == null) {
-            return false;
-        }
-        // 懒判定：end_time < NOW() 即视为 finished
-        return meetup.getEndTime() != null && meetup.getEndTime().isBefore(LocalDateTime.now());
-    }
+
 
     @Override
     public long countFinishedMatches(String userId, int days) {
@@ -189,6 +141,14 @@ public class MeetupGatewayImpl implements MeetupGateway {
     @Override
     public PageDTO<MeetupData> listPendingMeetups(String userId, int deadlineDays, int pageNo, int pageSize) {
         IPage<MeetupPO> page = meetupRepository.listPendingMeetups(userId, deadlineDays, pageNo, pageSize);
+        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(page.getRecords());
+        boolean hasMore = page.getCurrent() < page.getPages();
+        return new PageDTO<>(dataList, page.getTotal(), hasMore);
+    }
+
+    @Override
+    public PageDTO<MeetupData> listRecentByUser(String userId, int pageSize) {
+        IPage<MeetupPO> page = meetupRepository.listRecentByUser(userId, pageSize);
         List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(page.getRecords());
         boolean hasMore = page.getCurrent() < page.getPages();
         return new PageDTO<>(dataList, page.getTotal(), hasMore);

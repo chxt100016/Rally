@@ -14,7 +14,7 @@ public class PlayerHomeDTO {
     private MyProfileUserDTO user;
 
     /** 约球信息 */
-    private MyProfileMeetupDTO meetup;
+    private PlayerHomeMeetupDTO meetup;
 
     /** 评价信息 */
     private MyProfileReviewDTO review;

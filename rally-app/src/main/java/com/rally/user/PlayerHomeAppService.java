@@ -1,7 +1,11 @@
 package com.rally.user;
 
 import com.rally.config.property.QiniuConfiguration;
+import com.rally.domain.meetup.enums.UserMeetupTabEnum;
+import com.rally.domain.meetup.model.MeetupCardDTO;
+import com.rally.domain.meetup.model.UserMeetupListCmd;
 import com.rally.domain.meetup.service.MeetupDomainService;
+import com.rally.domain.meetup.service.MeetupQueryDomainService;
 import com.rally.domain.recap.UserReviewDomainService;
 import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
 import com.rally.domain.score.ProfileLevelManager;
@@ -28,6 +32,9 @@ public class PlayerHomeAppService {
 
     @Resource
     private MeetupDomainService meetupDomainService;
+
+    @Resource
+    private MeetupQueryDomainService meetupQueryDomainService;
 
     @Resource
     private UserReviewDomainService userReviewDomainService;
@@ -67,18 +74,22 @@ public class PlayerHomeAppService {
     }
 
     /** 构建约球信息 DTO */
-    private MyProfileMeetupDTO buildMeetupDTO(String userId) {
+    private PlayerHomeMeetupDTO buildMeetupDTO(String userId) {
         long completedCount = meetupDomainService.countFinishedMeetups(userId);
-        return new MyProfileMeetupDTO().setCompletedCount((int) completedCount);
+        UserMeetupListCmd recentCmd = new UserMeetupListCmd();
+        recentCmd.setTab(UserMeetupTabEnum.RECENT);
+        recentCmd.setPageSize(3);
+        List<MeetupCardDTO> recentMeetups = meetupQueryDomainService.listByUser(recentCmd, userId).getList();
+        return new PlayerHomeMeetupDTO().setCompletedCount((int) completedCount).setRecentMeetups(recentMeetups);
     }
 
     /** 构建评价信息 DTO */
     private MyProfileReviewDTO buildReviewDTO(String userId) {
-        ReviewSummaryDTO summary = userReviewDomainService.getReviewSummary(userId, 2);
+        ReviewSummaryDTO summary = userReviewDomainService.getReviewSummary(userId, 5);
         return new MyProfileReviewDTO()
                 .setTotal(summary.total())
                 .setTags(summary.topTags().stream()
-                        .map(tag -> new ReviewTagDTO().setName(tag))
+                        .map(tag -> new ReviewTagDTO().setName(tag.name()).setCount((int) tag.count()))
                         .collect(Collectors.toList()));
     }
 

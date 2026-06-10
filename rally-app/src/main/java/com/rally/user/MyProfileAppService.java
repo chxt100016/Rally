@@ -1,15 +1,14 @@
 package com.rally.user;
 
-import com.rally.utils.UserContext;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.recap.UserReviewDomainService;
 import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.system.SystemConfig;
-import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.user.model.*;
 import com.rally.domain.user.service.UserProfileDomainService;
+import com.rally.utils.UserContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -66,11 +65,11 @@ public class MyProfileAppService {
 
     /** 构建评价信息 DTO（一次查库聚合评价总数+标签） */
     private MyProfileReviewDTO buildReviewDTO(String userId) {
-        ReviewSummaryDTO summary = userReviewDomainService.getReviewSummary(userId, 2);
+        ReviewSummaryDTO summary = userReviewDomainService.getReviewSummary(userId, 5);
         return new MyProfileReviewDTO()
                 .setTotal(summary.total())
                 .setTags(summary.topTags().stream()
-                        .map(tag -> new ReviewTagDTO().setName(tag))
+                        .map(tag -> new ReviewTagDTO().setName(tag.name()).setCount((int) tag.count()))
                         .collect(Collectors.toList()));
     }
 

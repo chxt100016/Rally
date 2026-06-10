@@ -65,7 +65,7 @@ public class MeetupDomainService {
     /**
      * 构建约球聚合根（含创建者报名）并一次性持久化
      */
-    public void add(String userId, MeetupPublishCmd cmd) {
+    public void save(String userId, MeetupPublishCmd cmd) {
         // 1. 通过聚合根工厂创建（自动将创建者加入报名表）
         Meetup meetup = MeetupFactory.create(cmd, userId);
 

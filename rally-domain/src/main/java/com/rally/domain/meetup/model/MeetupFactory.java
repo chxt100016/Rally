@@ -2,9 +2,14 @@ package com.rally.domain.meetup.model;
 
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
+import com.rally.domain.meetup.enums.GenderLimitEnum;
+import com.rally.domain.meetup.enums.JoinModeEnum;
+import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.system.CityConfig;
+import org.apache.commons.lang3.StringUtils;
 
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,9 +38,49 @@ public class MeetupFactory {
         creatorRegistration.setUserId(userId);
         creatorRegistration.setStatus(RegistrationStatusEnum.JOINED);
 
-        // 3. 组装聚合根
+        // 3. 如果title为空， 设置title
+        if (StringUtils.isBlank(data.getTitle())) {
+            data.setTitle(generateTitle(cmd));
+        }
+
+
+        // 4. 组装聚合根
         List<RegistrationData> registrations = new ArrayList<>();
         registrations.add(creatorRegistration);
         return new Meetup(data, registrations);
+    }
+
+    private static String generateTitle(MeetupPublishCmd cmd) {
+        // 星期几 + 类型，例：星期六约单打 仅女生 需审批
+        StringBuilder title = new StringBuilder(weekdayText(cmd.getStartTime().getDayOfWeek())).append("约").append(matchTypeText(cmd.getMatchType()));
+        if (cmd.getGenderLimit() == GenderLimitEnum.FEMALE) {
+            title.append(" 仅女生");
+        } else if (cmd.getGenderLimit() == GenderLimitEnum.MALE) {
+            title.append(" 仅男生");
+        }
+        if (cmd.getJoinMode() == JoinModeEnum.APPROVAL) {
+            title.append(" 需审批");
+        }
+        return title.toString();
+    }
+
+    private static String weekdayText(DayOfWeek dayOfWeek) {
+        return switch (dayOfWeek) {
+            case MONDAY -> "星期一";
+            case TUESDAY -> "星期二";
+            case WEDNESDAY -> "星期三";
+            case THURSDAY -> "星期四";
+            case FRIDAY -> "星期五";
+            case SATURDAY -> "星期六";
+            case SUNDAY -> "星期日";
+        };
+    }
+
+    private static String matchTypeText(MatchTypeEnum matchType) {
+        return switch (matchType) {
+            case SINGLE -> "单打";
+            case DOUBLE -> "双打";
+            case RALLY -> "拉球";
+        };
     }
 }

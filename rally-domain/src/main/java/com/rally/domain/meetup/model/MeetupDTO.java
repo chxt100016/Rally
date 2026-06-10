@@ -1,5 +1,6 @@
 package com.rally.domain.meetup.model;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.rally.domain.meetup.enums.*;
 import lombok.Data;
 
@@ -20,8 +21,8 @@ public class MeetupDTO {
     private String cityCode;
     private String cityName;
     private String districtName;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startTime;
-    private LocalDateTime endTime;
     private BigDecimal duration;
     private String courtName;
     private String courtAddress;

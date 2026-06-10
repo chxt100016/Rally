@@ -103,7 +103,7 @@ public class MeetupQueryDomainService {
 
     /**
      * 用户约球列表查询（按 Tab 筛选）
-     * 一个入口，四个分支各自独立
+     * 一个入口，五个分支各自独立
      */
     public PageDTO<MeetupCardDTO> listByUser(UserMeetupListCmd cmd, String userId) {
         return switch (cmd.getTab()) {
@@ -111,10 +111,11 @@ public class MeetupQueryDomainService {
             case IN_PROGRESS -> listInProgress(userId, cmd.getPageNo(), cmd.getPageSize());
             case MY_PUBLISH -> listMyPublish(userId, cmd.getPageNo(), cmd.getPageSize());
             case COMPLETED -> listCompleted(userId, cmd.getPageNo(), cmd.getPageSize());
+            case RECENT -> listRecent(userId, cmd.getPageSize());
         };
     }
 
-    // ======================== 四个 Tab 分支 ========================
+    // ======================== 五个 Tab 分支 ========================
 
     /**
      * 待处理：创建人有 pending 报名待审批 + 参与者已结束但未录比分
@@ -157,6 +158,17 @@ public class MeetupQueryDomainService {
                 .userId(userId).statusList(List.of("FINISHED", "CLOSED"))
                 .pageNo(pageNo).pageSize(pageSize).build();
         return doList(param);
+    }
+
+    /**
+     * 最近：用户为创建人或已批准报名的约球，不限状态（球员主页用）
+     */
+    private PageDTO<MeetupCardDTO> listRecent(String userId, int pageSize) {
+        PageDTO<MeetupData> pageResult = meetupGateway.listRecentByUser(userId, pageSize);
+        List<MeetupCardDTO> cardList = pageResult.getList().stream()
+                .map(MeetupDomainConvertMapper.INSTANCE::toMeetupCardDTO)
+                .collect(Collectors.toList());
+        return new PageDTO<>(cardList, pageResult.getTotal(), pageResult.getHasMore());
     }
 
     // ======================== 内部工具方法 ========================

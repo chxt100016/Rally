@@ -304,3 +304,25 @@ CREATE TABLE `rally_meetup_score_status` (
   UNIQUE KEY `uk_meetup_id` (`meetup_id`),
   KEY `idx_pending` (`processed_at`) COMMENT '扫描待处理（processed_at IS NULL 或 version 落后）'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='批量评分幂等状态表（score_version 重算控制）';
+
+-- ============================================================
+-- 11. 场地域：球场信息表
+-- ============================================================
+
+DROP TABLE IF EXISTS `rally_court`;
+CREATE TABLE `rally_court` (
+  `id`             BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`         VARCHAR(32)  NOT NULL COMMENT '业务主键（雪花算法字符串）',
+  `name`           VARCHAR(128) NOT NULL COMMENT '球场名称',
+  `address`        VARCHAR(256) NOT NULL COMMENT '球场详细地址',
+  `lng`            DOUBLE       NOT NULL COMMENT '球场经度',
+  `lat`            DOUBLE       NOT NULL COMMENT '球场纬度',
+  `city_code`      VARCHAR(32)  NOT NULL COMMENT '城市编码',
+  `district_code`  VARCHAR(32)  DEFAULT NULL COMMENT '区域编码，选填',
+  `remark`         VARCHAR(255) DEFAULT NULL COMMENT '备注',
+  `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  KEY `idx_city_district` (`city_code`, `district_code`) COMMENT '按城市/区域查询球场'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='球场信息表';

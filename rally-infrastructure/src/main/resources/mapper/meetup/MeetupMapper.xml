@@ -69,4 +69,15 @@
         ORDER BY create_time DESC
     </select>
 
+    <!-- RECENT tab：用户为创建人或已批准报名的约球，不限状态，按开始时间倒序 -->
+    <select id="listRecentByUser" resultType="com.rally.db.meetup.entity.MeetupPO">
+        SELECT * FROM rally_meetup m
+        WHERE m.creator_id = #{userId}
+           OR EXISTS (
+               SELECT 1 FROM rally_meetup_registration r
+               WHERE r.rally_meetup_id = m.biz_id AND r.user_id = #{userId} AND r.status IN ('JOINED','REVIEWED')
+           )
+        ORDER BY m.start_time DESC
+    </select>
+
 </mapper>

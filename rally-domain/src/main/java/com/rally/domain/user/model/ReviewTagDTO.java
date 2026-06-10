@@ -12,4 +12,7 @@ public class ReviewTagDTO {
 
     /** 标签名称 */
     private String name;
+
+    /** 标签数量 */
+    private Integer count;
 }

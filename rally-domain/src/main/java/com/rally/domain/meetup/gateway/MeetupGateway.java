@@ -26,32 +26,7 @@ public interface MeetupGateway {
      */
     MeetupData findByBizId(String bizId);
 
-    /**
-     * 根据 bizId 列表批量查询
-     */
-    List<MeetupData> findByBizIds(List<String> bizIds);
 
-    /**
-     * 根据城市编码和状态列表查询
-     */
-    List<MeetupData> findByCityCodeAndStatus(String cityCode, List<String> statusList);
-
-    /**
-     * 更新状态
-     */
-    void updateStatus(String bizId, String status);
-
-    /**
-     * 原子自增人数（报名/审批通过）
-     * @return 影响行数，0 表示已满或状态变化
-     */
-    int incrementPlayers(String bizId);
-
-    /**
-     * 原子自减人数（退出/拒绝）
-     * @return 影响行数
-     */
-    int decrementPlayers(String bizId);
 
     /**
      * 统计用户当日活跃发布数（status IN OPEN,FULL）
@@ -69,20 +44,14 @@ public interface MeetupGateway {
      */
     int batchUpdateToFinished();
 
-    /**
-     * 判断用户是否为该场参与者（发布者 + 已批准报名者）
-     */
-    boolean isParticipant(String meetupId, String userId);
+
 
     /**
      * 获取该场全部参与者 userId 列表（发布者 + 已批准报名者）
      */
     List<String> listParticipantUserIds(String meetupId);
 
-    /**
-     * 懒判定约球是否已结束：end_time < NOW()
-     */
-    boolean isFinished(String meetupId);
+
 
     /**
      * 统计用户近 N 天内完成的约球场数（可信度计算用）
@@ -135,4 +104,12 @@ public interface MeetupGateway {
      * @return 分页结果
      */
     PageDTO<MeetupData> listPendingMeetups(String userId, int deadlineDays, int pageNo, int pageSize);
+
+    /**
+     * RECENT tab：用户为创建人或已批准报名的约球，不限状态，按开始时间倒序
+     * @param userId 当前用户 ID
+     * @param pageSize 数量
+     * @return 分页结果
+     */
+    PageDTO<MeetupData> listRecentByUser(String userId, int pageSize);
 }

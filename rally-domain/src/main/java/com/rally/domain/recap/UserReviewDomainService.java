@@ -34,14 +34,14 @@ public class UserReviewDomainService {
         List<ReviewData> allReviews = reviewGateway.listAllByToUser(toUserId);
         // 评价总数
         int total = allReviews.size();
-        // 从 TAG 类型评价中提取 top N 标签
-        List<String> topTags = allReviews.stream()
+        // 从 TAG 类型评价中提取 top N 标签及其数量
+        List<TagCount> topTags = allReviews.stream()
                 .filter(r -> ReviewTypeEnum.TAG.name().equals(r.getReviewType().name()))
                 .collect(Collectors.groupingBy(ReviewData::getReviewValue, Collectors.counting()))
                 .entrySet().stream()
                 .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
                 .limit(tagLimit)
-                .map(Map.Entry::getKey)
+                .map(e -> new TagCount(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
         return new ReviewSummaryDTO(total, topTags);
     }
@@ -49,5 +49,10 @@ public class UserReviewDomainService {
     /**
      * 评价聚合结果（评价总数 + top 标签）
      */
-    public record ReviewSummaryDTO(int total, List<String> topTags) {}
+    public record ReviewSummaryDTO(int total, List<TagCount> topTags) {}
+
+    /**
+     * 标签及其数量
+     */
+    public record TagCount(String name, long count) {}
 }

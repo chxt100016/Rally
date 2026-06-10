@@ -22,7 +22,6 @@ public class CourtPO {
     private Double lat;
     private String cityCode;
     private String districtCode;
-    private Integer total;
     private String remark;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

@@ -275,4 +275,9 @@ public class MeetupRepository {
     public IPage<MeetupPO> listPendingMeetups(String userId, int deadlineDays, int pageNo, int pageSize) {
         return meetupMapper.listPendingMeetups(new Page<>(pageNo, pageSize), userId, deadlineDays);
     }
+
+    /** RECENT tab：用户为创建人或已批准报名的约球，不限状态，XML mapper */
+    public IPage<MeetupPO> listRecentByUser(String userId, int pageSize) {
+        return meetupMapper.listRecentByUser(new Page<>(1, pageSize), userId);
+    }
 }

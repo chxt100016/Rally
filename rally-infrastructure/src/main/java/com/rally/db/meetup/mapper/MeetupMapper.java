@@ -18,4 +18,7 @@ public interface MeetupMapper extends BaseMapper<MeetupPO> {
 
     /** PENDING tab：创建人有待审批 + 参与者已结束未录比分，UNION 分页 */
     IPage<MeetupPO> listPendingMeetups(Page<MeetupPO> page, @Param("userId") String userId, @Param("deadlineDays") int deadlineDays);
+
+    /** RECENT tab：用户为创建人或已批准报名的约球，不限状态，按开始时间倒序 */
+    IPage<MeetupPO> listRecentByUser(Page<MeetupPO> page, @Param("userId") String userId);
 }

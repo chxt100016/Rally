@@ -41,7 +41,7 @@ public class MeetupAppService {
         meetupPolicy.assertPublish(userId, cmd);
 
         // 2. 构建 MeetupData 并持久化（含创建者自动报名）
-        meetupDomainService.add(userId, cmd);
+        meetupDomainService.save(userId, cmd);
 
         // 3. 球场查找或创建（200m 范围内合并）
         courtDomainService.findOrCreate(cmd.getCourtName(), cmd.getCourtAddress(), cmd.getCourtLng(), cmd.getCourtLat(), cmd.getCityCode(), cmd.getDistrictCode(), null);
