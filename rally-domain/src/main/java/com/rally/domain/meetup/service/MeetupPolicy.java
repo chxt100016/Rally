@@ -2,14 +2,13 @@ package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.meetup.enums.LevelModeEnum;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupPublishCmd;
-import com.rally.domain.system.CityLocator;
+import com.rally.domain.system.CityConfig;
 import com.rally.domain.system.SystemConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,7 @@ public class MeetupPolicy {
         // 1. 当日发布上限
         assertTimes(userId);
         // 2. 城市开通校验
-        CityLocator.assertCityOpened(cmd.getCityCode());
+        CityConfig.assertCityOpened(cmd.getCityCode());
         // 3. 字段校验
         assertParam(cmd);
     }

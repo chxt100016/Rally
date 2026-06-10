@@ -2,7 +2,7 @@ package com.rally.job;
 
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.gateway.NearbyGateway;
-import com.rally.domain.system.CityLocator;
+import com.rally.domain.system.CityConfig;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -51,7 +51,7 @@ public class MeetupStatusJob {
     public void syncGeoData() {
         log.info("开始执行 GEO 一致性校验任务");
         try {
-            List<String> cities = CityLocator.getOpenedCities();
+            List<String> cities = CityConfig.getOpenedCities();
             if (cities == null || cities.isEmpty()) {
                 log.info("无开通城市，跳过 GEO 校验");
                 return;

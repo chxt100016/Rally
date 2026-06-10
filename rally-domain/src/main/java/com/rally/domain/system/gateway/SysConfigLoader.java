@@ -1,5 +1,7 @@
 package com.rally.domain.system.gateway;
 
+import com.rally.domain.system.model.Location;
+
 import java.util.Map;
 
 /**
@@ -13,4 +15,9 @@ public interface SysConfigLoader {
      * @return key = "scope|configKey", value = configValue
      */
     Map<String, String> loadAll();
+
+
+    Map<String, Location> city();
+
+    Map<String, Location> district();
 }
