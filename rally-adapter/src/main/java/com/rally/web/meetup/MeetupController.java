@@ -3,9 +3,10 @@ package com.rally.web.meetup;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.tennis.model.Result;
 import com.rally.meetup.MeetupAppService;
+import com.rally.meetup.MeetupDetailAppService;
 import com.rally.meetup.MeetupQueryAppService;
-import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -13,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/meetup")
+@RequiredArgsConstructor
 public class MeetupController {
 
-    @Resource
-    private MeetupAppService meetupAppService;
 
-    @Resource
-    private MeetupQueryAppService meetupQueryAppService;
+    private final MeetupAppService meetupAppService;
+    private final MeetupQueryAppService meetupQueryAppService;
+    private final MeetupDetailAppService meetupDetailAppService;
 
     /**
      * 发布约球
@@ -60,6 +61,6 @@ public class MeetupController {
      */
     @GetMapping("/detail/{meetupId}")
     public Result<MeetupDetailDTO> detail(@PathVariable("meetupId") String meetupId) {
-        return Result.ok(meetupQueryAppService.detail(meetupId));
+        return Result.ok(meetupDetailAppService.detail(meetupId));
     }
 }

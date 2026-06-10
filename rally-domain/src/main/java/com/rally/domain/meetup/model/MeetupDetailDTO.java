@@ -21,6 +21,8 @@ public class MeetupDetailDTO {
     private List<ParticipantDTO> participants;
     /** 赛后收集（活动结束时返回） */
     private RecapDTO recap;
+    /** 天气信息 */
+    private WeatherDTO weather;
     /** 操作状态 */
     private ActionStateEnum actionState;
 }

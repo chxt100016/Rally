@@ -1,11 +1,13 @@
 package com.rally.utils;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 
 /**
  * 日出日落时间计算工具（基于 NOAA 天文简化算法）
- * 返回时间均为 UTC，调用方自行按时区偏移换算
+ * 返回时间均为上海时区（UTC+8）
  */
 public class SunUtils {
 
@@ -82,7 +84,10 @@ public class SunUtils {
         int minutes = (int) ((utHour - hours) * 60);
         int seconds = (int) (((utHour - hours) * 60 - minutes) * 60);
 
-        return LocalTime.of(hours, minutes, seconds);
+        LocalTime utcTime = LocalTime.of(hours, minutes, seconds);
+
+        // 转换为上海时区（UTC+8）
+        return utcTime.plusHours(8);
     }
 
     private static double normalizeAngle(double angle) {
@@ -93,5 +98,12 @@ public class SunUtils {
     private static double normalizeHour(double hour) {
         hour = hour % 24;
         return hour < 0 ? hour + 24 : hour;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(LocalDate.now());
+        System.out.println(sunrise(LocalDate.now(), 30.29, 120.02));
+        System.out.println(sunset(LocalDate.now(),30.29, 120.02));
+
     }
 }
