@@ -7,6 +7,7 @@ import com.rally.domain.meetup.enums.JoinModeEnum;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.system.CityConfig;
+import com.rally.domain.utils.AddressUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.DayOfWeek;
@@ -30,6 +31,7 @@ public class MeetupFactory {
         MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId);
         data.setCityName(CityConfig.getCityName(data.getCityCode()));
         data.setBizId(IdWorker.getIdStr());
+        data.setDistrictName(AddressUtils.getDistrict(data.getCourtAddress()));
 
         // 2. 创建者自动加入报名表，状态为 JOINED
         RegistrationData creatorRegistration = new RegistrationData();
