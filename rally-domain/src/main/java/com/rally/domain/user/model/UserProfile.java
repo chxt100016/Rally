@@ -5,6 +5,7 @@ import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.GenderEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
+import com.rally.domain.utils.Assert;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -197,9 +198,13 @@ public class UserProfile {
         profile.setNtrpUpdatedAt(LocalDateTime.now());
     }
 
+    public void assertBasic() {
+        Assert.isTrue(StringUtils.isNotBlank(this.user.getAvatarUrl()) && StringUtils.isNotBlank(this.user.getNickname()), BizErrorCode.USER_INCOMPLETE);
+    }
+
     public void assertCompleted() {
-        if (StringUtils.isBlank(this.user.getAvatarUrl()) || StringUtils.isBlank(this.user.getNickname())) {
-            throw new BusinessException(BizErrorCode.USER_INCOMPLETE);
-        }
+        assertBasic();
+        Assert.isTrue(hasProfile(), BizErrorCode.USER_INCOMPLETE);
+
     }
 }

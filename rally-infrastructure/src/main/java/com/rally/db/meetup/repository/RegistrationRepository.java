@@ -85,6 +85,16 @@ public class RegistrationRepository {
     }
 
     /**
+     * 按 bizId upsert：存在则更新，不存在则新增
+     */
+    public void saveOrUpdateByBizId(RegistrationPO po) {
+        boolean updated = po.getBizId() != null && registrationService.lambdaUpdate().eq(RegistrationPO::getBizId, po.getBizId()).update(po);
+        if (!updated) {
+            registrationService.save(po);
+        }
+    }
+
+    /**
      * 复活已失效的报名记录
      */
     public boolean revive(String bizId, LocalDateTime expiresAt) {

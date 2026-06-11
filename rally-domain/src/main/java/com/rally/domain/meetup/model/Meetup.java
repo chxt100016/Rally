@@ -28,13 +28,6 @@ public class Meetup {
     private final List<RegistrationData> registrations;
 
     /**
-     * 仅约球数据（不包含报名记录，适用于编辑/关闭等场景）
-     */
-    public Meetup(MeetupData data) {
-        this(data, new ArrayList<>());
-    }
-
-    /**
      * 完整聚合根（约球数据 + 报名记录）
      */
     public Meetup(MeetupData data, List<RegistrationData> registrations) {
@@ -48,8 +41,7 @@ public class Meetup {
      * 懒判定：计算真实状态（endTime 已过则视为 FINISHED）
      */
     public MeetupStatusEnum getRealStatus() {
-        if ((data.getStatus() == MeetupStatusEnum.OPEN || data.getStatus() == MeetupStatusEnum.FULL)
-                && data.getEndTime().isBefore(LocalDateTime.now())) {
+        if ((data.getStatus() == MeetupStatusEnum.OPEN || data.getStatus() == MeetupStatusEnum.FULL) && data.getEndTime().isBefore(LocalDateTime.now())) {
             return MeetupStatusEnum.FINISHED;
         }
         return data.getStatus();
@@ -122,9 +114,7 @@ public class Meetup {
         }
         // 经纬度变更
         if (cmd.getCourtLng() != null && cmd.getCourtLat() != null) {
-            if (!cmd.getCourtLng().equals(data.getCourtLng()) || !cmd.getCourtLat().equals(data.getCourtLat())) {
-                return true;
-            }
+            return !cmd.getCourtLng().equals(data.getCourtLng()) || !cmd.getCourtLat().equals(data.getCourtLat());
         }
         return false;
     }

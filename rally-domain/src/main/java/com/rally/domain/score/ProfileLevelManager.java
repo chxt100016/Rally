@@ -4,6 +4,7 @@ import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.RatingLevelEnum;
 import com.rally.domain.user.model.TennisProfileData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 
@@ -19,6 +20,9 @@ public class ProfileLevelManager {
      * 聚合总分 + 等级落档
      */
     public static String calculate(TennisProfileData profileData) {
+        if (profileData == null) {
+            return StringUtils.EMPTY;
+        }
         BigDecimal reputation = profileData.getReputationScore();
         BigDecimal credibility = profileData.getCredibilityScore();
         BigDecimal calibration = profileData.getCalibrationScore();

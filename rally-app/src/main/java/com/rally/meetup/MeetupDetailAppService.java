@@ -1,13 +1,12 @@
 package com.rally.meetup;
 
 import com.rally.domain.meetup.enums.ActionStateEnum;
-import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.MeetupDomainService;
-import com.rally.domain.meetup.service.MeetupQueryDomainService;
 import com.rally.domain.recap.model.Recap;
 import com.rally.domain.recap.model.RecapDTO;
+import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.recap.service.RecapDomainService;
@@ -44,6 +43,8 @@ public class MeetupDetailAppService {
      */
     public MeetupDetailDTO detail(String meetupId) {
         String currentUserId = UserContext.get();
+        UserProfile currentUser = userProfileDomainService.get(currentUserId);
+        currentUser.assertCompleted();
 
         // 1 获取聚合根（含报名记录）
         Meetup meetup = meetupDomainService.get(meetupId);
@@ -91,15 +92,14 @@ public class MeetupDetailAppService {
      */
     private List<ParticipantDTO> buildParticipantVOList(Meetup meetup, List<String> participantUserIds, Map<String, UserProfile> profileMap) {
         return participantUserIds.stream()
-                .map(uid -> toParticipantVO(uid, profileMap, resolveStatus(meetup, uid)))
+                .map(uid -> toParticipantVO(uid, profileMap, resolveRegistration(meetup, uid)))
                 .toList();
     }
 
-    /** 查询用户在该约球中的报名状态（用于创建人视角展示） */
-    private RegistrationStatusEnum resolveStatus(Meetup meetup, String userId) {
+    /** 查询用户在该约球中的报名记录（用于创建人视角展示状态与审批） */
+    private RegistrationData resolveRegistration(Meetup meetup, String userId) {
         return meetup.getRegistrations().stream()
                 .filter(r -> userId.equals(r.getUserId()))
-                .map(RegistrationData::getStatus)
                 .findFirst().orElse(null);
     }
 
@@ -107,18 +107,24 @@ public class MeetupDetailAppService {
      * 构建单个参与者 VO
      */
     private ParticipantDTO toParticipantVO(String uid, Map<String, UserProfile> profileMap,
-                                           RegistrationStatusEnum status) {
+                                           RegistrationData registration) {
         ParticipantDTO vo = new ParticipantDTO();
         vo.setUserId(uid);
         UserProfile profile = profileMap.get(uid);
         if (profile != null && profile.getUser() != null) {
             vo.setNickname(profile.getUser().getNickname());
             vo.setAvatarUrl(profile.getUser().getAvatarUrl());
+            vo.setGender(profile.getUser().getGender());
         }
         if (profile != null && profile.getProfile() != null) {
             vo.setNtrpScore(profile.getProfile().getNtrpScore());
+            vo.setProfileLevel(ProfileLevelManager.calculate(profile.getProfile()));
         }
-        vo.setStatus(status);
+        if (registration != null) {
+            vo.setStatus(registration.getStatus());
+            vo.setRegistrationId(registration.getBizId());
+            vo.setApplyTime(registration.getCreateTime());
+        }
         return vo;
     }
 

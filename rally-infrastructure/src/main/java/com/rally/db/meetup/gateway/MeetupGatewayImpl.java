@@ -3,13 +3,13 @@ package com.rally.db.meetup.gateway;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.rally.db.meetup.convert.MeetupConvertMapper;
 import com.rally.db.meetup.entity.MeetupPO;
-import com.rally.db.meetup.entity.RegistrationPO;
 import com.rally.db.meetup.repository.MeetupRepository;
 import com.rally.db.meetup.repository.RegistrationRepository;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,45 +26,17 @@ public class MeetupGatewayImpl implements MeetupGateway {
 
     @Override
     public void save(MeetupData data) {
-        MeetupPO po = MeetupConvertMapper.INSTANCE.toMeetupPO(data);
-        if (data.getBizId() != null) {
-            MeetupPO existing = meetupRepository.findByBizId(data.getBizId());
-            if (existing != null) {
-                po.setId(existing.getId());
-                meetupRepository.updateById(po);
-                return;
-            }
-        }
-        meetupRepository.save(po);
+        meetupRepository.saveOrUpdateByBizId(MeetupConvertMapper.INSTANCE.toMeetupPO(data));
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void save(Meetup meetup) {
-
-
-        // 1. 通过聚合根计算 currentPlayers 并回写
+        // 聚合根计算 currentPlayers 后整体落库：主表 + 报名表均按 bizId upsert
         MeetupData data = meetup.getData();
         data.setCurrentPlayers(meetup.countApprovedPlayers());
-
-        // 2. 保存约球主表
-        MeetupPO meetupPO = MeetupConvertMapper.INSTANCE.toMeetupPO(data);
-        if (data.getBizId() != null) {
-            MeetupPO existing = meetupRepository.findByBizId(data.getBizId());
-            if (existing != null) {
-                meetupPO.setId(existing.getId());
-                meetupRepository.updateById(meetupPO);
-            } else {
-                meetupRepository.save(meetupPO);
-            }
-        } else {
-            meetupRepository.save(meetupPO);
-        }
-
-        // 3. 保存报名记录（bizId 已在聚合根工厂中生成）
-        for (RegistrationData regData : meetup.getRegistrations()) {
-            RegistrationPO regPO = MeetupConvertMapper.INSTANCE.toRegistrationPO(regData);
-            registrationRepository.save(regPO);
-        }
+        save(data);
+        meetup.getRegistrations().forEach(reg -> registrationRepository.saveOrUpdateByBizId(MeetupConvertMapper.INSTANCE.toRegistrationPO(reg)));
     }
 
     @Override

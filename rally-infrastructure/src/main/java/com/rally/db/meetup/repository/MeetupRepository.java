@@ -59,6 +59,16 @@ public class MeetupRepository {
     }
 
     /**
+     * 按 bizId upsert：存在则更新，不存在则新增
+     */
+    public void saveOrUpdateByBizId(MeetupPO po) {
+        boolean updated = po.getBizId() != null && meetupService.lambdaUpdate().eq(MeetupPO::getBizId, po.getBizId()).update(po);
+        if (!updated) {
+            meetupService.save(po);
+        }
+    }
+
+    /**
      * 更新状态
      */
     public boolean updateStatus(String bizId, String fromStatus, String toStatus) {

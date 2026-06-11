@@ -42,7 +42,7 @@ public class MyProfileAppService {
     public MyProfileDTO getMyProfile() {
         String userId = UserContext.get();
         UserProfile userProfile = userProfileDomainService.get(userId);
-        userProfile.assertCompleted();
+        userProfile.assertBasic();
 
         boolean hasProfile = userProfile.hasProfile();
         return new MyProfileDTO()
