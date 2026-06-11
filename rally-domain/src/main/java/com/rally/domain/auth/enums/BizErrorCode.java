@@ -37,6 +37,7 @@ public enum BizErrorCode {
     UNDER_REVIEW_LOCKED(40006, "核查期内不可进行该操作"),
     PROFILE_NOT_FOUND(40007, "档案不存在"),
     VIDEO_CALLBACK_INVALID(40008, "视频回调校验失败"),
+    USER_INCOMPLETE(4009, "请先完善用户信息"),
 
     // ========== 约球域 41001-41999 ==========
     MEETUP_NOT_FOUND(41001, "约球不存在"),

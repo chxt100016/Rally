@@ -6,6 +6,7 @@ import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.GenderEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -194,5 +195,11 @@ public class UserProfile {
         profile.setVideoUrls(cmd.getVideoKeys());
         profile.setStatus(ProfileStatusEnum.NORMAL);
         profile.setNtrpUpdatedAt(LocalDateTime.now());
+    }
+
+    public void assertCompleted() {
+        if (StringUtils.isBlank(this.user.getAvatarUrl()) || StringUtils.isBlank(this.user.getNickname())) {
+            throw new BusinessException(BizErrorCode.USER_INCOMPLETE);
+        }
     }
 }
