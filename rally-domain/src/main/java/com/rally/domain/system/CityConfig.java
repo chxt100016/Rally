@@ -73,7 +73,4 @@ public class CityConfig {
         return cities.get(code).getName();
     }
 
-    public static String getDistrictName(String code) {
-        return districts.get(code).getName();
-    }
 }
