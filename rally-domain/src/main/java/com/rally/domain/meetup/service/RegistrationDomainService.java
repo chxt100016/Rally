@@ -53,8 +53,8 @@ public class RegistrationDomainService {
         RegistrationData registration = registrationGateway.findActiveByMeetupAndUser(meetupId, userId);
         Assert.notNull(registration, BizErrorCode.NOT_JOINED);
 
-        // 2. 状态校验（委托聚合根静态方法）
-        Assert.isTrue(Meetup.canWithdraw(registration), BizErrorCode.WAITLIST_NOT_PENDING);
+        // 2. 状态校验（委托实体自身行为）
+        Assert.isTrue(registration.canWithdraw(), BizErrorCode.WAITLIST_NOT_PENDING);
 
         // 3. 更新状态
         registrationGateway.updateStatus(registration.getBizId(), RegistrationStatusEnum.WITHDRAWN);

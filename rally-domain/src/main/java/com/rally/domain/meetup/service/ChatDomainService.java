@@ -1,0 +1,173 @@
+package com.rally.domain.meetup.service;
+
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.rally.domain.meetup.enums.ChatContentTypeEnum;
+import com.rally.domain.meetup.gateway.ChatMessageGateway;
+import com.rally.domain.meetup.gateway.ChatUserGateway;
+import com.rally.domain.meetup.model.ChatMessageData;
+import com.rally.domain.meetup.model.ChatUserData;
+import com.rally.domain.meetup.model.Meetup;
+import com.rally.domain.user.model.UserProfile;
+import com.rally.domain.user.service.UserProfileDomainService;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * 聊天领域服务
+ * <p>消息ID体系统一使用 bizId（雪花ID，单调递增）：拉取游标、已读位置均为 bizId
+ */
+@Service
+@RequiredArgsConstructor
+public class ChatDomainService {
+
+    /** 无游标拉取时最多回溯的历史消息条数 */
+    private static final int MAX_HISTORY_COUNT = 200;
+
+    private final ChatMessageGateway chatMessageGateway;
+    private final ChatUserGateway chatUserGateway;
+    private final MeetupDomainService meetupDomainService;
+    private final UserProfileDomainService userProfileDomainService;
+
+    /**
+     * 发送消息
+     */
+    public ChatMessageData sendMessage(String meetupId, String senderId, String content, ChatContentTypeEnum contentType) {
+        // 获取聚合根并验证用户权限
+        Meetup meetup = meetupDomainService.get(meetupId);
+        meetup.assertIn(senderId);
+
+        // 冗余发送者昵称和头像，拉取消息时无需再关联用户表
+        UserProfile sender = userProfileDomainService.get(senderId);
+
+        // 创建消息
+        ChatMessageData message = new ChatMessageData();
+        message.setBizId(IdWorker.getIdStr());
+        message.setMeetupId(meetupId);
+        message.setSenderId(senderId);
+        message.setSenderName(sender.getUser().getNickname());
+        message.setSenderAvatar(sender.getUser().getAvatarUrl());
+        message.setContent(content);
+        message.setContentType(contentType.name());
+        message.setCreateTime(LocalDateTime.now());
+
+        // 保存消息
+        chatMessageGateway.save(message);
+
+        // 增加其他用户的未读数
+        chatUserGateway.incrementUnreadCountForAllExceptSender(meetupId, senderId);
+
+        return message;
+    }
+
+    /**
+     * 拉取消息
+     */
+    public ChatPullData pullMessages(String meetupId, String userId, String lastMessageId, Integer limit) {
+        // 获取聚合根并验证用户权限
+        Meetup meetup = meetupDomainService.get(meetupId);
+        meetup.assertIn(userId);
+
+        // 无游标（首拉/清缓存）时历史回溯上限200条：超过则把游标定位到最近200条之前，从那里开始拉
+        if (StringUtils.isBlank(lastMessageId)) {
+            lastMessageId = chatMessageGateway.findCursorBeforeRecent(meetupId, MAX_HISTORY_COUNT);
+        }
+
+        // 查询消息（lastMessageId 为空表示从头拉取历史消息）
+        List<ChatMessageData> messages = chatMessageGateway.findByMeetupId(meetupId, lastMessageId, limit);
+
+        // 游标完全由前端控制：本次有消息则推进到最后一条，否则原样回传（前端清缓存不传即可重拉历史）
+        String nextCursor = resolveNextCursor(messages, lastMessageId);
+
+        // 维护数据库已读位置和未读数（仅用于未读数计算，不参与拉取游标）
+        markAsRead(meetupId, userId, messages);
+
+        // 构建返回数据
+        ChatPullData result = new ChatPullData();
+        result.setMessages(messages);
+        result.setLastMessageId(nextCursor);
+        return result;
+    }
+
+    /**
+     * 计算下次拉取的游标：取本次最后一条消息的bizId，无新消息则维持前端传入的位置
+     */
+    private String resolveNextCursor(List<ChatMessageData> messages, String lastMessageId) {
+        if (messages.isEmpty()) {
+            return lastMessageId;
+        }
+        return messages.get(messages.size() - 1).getBizId();
+    }
+
+    /**
+     * 维护数据库的已读状态：清零未读数，已读位置只前进不后退（防止清缓存重拉历史时把已读位置回退）
+     */
+    private void markAsRead(String meetupId, String userId, List<ChatMessageData> messages) {
+        // 没拉到新消息，无需变更已读状态
+        if (messages.isEmpty()) {
+            return;
+        }
+
+        String latestMessageId = messages.get(messages.size() - 1).getBizId();
+        ChatUserData chatUser = chatUserGateway.findByMeetupIdAndUserId(meetupId, userId);
+        if (chatUser == null) {
+            // 首次拉取，创建聊天用户记录
+            chatUser = new ChatUserData();
+            chatUser.setBizId(IdWorker.getIdStr());
+            chatUser.setMeetupId(meetupId);
+            chatUser.setUserId(userId);
+            chatUser.setLastReadMessageId(latestMessageId);
+            chatUser.setUnreadCount(0);
+            chatUser.setJoinedAt(LocalDateTime.now());
+            chatUserGateway.save(chatUser);
+            return;
+        }
+
+        // 已读位置只前进不后退（雪花ID等长，字符串比较即数值比较）
+        if (isAfter(latestMessageId, chatUser.getLastReadMessageId())) {
+            chatUserGateway.updateLastReadMessageId(meetupId, userId, latestMessageId);
+        }
+        chatUserGateway.updateUnreadCount(meetupId, userId, 0);
+    }
+
+    /**
+     * 判断 messageId 是否在 baseline 之后（baseline 为空视为最早）
+     */
+    private boolean isAfter(String messageId, String baseline) {
+        if (baseline == null || baseline.isEmpty()) {
+            return true;
+        }
+        return messageId.compareTo(baseline) > 0;
+    }
+
+    /**
+     * 获取未读数
+     */
+    public Integer getUnreadCount(String meetupId, String userId) {
+        // 获取聚合根并验证用户权限
+        Meetup meetup = meetupDomainService.get(meetupId);
+        meetup.assertIn(userId);
+
+        // 查询用户的聊天记录
+        ChatUserData chatUser = chatUserGateway.findByMeetupIdAndUserId(meetupId, userId);
+
+        // 如果没有记录，直接count所有消息作为未读数
+        if (chatUser == null) {
+            return chatMessageGateway.countByMeetupIdAfterMessageId(meetupId, null);
+        }
+
+        return chatUser.getUnreadCount();
+    }
+
+    /**
+     * 数据传输对象
+     */
+    @lombok.Data
+    public static class ChatPullData {
+        private List<ChatMessageData> messages;
+        private String lastMessageId;
+    }
+}

@@ -25,4 +25,7 @@ public class MeetupDetailDTO {
     private WeatherDTO weather;
     /** 操作状态 */
     private ActionStateEnum actionState;
+    /** im未读消息 */
+    private Integer unreadCount;
+
 }

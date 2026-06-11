@@ -2,21 +2,15 @@ package com.rally.domain.user.model;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.system.SystemConfig;
-import com.rally.domain.user.enums.GenderEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.utils.Assert;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 
 /**
  * 用户档案聚合根
- * 组合 User + TennisProfile，封装用户档案相关业务规则
+ * 组合 User + TennisProfile，只负责跨实体编排和判空，单实体规则下沉到对应实体内
  */
 @Data
 public class UserProfile {
@@ -43,7 +37,7 @@ public class UserProfile {
     }
 
     /**
-     * 获取档案状态
+     * 获取档案状态，无档案视为 NONE
      */
     public ProfileStatusEnum getStatus() {
         if (profile == null) {
@@ -60,24 +54,17 @@ public class UserProfile {
      * 是否在核查期
      */
     public boolean isUnderReview() {
-        return profile != null && Boolean.TRUE.equals(profile.getIsUnderReview());
+        return profile != null && profile.underReview();
     }
 
     /**
-     * 校验 NTRP 冷却期，已确认则跳过冷却校验
+     * 校验 NTRP 冷却期，冷却中抛业务异常
      */
     public void assertNtrpCooldown() {
-        if (profile == null || profile.getNtrpUpdatedAt() == null) {
+        if (profile == null) {
             return;
         }
-        int cooldown = calculateNtrpCooldownDays(
-                SystemConfig.getInt("score.ntrp.cooldown_low_days", 30),
-                SystemConfig.getInt("score.ntrp.cooldown_mid_days", 60),
-                SystemConfig.getInt("score.ntrp.cooldown_high_days", 90));
-        long daysSince = ChronoUnit.DAYS.between(profile.getNtrpUpdatedAt(), LocalDateTime.now());
-        if (daysSince < cooldown) {
-            throw new BusinessException(BizErrorCode.NTRP_COOLDOWN, "自评修改冷却中，" + (cooldown - daysSince) + " 天后可改");
-        }
+        profile.assertNtrpCooldown();
     }
 
     /**
@@ -85,81 +72,25 @@ public class UserProfile {
      * @return 触发时返回 requiredMatches，未触发返回 -1
      */
     public int triggerReviewIfNeeded(BigDecimal newNtrp) {
-        BigDecimal oldNtrp = profile.getNtrpScore();
-        BigDecimal delta = oldNtrp != null ? newNtrp.subtract(oldNtrp) : BigDecimal.ZERO;
-        BigDecimal triggerDelta = new BigDecimal(SystemConfig.getString("score.review_period.trigger_ntrp_delta", "0.5"));
-        if (delta.compareTo(triggerDelta) < 0) {
-            return -1;
-        }
-        int requiredMatches = SystemConfig.getInt("score.review_period.required_matches", 3);
-        profile.setStatus(ProfileStatusEnum.UNDER_REVIEW);
-        profile.setIsUnderReview(true);
-        profile.setReviewRemainingMatches(requiredMatches);
-        return requiredMatches;
+        return profile.triggerReviewIfNeeded(newNtrp);
     }
 
     /**
      * 更新 NTRP 分值和时间
      */
     public void updateNtrpScore(BigDecimal newNtrp) {
-        profile.setNtrpScore(newNtrp);
-        profile.setNtrpUpdatedAt(LocalDateTime.now());
-    }
-
-    /**
-     * 计算 NTRP 冷却天数
-     * 根据可信度返回对应的冷却天数
-     */
-    public int calculateNtrpCooldownDays(int lowDays, int midDays, int highDays) {
-        BigDecimal credibilityScore = profile != null ? profile.getCredibilityScore() : null;
-        if (credibilityScore == null) {
-            return lowDays;
-        }
-        float credibility = credibilityScore.floatValue();
-        if (credibility < 30) {
-            return lowDays;
-        } else if (credibility < 60) {
-            return midDays;
-        } else {
-            return highDays;
-        }
-    }
-
-    /**
-     * 计算 NTRP 可编辑状态和冷却剩余天数
-     *
-     * @param cooldownDays 冷却总天数
-     * @return [isEditable, cooldownRemainingDays]
-     */
-    public Object[] calculateNtrpEditableStatus(int cooldownDays) {
-        if (profile == null || profile.getNtrpUpdatedAt() == null) {
-            return new Object[]{true, null};
-        }
-
-        long daysSinceUpdate = ChronoUnit.DAYS.between(profile.getNtrpUpdatedAt(), LocalDateTime.now());
-        if (daysSinceUpdate < cooldownDays) {
-            return new Object[]{false, (int) (cooldownDays - daysSinceUpdate)};
-        }
-        return new Object[]{true, null};
+        profile.updateNtrpScore(newNtrp);
     }
 
     /**
      * 计算自评修改剩余冷却天数
-     * 可编辑时返回 null，不可编辑时返回剩余天数
+     * 可编辑时返回 null，冷却中返回剩余天数
      */
     public Integer calculateNtrpCooldownDays() {
-        if (profile == null || profile.getNtrpUpdatedAt() == null) {
+        if (profile == null) {
             return null;
         }
-        int lowDays = SystemConfig.getInt("score.ntrp.cooldown_low_days", 30);
-        int midDays = SystemConfig.getInt("score.ntrp.cooldown_mid_days", 60);
-        int highDays = SystemConfig.getInt("score.ntrp.cooldown_high_days", 90);
-        int cooldown = calculateNtrpCooldownDays(lowDays, midDays, highDays);
-        Object[] editStatus = calculateNtrpEditableStatus(cooldown);
-        if (!Boolean.TRUE.equals(editStatus[0]) && editStatus[1] != null) {
-            return (Integer) editStatus[1];
-        }
-        return null;
+        return profile.ntrpCooldownRemainingDays();
     }
 
     /**
@@ -169,42 +100,23 @@ public class UserProfile {
         if (profile == null) {
             profile = new TennisProfileData();
         }
-        profile.setUserId(user.getUserId());
-        profile.setStatus(ProfileStatusEnum.TBC);
-        profile.setVideoUrls(new ArrayList<>());
+        profile.initTBC(user.getUserId());
     }
 
     /**
-     * 完成 onboarding，设置状态为 NORMAL
+     * 完成 onboarding：用户基本信息 + 档案分别由各自实体落值
      */
     public void completeOnboarding(OnboardingCmd cmd) {
-        // 更新用户基本信息
-        if (cmd.getGender() != null) {
-            try {
-                user.setGender(GenderEnum.valueOf(cmd.getGender().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                throw new BusinessException(BizErrorCode.PARAM_ERROR, "性别值非法");
-            }
-        }
-        if (cmd.getBirthday() != null) {
-            user.setBirthday(cmd.getBirthday());
-        }
-
-        // 更新档案
-        profile.setNtrpScore(cmd.getNtrpScore());
-        user.setCityCode(cmd.getCityCode());
-        profile.setVideoUrls(cmd.getVideoKeys());
-        profile.setStatus(ProfileStatusEnum.NORMAL);
-        profile.setNtrpUpdatedAt(LocalDateTime.now());
+        user.completeOnboarding(cmd.getGender(), cmd.getBirthday(), cmd.getCityCode());
+        profile.completeOnboarding(cmd.getNtrpScore(), cmd.getVideoKeys());
     }
 
     public void assertBasic() {
-        Assert.isTrue(StringUtils.isNotBlank(this.user.getAvatarUrl()) && StringUtils.isNotBlank(this.user.getNickname()), BizErrorCode.USER_INCOMPLETE);
+        user.assertBasicComplete();
     }
 
     public void assertCompleted() {
         assertBasic();
         Assert.isTrue(hasProfile(), BizErrorCode.USER_INCOMPLETE);
-
     }
 }

@@ -88,4 +88,7 @@ public class MeetupPublishCmd {
 
     /** 费用明细 */
     private List<CostItem> costItems;
+
+    /** 场地索引，前端透传存储 */
+    private String courtIndex;
 }

@@ -3,6 +3,7 @@ package com.rally.meetup;
 import com.rally.domain.meetup.enums.ActionStateEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.*;
+import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.recap.model.Recap;
 import com.rally.domain.recap.model.RecapDTO;
@@ -36,6 +37,7 @@ public class MeetupDetailAppService {
     private final MeetupGateway meetupGateway;
     private final UserProfileDomainService userProfileDomainService;
     private final RecapDomainService recapDomainService;
+    private final ChatDomainService chatDomainService;
 
 
     /**
@@ -61,7 +63,9 @@ public class MeetupDetailAppService {
                 .setActionState(actionState)
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
                 .setParticipants(buildParticipantVOList(meetup, participantUserIds, profileMap))
-                .setRecap(actionState == ActionStateEnum.FINISHED ? buildRecap(meetupId) : null);
+                .setRecap(actionState == ActionStateEnum.FINISHED ? buildRecap(meetupId) : null)
+                .setUnreadCount(actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED  ? null : chatDomainService.getUnreadCount(meetupId, currentUserId));
+
     }
 
 

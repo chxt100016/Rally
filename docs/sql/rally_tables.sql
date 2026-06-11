@@ -194,6 +194,7 @@ CREATE TABLE `rally_meetup` (
   `join_mode`       varchar(8) NOT NULL DEFAULT 'direct' COMMENT '加入模式：直接/审批',
   `cost_items`      JSON         DEFAULT NULL COMMENT '费用明细 [{name,totalAmount(分)}]，纯展示',
   `status`          varchar(8) NOT NULL DEFAULT 'open' COMMENT '状态机',
+  `court_index`     VARCHAR(64)  DEFAULT NULL COMMENT '场地索引，前端透传存储',
   `create_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
@@ -326,3 +327,45 @@ CREATE TABLE `rally_court` (
   UNIQUE KEY `uk_biz_id` (`biz_id`),
   KEY `idx_city_district` (`city_code`, `district_code`) COMMENT '按城市/区域查询球场'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='球场信息表';
+
+-- ============================================================
+-- 12. 约球域：活动群聊消息表
+-- ============================================================
+
+DROP TABLE IF EXISTS `rally_meetup_chat_message`;
+CREATE TABLE `rally_meetup_chat_message` (
+  `id`              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`          VARCHAR(32)  NOT NULL COMMENT '消息业务主键（雪花ID）',
+  `meetup_id`       VARCHAR(32)  NOT NULL COMMENT '关联 rally_meetup.biz_id',
+  `sender_id`       VARCHAR(32)  NOT NULL COMMENT '发送者 user_id',
+  `sender_name`     VARCHAR(64)  NOT NULL DEFAULT '' COMMENT '发送者昵称（冗余存储）',
+  `sender_avatar`   VARCHAR(512) NOT NULL DEFAULT '' COMMENT '发送者头像URL（冗余存储）',
+  `content`         TEXT NOT NULL COMMENT '消息内容（文本/图片URL/表情标识）',
+  `content_type`    VARCHAR(16)  NOT NULL DEFAULT 'TEXT' COMMENT '消息类型：TEXT-文本/IMAGE-图片/LOCATION-位置',
+  `create_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发送时间',
+  `update_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  KEY `idx_meetup_biz` (`meetup_id`, `biz_id`) COMMENT '按活动+bizId游标拉取消息'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动群聊消息表';
+
+-- ============================================================
+-- 13. 约球域：活动群聊用户表（含已读状态）
+-- ============================================================
+
+DROP TABLE IF EXISTS `rally_meetup_chat_user`;
+CREATE TABLE `rally_meetup_chat_user` (
+  `id`                  BIGINT      NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`              VARCHAR(32) NOT NULL COMMENT '业务主键（雪花ID）',
+  `meetup_id`           VARCHAR(32) NOT NULL COMMENT '关联 rally_meetup.biz_id',
+  `user_id`             VARCHAR(32) NOT NULL COMMENT '用户 user_id',
+  `last_read_message_id` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '已读最新消息bizId（仅用于未读数计算）',
+  `unread_count`        INT         NOT NULL DEFAULT 0 COMMENT '未读消息数（冗余存储）',
+  `joined_at`           DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '加入聊天时间',
+  `create_time`         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  UNIQUE KEY `uk_meetup_user` (`meetup_id`, `user_id`) COMMENT '每个用户在每个活动只有一条记录',
+  KEY `idx_meetup` (`meetup_id`) COMMENT '查询活动的所有参与者'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动群聊用户表（含已读状态）';

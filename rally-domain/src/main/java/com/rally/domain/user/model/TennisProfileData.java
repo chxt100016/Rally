@@ -1,10 +1,15 @@
 package com.rally.domain.user.model;
 
+import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.auth.exception.BusinessException;
+import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,4 +32,101 @@ public class TennisProfileData {
     private Boolean isNewbie;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+
+    /**
+     * 是否在核查期
+     */
+    public boolean underReview() {
+        return Boolean.TRUE.equals(isUnderReview);
+    }
+
+    /**
+     * 校验 NTRP 冷却期，冷却中则抛出业务异常
+     */
+    public void assertNtrpCooldown() {
+        Integer remainingDays = ntrpCooldownRemainingDays();
+        if (remainingDays != null) {
+            throw new BusinessException(BizErrorCode.NTRP_COOLDOWN, "自评修改冷却中，" + remainingDays + " 天后可改");
+        }
+    }
+
+    /**
+     * 计算自评修改剩余冷却天数
+     * 可编辑时返回 null，冷却中返回剩余天数
+     */
+    public Integer ntrpCooldownRemainingDays() {
+        if (ntrpUpdatedAt == null) {
+            return null;
+        }
+        int cooldown = resolveNtrpCooldownDays();
+        long daysSince = ChronoUnit.DAYS.between(ntrpUpdatedAt, LocalDateTime.now());
+        if (daysSince < cooldown) {
+            return (int) (cooldown - daysSince);
+        }
+        return null;
+    }
+
+    /**
+     * 根据可信度档位解析 NTRP 冷却总天数：可信度越高冷却越久
+     */
+    private int resolveNtrpCooldownDays() {
+        int lowDays = SystemConfig.getInt("score.ntrp.cooldown_low_days", 30);
+        int midDays = SystemConfig.getInt("score.ntrp.cooldown_mid_days", 60);
+        int highDays = SystemConfig.getInt("score.ntrp.cooldown_high_days", 90);
+        if (credibilityScore == null) {
+            return lowDays;
+        }
+        float credibility = credibilityScore.floatValue();
+        if (credibility < 30) {
+            return lowDays;
+        } else if (credibility < 60) {
+            return midDays;
+        } else {
+            return highDays;
+        }
+    }
+
+    /**
+     * 校验 NTRP 涨幅是否触发核查期，触发则进入核查状态
+     * @return 触发时返回 requiredMatches，未触发返回 -1
+     */
+    public int triggerReviewIfNeeded(BigDecimal newNtrp) {
+        BigDecimal delta = ntrpScore != null ? newNtrp.subtract(ntrpScore) : BigDecimal.ZERO;
+        BigDecimal triggerDelta = new BigDecimal(SystemConfig.getString("score.review_period.trigger_ntrp_delta", "0.5"));
+        if (delta.compareTo(triggerDelta) < 0) {
+            return -1;
+        }
+        int requiredMatches = SystemConfig.getInt("score.review_period.required_matches", 3);
+        this.status = ProfileStatusEnum.UNDER_REVIEW;
+        this.isUnderReview = true;
+        this.reviewRemainingMatches = requiredMatches;
+        return requiredMatches;
+    }
+
+    /**
+     * 更新 NTRP 分值并刷新更新时间（冷却期起点）
+     */
+    public void updateNtrpScore(BigDecimal newNtrp) {
+        this.ntrpScore = newNtrp;
+        this.ntrpUpdatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 初始化为 TBC（待完善）档案
+     */
+    public void initTBC(String userId) {
+        this.userId = userId;
+        this.status = ProfileStatusEnum.TBC;
+        this.videoUrls = new ArrayList<>();
+    }
+
+    /**
+     * 完成 onboarding 的档案部分：落 NTRP 自评和视频，状态置为 NORMAL
+     */
+    public void completeOnboarding(BigDecimal ntrpScore, List<String> videoKeys) {
+        this.ntrpScore = ntrpScore;
+        this.videoUrls = videoKeys;
+        this.status = ProfileStatusEnum.NORMAL;
+        this.ntrpUpdatedAt = LocalDateTime.now();
+    }
 }

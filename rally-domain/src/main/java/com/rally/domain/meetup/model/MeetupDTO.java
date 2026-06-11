@@ -35,5 +35,7 @@ public class MeetupDTO {
     private JoinModeEnum joinMode;
     private List<CostItem> costItems;
     private MeetupStatusEnum status;
+    /** 场地索引，前端透传存储 */
+    private String courtIndex;
     private LocalDateTime createTime;
 }

@@ -44,6 +44,8 @@ public class MeetupPO {
     /** 费用明细 JSON */
     private String costItems;
     private String status;
+    /** 场地索引，前端透传存储 */
+    private String courtIndex;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }
