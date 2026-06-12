@@ -37,16 +37,6 @@ public class ChatUserRepository implements com.rally.domain.meetup.gateway.ChatU
     }
 
     @Override
-    public List<ChatUserData> findByMeetupId(String meetupId) {
-        LambdaQueryWrapper<ChatUserPO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ChatUserPO::getMeetupId, meetupId);
-        List<ChatUserPO> poList = chatUserService.list(wrapper);
-        return poList.stream()
-                .map(ChatConvertMapper.INSTANCE::toChatUserData)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public void updateLastReadMessageId(String meetupId, String userId, String lastReadMessageId) {
         LambdaUpdateWrapper<ChatUserPO> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(ChatUserPO::getMeetupId, meetupId)

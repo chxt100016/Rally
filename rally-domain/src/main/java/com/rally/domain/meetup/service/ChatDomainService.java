@@ -132,9 +132,6 @@ public class ChatDomainService {
      * 获取未读数
      */
     public Integer getUnreadCount(String meetupId, String userId) {
-        // 获取聚合根并验证用户权限
-        Meetup meetup = meetupDomainService.get(meetupId);
-        meetup.assertIn(userId);
 
         // 查询用户的聊天记录
         ChatUserData chatUser = chatUserRepository.findByMeetupIdAndUserId(meetupId, userId);
