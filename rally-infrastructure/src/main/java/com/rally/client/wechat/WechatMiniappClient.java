@@ -1,7 +1,7 @@
 package com.rally.client.wechat;
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.rally.config.WechatMiniappProperties;
+import com.rally.config.WechatAppProperties;
 import com.rally.domain.auth.exception.AuthException;
 import com.rally.domain.auth.gateway.WechatGateway;
 import com.rally.domain.auth.model.WechatSession;
@@ -17,12 +17,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class WechatMiniappClient implements WechatGateway {
 
-    private final WechatMiniappProperties properties;
+    private final WechatAppProperties properties;
 
     @Override
     public WechatSession code2Session(String code) {
-        Code2SessionResponse resp = Http.uri(properties.getCode2sessionUrl())
-                .param("appid", properties.getAppid())
+        String url = properties.getCode2sessionUrl();
+        if (StringUtils.isBlank(url)) {
+            log.error("wechat.miniapp.code2session-url 未配置");
+            throw new AuthException(10001, "微信配置错误");
+        }
+        Code2SessionResponse resp = Http.uri(url)
+                .param("appid", properties.getAppId())
                 .param("secret", properties.getSecret())
                 .param("js_code", code)
                 .param("grant_type", "authorization_code")

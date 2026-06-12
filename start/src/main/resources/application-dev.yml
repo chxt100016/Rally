@@ -6,14 +6,13 @@ spring:
         driver-class-name: com.mysql.cj.jdbc.Driver
         type: com.zaxxer.hikari.HikariDataSource
 
-wechat:
-  miniapp:
-    appid: ${WECHAT_APPID:wxa597b7c249b8ff81}
-    secret: ${WECHAT_SECRET:dev_secret_placeholder}
-    code2session-url: https://api.weixin.qq.com/sns/jscode2session
-
 auth:
   jwt:
-    secret: ${JWT_SECRET:dev-jwt-secret-key-at-least-32-bytes!!}
+    secret: ${JWT_SECRET}
     expire-days: 7
 
+qiniu:
+  access-key: ${QINIU_ACCESS_KEY}
+  secret-key: ${QINIU_SECRET_KEY}
+  bucket: rallyo
+  domain: http://tfbg5zeuz.hd-bkt.clouddn.com

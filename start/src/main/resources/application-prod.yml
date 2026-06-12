@@ -1,10 +1,21 @@
 spring:
     datasource:
-        url: jdbc:mysql://10.10.0.1:3306/fan?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-        username: root
-        password: 0ot4a72adxC2E0+Bvyv9CltrIzRA6g1R
+        url: jdbc:mysql://${MYSQL_ADDRESS}/fan?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+        username: ${MYSQL_USERNAME}
+        password: ${MYSQL_PASSWORD}
         driver-class-name: com.mysql.cj.jdbc.Driver
         type: com.zaxxer.hikari.HikariDataSource
+
+auth:
+  jwt:
+    secret: ${JWT_SECRET}
+    expire-days: 7
+
+qiniu:
+  access-key: ${QINIU_ACCESS_KEY}
+  secret-key: ${QINIU_SECRET_KEY}
+  bucket: rallyo
+  domain: http://tfbg5zeuz.hd-bkt.clouddn.com
 
 job:
   tennis:

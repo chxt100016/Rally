@@ -16,15 +16,15 @@ spring:
         active: dev
 
 deepseek:
-    api-key: ${DEEPSEEK_API_KEY:test}
+    api-key: ${DEEPSEEK_API_KEY:dev}
     api-url: https://api.deepseek.com/chat/completions
-
-qiniu:
-    access-key: ${QINIU_ACCESS_KEY:jZaKt1r9LJuQLt2NP6ARBOcOHcvRZkLUVuDzesL_}
-    secret-key: ${QINIU_SECRET_KEY:0Yh6Ks9K6xhVAVEWjH5H1cCMK50IMj7pOB596UWe}
-    bucket: ${QINIU_BUCKET:rallyo}
-    domain: ${QINIU_DOMAIN:http://tfbg5zeuz.hd-bkt.clouddn.com}
 
 upload:
     tournament:
         compress-kb: 10
+
+wechat:
+    mini:
+        app-id: ${WECHAT_APP_ID}
+        secret: ${WECHAT_SECRET}
+        code2session-url: https://api.weixin.qq.com/sns/jscode2session
