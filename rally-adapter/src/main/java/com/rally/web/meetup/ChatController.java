@@ -1,12 +1,10 @@
 package com.rally.web.meetup;
 
 import com.rally.domain.meetup.model.ChatMessageDTO;
-import com.rally.domain.meetup.model.ChatPullCmd;
 import com.rally.domain.meetup.model.ChatPullDTO;
 import com.rally.domain.meetup.model.ChatSendCmd;
 import com.rally.domain.tennis.model.Result;
 import com.rally.meetup.ChatAppService;
-import com.rally.utils.UserContext;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;

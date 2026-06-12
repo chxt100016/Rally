@@ -1,11 +1,8 @@
 package com.rally.meetup;
 
-import com.rally.domain.meetup.model.ChatMessageDTO;
-import com.rally.domain.meetup.model.ChatMessageData;
-import com.rally.domain.meetup.model.ChatPullDTO;
-import com.rally.domain.meetup.model.ChatSendCmd;
+import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.ChatDomainService;
-import com.rally.domain.meetup.service.MeetupPolicy;
+import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.meetup.convert.ChatAppConvertMapper;
@@ -26,14 +23,14 @@ public class ChatAppService {
 
     private final UserProfileDomainService userProfileDomainService;
 
-    private final MeetupPolicy meetupPolicy;
+    private final MeetupDomainService meetupDomainService;
 
     /**
      * 发送消息
      */
     public ChatMessageDTO send(ChatSendCmd cmd) {
         String senderId = UserContext.get();
-        meetupPolicy.assertIn(cmd.getMeetupId(), senderId);
+        assertIn(cmd.getMeetupId(), senderId);
 
          // 冗余发送者昵称和头像，拉取消息时无需再关联用户表
         UserProfile sender = userProfileDomainService.get(senderId);
@@ -49,7 +46,7 @@ public class ChatAppService {
      */
     public ChatPullDTO pull(String meetupId, String lastMessageId, Integer limit) {
         String userId = UserContext.get();
-        meetupPolicy.assertIn(meetupId, userId);
+        assertIn(meetupId, userId);
 
         // 无游标（首拉/清缓存）时历史回溯上限
         String fixedLastMessageId = chatDomainService.fixLastMessageId(lastMessageId, meetupId);
@@ -61,5 +58,15 @@ public class ChatAppService {
         List<ChatMessageDTO> messageDTOs = ChatAppConvertMapper.INSTANCE.toChatMessageDTO(messages);
 
         return new ChatPullDTO(messageDTOs);
+    }
+
+    /**
+     * 断言用户是活动参与者（创建者或已报名用户）
+     * @param meetupId 活动ID
+     * @param userId 用户ID
+     */
+    public void assertIn(String meetupId, String userId) {
+        Meetup meetup = meetupDomainService.get(meetupId);
+        meetup.assertIn(userId);
     }
 }
