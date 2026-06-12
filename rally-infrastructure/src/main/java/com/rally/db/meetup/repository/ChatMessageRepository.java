@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.rally.db.meetup.convert.ChatConvertMapper;
 import com.rally.db.meetup.entity.ChatMessagePO;
 import com.rally.db.meetup.service.ChatMessageService;
-import com.rally.domain.meetup.gateway.ChatMessageGateway;
 import com.rally.domain.meetup.model.ChatMessageData;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor
-public class ChatMessageRepository implements ChatMessageGateway {
+public class ChatMessageRepository implements com.rally.domain.meetup.gateway.ChatMessageRepository {
 
     private final ChatMessageService chatMessageService;
 
@@ -30,16 +29,12 @@ public class ChatMessageRepository implements ChatMessageGateway {
 
     @Override
     public List<ChatMessageData> findByMeetupId(String meetupId, String lastMessageId, Integer limit) {
-        LambdaQueryWrapper<ChatMessagePO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ChatMessagePO::getMeetupId, meetupId);
-        // 雪花ID等长且单调递增，字符串比较即数值比较
-        if (StringUtils.isNotBlank(lastMessageId)) {
-            wrapper.gt(ChatMessagePO::getBizId, lastMessageId);
-        }
-        wrapper.orderByAsc(ChatMessagePO::getBizId);
-        if (limit != null && limit > 0) {
-            wrapper.last("LIMIT " + limit);
-        }
+        LambdaQueryWrapper<ChatMessagePO> wrapper = new LambdaQueryWrapper<ChatMessagePO>()
+                .eq(ChatMessagePO::getMeetupId, meetupId)
+                .gt(StringUtils.isNotBlank(lastMessageId), ChatMessagePO::getBizId, lastMessageId)
+                .orderByAsc(ChatMessagePO::getBizId)
+                .last(limit != null && limit > 0, "LIMIT " + limit);
+
         List<ChatMessagePO> poList = chatMessageService.list(wrapper);
         return poList.stream()
                 .map(ChatConvertMapper.INSTANCE::toChatMessageData)
@@ -61,10 +56,8 @@ public class ChatMessageRepository implements ChatMessageGateway {
     @Override
     public Integer countByMeetupIdAfterMessageId(String meetupId, String afterMessageId) {
         LambdaQueryWrapper<ChatMessagePO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ChatMessagePO::getMeetupId, meetupId);
-        if (StringUtils.isNotBlank(afterMessageId)) {
-            wrapper.gt(ChatMessagePO::getBizId, afterMessageId);
-        }
+        wrapper.eq(ChatMessagePO::getMeetupId, meetupId)
+                .gt(StringUtils.isNotBlank(afterMessageId), ChatMessagePO::getBizId, afterMessageId);
         return Math.toIntExact(chatMessageService.count(wrapper));
     }
 }

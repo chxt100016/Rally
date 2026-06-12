@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 聊天消息网关接口
  */
-public interface ChatMessageGateway {
+public interface ChatMessageRepository {
 
     /**
      * 保存消息

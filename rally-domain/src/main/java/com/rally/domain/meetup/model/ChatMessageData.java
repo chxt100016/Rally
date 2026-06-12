@@ -1,5 +1,6 @@
 package com.rally.domain.meetup.model;
 
+import com.rally.domain.meetup.enums.ChatContentTypeEnum;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -19,6 +20,6 @@ public class ChatMessageData {
     /** 发送者头像（冗余存储） */
     private String senderAvatar;
     private String content;
-    private String contentType;
+    private ChatContentTypeEnum contentType;
     private LocalDateTime createTime;
 }

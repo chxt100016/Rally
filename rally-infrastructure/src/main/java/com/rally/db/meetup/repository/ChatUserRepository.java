@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.rally.db.meetup.convert.ChatConvertMapper;
 import com.rally.db.meetup.entity.ChatUserPO;
 import com.rally.db.meetup.service.ChatUserService;
-import com.rally.domain.meetup.gateway.ChatUserGateway;
 import com.rally.domain.meetup.model.ChatUserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor
-public class ChatUserRepository implements ChatUserGateway {
+public class ChatUserRepository implements com.rally.domain.meetup.gateway.ChatUserRepository {
 
     private final ChatUserService chatUserService;
 

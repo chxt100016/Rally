@@ -27,6 +27,8 @@ public class MeetupPolicy {
 
     private final RegistrationGateway registrationGateway;
 
+    private final MeetupDomainService meetupDomainService;
+
     /**
      * 发布前校验：发布上限 + 城市开通 + 字段校验
      */
@@ -161,6 +163,16 @@ public class MeetupPolicy {
                 throw new BusinessException(BizErrorCode.LOCATION_TIME_CHANGE_FORBIDDEN);
             }
         }
+    }
+
+    /**
+     * 断言用户是活动参与者（创建者或已报名用户）
+     * @param meetupId 活动ID
+     * @param userId 用户ID
+     */
+    public void assertIn(String meetupId, String userId) {
+        Meetup meetup = meetupDomainService.get(meetupId);
+        meetup.assertIn(userId);
     }
 
 

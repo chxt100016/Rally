@@ -6,6 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 /**
  * 聊天App层转换器
  */
@@ -19,4 +21,5 @@ public interface ChatAppConvertMapper {
      */
     @Mapping(target = "messageId", source = "bizId")
     ChatMessageDTO toChatMessageDTO(ChatMessageData data);
+    List<ChatMessageDTO> toChatMessageDTO(List<ChatMessageData> data);
 }

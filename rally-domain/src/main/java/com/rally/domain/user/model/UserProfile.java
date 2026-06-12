@@ -119,4 +119,8 @@ public class UserProfile {
         assertBasic();
         Assert.isTrue(hasProfile(), BizErrorCode.USER_INCOMPLETE);
     }
+
+    public String getUserId() {
+        return this.getUser().getUserId();
+    }
 }
