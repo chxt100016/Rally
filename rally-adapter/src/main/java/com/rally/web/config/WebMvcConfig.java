@@ -18,8 +18,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(logInterceptor)
-                .addPathPatterns("/**");
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/wechat/**")
                 .excludePathPatterns(
@@ -30,5 +28,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/tennis/collect/**",
                         "/wechat/user/video/callback"
                 );
+        registry.addInterceptor(logInterceptor)
+                .addPathPatterns("/**");
     }
 }

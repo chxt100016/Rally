@@ -1,5 +1,6 @@
 package com.rally.config;
 
+import com.rally.utils.UserContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,12 @@ public class LogInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         START_TIME.set(System.currentTimeMillis());
-        log.info("[REQ] IP={} {} {}", getClientIp(request), request.getMethod(), request.getRequestURI());
+        String userId = UserContext.getIfPresent();
+        if (userId != null) {
+            log.info("[REQ] IP={} userId={} {} {}", getClientIp(request), userId, request.getMethod(), request.getRequestURI());
+        } else {
+            log.info("[REQ] IP={} {} {}", getClientIp(request), request.getMethod(), request.getRequestURI());
+        }
         return true;
     }
 
@@ -24,7 +30,12 @@ public class LogInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         Long start = START_TIME.get();
         if (start != null) {
-            log.info("[RES] IP={} {} {} cost={}ms", getClientIp(request), request.getMethod(), request.getRequestURI(), System.currentTimeMillis() - start);
+            String userId = UserContext.getIfPresent();
+            if (userId != null) {
+                log.info("[RES] IP={} userId={} {} {} cost={}ms", getClientIp(request), userId, request.getMethod(), request.getRequestURI(), System.currentTimeMillis() - start);
+            } else {
+                log.info("[RES] IP={} {} {} cost={}ms", getClientIp(request), request.getMethod(), request.getRequestURI(), System.currentTimeMillis() - start);
+            }
             START_TIME.remove();
         }
     }

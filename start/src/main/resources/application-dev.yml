@@ -15,4 +15,4 @@ qiniu:
   access-key: ${QINIU_ACCESS_KEY}
   secret-key: ${QINIU_SECRET_KEY}
   bucket: rallyo
-  domain: http://tfbg5zeuz.hd-bkt.clouddn.com
+  domain: https://static.fantasticmonkey.top

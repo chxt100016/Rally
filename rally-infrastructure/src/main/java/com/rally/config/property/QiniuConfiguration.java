@@ -30,18 +30,7 @@ public class QiniuConfiguration {
     private static String domain;
 
 
-    // Spring 注入时调用静态 setter
-    public void setAccessKey(String accessKey) {
-        QiniuConfiguration.accessKey = accessKey;
-    }
 
-    public void setSecretKey(String secretKey) {
-        QiniuConfiguration.secretKey = secretKey;
-    }
-
-    public void setBucket(String bucket) {
-        QiniuConfiguration.bucket = bucket;
-    }
 
     public void setDomain(String domain) {
         QiniuConfiguration.domain = domain;
