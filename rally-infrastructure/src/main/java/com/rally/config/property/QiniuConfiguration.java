@@ -36,6 +36,17 @@ public class QiniuConfiguration {
         QiniuConfiguration.domain = domain;
     }
 
+    public  void setAccessKey(String accessKey) {
+        QiniuConfiguration.accessKey = accessKey;
+    }
+
+    public  void setSecretKey(String secretKey) {
+        QiniuConfiguration.secretKey = secretKey;
+    }
+
+    public  void setBucket(String bucket) {
+        QiniuConfiguration.bucket = bucket;
+    }
 
     /**
      * 生成公开访问 URL

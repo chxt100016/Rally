@@ -30,8 +30,7 @@ public class TennisUploadAppService {
         byte[] originalBytes = file.getBytes();
         String format = resolveFormat(file.getContentType(), file.getOriginalFilename());
 
-        byte[] compressedBytes = ImageCompressor.compress(
-                new ByteArrayInputStream(originalBytes), format, compressKb);
+        byte[] compressedBytes = ImageCompressor.compress(new ByteArrayInputStream(originalBytes), format, compressKb);
 
         String imageKey = qiniuClient.uploadImage(originalBytes, DIR, tournamentId);
         String backgroundKey = qiniuClient.uploadImage(compressedBytes, DIR, tournamentId + "_background");
