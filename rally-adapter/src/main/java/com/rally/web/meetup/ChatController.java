@@ -20,7 +20,7 @@ public class ChatController {
     private ChatAppService chatAppService;
 
     /**
-     * 发送消息
+     * 发送消 息
      */
     @PostMapping("/send")
     public Result<ChatMessageDTO> send(@Valid @RequestBody ChatSendCmd cmd) {
