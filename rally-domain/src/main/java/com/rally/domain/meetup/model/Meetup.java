@@ -351,7 +351,7 @@ public class Meetup {
             }
         }
 
-        // 未报名 根据满员和加入模式判断
+        // 未报名根据满员和加入模式判断
         if (realStatus == MeetupStatusEnum.FULL) {
             return ActionStateEnum.FULL;
         }
