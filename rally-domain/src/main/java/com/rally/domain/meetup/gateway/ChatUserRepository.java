@@ -19,10 +19,7 @@ public interface ChatUserRepository {
      */
     ChatUserData findByMeetupIdAndUserId(String meetupId, String userId);
 
-    /**
-     * 查询活动的所有聊天用户
-     */
-    List<ChatUserData> findByMeetupId(String meetupId);
+
 
     /**
      * 更新用户的已读位置
