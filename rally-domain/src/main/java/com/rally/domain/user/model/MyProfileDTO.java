@@ -17,8 +17,8 @@ public class MyProfileDTO {
     /** 基础用户信息 */
     private MyProfileUserDTO user;
 
-    private MyProfileMeetupDTO meetup;
-
+    /** 统计数据 */
+    private MyProfileStatsDTO stats;
 
     /* 四格快捷入口 */
     /** 等级信息 */
@@ -32,6 +32,4 @@ public class MyProfileDTO {
 
     /** 视频信息 */
     private MyProfileVideoDTO video;
-
-
 }

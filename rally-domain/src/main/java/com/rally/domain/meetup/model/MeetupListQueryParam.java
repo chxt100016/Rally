@@ -41,6 +41,8 @@ public class MeetupListQueryParam {
     private Integer pageNo;
     /** 每页数量 */
     private Integer pageSize;
-    /** 上一页最后一条记录的 meetupId（searchAfter 游标，listNew 用） */
+    /** 上一页最后一条记录的 bizId（searchAfter 游标） */
     private String lastId;
+    /** 查询限制条数（searchAfter: size + 1用于判断hasMore） */
+    private Integer limit;
 }

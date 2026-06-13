@@ -13,10 +13,9 @@ public class UserMeetupListCmd {
     /** 筛选 Tab */
     @NotNull(message = "请选择tab")
     private UserMeetupTabEnum tab;
-    /** 页码，默认1 */
-    @Min(value = 1, message = "页码最小为1")
-    private Integer pageNo = 1;
+    /** 上一页最后一条的 bizId，首页不传 */
+    private String lastId;
     /** 每页数量，默认10 */
     @Min(value = 1, message = "每页数量最小为1")
-    private Integer pageSize = 10;
+    private Integer size = 10;
 }

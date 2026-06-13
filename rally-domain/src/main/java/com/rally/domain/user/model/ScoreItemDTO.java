@@ -19,12 +19,12 @@ public class ScoreItemDTO {
     /** 评分值 */
     private String value;
 
-    /** 权重标签 */
-    private String label;
+    /** 最大值 */
+    private String maxValue;
 
     /** 说明信息 */
     private String info;
 
     /** 排序 */
-    private String sort;
+    private Integer sort;
 }

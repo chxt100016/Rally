@@ -102,16 +102,18 @@ public class MeetupQueryDomainService {
     }
 
     /**
-     * 用户约球列表查询（按 Tab 筛选）
+     * 用户约球列表查询（按 Tab 筛选，searchAfter 游标分页）
      * 一个入口，五个分支各自独立
      */
     public PageDTO<MeetupCardDTO> listByUser(UserMeetupListCmd cmd, String userId) {
+        // searchAfter：多查1条用于判断 hasMore，limit = size + 1
+        int limit = cmd.getSize() + 1;
         return switch (cmd.getTab()) {
-            case PENDING -> listPending(userId, cmd.getPageNo(), cmd.getPageSize());
-            case IN_PROGRESS -> listInProgress(userId, cmd.getPageNo(), cmd.getPageSize());
-            case MY_PUBLISH -> listMyPublish(userId, cmd.getPageNo(), cmd.getPageSize());
-            case COMPLETED -> listCompleted(userId, cmd.getPageNo(), cmd.getPageSize());
-            case RECENT -> listRecent(userId, cmd.getPageSize());
+            case PENDING -> listPending(userId, cmd.getLastId(), limit);
+            case IN_PROGRESS -> listInProgress(userId, cmd.getLastId(), limit);
+            case MY_PUBLISH -> listMyPublish(userId, cmd.getLastId(), limit);
+            case COMPLETED -> listCompleted(userId, cmd.getLastId(), limit);
+            case RECENT -> listRecent(userId, cmd.getLastId(), limit);
         };
     }
 
@@ -119,56 +121,56 @@ public class MeetupQueryDomainService {
 
     /**
      * 待处理：创建人有 pending 报名待审批 + 参与者已结束但未录比分
-     * UNION SQL 分页，review deadline 过滤在 SQL 中完成
+     * UNION SQL searchAfter 游标分页，review deadline 过滤在 SQL 中完成
      */
-    private PageDTO<MeetupCardDTO> listPending(String userId, int pageNo, int pageSize) {
+    private PageDTO<MeetupCardDTO> listPending(String userId, String lastId, int limit) {
         int deadlineDays = SystemConfig.getInt("review.deadline_days", 30);
-        PageDTO<MeetupData> pageResult = meetupGateway.listPendingMeetups(userId, deadlineDays, pageNo, pageSize);
+        PageDTO<MeetupData> pageResult = meetupGateway.listPendingMeetups(userId, deadlineDays, lastId, limit);
         List<MeetupCardDTO> cardList = pageResult.getList().stream()
                 .map(MeetupDomainConvertMapper.INSTANCE::toMeetupCardDTO)
                 .toList();
-        return new PageDTO<>(cardList, pageResult.getTotal(), pageResult.getHasMore());
+        return new PageDTO<>(cardList, null, pageResult.getHasMore());
     }
 
     /**
      * 进行中：我创建或我已批准参与 + status IN (OPEN,FULL) + 未到结束时间
      */
-    private PageDTO<MeetupCardDTO> listInProgress(String userId, int pageNo, int pageSize) {
+    private PageDTO<MeetupCardDTO> listInProgress(String userId, String lastId, int limit) {
         MeetupListQueryParam param = MeetupListQueryParam.builder()
                 .userId(userId).statusList(List.of("OPEN", "FULL"))
-                .pageNo(pageNo).pageSize(pageSize).build();
+                .lastId(lastId).limit(limit).build();
         return doList(param);
     }
 
     /**
      * 我发布：创建人是当前用户，按创建时间倒序
      */
-    private PageDTO<MeetupCardDTO> listMyPublish(String userId, int pageNo, int pageSize) {
+    private PageDTO<MeetupCardDTO> listMyPublish(String userId, String lastId, int limit) {
         MeetupListQueryParam param = MeetupListQueryParam.builder()
                 .creatorId(userId)
-                .pageNo(pageNo).pageSize(pageSize).build();
+                .lastId(lastId).limit(limit).build();
         return doList(param);
     }
 
     /**
      * 已完成：status=FINISHED/CLOSED 或懒判定已结束（OPEN/FULL 且 end_time < now）
      */
-    private PageDTO<MeetupCardDTO> listCompleted(String userId, int pageNo, int pageSize) {
+    private PageDTO<MeetupCardDTO> listCompleted(String userId, String lastId, int limit) {
         MeetupListQueryParam param = MeetupListQueryParam.builder()
                 .userId(userId).statusList(List.of("FINISHED", "CLOSED"))
-                .pageNo(pageNo).pageSize(pageSize).build();
+                .lastId(lastId).limit(limit).build();
         return doList(param);
     }
 
     /**
      * 最近：用户为创建人或已批准报名的约球，不限状态（球员主页用）
      */
-    private PageDTO<MeetupCardDTO> listRecent(String userId, int pageSize) {
-        PageDTO<MeetupData> pageResult = meetupGateway.listRecentByUser(userId, pageSize);
+    private PageDTO<MeetupCardDTO> listRecent(String userId, String lastId, int limit) {
+        PageDTO<MeetupData> pageResult = meetupGateway.listRecentByUser(userId, lastId, limit);
         List<MeetupCardDTO> cardList = pageResult.getList().stream()
                 .map(MeetupDomainConvertMapper.INSTANCE::toMeetupCardDTO)
-                .collect(Collectors.toList());
-        return new PageDTO<>(cardList, pageResult.getTotal(), pageResult.getHasMore());
+                .toList();
+        return new PageDTO<>(cardList, null, pageResult.getHasMore());
     }
 
     // ======================== 内部工具方法 ========================

@@ -6,9 +6,8 @@ import com.rally.domain.recap.model.ReviewData;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -32,27 +31,47 @@ public class UserReviewDomainService {
     public ReviewSummaryDTO getReviewSummary(String toUserId, int tagLimit) {
         // 一次查询获取该用户收到的全部评价
         List<ReviewData> allReviews = reviewGateway.listAllByToUser(toUserId);
-        // 评价总数
-        int total = allReviews.size();
-        // 从 TAG 类型评价中提取 top N 标签及其数量
-        List<TagCount> topTags = allReviews.stream()
-                .filter(r -> ReviewTypeEnum.TAG.name().equals(r.getReviewType().name()))
-                .collect(Collectors.groupingBy(ReviewData::getReviewValue, Collectors.counting()))
+
+        // 统计 LEVEL_VOTE 类型数量
+        long levelVoteCount = allReviews.stream()
+                .filter(r -> ReviewTypeEnum.LEVEL_VOTE == r.getReviewType())
+                .count();
+
+        // 统计 ATTENDANCE_VOTE 类型数量
+        long attendanceVoteCount = allReviews.stream()
+                .filter(r -> ReviewTypeEnum.ATTENDANCE_VOTE == r.getReviewType())
+                .count();
+
+        // TAG 类型的 value 是逗号分隔的多标签，需要 split 后分别计数
+        List<TagItem> topTags = allReviews.stream()
+                .filter(r -> ReviewTypeEnum.TAG == r.getReviewType())
+                .flatMap(r -> Arrays.stream(r.getReviewValue().split(",")))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.groupingBy(s -> s, Collectors.counting()))
                 .entrySet().stream()
                 .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
                 .limit(tagLimit)
-                .map(e -> new TagCount(e.getKey(), e.getValue()))
+                .map(e -> new TagItem(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
-        return new ReviewSummaryDTO(total, topTags);
+
+        // 标签总数
+        long tagCount = allReviews.stream()
+                .filter(r -> ReviewTypeEnum.TAG == r.getReviewType())
+                .flatMap(r -> Arrays.stream(r.getReviewValue().split(",")))
+                .filter(s -> !s.isEmpty())
+                .count();
+
+        return new ReviewSummaryDTO(levelVoteCount + attendanceVoteCount + tagCount, levelVoteCount, attendanceVoteCount, tagCount, topTags);
     }
 
     /**
      * 评价聚合结果（评价总数 + top 标签）
      */
-    public record ReviewSummaryDTO(int total, List<TagCount> topTags) {}
+    public record ReviewSummaryDTO(Long total, Long levelVoteCount, Long attendanceVoteCount, Long tagCount, List<TagItem> topTags) {}
 
     /**
      * 标签及其数量
      */
-    public record TagCount(String name, long count) {}
+    public record TagItem(String name, long count) {}
 }

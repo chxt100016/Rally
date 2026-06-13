@@ -15,12 +15,13 @@ public class MyProfileLevelDTO {
     /** NTRP 评分 */
     private String ntrpScore;
 
-    /** 自评修改剩余冷却天数 */
-    private Integer cooldownDays;
+    private String subTitle;
 
-    /** 是否在核查期 */
-    private Boolean isUnderReview;
+    private String noticeTitle;
 
-    /** 核查期剩余比赛场次 */
-    private Integer remainingMatches;
+    private String noticeContent;
+
+    private String noticeInfo;
+
+    private boolean canModify;
 }

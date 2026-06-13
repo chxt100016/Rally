@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rally.db.meetup.mapper.MeetupMapper">
 
-    <!-- 用户维度约球列表（IN_PROGRESS / COMPLETED / MY_PUBLISH） -->
+    <!-- 用户维度约球列表（IN_PROGRESS / COMPLETED / MY_PUBLISH），searchAfter 游标分页 -->
     <select id="listByUserFilter" resultType="com.rally.db.meetup.entity.MeetupPO">
         SELECT * FROM rally_meetup
         <where>
@@ -27,8 +27,13 @@
                     OR (status IN ('OPEN','FULL') AND end_time &lt; NOW())
                 )
             </if>
+            <!-- searchAfter 游标 -->
+            <if test="param.lastId != null and param.lastId != ''">
+                AND biz_id &lt; #{param.lastId}
+            </if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY biz_id DESC
+        LIMIT #{param.limit}
     </select>
 
     <!-- 创建人有待审批报名的约球 -->
@@ -43,7 +48,7 @@
         ORDER BY create_time DESC
     </select>
 
-    <!-- PENDING tab：创建人有待审批 + 参与者已结束未录比分，UNION 分页 -->
+    <!-- PENDING tab：创建人有待审批 + 参与者已结束未录比分，UNION searchAfter 游标分页 -->
     <select id="listPendingMeetups" resultType="com.rally.db.meetup.entity.MeetupPO">
         SELECT * FROM (
             (SELECT m.* FROM rally_meetup m
@@ -66,18 +71,28 @@
                    SELECT 1 FROM rally_meetup_score s WHERE s.rally_meetup_id = m.biz_id
                ))
         ) t
-        ORDER BY create_time DESC
+        <where>
+            <if test="lastId != null and lastId != ''">
+                AND t.biz_id &lt; #{lastId}
+            </if>
+        </where>
+        ORDER BY t.biz_id DESC
+        LIMIT #{limit}
     </select>
 
-    <!-- RECENT tab：用户为创建人或已批准报名的约球，不限状态，按开始时间倒序 -->
+    <!-- RECENT tab：用户为创建人或已批准报名的约球，不限状态，searchAfter 游标分页 -->
     <select id="listRecentByUser" resultType="com.rally.db.meetup.entity.MeetupPO">
         SELECT * FROM rally_meetup m
-        WHERE m.creator_id = #{userId}
+        WHERE (m.creator_id = #{userId}
            OR EXISTS (
                SELECT 1 FROM rally_meetup_registration r
                WHERE r.rally_meetup_id = m.biz_id AND r.user_id = #{userId} AND r.status IN ('JOINED','REVIEWED')
-           )
-        ORDER BY m.start_time DESC
+           ))
+        <if test="lastId != null and lastId != ''">
+            AND m.biz_id &lt; #{lastId}
+        </if>
+        ORDER BY m.biz_id DESC
+        LIMIT #{limit}
     </select>
 
 </mapper>

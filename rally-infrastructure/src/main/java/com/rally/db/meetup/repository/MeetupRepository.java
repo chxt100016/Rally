@@ -274,9 +274,9 @@ public class MeetupRepository {
                 .count();
     }
 
-    /** 用户维度约球列表（IN_PROGRESS / COMPLETED / MY_PUBLISH），XML mapper */
-    public IPage<MeetupPO> listByUserFilter(MeetupListQueryParam param) {
-        return meetupMapper.listByUserFilter(new Page<>(param.getPageNo(), param.getPageSize()), param);
+    /** 用户维度约球列表（IN_PROGRESS / COMPLETED / MY_PUBLISH），searchAfter 游标分页 */
+    public List<MeetupPO> listByUserFilter(MeetupListQueryParam param) {
+        return meetupMapper.listByUserFilter(param);
     }
 
     /** 创建人有待审批报名的约球，XML mapper */
@@ -284,13 +284,13 @@ public class MeetupRepository {
         return meetupMapper.listCreatorPending(new Page<>(pageNo, pageSize), creatorId);
     }
 
-    /** PENDING tab：UNION 分页，XML mapper */
-    public IPage<MeetupPO> listPendingMeetups(String userId, int deadlineDays, int pageNo, int pageSize) {
-        return meetupMapper.listPendingMeetups(new Page<>(pageNo, pageSize), userId, deadlineDays);
+    /** PENDING tab：UNION searchAfter 游标分页 */
+    public List<MeetupPO> listPendingMeetups(String userId, int deadlineDays, String lastId, int limit) {
+        return meetupMapper.listPendingMeetups(userId, deadlineDays, lastId, limit);
     }
 
-    /** RECENT tab：用户为创建人或已批准报名的约球，不限状态，XML mapper */
-    public IPage<MeetupPO> listRecentByUser(String userId, int pageSize) {
-        return meetupMapper.listRecentByUser(new Page<>(1, pageSize), userId);
+    /** RECENT tab：用户为创建人或已批准报名的约球，不限状态，searchAfter 游标分页 */
+    public List<MeetupPO> listRecentByUser(String userId, String lastId, int limit) {
+        return meetupMapper.listRecentByUser(userId, lastId, limit);
     }
 }

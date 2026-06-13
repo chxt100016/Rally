@@ -78,7 +78,7 @@ public class PlayerHomeAppService {
         long completedCount = meetupDomainService.countFinishedMeetups(userId);
         UserMeetupListCmd recentCmd = new UserMeetupListCmd();
         recentCmd.setTab(UserMeetupTabEnum.RECENT);
-        recentCmd.setPageSize(3);
+        recentCmd.setSize(3);
         List<MeetupCardDTO> recentMeetups = meetupQueryDomainService.listByUser(recentCmd, userId).getList();
         return new PlayerHomeMeetupDTO().setCompletedCount((int) completedCount).setRecentMeetups(recentMeetups);
     }
@@ -88,9 +88,7 @@ public class PlayerHomeAppService {
         ReviewSummaryDTO summary = userReviewDomainService.getReviewSummary(userId, 5);
         return new MyProfileReviewDTO()
                 .setTotal(summary.total())
-                .setTags(summary.topTags().stream()
-                        .map(tag -> new ReviewTagDTO().setName(tag.name()).setCount((int) tag.count()))
-                        .collect(Collectors.toList()));
+                .setTags(summary.topTags());
     }
 
     /** 构建等级信息 DTO */

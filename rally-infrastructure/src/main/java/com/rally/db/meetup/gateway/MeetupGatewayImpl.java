@@ -1,6 +1,5 @@
 package com.rally.db.meetup.gateway;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.rally.db.meetup.convert.MeetupConvertMapper;
 import com.rally.db.meetup.entity.MeetupPO;
 import com.rally.db.meetup.entity.RegistrationPO;
@@ -108,25 +107,29 @@ public class MeetupGatewayImpl implements MeetupGateway {
 
     @Override
     public PageDTO<MeetupData> listByUserFilter(MeetupListQueryParam param) {
-        IPage<MeetupPO> page = meetupRepository.listByUserFilter(param);
-        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(page.getRecords());
-        boolean hasMore = page.getCurrent() < page.getPages();
-        return new PageDTO<>(dataList, page.getTotal(), hasMore);
+        List<MeetupPO> poList = meetupRepository.listByUserFilter(param);
+        // searchAfter：多查了1条用于判断是否还有下一页
+        boolean hasMore = poList.size() > param.getLimit() - 1;
+        List<MeetupPO> pageData = hasMore ? poList.subList(0, param.getLimit() - 1) : poList;
+        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(pageData);
+        return new PageDTO<>(dataList, null, hasMore);
     }
 
     @Override
-    public PageDTO<MeetupData> listPendingMeetups(String userId, int deadlineDays, int pageNo, int pageSize) {
-        IPage<MeetupPO> page = meetupRepository.listPendingMeetups(userId, deadlineDays, pageNo, pageSize);
-        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(page.getRecords());
-        boolean hasMore = page.getCurrent() < page.getPages();
-        return new PageDTO<>(dataList, page.getTotal(), hasMore);
+    public PageDTO<MeetupData> listPendingMeetups(String userId, int deadlineDays, String lastId, int limit) {
+        List<MeetupPO> poList = meetupRepository.listPendingMeetups(userId, deadlineDays, lastId, limit);
+        boolean hasMore = poList.size() > limit - 1;
+        List<MeetupPO> pageData = hasMore ? poList.subList(0, limit - 1) : poList;
+        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(pageData);
+        return new PageDTO<>(dataList, null, hasMore);
     }
 
     @Override
-    public PageDTO<MeetupData> listRecentByUser(String userId, int pageSize) {
-        IPage<MeetupPO> page = meetupRepository.listRecentByUser(userId, pageSize);
-        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(page.getRecords());
-        boolean hasMore = page.getCurrent() < page.getPages();
-        return new PageDTO<>(dataList, page.getTotal(), hasMore);
+    public PageDTO<MeetupData> listRecentByUser(String userId, String lastId, int limit) {
+        List<MeetupPO> poList = meetupRepository.listRecentByUser(userId, lastId, limit);
+        boolean hasMore = poList.size() > limit - 1;
+        List<MeetupPO> pageData = hasMore ? poList.subList(0, limit - 1) : poList;
+        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(pageData);
+        return new PageDTO<>(dataList, null, hasMore);
     }
 }

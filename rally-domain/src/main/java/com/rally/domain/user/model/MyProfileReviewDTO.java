@@ -1,5 +1,6 @@
 package com.rally.domain.user.model;
 
+import com.rally.domain.recap.UserReviewDomainService;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -13,8 +14,14 @@ import java.util.List;
 public class MyProfileReviewDTO {
 
     /** 评价总数 */
-    private Integer total;
+    private Long total;
+
+    private Long levelVoteCount;
+
+    private Long attendanceVoteCount;
+
+    private Long tagCount;
 
     /** 评价标签 */
-    private List<ReviewTagDTO> tags;
+    private List<UserReviewDomainService.TagItem> tags;
 }
