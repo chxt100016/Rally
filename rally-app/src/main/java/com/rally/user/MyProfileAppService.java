@@ -52,7 +52,9 @@ public class MyProfileAppService {
                 .setLevel(hasProfile ? buildLevelDTO(userProfile) : null)
                 .setScore(hasProfile ? buildScoreDTO(userProfile.getProfile()) : null)
                 .setReview(hasProfile ? buildReviewDTO(userId) : null)
-                .setVideo(hasProfile ? buildVideoDTO(userProfile.getProfile()) : null);
+                .setVideo(hasProfile ? buildVideoDTO(userProfile.getProfile()) : null)
+                .setSetScore(hasProfile ? MyProfileSetScoreDTO.mock() : null);
+
     }
 
     private MyProfileStatsDTO buildStats(String userId) {

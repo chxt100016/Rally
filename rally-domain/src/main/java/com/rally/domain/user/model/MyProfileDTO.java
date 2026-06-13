@@ -20,7 +20,7 @@ public class MyProfileDTO {
     /** 统计数据 */
     private MyProfileStatsDTO stats;
 
-    /* 四格快捷入口 */
+    /* 快捷入口 */
     /** 等级信息 */
     private MyProfileLevelDTO level;
 
@@ -32,4 +32,8 @@ public class MyProfileDTO {
 
     /** 视频信息 */
     private MyProfileVideoDTO video;
+
+    /** 战绩 */
+    private MyProfileSetScoreDTO setScore;
+
 }
