@@ -78,4 +78,11 @@ public class RecapDomainService {
     public List<ScoreRecordData> listScoresByMeetup(String meetupId) {
         return recapGateway.listScoresByMeetup(meetupId);
     }
+
+    /**
+     * 查询某用户参与的所有比分记录（按比赛日期倒序）
+     */
+    public List<ScoreRecordData> listScoresByUserId(String userId) {
+        return recapGateway.listScoresByUserId(userId);
+    }
 }

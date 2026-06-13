@@ -1,10 +1,12 @@
 package com.rally.auth;
 
+import com.rally.auth.convert.AuthConvertMapper;
 import com.rally.domain.auth.enums.ChannelEnum;
 import com.rally.domain.auth.exception.AuthException;
 import com.rally.domain.auth.gateway.AccountGateway;
 import com.rally.domain.auth.gateway.WechatGateway;
 import com.rally.domain.auth.model.AccountData;
+import com.rally.domain.auth.model.CompleteRegistrationCmd;
 import com.rally.domain.auth.model.LoginResultVO;
 import com.rally.domain.auth.model.WechatLoginCmd;
 import com.rally.domain.auth.model.WechatSession;
@@ -37,8 +39,7 @@ public class AuthAppService {
 
         WechatSession session = wechatGateway.code2Session(cmd.getCode());
 
-        Optional<AccountData> accountOpt = accountGateway.findByChannelAndIdentifier(
-                ChannelEnum.WECHAT_MINIAPP, session.getOpenid());
+        Optional<AccountData> accountOpt = accountGateway.findByChannelAndIdentifier(ChannelEnum.WECHAT_MINIAPP, session.getOpenid());
 
         String userId;
         boolean isNewUser;
@@ -72,28 +73,10 @@ public class AuthAppService {
                 .orElse(true);
     }
 
-    public void completeRegistration(String nickname, String avatarUrl,
-                                       String birthday, String gender) {
+    public void completeRegistration(CompleteRegistrationCmd cmd) {
         String userId = UserContext.get();
-        if (StringUtils.isBlank(nickname) || StringUtils.isBlank(avatarUrl)) {
-            throw new AuthException(10005, "昵称和头像不能为空");
-        }
-
-        UserData userData = new UserData();
+        UserData userData = AuthConvertMapper.INSTANCE.toUserData(cmd);
         userData.setUserId(userId);
-        userData.setNickname(nickname);
-        userData.setAvatarUrl(avatarUrl);
-
-        if (StringUtils.isNotBlank(birthday)) {
-            userData.setBirthday(java.time.LocalDate.parse(birthday));
-        }
-        if (StringUtils.isNotBlank(gender)) {
-            try {
-                userData.setGender(com.rally.domain.user.enums.GenderEnum.valueOf(gender.toUpperCase()));
-            } catch (IllegalArgumentException ignored) {
-            }
-        }
-
         userGateway.updateUser(userData);
     }
 }

@@ -107,8 +107,7 @@ public class UserProfile {
      * 完成 onboarding：用户基本信息 + 档案分别由各自实体落值
      */
     public void completeOnboarding(OnboardingCmd cmd) {
-        user.completeOnboarding(cmd.getGender(), cmd.getBirthday(), cmd.getCityCode());
-        profile.completeOnboarding(cmd.getNtrpScore(), cmd.getVideoKeys());
+        profile.completeOnboarding(cmd.getNtrpScore(), cmd.getVideos());
     }
 
     public void assertBasic() {

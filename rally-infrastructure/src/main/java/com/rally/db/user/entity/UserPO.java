@@ -3,6 +3,7 @@ package com.rally.db.user.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.rally.domain.user.enums.GenderEnum;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -16,7 +17,7 @@ public class UserPO {
     private String userId;
     private String nickname;
     private String avatarUrl;
-    private String gender;
+    private GenderEnum gender;
     private LocalDate birthday;
     /** 个人简介 */
     private String bio;

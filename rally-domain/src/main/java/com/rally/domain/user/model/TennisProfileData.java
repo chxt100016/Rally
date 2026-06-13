@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 球员档案领域数据
@@ -19,7 +20,7 @@ import java.util.List;
 public class TennisProfileData {
     private String bizId;
     private String userId;
-    private List<String> videoUrls;
+    private List<VideoVO> videos;
     private BigDecimal ntrpScore;
     private BigDecimal utrScore;
     private LocalDateTime ntrpUpdatedAt;
@@ -117,15 +118,15 @@ public class TennisProfileData {
     public void initTBC(String userId) {
         this.userId = userId;
         this.status = ProfileStatusEnum.TBC;
-        this.videoUrls = new ArrayList<>();
+        this.videos = new ArrayList<>();
     }
 
     /**
      * 完成 onboarding 的档案部分：落 NTRP 自评和视频，状态置为 NORMAL
      */
-    public void completeOnboarding(BigDecimal ntrpScore, List<String> videoKeys) {
+    public void completeOnboarding(BigDecimal ntrpScore, List<VideoVO> videos) {
         this.ntrpScore = ntrpScore;
-        this.videoUrls = videoKeys;
+        this.videos = videos;
         this.status = ProfileStatusEnum.NORMAL;
         this.ntrpUpdatedAt = LocalDateTime.now();
     }

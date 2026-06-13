@@ -1,10 +1,16 @@
 package com.rally.user;
 
 import com.rally.config.property.QiniuConfiguration;
+import com.rally.domain.meetup.enums.MatchTypeEnum;
+import com.rally.domain.meetup.enums.ResultTypeEnum;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.recap.UserReviewDomainService;
 import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
+import com.rally.domain.recap.enums.SetFormatEnum;
+import com.rally.domain.recap.model.ScoreRecordData;
+import com.rally.domain.recap.service.RecapDomainService;
 import com.rally.domain.score.ProfileLevelManager;
+import com.rally.domain.system.CityConfig;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.model.*;
 import com.rally.domain.user.service.UserProfileDomainService;
@@ -15,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +43,15 @@ public class MyProfileAppService {
     @Resource
     private UserReviewDomainService userReviewDomainService;
 
+    @Resource
+    private RecapDomainService recapDomainService;
+
+    /** 战绩明细展示数量 */
+    private static final int SET_SCORE_ITEM_LIMIT = 5;
+
+    /** 战绩明细标题日期格式 */
+    private static final DateTimeFormatter SET_TITLE_DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd");
+
     /**
      * 我的档案（新版）
      */
@@ -53,7 +69,7 @@ public class MyProfileAppService {
                 .setScore(hasProfile ? buildScoreDTO(userProfile.getProfile()) : null)
                 .setReview(hasProfile ? buildReviewDTO(userId) : null)
                 .setVideo(hasProfile ? buildVideoDTO(userProfile.getProfile()) : null)
-                .setSetScore(hasProfile ? MyProfileSetScoreDTO.mock() : null);
+                .setSetScore(hasProfile ? buildSetScoreDTO(userId) : null);
 
     }
 
@@ -146,16 +162,74 @@ public class MyProfileAppService {
                 .setGender(userData.getGender())
                 .setBirthday(userData.getBirthday())
                 .setCityCode(userData.getCityCode())
+                .setCityName(CityConfig.getCityName(userData.getCityCode()))
                 .setBio(userData.getBio());
+    }
+
+    /** 构建战绩信息 DTO（按比赛日期倒序，仅展示最近若干场明细） */
+    private MyProfileSetScoreDTO buildSetScoreDTO(String userId) {
+        List<ScoreRecordData> records = recapDomainService.listScoresByUserId(userId);
+        long singleCount = records.stream().filter(record -> record.getMatchType() == MatchTypeEnum.SINGLE).count();
+        long doubleCount = records.stream().filter(record -> record.getMatchType() == MatchTypeEnum.DOUBLE).count();
+        List<MyProfileSetScoreDTO.SetItem> setItems = records.stream()
+                .limit(SET_SCORE_ITEM_LIMIT)
+                .map(record -> buildSetItem(userId, record))
+                .collect(Collectors.toList());
+        return new MyProfileSetScoreDTO()
+                .setTotal((long) records.size())
+                .setSingleCount(singleCount)
+                .setDoubleCount(doubleCount)
+                .setSetItems(setItems);
+    }
+
+    /** 构建单条战绩明细：根据当前用户所在阵营与比分判断胜负 */
+    private MyProfileSetScoreDTO.SetItem buildSetItem(String userId, ScoreRecordData record) {
+        boolean userInSideA = userId.equals(record.getSideAPlayer1()) || userId.equals(record.getSideAPlayer2());
+        boolean sideAWin = resolveSideAWin(record);
+        ResultTypeEnum resultType = (userInSideA == sideAWin) ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
+        String matchTypeLabel = record.getMatchType() == MatchTypeEnum.DOUBLE ? "双打" : "单打";
+        String title = record.getMeetupDate().format(SET_TITLE_DATE_FORMATTER) + " " + matchTypeLabel + " " + buildSetFormatLabel(record);
+        return new MyProfileSetScoreDTO.SetItem()
+                .setTitle(title)
+                .setResultType(resultType)
+                .setMatchType(record.getMatchType())
+                .setSideAPlayer1AvatarUrl(record.getSideAPlayer1Avatar())
+                .setSideAPlayer2AvatarUrl(record.getSideAPlayer2Avatar())
+                .setSideAScore(String.valueOf(record.getSideAScore()))
+                .setSideBPlayer1AvatarUrl(record.getSideBPlayer1Avatar())
+                .setSideBPlayer2AvatarUrl(record.getSideBPlayer2Avatar())
+                .setSideBScore(String.valueOf(record.getSideBScore()));
+    }
+
+    /** 判定 A 侧是否胜出：常规比分相同（如 6:6）时按抢七比分判定 */
+    private boolean resolveSideAWin(ScoreRecordData record) {
+        Integer sideAScore = record.getSideAScore();
+        Integer sideBScore = record.getSideBScore();
+        if (sideAScore.equals(sideBScore) && record.getSideATiebreakScore() != null && record.getSideBTiebreakScore() != null) {
+            return record.getSideATiebreakScore() > record.getSideBTiebreakScore();
+        }
+        return sideAScore > sideBScore;
+    }
+
+    /** 构建赛制标签：常规局按本盘最大局数显示「X局」，抢七统一显示「抢分」 */
+    private String buildSetFormatLabel(ScoreRecordData record) {
+        if (record.getSetFormat() == SetFormatEnum.TIEBREAK) {
+            return "抢分";
+        }
+        int games = Math.max(record.getSideAScore(), record.getSideBScore()) - 1;
+        return games + "局";
     }
 
     /** 构建视频信息 DTO */
     private MyProfileVideoDTO buildVideoDTO(TennisProfileData profileData) {
         MyProfileVideoDTO videoDTO = new MyProfileVideoDTO();
-        List<String> videoKeys = profileData.getVideoUrls();
-        videoDTO.setTotal(videoKeys.size());
-        videoDTO.setData(videoKeys.stream()
-                .map(key -> new VideoItemDTO().setKey(key).setUrl(QiniuConfiguration.buildSignedUrl(key)).setTitle("标题"))
+        List<VideoVO> videos = profileData.getVideos();
+        videoDTO.setTotal(videos.size());
+        videoDTO.setData(videos.stream()
+                .map(video -> new VideoItemDTO()
+                        .setKey(video.getKey())
+                        .setUrl(QiniuConfiguration.buildSignedUrl(video.getKey()))
+                        .setTitle(video.getTitle()))
                 .collect(Collectors.toList()));
         return videoDTO;
     }

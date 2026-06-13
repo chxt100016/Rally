@@ -111,11 +111,14 @@ public class PlayerHomeAppService {
     /** 构建视频信息 DTO */
     private MyProfileVideoDTO buildVideoDTO(TennisProfileData profileData) {
         MyProfileVideoDTO videoDTO = new MyProfileVideoDTO();
-        if (profileData != null && profileData.getVideoUrls() != null) {
-            List<String> videoKeys = profileData.getVideoUrls();
-            videoDTO.setTotal(videoKeys.size());
-            videoDTO.setData(videoKeys.stream()
-                    .map(key -> new VideoItemDTO().setKey(key).setUrl(QiniuConfiguration.buildSignedUrl(key)))
+        if (profileData != null && profileData.getVideos() != null) {
+            List<VideoVO> videos = profileData.getVideos();
+            videoDTO.setTotal(videos.size());
+            videoDTO.setData(videos.stream()
+                    .map(video -> new VideoItemDTO()
+                            .setKey(video.getKey())
+                            .setUrl(QiniuConfiguration.buildSignedUrl(video.getKey()))
+                            .setTitle(video.getTitle()))
                     .collect(Collectors.toList()));
         } else {
             videoDTO.setTotal(0);

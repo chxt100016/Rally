@@ -47,7 +47,7 @@ public class OnboardingAppService {
         if (ProfileStatusEnum.NONE == profile.getStatus()) {
             this.userProfileDomainService.init(profile);
         }
-        cmd.getVideoKeys().forEach(QiniuConfiguration::buildSignedUrl);
+        cmd.getVideos().forEach(video -> QiniuConfiguration.buildSignedUrl(video.getKey()));
         profile.completeOnboarding(cmd);
         userProfileDomainService.save(profile);
 

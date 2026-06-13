@@ -53,7 +53,7 @@ public class CredibilityStrategy implements ScoreStrategy {
 
         // 2. 视频加分
         int videoCount = profileGateway.findByUserId(userId)
-                .map(p -> p.getVideoUrls() != null ? p.getVideoUrls().size() : 0)
+                .map(p -> p.getVideos() != null ? p.getVideos().size() : 0)
                 .orElse(0);
         int videoPerScore = SystemConfig.getInt("score.credibility.video_per_score", 5);
         int videoCap = SystemConfig.getInt("score.credibility.video_cap", 25);

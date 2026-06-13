@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.rally.db.user.entity.TennisProfilePO;
 import com.rally.domain.user.model.TennisProfileData;
+import com.rally.domain.user.model.VideoVO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -15,11 +16,11 @@ public interface TennisProfileConvertMapper {
     TennisProfileConvertMapper INSTANCE = Mappers.getMapper(TennisProfileConvertMapper.class);
 
     @Named("toData")
-    @Mapping(target = "videoUrls", expression = "java(jsonToStringList(po.getVideoUrls()))")
+    @Mapping(target = "videos", expression = "java(jsonToVideoList(po.getVideos()))")
     TennisProfileData toData(TennisProfilePO po);
 
     @Named("toPO")
-    @Mapping(target = "videoUrls", expression = "java(stringListToJson(data.getVideoUrls()))")
+    @Mapping(target = "videos", expression = "java(videoListToJson(data.getVideos()))")
     TennisProfilePO toPO(TennisProfileData data);
 
     /**
@@ -30,23 +31,23 @@ public interface TennisProfileConvertMapper {
     @Mapping(target = "bizId", ignore = true)
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "videoUrls", expression = "java(stringListToJson(data.getVideoUrls()))")
+    @Mapping(target = "videos", expression = "java(videoListToJson(data.getVideos()))")
     void updatePO(@MappingTarget TennisProfilePO po, TennisProfileData data);
 
-    @Named("stringListToJson")
-    default String stringListToJson(List<String> list) {
+    @Named("videoListToJson")
+    default String videoListToJson(List<VideoVO> list) {
         if (list == null) {
             return null;
         }
         return JSON.toJSONString(list);
     }
 
-    @Named("jsonToStringList")
-    default List<String> jsonToStringList(String json) {
+    @Named("jsonToVideoList")
+    default List<VideoVO> jsonToVideoList(String json) {
         if (json == null || json.isEmpty()) {
             return null;
         }
-        return JSON.parseObject(json, new TypeReference<List<String>>() {});
+        return JSON.parseObject(json, new TypeReference<List<VideoVO>>() {});
     }
 
 }

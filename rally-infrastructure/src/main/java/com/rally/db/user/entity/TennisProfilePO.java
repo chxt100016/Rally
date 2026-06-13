@@ -15,8 +15,8 @@ public class TennisProfilePO {
     private Long id;
     private String bizId;
     private String userId;
-    /** JSON 格式存储视频 key 列表 */
-    private String videoUrls;
+    /** JSON 格式存储视频列表 [{key,title}] */
+    private String videos;
     private BigDecimal ntrpScore;
     private BigDecimal utrScore;
     private LocalDateTime ntrpUpdatedAt;

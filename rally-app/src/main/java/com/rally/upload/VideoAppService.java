@@ -10,6 +10,7 @@ import com.rally.domain.system.SystemConfig;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.VideoTokenVO;
+import com.rally.domain.user.model.VideoVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,8 +35,8 @@ public class VideoAppService {
                 .orElse(null);
         if (profileData != null) {
             int maxCount = SystemConfig.getInt("user.video.max_count", 3);
-            List<String> currentUrls = profileData.getVideoUrls();
-            if (currentUrls != null && currentUrls.size() >= maxCount) {
+            List<VideoVO> currentVideos = profileData.getVideos();
+            if (currentVideos != null && currentVideos.size() >= maxCount) {
                 throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED);
             }
         }
@@ -58,13 +59,13 @@ public class VideoAppService {
 
         TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
-        List<String> videoUrls = profileData.getVideoUrls();
-        if (videoUrls == null) {
-            videoUrls = new ArrayList<>();
+        List<VideoVO> videos = profileData.getVideos();
+        if (videos == null) {
+            videos = new ArrayList<>();
         }
 
-        videoUrls.remove(key);
-        tennisProfileGateway.updateVideoUrls(userId, videoUrls);
+        videos.removeIf(video -> video.getKey().equals(key));
+        tennisProfileGateway.updateVideos(userId, videos);
     }
 
 
@@ -91,7 +92,7 @@ public class VideoAppService {
         policy.put("fsizeLimit", fsizeLimit);
         policy.put("deadline", System.currentTimeMillis() / 1000 + 600);
 
-        String uploadToken = auth.uploadToken(QiniuConfiguration.getBucket(), null, 3600, policy);
+        String uploadToken = auth.uploadToken(QiniuConfiguration.getBucket(), key, 3600, policy);
 
         VideoTokenVO vo = new VideoTokenVO();
         vo.setUploadToken(uploadToken);

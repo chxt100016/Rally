@@ -64,5 +64,11 @@ public class ScoreSubmitCmd {
         /** B 侧本盘比分 */
         @NotNull(message = "B侧比分不能为空")
         private Integer sideBScore;
+
+        /** A 侧抢七比分（本盘 6:6 时填写） */
+        private Integer sideATiebreakScore;
+
+        /** B 侧抢七比分（本盘 6:6 时填写） */
+        private Integer sideBTiebreakScore;
     }
 }

@@ -19,6 +19,7 @@ public class MyProfileUserDTO {
     private LocalDate birthday;
     /** 用户当前城市编码 */
     private String cityCode;
+    private String cityName;
     /** 个人简介 */
     private String bio;
     /** 头像URL */

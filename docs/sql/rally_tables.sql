@@ -33,7 +33,7 @@ CREATE TABLE `user_tennis_profile` (
   `id`                BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `biz_id`            VARCHAR(32)  NOT NULL COMMENT '雪花 ID（业务主键）',
   `user_id`           VARCHAR(32)  NOT NULL COMMENT '关联 users.user_id',
-  `video_urls`        JSON         DEFAULT NULL COMMENT '打球视频 key 列表，存储放宽最多 5，交互上限走配置 user.video.max_count 默认 3（裁定 D1）',
+  `videos`            JSON         DEFAULT NULL COMMENT '打球视频列表 [{key,title}]，存储放宽最多 5，交互上限走配置 user.video.max_count 默认 3（裁定 D1）',
   `ntrp_score`        DECIMAL(3,1) DEFAULT NULL COMMENT 'NTRP 自评 1.5~7.0 步长 0.5',
   `utr_score`         DECIMAL(4,2) DEFAULT NULL COMMENT 'UTR 三方接入选填，MVP 预留不实现',
   `ntrp_updated_at`   DATETIME     DEFAULT NULL COMMENT 'NTRP 最后修改时间，冷却期计算基准',
@@ -161,7 +161,7 @@ INSERT INTO `sys_config` (`biz_id`, `config_key`, `config_value`, `value_type`, 
 ('cfg0000000000000062', 'anti_abuse.conflict_buffer_minutes', '30', 'int', 'global', '报名抵冲路上缓冲时间（分钟）', 1, 0),
 
 -- 5.12 约球域 · 城市开通（meetup.city）1 项
-('cfg0000000000000063', 'meetup.city.opened_codes', '310000,110000,440100', 'json', 'global', '后台开通城市 cityCode 列表，发布/报名/推荐限定其中', 1, 0);
+('cfg0000000000000063', 'meetup.city.opened_codes', '330100,110000,440100', 'json', 'global', '后台开通城市 cityCode 列表，发布/报名/推荐限定其中', 1, 0);
 
 -- ============================================================
 -- 5. 约球域：约球主表
@@ -275,6 +275,8 @@ CREATE TABLE `rally_meetup_score` (
   `side_b_player2_avatar` VARCHAR(512) DEFAULT '' COMMENT 'B 侧选手2头像URL（冗余存储）',
   `side_a_score`    INT         NOT NULL COMMENT 'A 侧本盘比分（局数/抢七分）',
   `side_b_score`    INT         NOT NULL COMMENT 'B 侧本盘比分',
+  `side_a_tiebreak_score` INT   DEFAULT NULL COMMENT 'A 侧抢七比分（本盘 6:6 时记录）',
+  `side_b_tiebreak_score` INT   DEFAULT NULL COMMENT 'B 侧抢七比分（本盘 6:6 时记录）',
   `recorded_by`     VARCHAR(32) NOT NULL COMMENT '记录人 user_id（任意参与者可代记）',
   `version`         INT         NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
   `create_time`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

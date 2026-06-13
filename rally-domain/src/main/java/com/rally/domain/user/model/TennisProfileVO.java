@@ -22,7 +22,7 @@ public class TennisProfileVO {
     private String status;
     private Boolean isUnderReview;
     private Integer reviewRemainingMatches;
-    private List<String> videoUrls;
+    private List<String> videos;
     private LocalDateTime ntrpUpdatedAt;
     private Boolean ntrpEditable;
     private Integer ntrpCooldownRemainingDays;

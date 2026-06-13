@@ -6,8 +6,8 @@ import com.rally.domain.auth.model.CompleteRegistrationCmd;
 import com.rally.domain.auth.model.LoginResultVO;
 import com.rally.domain.auth.model.WechatLoginCmd;
 import com.rally.domain.tennis.model.Result;
-import com.rally.domain.user.model.UserVO;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,12 +30,8 @@ public class WechatAuthController {
     }
 
     @PostMapping("/complete-registration")
-    public Result<?> completeRegistration(@RequestBody CompleteRegistrationCmd cmd) {
-        try {
-            authAppService.completeRegistration(cmd.getNickname(), cmd.getAvatarUrl(), cmd.getBirthday(), cmd.getGender());
-            return Result.ok();
-        } catch (AuthException e) {
-            return Result.fail(e.getCode(), e.getMessage());
-        }
+    public Result<?> completeRegistration(@Valid @RequestBody CompleteRegistrationCmd cmd) {
+        authAppService.completeRegistration(cmd);
+        return Result.ok();
     }
 }

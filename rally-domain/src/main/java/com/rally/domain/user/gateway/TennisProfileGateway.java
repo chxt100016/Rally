@@ -1,6 +1,7 @@
 package com.rally.domain.user.gateway;
 
 import com.rally.domain.user.model.TennisProfileData;
+import com.rally.domain.user.model.VideoVO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,7 +27,7 @@ public interface TennisProfileGateway {
     /**
      * 更新视频列表
      */
-    void updateVideoUrls(String userId, List<String> videoUrls);
+    void updateVideos(String userId, List<VideoVO> videos);
 
     /**
      * 更新评分字段（由评分域调用）

@@ -102,6 +102,8 @@ public class RecapRepository implements RecapGateway {
                 existing.setSideBPlayer2(item.getSideBPlayer2());
                 existing.setSideAScore(item.getSideAScore());
                 existing.setSideBScore(item.getSideBScore());
+                existing.setSideATiebreakScore(item.getSideATiebreakScore());
+                existing.setSideBTiebreakScore(item.getSideBTiebreakScore());
                 existing.setRecordedBy(userId);
                 existing.setMatchType(item.getMatchType());
                 existing.setMeetupDate(meetupDate);
@@ -141,7 +143,7 @@ public class RecapRepository implements RecapGateway {
                 .flatMap(item -> Stream.of(item.getSideAPlayer1(), item.getSideAPlayer2(), item.getSideBPlayer1(), item.getSideBPlayer2()))
                 .filter(StringUtils::isNotBlank)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
         // 批量查询用户数据
         Map<String, UserData> userMap = new HashMap<>();
         for (String uid : userIds) {
@@ -196,6 +198,16 @@ public class RecapRepository implements RecapGateway {
         List<ScoreRecordPO> poList = scoreRecordService.lambdaQuery()
                 .eq(ScoreRecordPO::getRallyMeetupId, meetupId)
                 .orderByAsc(ScoreRecordPO::getSetNumber)
+                .list();
+        return MAPPER.toScoreRecordDataList(poList);
+    }
+
+    @Override
+    public List<ScoreRecordData> listScoresByUserId(String userId) {
+        List<ScoreRecordPO> poList = scoreRecordService.lambdaQuery()
+                .and(wrapper -> wrapper.eq(ScoreRecordPO::getSideAPlayer1, userId).or().eq(ScoreRecordPO::getSideAPlayer2, userId).or().eq(ScoreRecordPO::getSideBPlayer1, userId).or().eq(ScoreRecordPO::getSideBPlayer2, userId))
+                .orderByDesc(ScoreRecordPO::getMeetupDate)
+                .last("limit 10")
                 .list();
         return MAPPER.toScoreRecordDataList(poList);
     }

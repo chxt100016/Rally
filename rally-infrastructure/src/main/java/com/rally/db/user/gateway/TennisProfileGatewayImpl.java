@@ -5,6 +5,7 @@ import com.rally.db.user.entity.TennisProfilePO;
 import com.rally.db.user.repository.TennisProfileRepository;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.model.TennisProfileData;
+import com.rally.domain.user.model.VideoVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -31,8 +32,8 @@ public class TennisProfileGatewayImpl implements TennisProfileGateway {
         TennisProfilePO po = repository.findByUserId(data.getUserId())
                 .orElseThrow(() -> new RuntimeException("档案不存在"));
 
-        if (data.getVideoUrls() != null) {
-            po.setVideoUrls(CONVERTER.stringListToJson(data.getVideoUrls()));
+        if (data.getVideos() != null) {
+            po.setVideos(CONVERTER.videoListToJson(data.getVideos()));
         }
         if (data.getNtrpScore() != null) {
             po.setNtrpScore(data.getNtrpScore());
@@ -51,10 +52,10 @@ public class TennisProfileGatewayImpl implements TennisProfileGateway {
     }
 
     @Override
-    public void updateVideoUrls(String userId, List<String> videoUrls) {
+    public void updateVideos(String userId, List<VideoVO> videos) {
         TennisProfilePO po = repository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("档案不存在"));
-        po.setVideoUrls(CONVERTER.stringListToJson(videoUrls));
+        po.setVideos(CONVERTER.videoListToJson(videos));
         repository.updateById(po);
     }
 

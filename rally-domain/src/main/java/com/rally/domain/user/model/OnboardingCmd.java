@@ -21,10 +21,8 @@ public class OnboardingCmd {
     /** NTRP 自评 1.5~7.0 步长 0.5 */
     @NotNull(message = "NTRP 自评分不能为空")
     private BigDecimal ntrpScore;
-    /** 城市编码 */
-    @NotBlank(message = "城市编码不能为空")
-    private String cityCode;
-    /** 视频 key 列表（≥1） */
+    /** 视频列表（≥1） */
     @NotEmpty(message = "视频列表不能为空")
-    private List<String> videoKeys;
+    private List<VideoVO> videos;
+
 }

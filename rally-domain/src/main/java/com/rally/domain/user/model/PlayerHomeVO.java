@@ -22,7 +22,7 @@ public class PlayerHomeVO {
     private BigDecimal ntrpScore;
     private Boolean isNewbie;
     private Boolean isUnderReview;
-    private List<String> videoUrls;
+    private List<String> videos;
     private LocalDateTime joinTime;
     private Integer meetupCompletedCount;
     private Integer reviewReceivedCount;

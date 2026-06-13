@@ -1,5 +1,6 @@
 package com.rally.domain.user.model;
 
+import com.rally.domain.user.enums.GenderEnum;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -11,7 +12,7 @@ import java.time.LocalDate;
 public class EditProfileCmd {
     private String nickname;
     private String avatarUrl;
-    private String gender;
+    private GenderEnum gender;
     private LocalDate birthday;
     private String cityCode;
     private String bio;

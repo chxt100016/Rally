@@ -56,4 +56,9 @@ public interface RecapGateway {
      * 查询该活动的所有比分记录
      */
     List<ScoreRecordData> listScoresByMeetup(String meetupId);
+
+    /**
+     * 查询某用户参与的所有比分记录（按比赛日期倒序）
+     */
+    List<ScoreRecordData> listScoresByUserId(String userId);
 }
