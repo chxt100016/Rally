@@ -29,10 +29,5 @@ public class UploadController {
         return Result.ok(Map.of("url", url));
     }
 
-    @PostMapping("/image/avatar")
-    public Result<Map<String, String>> uploadAvatar(
-            @RequestParam("file") MultipartFile file) throws Exception {
-        String url = uploadAppService.uploadAvatar(file);
-        return Result.ok(Map.of("url", url));
-    }
+
 }

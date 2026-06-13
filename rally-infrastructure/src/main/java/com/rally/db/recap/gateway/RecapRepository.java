@@ -12,14 +12,20 @@ import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ReviewSubmitCmd;
 import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.recap.model.ScoreSubmitCmd;
+import com.rally.domain.user.gateway.UserGateway;
+import com.rally.domain.user.model.UserData;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 赛后收集网关实现
@@ -35,6 +41,7 @@ public class RecapRepository implements RecapGateway {
 
     private final ReviewService reviewService;
     private final ScoreRecordService scoreRecordService;
+    private final UserGateway userGateway;
 
     private static final ReviewConvertMapper MAPPER = ReviewConvertMapper.INSTANCE;
 
@@ -70,13 +77,16 @@ public class RecapRepository implements RecapGateway {
     // ==================== 比分提交 ====================
 
     @Override
-    public void submitScoreItems(String meetupId, String userId, List<ScoreSubmitCmd.ScoreItem> targetScores, Integer clientVersion) {
+    public void submitScoreItems(String meetupId, String userId, List<ScoreSubmitCmd.ScoreItem> targetScores, Integer clientVersion, LocalDateTime meetupDate, String venueName) {
         // 查询该 meetup 已有的比分记录（按盘号索引）
         Map<Integer, ScoreRecordPO> existingMap = scoreRecordService.lambdaQuery()
                 .eq(ScoreRecordPO::getRallyMeetupId, meetupId)
                 .list()
                 .stream()
                 .collect(Collectors.toMap(ScoreRecordPO::getSetNumber, po -> po));
+
+        // 批量查询所有选手的用户信息（昵称、头像）
+        Map<String, UserData> userMap = batchQueryUsers(targetScores);
 
         List<ScoreRecordPO> toInsert = new ArrayList<>();
         List<ScoreRecordPO> toUpdate = new ArrayList<>();
@@ -85,26 +95,28 @@ public class RecapRepository implements RecapGateway {
             ScoreRecordPO existing = existingMap.get(item.getSetNum());
             if (existing != null) {
                 // 已有该盘记录，准备更新（乐观锁由 updateById 自动处理）
-                existing.setSetFormat(item.getSetFormat());
+                existing.setSetFormat(item.getSetFormatType());
                 existing.setSideAPlayer1(item.getSideAPlayer1());
-                existing.setSideAPlayer1Nickname(item.getSideAPlayer1Nickname());
-                existing.setSideAPlayer1Avatar(item.getSideAPlayer1Avatar());
                 existing.setSideAPlayer2(item.getSideAPlayer2());
-                existing.setSideAPlayer2Nickname(item.getSideAPlayer2Nickname());
-                existing.setSideAPlayer2Avatar(item.getSideAPlayer2Avatar());
                 existing.setSideBPlayer1(item.getSideBPlayer1());
-                existing.setSideBPlayer1Nickname(item.getSideBPlayer1Nickname());
-                existing.setSideBPlayer1Avatar(item.getSideBPlayer1Avatar());
                 existing.setSideBPlayer2(item.getSideBPlayer2());
-                existing.setSideBPlayer2Nickname(item.getSideBPlayer2Nickname());
-                existing.setSideBPlayer2Avatar(item.getSideBPlayer2Avatar());
                 existing.setSideAScore(item.getSideAScore());
                 existing.setSideBScore(item.getSideBScore());
                 existing.setRecordedBy(userId);
+                existing.setMatchType(item.getMatchType());
+                existing.setMeetupDate(meetupDate);
+                existing.setVenueName(venueName);
+                // 从用户服务填充昵称和头像
+                fillUserinfo(existing, userMap);
                 toUpdate.add(existing);
             } else {
                 // 新盘记录，准备插入
                 ScoreRecordPO newRecord = MAPPER.toScoreRecordPO(item, IdWorker.getIdStr(), meetupId, userId);
+                newRecord.setMatchType(item.getMatchType());
+                newRecord.setMeetupDate(meetupDate);
+                newRecord.setVenueName(venueName);
+                // 从用户服务填充昵称和头像
+                fillUserinfo(newRecord, userMap);
                 toInsert.add(newRecord);
             }
         }
@@ -117,6 +129,54 @@ public class RecapRepository implements RecapGateway {
         for (ScoreRecordPO record : toUpdate) {
             boolean success = scoreRecordService.updateById(record);
             Assert.isTrue(success, BizErrorCode.SCORE_VERSION_MISMATCH);
+        }
+    }
+
+    /**
+     * 批量查询所有选手的用户信息
+     */
+    private Map<String, UserData> batchQueryUsers(List<ScoreSubmitCmd.ScoreItem> targetScores) {
+        // 收集所有非空的选手 userId（去重）
+        List<String> userIds = targetScores.stream()
+                .flatMap(item -> Stream.of(item.getSideAPlayer1(), item.getSideAPlayer2(), item.getSideBPlayer1(), item.getSideBPlayer2()))
+                .filter(StringUtils::isNotBlank)
+                .distinct()
+                .collect(Collectors.toList());
+        // 批量查询用户数据
+        Map<String, UserData> userMap = new HashMap<>();
+        for (String uid : userIds) {
+            userGateway.findByUserId(uid).ifPresent(data -> userMap.put(uid, data));
+        }
+        return userMap;
+    }
+
+    /**
+     * 从用户数据填充 PO 的昵称和头像字段
+     */
+    private void fillUserinfo(ScoreRecordPO po, Map<String, UserData> userMap) {
+        UserData a1 = userMap.get(po.getSideAPlayer1());
+        if (a1 != null) {
+            po.setSideAPlayer1Nickname(a1.getNickname());
+            po.setSideAPlayer1Avatar(a1.getAvatarUrl());
+        }
+        if (StringUtils.isNotBlank(po.getSideAPlayer2())) {
+            UserData a2 = userMap.get(po.getSideAPlayer2());
+            if (a2 != null) {
+                po.setSideAPlayer2Nickname(a2.getNickname());
+                po.setSideAPlayer2Avatar(a2.getAvatarUrl());
+            }
+        }
+        UserData b1 = userMap.get(po.getSideBPlayer1());
+        if (b1 != null) {
+            po.setSideBPlayer1Nickname(b1.getNickname());
+            po.setSideBPlayer1Avatar(b1.getAvatarUrl());
+        }
+        if (StringUtils.isNotBlank(po.getSideBPlayer2())) {
+            UserData b2 = userMap.get(po.getSideBPlayer2());
+            if (b2 != null) {
+                po.setSideBPlayer2Nickname(b2.getNickname());
+                po.setSideBPlayer2Avatar(b2.getAvatarUrl());
+            }
         }
     }
 

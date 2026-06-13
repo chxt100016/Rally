@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,8 +58,8 @@ public class RecapDomainService {
     /**
      * 提交比分（独立事务，调用 gateway 完成版本校验与 diff 落库）
      */
-    public void submitScoreItems(Meetup meetup, String userId, List<ScoreSubmitCmd.ScoreItem> targetScores, Integer clientVersion) {
-        recapGateway.submitScoreItems(meetup.getMeetupId(), userId, targetScores, clientVersion);
+    public void submitScoreItems(Meetup meetup, String userId, List<ScoreSubmitCmd.ScoreItem> targetScores, Integer clientVersion, LocalDateTime meetupDate, String venueName) {
+        recapGateway.submitScoreItems(meetup.getMeetupId(), userId, targetScores, clientVersion, meetupDate, venueName);
         // 触发评分重算 TODO
     }
 

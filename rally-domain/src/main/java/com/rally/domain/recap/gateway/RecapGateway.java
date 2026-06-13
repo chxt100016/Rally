@@ -5,6 +5,7 @@ import com.rally.domain.recap.model.ReviewSubmitCmd;
 import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.recap.model.ScoreSubmitCmd;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -39,8 +40,10 @@ public interface RecapGateway {
      * @param userId        操作人
      * @param targetScores  前端提交的目标比分
      * @param clientVersion 前端回传的版本号
+     * @param meetupDate    比赛日期
+     * @param venueName     比赛场地名称
      */
-    void submitScoreItems(String meetupId, String userId, List<ScoreSubmitCmd.ScoreItem> targetScores, Integer clientVersion);
+    void submitScoreItems(String meetupId, String userId, List<ScoreSubmitCmd.ScoreItem> targetScores, Integer clientVersion, LocalDateTime meetupDate, String venueName);
 
     // ==================== 查询 ====================
 

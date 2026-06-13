@@ -8,4 +8,5 @@ public class CompleteRegistrationCmd {
     private String avatarUrl;
     private String birthday;
     private String gender;
+
 }

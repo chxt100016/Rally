@@ -68,6 +68,40 @@ public class VideoAppService {
     }
 
 
+    /**
+     * 获取头像直传凭证
+     * @param ext 文件扩展名，如 jpg、png
+     */
+    public VideoTokenVO getAvatarUploadToken(String ext) {
+        String userId = UserContext.get();
+        int maxSizeMb = SystemConfig.getInt("user.avatar.max_size_mb", 5);
+        return this.generateAvatarUploadToken(userId, ext, maxSizeMb);
+    }
+
+    private VideoTokenVO generateAvatarUploadToken(String userId, String ext, int maxSizeMb) {
+        // 固定 key，每次上传覆盖：avatar/{userId}.{ext}
+        String key = "avatar/" + userId + "." + ext;
+        long fsizeLimit = (long) maxSizeMb * 1024 * 1024;
+
+        Auth auth = Auth.create(QiniuConfiguration.getAccessKey(), QiniuConfiguration.getSecretKey());
+
+        // 固定 key 模式，不设 isPrefixalScope
+        StringMap policy = new StringMap();
+        policy.put("scope", QiniuConfiguration.getBucket() + ":" + key);
+        policy.put("fsizeLimit", fsizeLimit);
+        policy.put("deadline", System.currentTimeMillis() / 1000 + 600);
+
+        String uploadToken = auth.uploadToken(QiniuConfiguration.getBucket(), null, 3600, policy);
+
+        VideoTokenVO vo = new VideoTokenVO();
+        vo.setUploadToken(uploadToken);
+        vo.setKey(key);
+        vo.setMaxSizeMb(maxSizeMb);
+        vo.setUploadHost("https://up-z0.qiniup.com");
+        vo.setResourceUrl(QiniuConfiguration.buildSignedUrl(key));
+        return vo;
+    }
+
     private VideoTokenVO generateUploadToken(String userId, int maxSizeMb) {
         // 作用域限定到 videos/{userId}/
         String scope = QiniuConfiguration.getBucket() + ":videos/" + userId + "/";

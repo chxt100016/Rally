@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
+import com.rally.domain.meetup.enums.MatchTypeEnum;
+import com.rally.domain.recap.enums.SetFormatEnum;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -21,8 +23,14 @@ public class ScoreRecordPO {
     private String rallyMeetupId;
     /** 第几盘，从 1 开始 */
     private Integer setNumber;
-    /** 赛制：games_4 / games_6 / tiebreak */
-    private String setFormat;
+    /** 赛制：GAME / TIEBREAK */
+    private SetFormatEnum setFormat;
+    /** 比赛类型：SINGLE / DOUBLE / RALLY */
+    private MatchTypeEnum matchType;
+    /** 比赛日期（冗余自 rally_meetup.start_time） */
+    private LocalDateTime meetupDate;
+    /** 比赛场地名称（冗余自 rally_meetup.court_name） */
+    private String venueName;
     /** A 侧选手1 user_id */
     private String sideAPlayer1;
     /** A 侧选手1昵称（冗余存储） */

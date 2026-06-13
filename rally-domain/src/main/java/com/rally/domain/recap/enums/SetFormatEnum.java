@@ -4,10 +4,8 @@ package com.rally.domain.recap.enums;
  * 赛制枚举
  */
 public enum SetFormatEnum {
-    /** 4 局制（单侧最大 5） */
-    GAMES_4,
-    /** 6 局制（单侧最大 7） */
-    GAMES_6,
+    /** 常规局 */
+    GAME,
     /** 抢七 */
     TIEBREAK
 }

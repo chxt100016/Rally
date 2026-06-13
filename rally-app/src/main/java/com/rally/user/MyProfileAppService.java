@@ -57,6 +57,7 @@ public class MyProfileAppService {
 
     }
 
+
     private MyProfileStatsDTO buildStats(String userId) {
         long completedCount = meetupDomainService.countFinishedMeetups(userId);
         return new MyProfileStatsDTO()

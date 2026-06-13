@@ -38,9 +38,9 @@ public class RecapAppService {
         Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
         meetup.assertReviewAvailable(userId);
 
-        // 2. 提交比分（独立事务，冲突返回 false）
-        recapDomainService.submitScoreItems(meetup, userId, cmd.getScores(), cmd.getScoreVersion());
-
+        // 2. 从 Meetup 冗余提取比赛日期和场地名称
+        recapDomainService.submitScoreItems(meetup, userId, cmd.getScores(), cmd.getScoreVersion(),
+                meetup.getData().getStartTime(), meetup.getData().getCourtName());
     }
 
     /**
