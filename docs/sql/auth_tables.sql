@@ -12,7 +12,7 @@ CREATE TABLE user (
     user_id     VARCHAR(32)  NOT NULL COMMENT '系统唯一 ID（雪花算法字符串形式）',
     nickname    VARCHAR(64)  DEFAULT NULL COMMENT '昵称',
     avatar_url  VARCHAR(512) DEFAULT NULL COMMENT '头像 URL',
-    gender      NOT NULL DEFAULT 'UNDISCLOSED' COMMENT '性别',
+    gender      VARCHAR(16) NOT NULL DEFAULT 'UNDISCLOSED' COMMENT '性别',
     birthday    DATE         DEFAULT NULL COMMENT '生日，用于年龄段筛选',
     bio         VARCHAR(255) DEFAULT NULL COMMENT '个人简介',
     city_code   VARCHAR(32)  DEFAULT NULL COMMENT '用户当前城市编码',
