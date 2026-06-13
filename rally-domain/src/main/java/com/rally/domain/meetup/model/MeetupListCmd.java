@@ -26,13 +26,12 @@ public class MeetupListCmd {
     @NotNull(message = "请选择排序方式")
     private MeetupSortEnum sort;
 
-    /** 页码，默认1 */
-    @Min(value = 1, message = "页码最小为1")
-    private Integer pageNo = 1;
-
     /** 每页数量，默认10 */
     @Min(value = 1, message = "每页数量最小为1")
     private Integer pageSize = 10;
+
+    /** 上一页最后一条记录的 meetupId（searchAfter 游标，首页不传） */
+    private String lastId;
 
     /** 经度（距离排序必传） */
     private Double lng;

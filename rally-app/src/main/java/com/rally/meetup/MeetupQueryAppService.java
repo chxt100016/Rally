@@ -1,14 +1,18 @@
 package com.rally.meetup;
 
 import com.rally.domain.meetup.model.MeetupCardDTO;
+import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupListCmd;
 import com.rally.domain.meetup.model.PageDTO;
 import com.rally.domain.meetup.model.UserMeetupListCmd;
 import com.rally.domain.meetup.service.MeetupQueryDomainService;
+import com.rally.meetup.convert.MeetupAppConvertMapper;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 约球查询应用服务
@@ -25,11 +29,17 @@ public class MeetupQueryAppService {
      * 约球列表查询（按时间/距离）
      */
     public PageDTO<MeetupCardDTO> queryMeetupList(MeetupListCmd query) {
-        return switch (query.getSort()) {
+        List<MeetupData> dataList = switch (query.getSort()) {
             case DISTANCE -> meetupQueryDomainService.listByDistance(query);
             case TIME -> meetupQueryDomainService.listByTime(query);
-            default -> null;
+            default -> List.of();
         };
+        // searchAfter：多查了 1 条用于判断是否还有下一页，命中则去掉多余的一条
+        boolean hasMore = dataList.size() > query.getPageSize();
+        List<MeetupData> pageData = hasMore ? dataList.subList(0, query.getPageSize()) : dataList;
+        // 数据库数据转 DTO 在应用层完成
+        List<MeetupCardDTO> cardList = MeetupAppConvertMapper.INSTANCE.toMeetupCardDTOList(pageData);
+        return new PageDTO<>(cardList, null, hasMore);
     }
 
     /**

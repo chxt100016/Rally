@@ -5,7 +5,9 @@ import com.rally.db.review.entity.ScoreRecordPO;
 import com.rally.domain.recap.enums.ReviewTypeEnum;
 import com.rally.domain.recap.enums.SetFormatEnum;
 import com.rally.domain.recap.model.ReviewData;
+import com.rally.domain.recap.model.ReviewSubmitCmd;
 import com.rally.domain.recap.model.ScoreRecordData;
+import com.rally.domain.recap.model.ScoreSubmitCmd;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -46,6 +48,28 @@ public interface ReviewConvertMapper {
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     ScoreRecordPO toScoreRecordPO(ScoreRecordData data);
+
+    // ==================== Cmd → PO 转换 ====================
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "bizId", source = "bizId")
+    @Mapping(target = "rallyMeetupId", source = "meetupId")
+    @Mapping(target = "fromUserId", source = "fromUserId")
+    @Mapping(target = "reviewType", source = "item.type", qualifiedByName = "reviewTypeToStr")
+    @Mapping(target = "reviewValue", source = "item.value")
+    @Mapping(target = "createTime", ignore = true)
+    @Mapping(target = "updateTime", ignore = true)
+    ReviewPO toReviewPO(ReviewSubmitCmd.ReviewItem item, String bizId, String meetupId, String fromUserId);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "bizId", source = "bizId")
+    @Mapping(target = "rallyMeetupId", source = "meetupId")
+    @Mapping(target = "setNumber", source = "item.setNum")
+    @Mapping(target = "recordedBy", source = "userId")
+    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "createTime", ignore = true)
+    @Mapping(target = "updateTime", ignore = true)
+    ScoreRecordPO toScoreRecordPO(ScoreSubmitCmd.ScoreItem item, String bizId, String meetupId, String userId);
 
     // ==================== 枚举转换 ====================
 

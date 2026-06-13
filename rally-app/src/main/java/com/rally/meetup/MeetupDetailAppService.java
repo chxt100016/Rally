@@ -5,12 +5,12 @@ import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.domain.meetup.service.MeetupDomainService;
-import com.rally.domain.recap.model.Recap;
 import com.rally.domain.recap.model.RecapDTO;
-import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.recap.service.RecapDomainService;
+import com.rally.meetup.convert.MeetupAppConvertMapper;
+import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
@@ -20,9 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 约球查询应用服务
@@ -136,42 +136,26 @@ public class MeetupDetailAppService {
      * 构建赛后收集详情 VO
      */
     public RecapDTO buildRecap(String meetupId) {
-        Recap recap = recapDomainService.get(UserContext.get(), meetupId);
+        String currentUserId = UserContext.get();
 
-        // 当前用户已填评价（按 toUser 分组）
-        Map<String, List<RecapDTO.ReviewItem>> myReviewsMap = new LinkedHashMap<>();
-        for (ReviewData review : recap.getMyReviews().values()) {
-            RecapDTO.ReviewItem item = new RecapDTO.ReviewItem();
-            item.setToUserId(review.getToUserId());
-            item.setType(review.getReviewType().name());
-            item.setValue(review.getReviewValue());
-            myReviewsMap.computeIfAbsent(review.getToUserId(), k -> new ArrayList<>()).add(item);
-        }
+        // 1. 查询当前用户已提交的评价，按 toUserId 分组
+        List<ReviewData> myReviews = recapDomainService.listReviewsByMeetupAndFrom(meetupId, currentUserId);
+        Map<String, List<RecapDTO.ReviewItem>> reviewMap = myReviews.stream()
+                .collect(Collectors.groupingBy(
+                        ReviewData::getToUserId,
+                        Collectors.mapping(MeetupAppConvertMapper.INSTANCE::toReviewItem, Collectors.toList())
+                ));
 
-        // 比分
-        List<RecapDTO.ScoreItem> scoreItems = recap.getScoreBoard() != null && recap.getScoreBoard().getScores() != null
-                ? recap.getScoreBoard().getScores().stream().map(this::toScoreItem).toList()
-                : List.of();
+        // 2. 查询该活动的比分记录
+        List<ScoreRecordData> scoreRecords = recapDomainService.listScoresByMeetup(meetupId);
 
-        RecapDTO dto = new RecapDTO();
-        dto.setMyReviews(myReviewsMap);
-        dto.setScores(scoreItems);
-        dto.setScoreVersion(recap.getScoreBoard() != null ? recap.getScoreBoard().getVersion() : 0);
-        dto.setScoreFilled(!scoreItems.isEmpty());
-        return dto;
+        // 3. 组装 RecapDTO
+        RecapDTO recap = new RecapDTO();
+        recap.setMyReviews(reviewMap);
+        recap.setScores(MeetupAppConvertMapper.INSTANCE.toScoreItemList(scoreRecords));
+        recap.setScoreFilled(!scoreRecords.isEmpty());
+        return recap;
     }
 
-    private RecapDTO.ScoreItem toScoreItem(ScoreRecordData data) {
-        RecapDTO.ScoreItem item = new RecapDTO.ScoreItem();
-        item.setBizId(data.getBizId());
-        item.setSetNum(data.getSetNumber());
-        item.setSetFormat(data.getSetFormat() != null ? data.getSetFormat().name() : null);
-        item.setSideAPlayer1(data.getSideAPlayer1());
-        item.setSideAPlayer2(data.getSideAPlayer2());
-        item.setSideBPlayer1(data.getSideBPlayer1());
-        item.setSideBPlayer2(data.getSideBPlayer2());
-        item.setSideAScore(data.getSideAScore());
-        item.setSideBScore(data.getSideBScore());
-        return item;
-    }
+
 }

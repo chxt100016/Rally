@@ -17,8 +17,7 @@ public class RecapDTO {
 
     // ==================== 比分 ====================
     private List<ScoreItem> scores;
-    /** 比分版本号，下次 submit 回传做乐观锁 */
-    private Integer scoreVersion;
+
 
     // ==================== 填写状态 ====================
     /** 当前用户是否已填比分 */
@@ -41,6 +40,8 @@ public class RecapDTO {
     public static class ScoreItem {
         private String bizId;
         private Integer setNum;
+        /** 比分版本号，下次 submit 回传做乐观锁 */
+        private Integer scoreVersion;
         private String setFormat;
         private String sideAPlayer1;
         private String sideAPlayer2;

@@ -24,46 +24,12 @@ public interface RegistrationGateway {
      */
     RegistrationData findActiveByMeetupAndUser(String meetupId, String userId);
 
-    /**
-     * 查询用户在某约球的任意状态报名记录（用于复报名判断）
-     */
-    RegistrationData findByMeetupAndUserAny(String meetupId, String userId);
-
-    /**
-     * 查询用户的报名状态列表
-     */
-    List<RegistrationData> findByUserAndStatus(String userId, RegistrationStatusEnum status);
-
-    /**
-     * 查询约球的待审批列表
-     */
-    List<RegistrationData> findPendingByMeetupId(String meetupId);
-
-    /**
-     * 查询用户在指定时间段内的有效报名（冲突检测用）
-     * @param userId 用户 ID
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param excludeMeetupId 排除的约球 ID（编辑/重报名时排除自身）
-     * @return 冲突的报名列表
-     */
-    List<RegistrationData> findConflict(String userId, java.time.LocalDateTime startTime,
-                                         java.time.LocalDateTime endTime, String excludeMeetupId);
 
     /**
      * 根据 bizId 更新状态
      */
     void updateStatus(String bizId, RegistrationStatusEnum status);
 
-    /**
-     * 复活已失效的报名记录（REJECTED/WITHDRAWN/EXPIRED → pending）
-     */
-    void revive(String bizId, java.time.LocalDateTime expiresAt);
-
-    /**
-     * 查询约球已批准的参与者 userId 列表
-     */
-    List<String> listApprovedUserIds(String meetupId);
 
     /**
      * 统计约球已批准的参与者数量（含创建者）
@@ -74,4 +40,6 @@ public interface RegistrationGateway {
      * 查询约球的所有报名记录（加载聚合根用）
      */
     List<RegistrationData> findByMeetupId(String meetupId);
+
+    void toReviewed(String userId);
 }

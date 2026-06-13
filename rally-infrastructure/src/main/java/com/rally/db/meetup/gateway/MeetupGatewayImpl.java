@@ -3,8 +3,9 @@ package com.rally.db.meetup.gateway;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.rally.db.meetup.convert.MeetupConvertMapper;
 import com.rally.db.meetup.entity.MeetupPO;
+import com.rally.db.meetup.entity.RegistrationPO;
 import com.rally.db.meetup.repository.MeetupRepository;
-import com.rally.db.meetup.repository.RegistrationRepository;
+import com.rally.db.meetup.service.RegistrationService;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.*;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ import java.util.List;
 public class MeetupGatewayImpl implements MeetupGateway {
 
     private final MeetupRepository meetupRepository;
-    private final RegistrationRepository registrationRepository;
+    private final RegistrationService registrationService;
 
 
     @Override
@@ -36,7 +37,18 @@ public class MeetupGatewayImpl implements MeetupGateway {
         MeetupData data = meetup.getData();
         data.setCurrentPlayers(meetup.countApprovedPlayers());
         save(data);
-        meetup.getRegistrations().forEach(reg -> registrationRepository.saveOrUpdateByBizId(MeetupConvertMapper.INSTANCE.toRegistrationPO(reg)));
+
+        meetup.getRegistrations().forEach(reg -> saveOrUpdateByBizId(MeetupConvertMapper.INSTANCE.toRegistrationPO(reg)));
+    }
+
+    /**
+     * 按 bizId upsert：存在则更新，不存在则新增
+     */
+    private void saveOrUpdateByBizId(RegistrationPO po) {
+        boolean updated = po.getBizId() != null && registrationService.lambdaUpdate().eq(RegistrationPO::getBizId, po.getBizId()).update(po);
+        if (!updated) {
+            registrationService.save(po);
+        }
     }
 
     @Override
@@ -65,12 +77,6 @@ public class MeetupGatewayImpl implements MeetupGateway {
 
 
 
-    @Override
-    public List<String> listParticipantUserIds(String meetupId) {
-        // 所有参与者（含创建者）都在 registration 表中
-        return registrationRepository.listApprovedUserIds(meetupId);
-    }
-
 
 
     @Override
@@ -79,11 +85,9 @@ public class MeetupGatewayImpl implements MeetupGateway {
     }
 
     @Override
-    public PageDTO<MeetupData> listAvailable(MeetupListQueryParam param) {
-        IPage<MeetupPO> page = meetupRepository.listNew(param);
-        List<MeetupData> dataList = MeetupConvertMapper.INSTANCE.toMeetupDataList(page.getRecords());
-        boolean hasMore = page.getCurrent() < page.getPages();
-        return new PageDTO<>(dataList, page.getTotal(), hasMore);
+    public List<MeetupData> listAvailable(MeetupListQueryParam param) {
+        List<MeetupPO> poList = meetupRepository.listNew(param);
+        return MeetupConvertMapper.INSTANCE.toMeetupDataList(poList);
     }
 
     @Override

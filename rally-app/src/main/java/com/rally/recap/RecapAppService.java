@@ -1,10 +1,12 @@
 package com.rally.recap;
 
-import com.rally.utils.UserContext;
+import com.rally.domain.meetup.model.Meetup;
+import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.recap.enums.RecapOverallStatus;
-import com.rally.domain.recap.model.Recap;
-import com.rally.domain.recap.model.RecapSubmitCmd;
+import com.rally.domain.recap.model.ReviewSubmitCmd;
+import com.rally.domain.recap.model.ScoreSubmitCmd;
 import com.rally.domain.recap.service.RecapDomainService;
+import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,28 +26,36 @@ import org.springframework.stereotype.Service;
 public class RecapAppService {
 
     private final RecapDomainService recapDomainService;
-
+    private final MeetupDomainService meetupDomainService;
 
     /**
-     * 提交赛后收集
-     *
-     * @return 整体状态枚举
+     * 提交比分
+
      */
-    public RecapOverallStatus submit(RecapSubmitCmd cmd) {
+    public void submitScore(ScoreSubmitCmd cmd) {
         String userId = UserContext.get();
+        // 1. 获取 Meetup 聚合根（含报名记录）
+        Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
+        meetup.assertReviewAvailable(userId);
 
-        // 1. 加载聚合根（含业务校验）
-        Recap recap = recapDomainService.get(userId, cmd.getMeetupId());
+        // 2. 提交比分（独立事务，冲突返回 false）
+        recapDomainService.submitScoreItems(meetup, userId, cmd.getScores(), cmd.getScoreVersion());
 
-        // 2. 提交评价（独立事务）
-        recapDomainService.submitReviews(recap, cmd.getReviews());
-
-        // 3. 提交比分（独立事务，冲突返回 false）
-        boolean scoreSuccess = recapDomainService.submitScores(recap, cmd.getScores(), cmd.getScoreVersion());
-
-        return scoreSuccess ? RecapOverallStatus.SUCCESS : RecapOverallStatus.SCORE_FAIL;
     }
 
+    /**
+     * 提交评价
+     */
+    public void submitReview(ReviewSubmitCmd cmd) {
+        cmd.getReviews().forEach(item -> ReviewSubmitCmd.assertValidReviewValue(item.getType(), item.getValue()));
+        String userId = UserContext.get();
+
+        // 1. 获取 Meetup 聚合根（含报名记录）
+        Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
+        meetup.assertReviewAvailable(userId);
+        // 2. 提交评价
+        recapDomainService.submitReviewItems(meetup, userId, cmd.getReviews());
 
 
+    }
 }

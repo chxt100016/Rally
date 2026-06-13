@@ -20,12 +20,28 @@ public class ScoreRecordData {
     private SetFormatEnum setFormat;
     /** A 侧选手1 user_id */
     private String sideAPlayer1;
+    /** A 侧选手1昵称（冗余存储） */
+    private String sideAPlayer1Nickname;
+    /** A 侧选手1头像URL（冗余存储） */
+    private String sideAPlayer1Avatar;
     /** A 侧选手2 user_id（单打为 null） */
     private String sideAPlayer2;
+    /** A 侧选手2昵称（冗余存储） */
+    private String sideAPlayer2Nickname;
+    /** A 侧选手2头像URL（冗余存储） */
+    private String sideAPlayer2Avatar;
     /** B 侧选手1 user_id */
     private String sideBPlayer1;
+    /** B 侧选手1昵称（冗余存储） */
+    private String sideBPlayer1Nickname;
+    /** B 侧选手1头像URL（冗余存储） */
+    private String sideBPlayer1Avatar;
     /** B 侧选手2 user_id（单打为 null） */
     private String sideBPlayer2;
+    /** B 侧选手2昵称（冗余存储） */
+    private String sideBPlayer2Nickname;
+    /** B 侧选手2头像URL（冗余存储） */
+    private String sideBPlayer2Avatar;
     /** A 侧本盘比分 */
     private Integer sideAScore;
     /** B 侧本盘比分 */

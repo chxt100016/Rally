@@ -47,13 +47,6 @@ public interface MeetupGateway {
 
 
     /**
-     * 获取该场全部参与者 userId 列表（发布者 + 已批准报名者）
-     */
-    List<String> listParticipantUserIds(String meetupId);
-
-
-
-    /**
      * 统计用户近 N 天内完成的约球场数（可信度计算用）
      * @param userId 用户 ID
      * @param days 近 N 天
@@ -62,11 +55,12 @@ public interface MeetupGateway {
     long countFinishedMatches(String userId, int days);
 
     /**
-     * 查询可报名的约球列表（带筛选、排序、分页）
+     * 查询可报名的约球列表（带筛选、排序、searchAfter 游标分页）
+     * 返回 pageSize+1 条数据，由调用方判断是否还有下一页
      * @param param 查询参数
-     * @return 分页结果
+     * @return 约球数据列表
      */
-    PageDTO<MeetupData> listAvailable(MeetupListQueryParam param);
+    List<MeetupData> listAvailable(MeetupListQueryParam param);
 
     /**
      * 按 meetupId 列表 + 筛选条件查询（不分页，距离排序用）

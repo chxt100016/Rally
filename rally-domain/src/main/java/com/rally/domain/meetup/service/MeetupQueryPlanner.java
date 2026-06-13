@@ -5,7 +5,6 @@ import com.rally.domain.meetup.gateway.NearbyGateway;
 import com.rally.domain.meetup.model.MeetupListCmd;
 import com.rally.domain.meetup.model.MeetupListQueryParam;
 import com.rally.domain.meetup.model.NearbyResult;
-import com.rally.domain.meetup.model.PageDTO;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,13 +24,6 @@ public class MeetupQueryPlanner {
     private final NearbyGateway nearbyGateway;
 
     /**
-     * 返回空分页结果
-     */
-    public static <T> PageDTO<T> emptyPage() {
-        return new PageDTO<>(List.of(), 0L, false);
-    }
-
-    /**
      * 构建查询参数（含 Redis GEO 查询，listByTime 用）
      * @param query 查询命令
      * @return 查询参数，如果 radiusKm 查询无结果返回 null
@@ -45,7 +37,7 @@ public class MeetupQueryPlanner {
                 .levelMode(query.getLevelMode())
                 .levelMin(query.getLevelMin())
                 .levelMax(query.getLevelMax())
-                .pageNo(query.getPageNo())
+                .lastId(query.getLastId())
                 .pageSize(query.getPageSize());
 
         // 如果有 radiusKm，通过 Redis 获取范围内的 meetupId 列表
@@ -73,8 +65,6 @@ public class MeetupQueryPlanner {
                 .levelMode(query.getLevelMode())
                 .levelMin(query.getLevelMin())
                 .levelMax(query.getLevelMax())
-                .pageNo(query.getPageNo())
-                .pageSize(query.getPageSize())
                 .build();
     }
 

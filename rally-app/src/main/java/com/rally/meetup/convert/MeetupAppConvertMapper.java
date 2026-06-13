@@ -1,8 +1,13 @@
 package com.rally.meetup.convert;
 
+import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.model.*;
+import com.rally.domain.recap.model.RecapDTO;
+import com.rally.domain.recap.model.ReviewData;
+import com.rally.domain.recap.model.ScoreRecordData;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -34,9 +39,20 @@ public interface MeetupAppConvertMapper {
     // ==================== MeetupData → MeetupCardDTO ====================
 
     @Mapping(target = "meetupId", source = "bizId")
+    @Mapping(target = "primaryLabel", expression = "java(toPrimaryLabel(data.getStatus(), data.getDistrictName()))")
     MeetupCardDTO toMeetupCardDTO(MeetupData data);
 
     List<MeetupCardDTO> toMeetupCardDTOList(List<MeetupData> dataList);
+
+    /**
+     * 计算主标签：OPEN 状态展示区域名，其余状态展示状态文案
+     */
+    default String toPrimaryLabel(MeetupStatusEnum status, String districtName) {
+        return switch (status) {
+            case OPEN -> districtName;
+            default -> status.getLabel();
+        };
+    }
 
     // ==================== MeetupData → MeetupDTO ====================
 
@@ -53,4 +69,33 @@ public interface MeetupAppConvertMapper {
     RegistrationVO toRegistrationVO(RegistrationData data);
 
     List<RegistrationVO> toRegistrationVOList(List<RegistrationData> dataList);
+
+    // ==================== ReviewData → RecapDTO.ReviewItem ====================
+
+    @Mapping(target = "type", source = "reviewType", qualifiedByName = "reviewTypeToStr")
+    @Mapping(target = "value", source = "reviewValue")
+    RecapDTO.ReviewItem toReviewItem(ReviewData data);
+
+    List<RecapDTO.ReviewItem> toReviewItemList(List<ReviewData> dataList);
+
+    // ==================== ScoreRecordData → RecapDTO.ScoreItem ====================
+
+    @Mapping(target = "setNum", source = "setNumber")
+    @Mapping(target = "scoreVersion", source = "version")
+    @Mapping(target = "setFormat", source = "setFormat", qualifiedByName = "setFormatToStr")
+    RecapDTO.ScoreItem toScoreItem(ScoreRecordData data);
+
+    List<RecapDTO.ScoreItem> toScoreItemList(List<ScoreRecordData> dataList);
+
+    // ==================== 枚举转换 ====================
+
+    @Named("reviewTypeToStr")
+    static String reviewTypeToStr(com.rally.domain.recap.enums.ReviewTypeEnum value) {
+        return value == null ? null : value.name();
+    }
+
+    @Named("setFormatToStr")
+    static String setFormatToStr(com.rally.domain.recap.enums.SetFormatEnum value) {
+        return value == null ? null : value.name();
+    }
 }

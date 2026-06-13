@@ -11,6 +11,7 @@ import com.rally.domain.system.SystemConfig;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,25 +33,25 @@ public class MeetupQueryDomainService {
     private final MeetupQueryPlanner queryPlanner;
 
     /**
-     * 按时间排序的列表查询
+     * 按时间排序的列表查询（searchAfter 游标分页）
      * @param query 查询条件
-     * @return 约球卡片分页结果
+     * @return 约球数据列表，最多 pageSize+1 条，供 app 层判断是否还有下一页
      */
-    public PageDTO<MeetupCardDTO> listByTime(MeetupListCmd query) {
+    public List<MeetupData> listByTime(MeetupListCmd query) {
         MeetupListQueryParam param = queryPlanner.plan(query);
         if (param == null) {
-            return MeetupQueryPlanner.emptyPage();
+            return List.of();
         }
-        return doAvailableList(param);
+        return meetupGateway.listAvailable(param);
     }
 
     /**
-     * 按距离排序的列表查询（GEO 特化）
-     * 流程：一次 Redis 查询（距离+范围） → 数据库筛选 → 应用层排序分页
+     * 按距离排序的列表查询（GEO 特化，searchAfter 游标分页）
+     * 流程：一次 Redis 查询（距离+范围） → 数据库筛选 → 应用层排序 → 按游标取窗口
      * @param query 查询条件（必须包含 lng/lat）
-     * @return 约球卡片分页结果
+     * @return 约球数据列表，最多 pageSize+1 条，供 app 层判断是否还有下一页
      */
-    public PageDTO<MeetupCardDTO> listByDistance(MeetupListCmd query) {
+    public List<MeetupData> listByDistance(MeetupListCmd query) {
         Assert.notNull(query.getLng(), BizErrorCode.PARAM_ERROR);
         Assert.notNull(query.getLat(), BizErrorCode.PARAM_ERROR);
 
@@ -63,7 +64,7 @@ public class MeetupQueryDomainService {
             nearbyResults = nearbyGateway.searchAllByDistance(query.getCityCode(), query.getLng(), query.getLat());
         }
         if (nearbyResults.isEmpty()) {
-            return MeetupQueryPlanner.emptyPage();
+            return List.of();
         }
 
         // 2. 构建筛选条件（不查 Redis）
@@ -75,7 +76,7 @@ public class MeetupQueryDomainService {
         // 3. 数据库查询（带筛选条件，不分页）
         List<MeetupData> allData = meetupGateway.listByMeetupIdsWithFilter(param);
 
-        // 4. 按 Redis 距离顺序排序
+        // 4. 按 Redis 距离顺序排序，并设置距离
         Map<String, Double> distanceMap = nearbyResults.stream()
                 .collect(Collectors.toMap(NearbyResult::getMeetupId, NearbyResult::getDistanceMeters, (a, b) -> a));
         Map<String, MeetupData> dataMap = allData.stream()
@@ -83,22 +84,21 @@ public class MeetupQueryDomainService {
         List<MeetupData> sortedData = nearbyIds.stream()
                 .filter(dataMap::containsKey)
                 .map(dataMap::get)
+                .peek(data -> data.setDistanceMeters(distanceMap.get(data.getBizId())))
                 .toList();
 
-        // 5. 内存分页
-        int start = (query.getPageNo() - 1) * query.getPageSize();
-        int end = Math.min(start + query.getPageSize(), sortedData.size());
-        List<MeetupData> pageData = start < sortedData.size() ? sortedData.subList(start, end) : List.of();
-        boolean hasMore = end < sortedData.size();
-
-        // 6. 转换 DTO 并设置距离
-        List<MeetupCardDTO> cardList = pageData.stream().map(data -> {
-            MeetupCardDTO card = MeetupDomainConvertMapper.INSTANCE.toMeetupCardDTO(data);
-            card.setDistanceMeters(distanceMap.get(data.getBizId()));
-            return card;
-        }).collect(Collectors.toList());
-
-        return new PageDTO<>(cardList, (long) sortedData.size(), hasMore);
+        // 5. searchAfter 游标：定位上一页最后一条记录，取其后 pageSize+1 条
+        int start = 0;
+        if (StringUtils.isNotBlank(query.getLastId())) {
+            for (int i = 0; i < sortedData.size(); i++) {
+                if (sortedData.get(i).getBizId().equals(query.getLastId())) {
+                    start = i + 1;
+                    break;
+                }
+            }
+        }
+        int end = Math.min(start + query.getPageSize() + 1, sortedData.size());
+        return start < sortedData.size() ? sortedData.subList(start, end) : List.of();
     }
 
     /**
@@ -176,15 +176,6 @@ public class MeetupQueryDomainService {
     /** 执行用户维度分页查询并转换 DTO（listByUser 各分支用） */
     private PageDTO<MeetupCardDTO> doList(MeetupListQueryParam param) {
         PageDTO<MeetupData> pageResult = meetupGateway.listByUserFilter(param);
-        List<MeetupCardDTO> cardList = pageResult.getList().stream()
-                .map(MeetupDomainConvertMapper.INSTANCE::toMeetupCardDTO)
-                .collect(Collectors.toList());
-        return new PageDTO<>(cardList, pageResult.getTotal(), pageResult.getHasMore());
-    }
-
-    /** 执行全局可报名列表查询并转换 DTO（listByTime 用） */
-    private PageDTO<MeetupCardDTO> doAvailableList(MeetupListQueryParam param) {
-        PageDTO<MeetupData> pageResult = meetupGateway.listAvailable(param);
         List<MeetupCardDTO> cardList = pageResult.getList().stream()
                 .map(MeetupDomainConvertMapper.INSTANCE::toMeetupCardDTO)
                 .collect(Collectors.toList());

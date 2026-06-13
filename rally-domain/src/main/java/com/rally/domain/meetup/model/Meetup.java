@@ -35,16 +35,29 @@ public class Meetup {
         this.registrations = registrations != null ? registrations : new ArrayList<>();
     }
 
+    public String getMeetupId() {
+        return this.data.getBizId();
+    }
+
     // ======================== 约球状态判断 ========================
 
     /**
-     * 懒判定：计算真实状态（endTime 已过则视为 FINISHED）
+     * 懒判定：计算真实状态
+     * - OPEN/FULL + endTime 已过 → FINISHED
+     * - OPEN/FULL + startTime 已过 + endTime 未过 → ONGOING
      */
     public MeetupStatusEnum getRealStatus() {
-        if ((data.getStatus() == MeetupStatusEnum.OPEN || data.getStatus() == MeetupStatusEnum.FULL) && data.getEndTime().isBefore(LocalDateTime.now())) {
-            return MeetupStatusEnum.FINISHED;
+        MeetupStatusEnum status = data.getStatus();
+        if (status == MeetupStatusEnum.OPEN || status == MeetupStatusEnum.FULL) {
+            LocalDateTime now = LocalDateTime.now();
+            if (data.getEndTime().isBefore(now)) {
+                return MeetupStatusEnum.FINISHED;
+            }
+            if (data.getStartTime().isBefore(now)) {
+                return MeetupStatusEnum.ONGOING;
+            }
         }
-        return data.getStatus();
+        return status;
     }
 
     /** 是否已过期（开始时间已过） */
@@ -188,6 +201,9 @@ public class Meetup {
         }
         if (realStatus == MeetupStatusEnum.FINISHED) {
             throw new BusinessException(BizErrorCode.MEETUP_EXPIRED);
+        }
+        if (realStatus == MeetupStatusEnum.ONGOING) {
+            throw new BusinessException(BizErrorCode.MEETUP_ONGOING);
         }
 
         // 2. 开始时间校验
@@ -355,6 +371,9 @@ public class Meetup {
         if (realStatus == MeetupStatusEnum.FULL) {
             return ActionStateEnum.FULL;
         }
+        if (realStatus == MeetupStatusEnum.ONGOING) {
+            return ActionStateEnum.ONGOING;
+        }
         return data.getJoinMode() == JoinModeEnum.DIRECT
                 ? ActionStateEnum.JOIN_DIRECT : ActionStateEnum.APPLY_APPROVAL;
     }
@@ -382,4 +401,18 @@ public class Meetup {
         return userIds;
     }
 
+    public void assertEnd() {
+        MeetupStatusEnum realStatus = getRealStatus();
+        Assert.eq(realStatus, ActionStateEnum.FINISHED, BizErrorCode.MEETUP_NOT_FINISHED);
+    }
+
+    public void assertReviewAvailable(String userId) {
+        assertIn(userId);
+        assertEnd();
+        int deadlineDays = SystemConfig.getInt("review.deadline_days", 30);
+        LocalDateTime deadlineAt = this.getData().getEndTime().plusDays(deadlineDays);
+        if (LocalDateTime.now().isAfter(deadlineAt)) {
+            throw new BusinessException(BizErrorCode.REVIEW_DEADLINE_PASSED);
+        }
+    }
 }

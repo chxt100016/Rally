@@ -25,6 +25,7 @@ public enum ActionStateEnum {
     PENDING_REVIEW,
     JOINED,
     FULL,
+    ONGOING,  // 约球进行中，未报名访客不可加入
     // 创建人视角
     OWNER_EDITABLE,
     OWNER_EDIT_LOCKED,

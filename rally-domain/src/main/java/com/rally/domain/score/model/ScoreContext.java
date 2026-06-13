@@ -2,7 +2,6 @@ package com.rally.domain.score.model;
 
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.recap.gateway.ReviewGateway;
-import com.rally.domain.recap.gateway.ScoreRecordGateway;
 import com.rally.domain.log.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import lombok.Data;
@@ -27,8 +26,6 @@ public class ScoreContext {
     /** 只读 Gateway：评价数据 */
     private ReviewGateway reviewGateway;
 
-    /** 只读 Gateway：比分数据 */
-    private ScoreRecordGateway scoreRecordGateway;
 
     /** 只读 Gateway：约球数据（参与者、finished 判定） */
     private MeetupGateway meetupGateway;

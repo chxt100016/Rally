@@ -3,6 +3,8 @@ package com.rally.domain.utils;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 
+import java.util.Objects;
+
 public interface Assert {
 
     static void notNull(Object obj, BizErrorCode errorCode) {
@@ -17,8 +19,8 @@ public interface Assert {
         }
     }
 
-    static void notEmpty(String str, BizErrorCode errorCode) {
-        if (str == null || str.isEmpty()) {
+    static void eq(Object o1, Object o2, BizErrorCode errorCode) {
+        if (!Objects.equals(o1, o2)) {
             throw new BusinessException(errorCode);
         }
     }

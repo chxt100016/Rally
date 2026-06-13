@@ -9,6 +9,7 @@ import com.rally.db.meetup.mapper.MeetupMapper;
 import com.rally.db.meetup.service.MeetupService;
 import com.rally.domain.meetup.model.MeetupListQueryParam;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
@@ -161,9 +162,11 @@ public class MeetupRepository {
     }
 
     /**
-     * 查询可报名的约球列表（带筛选、排序、分页）
+     * 查询可报名的约球列表（带筛选、排序、searchAfter 游标分页）
+     * bizId 为雪花 ID，与创建时间同序，按 bizId 倒序排列并作为游标使用
+     * 返回 pageSize+1 条，供 app 层判断是否还有下一页
      */
-    public IPage<MeetupPO> listNew(MeetupListQueryParam param) {
+    public List<MeetupPO> listNew(MeetupListQueryParam param) {
         LambdaQueryWrapper<MeetupPO> wrapper = new LambdaQueryWrapper<>();
 
         // 基础条件：城市 + 状态 + 未结束
@@ -201,12 +204,12 @@ public class MeetupRepository {
             );
         }
 
-        // 排序
-        wrapper.orderByDesc(MeetupPO::getCreateTime);
+        // searchAfter 游标：取 bizId 小于上一页最后一条记录的数据
+        wrapper.lt(StringUtils.isNotBlank(param.getLastId()), MeetupPO::getBizId, param.getLastId())
+                .orderByDesc(MeetupPO::getBizId)
+                .last("LIMIT " + (param.getPageSize() + 1));
 
-        // 分页
-        Page<MeetupPO> page = new Page<>(param.getPageNo(), param.getPageSize());
-        return meetupService.page(page, wrapper);
+        return meetupService.list(wrapper);
     }
 
     /**

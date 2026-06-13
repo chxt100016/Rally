@@ -7,7 +7,6 @@ public enum RegistrationStatusEnum {
     PENDING,
     JOINED,
     REJECTED,
-    EXPIRED,
     WITHDRAWN,
     REVIEWED,
 

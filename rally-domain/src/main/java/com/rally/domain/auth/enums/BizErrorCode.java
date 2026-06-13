@@ -45,6 +45,7 @@ public enum BizErrorCode {
     MEETUP_EXPIRED(41003, "约球已开始或已结束，无法操作"),
     MEETUP_CLOSED(41004, "约球已关闭"),
     MEETUP_STATUS_ILLEGAL(41005, "约球状态不允许该操作"),
+    MEETUP_ONGOING(41021, "约球进行中，无法报名"),
     CITY_CHANGE_FORBIDDEN(41019, "已发布的约球不可修改城市"),
     LOCATION_TIME_CHANGE_FORBIDDEN(41020, "已有参与者报名，不可修改时间、地点、持续时长"),
     JOIN_FORBIDDEN(41006, "当前不可报名"),
@@ -83,7 +84,8 @@ public enum BizErrorCode {
     RECAP_NOT_FOUND(43001, "赛后收集数据不存在"),
     RECAP_SCORE_CONFLICT(43002, "比分已被其他参与者更新，请刷新后重试"),
     RECAP_REVIEW_INVALID_TYPE(43003, "评价类型不合法"),
-    RECAP_REVIEW_INVALID_VALUE(43004, "评价值不合法");
+    RECAP_REVIEW_INVALID_VALUE(43004, "评价值不合法"),
+    SCORE_VERSION_MISMATCH(43005, "比分版本不一致，请刷新后重试");
 
     private final int code;
     private final String message;

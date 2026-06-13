@@ -3,7 +3,7 @@ package com.rally.db.meetup.gateway;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.rally.db.meetup.convert.MeetupConvertMapper;
 import com.rally.db.meetup.entity.RegistrationPO;
-import com.rally.db.meetup.repository.RegistrationRepository;
+import com.rally.db.meetup.service.RegistrationService;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.RegistrationData;
@@ -20,90 +20,98 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RegistrationGatewayImpl implements RegistrationGateway {
 
-    private final RegistrationRepository registrationRepository;
+    private final RegistrationService registrationService;
     private static final MeetupConvertMapper MAPPER = MeetupConvertMapper.INSTANCE;
+
 
     @Override
     public void save(RegistrationData data) {
         RegistrationPO po = MAPPER.toRegistrationPO(data);
         if (data.getBizId() != null) {
-            RegistrationPO existing = registrationRepository.findByBizId(data.getBizId());
+            RegistrationPO existing = get(data.getBizId());
             if (existing != null) {
                 po.setId(existing.getId());
-                registrationRepository.updateById(po);
+                registrationService.updateById(po);
                 return;
             }
         } else {
             // 新增时生成 bizId
             po.setBizId(IdWorker.getIdStr());
         }
-        registrationRepository.save(po);
+        registrationService.save(po);
     }
 
     @Override
     public RegistrationData findByBizId(String bizId) {
-        RegistrationPO po = registrationRepository.findByBizId(bizId);
+        RegistrationPO po = get(bizId);
         return MAPPER.toRegistrationData(po);
     }
 
     @Override
     public RegistrationData findActiveByMeetupAndUser(String meetupId, String userId) {
-        RegistrationPO po = registrationRepository.findActiveByMeetupAndUser(meetupId, userId);
+        RegistrationPO po = get(meetupId, userId);
         return MAPPER.toRegistrationData(po);
     }
 
-    @Override
-    public RegistrationData findByMeetupAndUserAny(String meetupId, String userId) {
-        RegistrationPO po = registrationRepository.findByMeetupAndUserAny(meetupId, userId);
-        return MAPPER.toRegistrationData(po);
-    }
 
-    @Override
-    public List<RegistrationData> findByUserAndStatus(String userId, RegistrationStatusEnum status) {
-        return MAPPER.toRegistrationDataList(
-                registrationRepository.findByUserAndStatus(userId, status.name()));
-    }
-
-    @Override
-    public List<RegistrationData> findPendingByMeetupId(String meetupId) {
-        return MAPPER.toRegistrationDataList(
-                registrationRepository.findPendingByMeetupId(meetupId));
-    }
-
-    @Override
-    public List<RegistrationData> findConflict(String userId, LocalDateTime startTime,
-                                                LocalDateTime endTime, String excludeMeetupId) {
-        return MAPPER.toRegistrationDataList(
-                registrationRepository.findConflict(userId, startTime, endTime, excludeMeetupId));
-    }
 
     @Override
     public void updateStatus(String bizId, RegistrationStatusEnum status) {
-        RegistrationPO po = registrationRepository.findByBizId(bizId);
+        RegistrationPO po = get(bizId);
         if (po != null) {
             po.setStatus(status.name());
             po.setOptTime(LocalDateTime.now());
-            registrationRepository.updateById(po);
+            registrationService.updateById(po);
         }
     }
 
-    @Override
-    public void revive(String bizId, LocalDateTime expiresAt) {
-        registrationRepository.revive(bizId, expiresAt);
-    }
-
-    @Override
-    public List<String> listApprovedUserIds(String meetupId) {
-        return registrationRepository.listApprovedUserIds(meetupId);
-    }
 
     @Override
     public int countApprovedByMeetupId(String meetupId) {
-        return registrationRepository.countApprovedByMeetupId(meetupId);
+        Long count = registrationService.lambdaQuery()
+                .eq(RegistrationPO::getRallyMeetupId, meetupId)
+                .eq(RegistrationPO::getStatus, "JOINED")
+                .count();
+        return count.intValue();
     }
 
     @Override
     public List<RegistrationData> findByMeetupId(String meetupId) {
-        return MAPPER.toRegistrationDataList(registrationRepository.findByMeetupId(meetupId));
+        return MAPPER.toRegistrationDataList(list(meetupId));
     }
+
+    @Override
+    public void toReviewed(String userId) {
+        this.registrationService.lambdaUpdate()
+                .eq(RegistrationPO::getUserId, userId)
+                .eq(RegistrationPO::getStatus, RegistrationStatusEnum.JOINED)
+                .set(RegistrationPO::getStatus, RegistrationStatusEnum.REVIEWED)
+                .set(RegistrationPO::getOptTime, LocalDateTime.now());
+    }
+
+
+    private RegistrationPO get(String bizId) {
+        return registrationService.lambdaQuery()
+                .eq(RegistrationPO::getBizId, bizId)
+                .one();
+    }
+    private RegistrationPO get(String meetupId, String userId) {
+        return registrationService.lambdaQuery()
+                .eq(RegistrationPO::getRallyMeetupId, meetupId)
+                .eq(RegistrationPO::getUserId, userId)
+                .in(RegistrationPO::getStatus, "pending", "JOINED")
+                .one();
+    }
+    private List<RegistrationPO> list(String meetupId) {
+        return registrationService.lambdaQuery()
+                .eq(RegistrationPO::getRallyMeetupId, meetupId)
+                .list();
+    }
+
+
+
+
+
+
+
 }

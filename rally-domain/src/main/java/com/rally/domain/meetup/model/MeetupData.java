@@ -40,4 +40,6 @@ public class MeetupData {
     private String courtIndex;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+    /** 距离（米），按距离排序时设置 */
+    private Double distanceMeters;
 }
