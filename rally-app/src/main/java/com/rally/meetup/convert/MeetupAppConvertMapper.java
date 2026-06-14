@@ -39,20 +39,12 @@ public interface MeetupAppConvertMapper {
     // ==================== MeetupData → MeetupCardDTO ====================
 
     @Mapping(target = "meetupId", source = "bizId")
-    @Mapping(target = "primaryLabel", expression = "java(toPrimaryLabel(data.getStatus(), data.getDistrictName()))")
     MeetupCardDTO toMeetupCardDTO(MeetupData data);
 
     List<MeetupCardDTO> toMeetupCardDTOList(List<MeetupData> dataList);
 
-    /**
-     * 计算主标签：OPEN 状态展示区域名，其余状态展示状态文案
-     */
-    default String toPrimaryLabel(MeetupStatusEnum status, String districtName) {
-        return switch (status) {
-            case OPEN -> districtName;
-            default -> status.getLabel();
-        };
-    }
+
+
 
     // ==================== MeetupData → MeetupDTO ====================
 
