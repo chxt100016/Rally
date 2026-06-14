@@ -10,6 +10,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 @Slf4j
 @Component
+
 public class LogInterceptor implements HandlerInterceptor {
 
     private static final ThreadLocal<Long> START_TIME = new ThreadLocal<>();
