@@ -5,6 +5,7 @@ import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.system.gateway.SysConfigLoader;
 import com.rally.domain.system.model.Location;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -71,6 +72,9 @@ public class CityConfig {
     }
 
     public static String getCityName(String code) {
+        if (StringUtils.isBlank(code)) {
+            return null;
+        }
         return cities.get(code).getName();
     }
 

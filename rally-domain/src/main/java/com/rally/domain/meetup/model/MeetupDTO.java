@@ -16,6 +16,7 @@ public class MeetupDTO {
     private String meetupId;
     private String title;
     private MatchTypeEnum matchType;
+    private String matchTypeLabel;
     private Integer maxPlayers;
     private Integer currentPlayers;
     private String cityCode;

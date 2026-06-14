@@ -49,7 +49,12 @@ public interface MeetupAppConvertMapper {
     // ==================== MeetupData → MeetupDTO ====================
 
     @Mapping(target = "meetupId", source = "bizId")
+    @Mapping(target = "matchTypeLabel", expression = "java(getMatchTypeLabel(data))")
     MeetupDTO toMeetupDTO(MeetupData data);
+
+    default String getMatchTypeLabel(MeetupData data) {
+        return data.getMatchType().getName();
+    }
 
     // ==================== RegistrationData → RegistrationVO ====================
 
