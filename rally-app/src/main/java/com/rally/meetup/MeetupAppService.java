@@ -99,10 +99,10 @@ public class MeetupAppService {
 
         // 3. 阶梯扣分（如果有人报名）
         if (data.getCurrentPlayers() > 1) {
-            int penalty24h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_24H_OUT);
-            int penalty12h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_12_24H);
-            int penalty6h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_6_12H);
-            int penaltyUnder6h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_UNDER_6H);
+            int penalty24h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_24H_OUT.getKey(), Integer.parseInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_24H_OUT.getDefaultValue()));
+            int penalty12h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_12_24H.getKey(), Integer.parseInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_12_24H.getDefaultValue()));
+            int penalty6h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_6_12H.getKey(), Integer.parseInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_6_12H.getDefaultValue()));
+            int penaltyUnder6h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_UNDER_6H.getKey(), Integer.parseInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_UNDER_6H.getDefaultValue()));
             int penalty = meetupDomainService.calculateCancelPenalty(
                     data.getStartTime(), penalty24h, penalty12h, penalty6h, penaltyUnder6h);
             if (penalty > 0) {

@@ -53,7 +53,7 @@ public class CalibrationStrategy implements ScoreStrategy {
         List<ReviewData> votes = reviewGateway.listByToUserAndType(userId, "ntrp_vote");
 
         // 2. 反滥用剔除（超出部分剔除，保留前 N=3 张 lower 票）
-        int lowerVoteMax = SystemConfig.getInt(SystemConfigKey.ANTI_ABUSE_LOWER_VOTE_MAX_PER_TARGET);
+        int lowerVoteMax = SystemConfig.getInt(SystemConfigKey.ANTI_ABUSE_LOWER_VOTE_MAX_PER_TARGET.getKey(), Integer.parseInt(SystemConfigKey.ANTI_ABUSE_LOWER_VOTE_MAX_PER_TARGET.getDefaultValue()));
         Map<String, Integer> lowerCountByFrom = new HashMap<>();
         int nHigher = 0, nSame = 0, nLower = 0;
 
@@ -79,9 +79,9 @@ public class CalibrationStrategy implements ScoreStrategy {
         int total = nHigher + nSame + nLower;
 
         // 3. 票数不足：给默认分 80
-        int minVotes = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_MIN_VOTES);
+        int minVotes = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_MIN_VOTES.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CALIBRATION_MIN_VOTES.getDefaultValue()));
         if (total < minVotes) {
-            int insufficientScore = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_INSUFFICIENT);
+            int insufficientScore = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_INSUFFICIENT.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_INSUFFICIENT.getDefaultValue()));
             BigDecimal after = BigDecimal.valueOf(insufficientScore);
             change.setAfter(after);
             change.setValue(after.subtract(before));
@@ -95,23 +95,23 @@ public class CalibrationStrategy implements ScoreStrategy {
         String direction = biasLow >= biasHigh ? "ABOVE" : "BELOW";
 
         // 5. 档位落分
-        double t1 = SystemConfig.getFloat(SystemConfigKey.SCORE_CALIBRATION_DEVIATION_T1);
-        double t2 = SystemConfig.getFloat(SystemConfigKey.SCORE_CALIBRATION_DEVIATION_T2);
+        double t1 = SystemConfig.getFloat(SystemConfigKey.SCORE_CALIBRATION_DEVIATION_T1.getKey(), Float.parseFloat(SystemConfigKey.SCORE_CALIBRATION_DEVIATION_T1.getDefaultValue()));
+        double t2 = SystemConfig.getFloat(SystemConfigKey.SCORE_CALIBRATION_DEVIATION_T2.getKey(), Float.parseFloat(SystemConfigKey.SCORE_CALIBRATION_DEVIATION_T2.getDefaultValue()));
 
         int score;
         if (deviation < t1) {
-            score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_UNDER_T1);
+            score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_UNDER_T1.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_UNDER_T1.getDefaultValue()));
         } else if (deviation < t2) {
             if ("BELOW".equals(direction)) {
-                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_BELOW_T1_T2);
+                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_BELOW_T1_T2.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_BELOW_T1_T2.getDefaultValue()));
             } else {
-                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_ABOVE_T1_T2);
+                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_ABOVE_T1_T2.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_ABOVE_T1_T2.getDefaultValue()));
             }
         } else {
             if ("BELOW".equals(direction)) {
-                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_BELOW_T2);
+                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_BELOW_T2.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_BELOW_T2.getDefaultValue()));
             } else {
-                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_ABOVE_T2);
+                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_ABOVE_T2.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_ABOVE_T2.getDefaultValue()));
             }
         }
 

@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,14 +37,14 @@ public class VideoAppService {
         TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
                 .orElse(null);
         if (profileData != null) {
-            int maxCount = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT);
+            int maxCount = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getDefaultValue()));
             List<VideoVO> currentVideos = profileData.getVideos();
             if (currentVideos != null && currentVideos.size() >= maxCount) {
                 throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED);
             }
         }
 
-        int maxSizeMb = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB);
+        int maxSizeMb = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getDefaultValue()));
         return this.generateUploadToken(userId, maxSizeMb);
     }
 
@@ -76,13 +78,14 @@ public class VideoAppService {
      */
     public VideoTokenVO getAvatarUploadToken(String ext) {
         String userId = UserContext.get();
-        int maxSizeMb = SystemConfig.getInt(SystemConfigKey.USER_AVATAR_MAX_SIZE_MB);
+        int maxSizeMb = SystemConfig.getInt(SystemConfigKey.USER_AVATAR_MAX_SIZE_MB.getKey(), Integer.parseInt(SystemConfigKey.USER_AVATAR_MAX_SIZE_MB.getDefaultValue()));
         return this.generateAvatarUploadToken(userId, ext, maxSizeMb);
     }
 
     private VideoTokenVO generateAvatarUploadToken(String userId, String ext, int maxSizeMb) {
-        // 固定 key，每次上传覆盖：avatar/{userId}.{ext}
-        String key = "avatar/" + userId + "." + ext;
+        // 拼接时间戳避免CDN缓存：avatar/{userId}_{yyyyMMddHHmmss}.{ext}
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String key = "avatar/" + userId + "_" + timestamp + "." + ext;
         long fsizeLimit = (long) maxSizeMb * 1024 * 1024;
 
         Auth auth = Auth.create(QiniuConfiguration.getAccessKey(), QiniuConfiguration.getSecretKey());

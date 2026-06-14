@@ -29,9 +29,9 @@ public class ProfileLevelManager {
         BigDecimal calibration = profileData.getCalibrationScore();
 
         // 读取权重
-        float w1 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_REPUTATION);
-        float w2 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_CREDIBILITY);
-        float w3 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_CALIBRATION);
+        float w1 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_REPUTATION.getKey(), Float.parseFloat(SystemConfigKey.SCORE_WEIGHTS_REPUTATION.getDefaultValue()));
+        float w2 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_CREDIBILITY.getKey(), Float.parseFloat(SystemConfigKey.SCORE_WEIGHTS_CREDIBILITY.getDefaultValue()));
+        float w3 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_CALIBRATION.getKey(), Float.parseFloat(SystemConfigKey.SCORE_WEIGHTS_CALIBRATION.getDefaultValue()));
 
         // 三维分（缺失则用默认值）
         BigDecimal rep = reputation != null ? reputation : BigDecimal.valueOf(100);
@@ -42,9 +42,9 @@ public class ProfileLevelManager {
         float total = rep.floatValue() * w1 + cred.floatValue() * w2 + cal.floatValue() * w3;
 
         // 等级落档
-        int sThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_S_THRESHOLD);
-        int aThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_A_THRESHOLD);
-        int bThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_B_THRESHOLD);
+        int sThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_S_THRESHOLD.getKey(), Integer.parseInt(SystemConfigKey.SCORE_RATING_S_THRESHOLD.getDefaultValue()));
+        int aThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_A_THRESHOLD.getKey(), Integer.parseInt(SystemConfigKey.SCORE_RATING_A_THRESHOLD.getDefaultValue()));
+        int bThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_B_THRESHOLD.getKey(), Integer.parseInt(SystemConfigKey.SCORE_RATING_B_THRESHOLD.getDefaultValue()));
 
         RatingLevelEnum level;
         if (total >= sThreshold) {

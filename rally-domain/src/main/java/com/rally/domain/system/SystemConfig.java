@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,6 +28,14 @@ public class SystemConfig {
     /** 缓存键 = scope + '|' + configKey，value = 字符串化的 configValue */
     private final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>();
 
+    /** key -> defaultValue 映射，从枚举初始化，用于缓存未命中时回退 */
+    private static final Map<String, String> KEY_DEFAULT_MAP = new ConcurrentHashMap<>();
+
+    static {
+        // 从枚举构建 key -> defaultValue 映射
+        Arrays.stream(SystemConfigKey.values()).forEach(e -> KEY_DEFAULT_MAP.put(e.getKey(), e.getDefaultValue()));
+    }
+
     public SystemConfig(SysConfigLoader loader) {
         this.loader = loader;
     }
@@ -39,12 +48,24 @@ public class SystemConfig {
 
     // ==================== 静态方法 ====================
 
+    /**
+     * 获取字符串配置值。
+     * 若缓存中不存在该 key，则从枚举 SystemConfigKey 的 defaultValue 中获取；
+     * 若枚举中也不存在，则返回传入的 defaultValue 参数。
+     */
     public static String getString(String key, String defaultValue) {
         return getString(key, "global", defaultValue);
     }
 
+    /**
+     * 获取 int 配置值。
+     * 若缓存中不存在该 key，则从枚举 SystemConfigKey 的 defaultValue 中获取；
+     * 若枚举中也不存在，则返回传入的 defaultValue 参数。
+     */
     public static int getInt(String key, int defaultValue) {
-        String value = getString(key, "global", null);
+        // 先尝试从枚举默认值获取
+        String enumDefault = KEY_DEFAULT_MAP.get(key);
+        String value = getString(key, "global", enumDefault != null ? enumDefault : String.valueOf(defaultValue));
         if (value == null) {
             return defaultValue;
         }
@@ -56,8 +77,14 @@ public class SystemConfig {
         }
     }
 
+    /**
+     * 获取 float 配置值。
+     * 若缓存中不存在该 key，则从枚举 SystemConfigKey 的 defaultValue 中获取；
+     * 若枚举中也不存在，则返回传入的 defaultValue 参数。
+     */
     public static float getFloat(String key, float defaultValue) {
-        String value = getString(key, "global", null);
+        String enumDefault = KEY_DEFAULT_MAP.get(key);
+        String value = getString(key, "global", enumDefault != null ? enumDefault : String.valueOf(defaultValue));
         if (value == null) {
             return defaultValue;
         }
@@ -69,8 +96,14 @@ public class SystemConfig {
         }
     }
 
+    /**
+     * 获取 boolean 配置值。
+     * 若缓存中不存在该 key，则从枚举 SystemConfigKey 的 defaultValue 中获取；
+     * 若枚举中也不存在，则返回传入的 defaultValue 参数。
+     */
     public static boolean getBool(String key, boolean defaultValue) {
-        String value = getString(key, "global", null);
+        String enumDefault = KEY_DEFAULT_MAP.get(key);
+        String value = getString(key, "global", enumDefault != null ? enumDefault : String.valueOf(defaultValue));
         if (value == null) {
             return defaultValue;
         }
@@ -82,8 +115,14 @@ public class SystemConfig {
         }
     }
 
+    /**
+     * 获取 JSON 配置值。
+     * 若缓存中不存在该 key，则从枚举 SystemConfigKey 的 defaultValue 中获取；
+     * 若枚举中也不存在，则返回传入的 defaultValue 参数。
+     */
     public static <T> T getJson(String key, Class<T> cls, T defaultValue) {
-        String value = getString(key, "global", null);
+        String enumDefault = KEY_DEFAULT_MAP.get(key);
+        String value = getString(key, "global", enumDefault);
         if (value == null) {
             return defaultValue;
         }
@@ -95,6 +134,10 @@ public class SystemConfig {
         }
     }
 
+    /**
+     * 获取字符串配置值（带 scope）。
+     * 优先级：scope 专属值 > global 值 > 枚举默认值 > 传入的 defaultValue
+     */
     public static String getString(String key, String scope, String defaultValue) {
         SystemConfig inst = instance;
         if (inst == null) {
@@ -111,25 +154,12 @@ public class SystemConfig {
             value = inst.cache.get(cacheKey);
         }
 
+        // 缓存未命中时，尝试从枚举默认值获取
+        if (value == null) {
+            value = KEY_DEFAULT_MAP.get(key);
+        }
+
         return value != null ? value : defaultValue;
-    }
-
-    // ==================== 枚举 key 重载（默认值取自枚举 defaultValue） ====================
-
-    public static String getString(SystemConfigKey key) {
-        return getString(key.getKey(), key.getDefaultValue());
-    }
-
-    public static int getInt(SystemConfigKey key) {
-        return getInt(key.getKey(), Integer.parseInt(key.getDefaultValue()));
-    }
-
-    public static float getFloat(SystemConfigKey key) {
-        return getFloat(key.getKey(), Float.parseFloat(key.getDefaultValue()));
-    }
-
-    public static boolean getBool(SystemConfigKey key) {
-        return getBool(key.getKey(), Boolean.parseBoolean(key.getDefaultValue()));
     }
 
     // ==================== 内部方法 ====================

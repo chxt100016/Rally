@@ -46,18 +46,18 @@ public class CredibilityStrategy implements ScoreStrategy {
         change.setBefore(before);
 
         // 1. 近窗口完成约球加分
-        int matchWindowDays = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_WINDOW_DAYS);
+        int matchWindowDays = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_WINDOW_DAYS.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_WINDOW_DAYS.getDefaultValue()));
         long matchCount = meetupGateway.countFinishedMatches(userId, matchWindowDays);
-        int matchPerScore = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_PER_SCORE);
-        int matchScoreCap = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_SCORE_CAP);
+        int matchPerScore = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_PER_SCORE.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_PER_SCORE.getDefaultValue()));
+        int matchScoreCap = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_SCORE_CAP.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_SCORE_CAP.getDefaultValue()));
         int sMatch = (int) Math.min(matchCount * matchPerScore, matchScoreCap);
 
         // 2. 视频加分
         int videoCount = profileGateway.findByUserId(userId)
                 .map(p -> p.getVideos() != null ? p.getVideos().size() : 0)
                 .orElse(0);
-        int videoPerScore = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_VIDEO_PER_SCORE);
-        int videoCap = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_VIDEO_CAP);
+        int videoPerScore = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_VIDEO_PER_SCORE.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CREDIBILITY_VIDEO_PER_SCORE.getDefaultValue()));
+        int videoCap = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_VIDEO_CAP.getKey(), Integer.parseInt(SystemConfigKey.SCORE_CREDIBILITY_VIDEO_CAP.getDefaultValue()));
         int sVideo = Math.min(videoCount * videoPerScore, videoCap);
 
         // 3. UTR 加分（MVP 恒为 0）

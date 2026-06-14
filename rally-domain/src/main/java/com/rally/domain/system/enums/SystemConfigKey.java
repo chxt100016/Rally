@@ -130,11 +130,11 @@ public enum SystemConfigKey {
     /** 用户可上传视频数量上限 */
     USER_VIDEO_MAX_COUNT("user.video.max_count", "用户可上传视频数量上限", "3"),
     /** 用户上传视频的文件大小上限（MB） */
-    USER_VIDEO_MAX_SIZE_MB("user.video.max_size_mb", "用户上传视频的文件大小上限（MB）", "5"),
+    USER_VIDEO_MAX_SIZE_MB("user.video.max_size_mb", "用户上传视频的文件大小上限（MB）", "20"),
     /** 用户上传头像的文件大小上限（MB） */
     USER_AVATAR_MAX_SIZE_MB("user.avatar.max_size_mb", "用户上传头像的文件大小上限（MB）", "5"),
-    USER_HINT_VIDEO("user.hint.video", "", ""),
-    USER_HINT_NTRP("user.hint.ntrp", "", "")
+    USER_HINT_VIDEO("user.hint.video", "", "· 单个视频时长 ≤ 60 秒，大小 ≤ 20MB\n· 建议横屏拍摄，画面清晰稳定\n· 完整展示正手 / 反手 / 发球等技术动作\n· 每位用户最多上传 3 个视频"),
+    USER_HINT_NTRP("user.hint.ntrp", "", "不懂ntrp是什么你就去百度可以吗？？")
     ;
 
     /** 配置项 key */

@@ -40,13 +40,12 @@ public class UserUploadController {
     }
 
     /**
-     * 取头像直传凭证
-     * @param ext 文件扩展名，如 jpg、png
+     * 取头像直传凭证，默认 jpeg 格式
      */
     @GetMapping("/upload-token/avatar")
-    public Result<VideoTokenVO> getAvatarUploadToken(@RequestParam("ext") String ext) {
+    public Result<VideoTokenVO> getAvatarUploadToken() {
         try {
-            return Result.ok(videoAppService.getAvatarUploadToken(ext));
+            return Result.ok(videoAppService.getAvatarUploadToken("jpeg"));
         } catch (BusinessException e) {
             return Result.fail(e.getErrorCode().getCode(), e.getMessage());
         }

@@ -102,9 +102,9 @@ public class ReputationStrategy implements ScoreStrategy {
      */
     private int resolveDelta(String verdict) {
         return switch (verdict) {
-            case "no_show" -> SystemConfig.getInt(SystemConfigKey.SCORE_REPUTATION_NO_SHOW);
-            case "late" -> SystemConfig.getInt(SystemConfigKey.SCORE_REPUTATION_LATE);
-            default -> SystemConfig.getInt(SystemConfigKey.SCORE_REPUTATION_ON_TIME);
+            case "no_show" -> SystemConfig.getInt(SystemConfigKey.SCORE_REPUTATION_NO_SHOW.getKey(), Integer.parseInt(SystemConfigKey.SCORE_REPUTATION_NO_SHOW.getDefaultValue()));
+            case "late" -> SystemConfig.getInt(SystemConfigKey.SCORE_REPUTATION_LATE.getKey(), Integer.parseInt(SystemConfigKey.SCORE_REPUTATION_LATE.getDefaultValue()));
+            default -> SystemConfig.getInt(SystemConfigKey.SCORE_REPUTATION_ON_TIME.getKey(), Integer.parseInt(SystemConfigKey.SCORE_REPUTATION_ON_TIME.getDefaultValue()));
         };
     }
 

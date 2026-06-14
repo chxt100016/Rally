@@ -147,7 +147,7 @@ public class MyProfileAppService {
                 .setKey(key)
                 .setValue(score != null ? score.toPlainString() : "0")
                 .setMaxValue("1500")
-                .setInfo(SystemConfig.getString(infoConfigKey))
+                .setInfo(SystemConfig.getString(infoConfigKey.getKey(), infoConfigKey.getDefaultValue()))
                 .setSort(sort);
     }
 
@@ -159,7 +159,7 @@ public class MyProfileAppService {
         return new MyProfileUserDTO()
                 .setUserId(userData.getUserId())
                 .setNickname(userData.getNickname())
-                .setAvatarUrl(userData.getAvatarUrl())
+                .setAvatarUrl(QiniuConfiguration.buildSignedUrl(userData.getAvatarUrl()))
                 .setGender(userData.getGender())
                 .setBirthday(userData.getBirthday())
                 .setCityCode(userData.getCityCode())

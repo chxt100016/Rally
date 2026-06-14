@@ -49,7 +49,7 @@ public class CityConfig {
      * 获取开通城市编码列表
      */
     public static List<String> getOpenedCities() {
-        String str = SystemConfig.getString(SystemConfigKey.MEETUP_CITY_OPENED_CODES);
+        String str = SystemConfig.getString(SystemConfigKey.MEETUP_CITY_OPENED_CODES.getKey(), SystemConfigKey.MEETUP_CITY_OPENED_CODES.getDefaultValue());
         try {
             return Arrays.asList(str.split(","));
         } catch (Exception e) {
