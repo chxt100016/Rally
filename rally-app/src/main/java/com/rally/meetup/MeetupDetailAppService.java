@@ -1,5 +1,6 @@
 package com.rally.meetup;
 
+import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.enums.ActionStateEnum;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.meetup.model.*;
@@ -9,11 +10,13 @@ import com.rally.domain.recap.model.RecapDTO;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.recap.service.RecapDomainService;
+import com.rally.domain.utils.GeoUtils;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
+import com.rally.utils.SunUtils;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,11 +64,19 @@ public class MeetupDetailAppService {
         return new MeetupDetailDTO()
                 .setMeetup(MeetupAppConvertMapper.INSTANCE.toMeetupDTO(meetup.getData()))
                 .setActionState(actionState)
+                .setWeather(buildWeather(meetup))
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
                 .setParticipants(buildParticipantVOList(meetup, participantUserIds, profileMap))
                 .setRecap(actionState == ActionStateEnum.FINISHED ? buildRecap(meetupId) : null)
                 .setUnreadCount(actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED  ? null : chatDomainService.getUnreadCount(meetupId, currentUserId));
 
+    }
+
+    private WeatherDTO buildWeather(Meetup meetup) {
+        return new WeatherDTO()
+                .setSunrise(SunUtils.sunrise(meetup.getData().getStartTime(), meetup.getData().getCourtLat(), meetup.getData().getCourtLng()))
+                .setSunset(SunUtils.sunset(meetup.getData().getStartTime(), meetup.getData().getCourtLat(), meetup.getData().getCourtLng()))
+                ;
     }
 
 
@@ -81,7 +92,7 @@ public class MeetupDetailAppService {
         UserProfile profile = profileMap.get(creatorId);
         if (profile != null && profile.getUser() != null) {
             creator.setNickname(profile.getUser().getNickname());
-            creator.setAvatarUrl(profile.getUser().getAvatarUrl());
+            creator.setAvatarUrl(QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl()));
         }
         if (profile != null && profile.getProfile() != null) {
             creator.setNtrpScore(profile.getProfile().getNtrpScore());
@@ -117,7 +128,7 @@ public class MeetupDetailAppService {
         UserProfile profile = profileMap.get(uid);
         if (profile != null && profile.getUser() != null) {
             vo.setNickname(profile.getUser().getNickname());
-            vo.setAvatarUrl(profile.getUser().getAvatarUrl());
+            vo.setAvatarUrl(QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl()));
             vo.setGender(profile.getUser().getGender());
         }
         if (profile != null && profile.getProfile() != null) {

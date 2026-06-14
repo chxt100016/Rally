@@ -66,7 +66,7 @@ public class PlayerHomeAppService {
         return new MyProfileUserDTO()
                 .setUserId(userData.getUserId())
                 .setNickname(userData.getNickname())
-                .setAvatarUrl(userData.getAvatarUrl())
+                .setAvatarUrl(QiniuConfiguration.buildSignedUrl(userData.getAvatarUrl()))
                 .setGender(userData.getGender())
                 .setBirthday(userData.getBirthday())
                 .setCityCode(userData.getCityCode())

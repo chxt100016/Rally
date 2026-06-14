@@ -1,9 +1,8 @@
 package com.rally.utils;
 
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 
 /**
  * 日出日落时间计算工具（基于 NOAA 天文简化算法）
@@ -15,28 +14,28 @@ public class SunUtils {
     private static final double ZENITH = 90.833;
 
     /**
-     * 计算日出 UTC 时间
-     * @param date      日期
+     * 计算日出时间（上海时区）
+     * @param dateTime  日期时间（取其日期部分参与计算）
      * @param latitude  纬度（北纬为正，南纬为负）
      * @param longitude 经度（东经为正，西经为负）
-     * @return 日出 UTC LocalTime；极夜（太阳永不升起）返回 null
+     * @return 日出 LocalDateTime（上海时区）；极夜（太阳永不升起）返回 null
      */
-    public static LocalTime sunrise(LocalDate date, double latitude, double longitude) {
-        return calculate(date, latitude, longitude, true);
+    public static LocalDateTime sunrise(LocalDateTime dateTime, double latitude, double longitude) {
+        return calculate(dateTime.toLocalDate(), latitude, longitude, true);
     }
 
     /**
-     * 计算日落 UTC 时间
-     * @param date      日期
+     * 计算日落时间（上海时区）
+     * @param dateTime  日期时间（取其日期部分参与计算）
      * @param latitude  纬度（北纬为正，南纬为负）
      * @param longitude 经度（东经为正，西经为负）
-     * @return 日落 UTC LocalTime；极昼（太阳永不落下）返回 null
+     * @return 日落 LocalDateTime（上海时区）；极昼（太阳永不落下）返回 null
      */
-    public static LocalTime sunset(LocalDate date, double latitude, double longitude) {
-        return calculate(date, latitude, longitude, false);
+    public static LocalDateTime sunset(LocalDateTime dateTime, double latitude, double longitude) {
+        return calculate(dateTime.toLocalDate(), latitude, longitude, false);
     }
 
-    private static LocalTime calculate(LocalDate date, double latitude, double longitude, boolean isSunrise) {
+    private static LocalDateTime calculate(LocalDate date, double latitude, double longitude, boolean isSunrise) {
         int dayOfYear = date.getDayOfYear();
 
         // 经度换算为时区小时偏移（每 15° 对应 1 小时）
@@ -84,10 +83,10 @@ public class SunUtils {
         int minutes = (int) ((utHour - hours) * 60);
         int seconds = (int) (((utHour - hours) * 60 - minutes) * 60);
 
-        LocalTime utcTime = LocalTime.of(hours, minutes, seconds);
+        LocalDateTime utcDateTime = LocalDateTime.of(date, LocalTime.of(hours, minutes, seconds));
 
-        // 转换为上海时区（UTC+8）
-        return utcTime.plusHours(8);
+        // 转换为上海时区（UTC+8），跨日时自动进位到次日
+        return utcDateTime.plusHours(8);
     }
 
     private static double normalizeAngle(double angle) {
@@ -101,9 +100,8 @@ public class SunUtils {
     }
 
     public static void main(String[] args) {
-        System.out.println(LocalDate.now());
-        System.out.println(sunrise(LocalDate.now(), 30.29, 120.02));
-        System.out.println(sunset(LocalDate.now(),30.29, 120.02));
-
+        System.out.println(LocalDateTime.now());
+        System.out.println(sunrise(LocalDateTime.now(), 30.29, 120.02));
+        System.out.println(sunset(LocalDateTime.now(), 30.29, 120.02));
     }
 }
