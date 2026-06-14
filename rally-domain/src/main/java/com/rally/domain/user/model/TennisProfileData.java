@@ -3,6 +3,7 @@ package com.rally.domain.user.model;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import lombok.Data;
 
@@ -71,9 +72,9 @@ public class TennisProfileData {
      * 根据可信度档位解析 NTRP 冷却总天数：可信度越高冷却越久
      */
     private int resolveNtrpCooldownDays() {
-        int lowDays = SystemConfig.getInt("score.ntrp.cooldown_low_days", 30);
-        int midDays = SystemConfig.getInt("score.ntrp.cooldown_mid_days", 60);
-        int highDays = SystemConfig.getInt("score.ntrp.cooldown_high_days", 90);
+        int lowDays = SystemConfig.getInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_LOW_DAYS);
+        int midDays = SystemConfig.getInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_MID_DAYS);
+        int highDays = SystemConfig.getInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_HIGH_DAYS);
         if (credibilityScore == null) {
             return lowDays;
         }
@@ -93,11 +94,11 @@ public class TennisProfileData {
      */
     public int triggerReviewIfNeeded(BigDecimal newNtrp) {
         BigDecimal delta = ntrpScore != null ? newNtrp.subtract(ntrpScore) : BigDecimal.ZERO;
-        BigDecimal triggerDelta = new BigDecimal(SystemConfig.getString("score.review_period.trigger_ntrp_delta", "0.5"));
+        BigDecimal triggerDelta = new BigDecimal(SystemConfig.getString(SystemConfigKey.SCORE_REVIEW_PERIOD_TRIGGER_NTRP_DELTA));
         if (delta.compareTo(triggerDelta) < 0) {
             return -1;
         }
-        int requiredMatches = SystemConfig.getInt("score.review_period.required_matches", 3);
+        int requiredMatches = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_REQUIRED_MATCHES);
         this.status = ProfileStatusEnum.UNDER_REVIEW;
         this.isUnderReview = true;
         this.reviewRemainingMatches = requiredMatches;
@@ -129,5 +130,15 @@ public class TennisProfileData {
         this.videos = videos;
         this.status = ProfileStatusEnum.NORMAL;
         this.ntrpUpdatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 追加一条视频
+     */
+    public void addVideo(VideoVO video) {
+        if (this.videos == null) {
+            this.videos = new ArrayList<>();
+        }
+        this.videos.add(video);
     }
 }

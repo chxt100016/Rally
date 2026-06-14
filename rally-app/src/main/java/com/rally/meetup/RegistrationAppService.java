@@ -7,6 +7,7 @@ import com.rally.domain.meetup.model.QuitResult;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.RegistrationDomainService;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
 import lombok.RequiredArgsConstructor;
@@ -82,7 +83,7 @@ public class RegistrationAppService {
 
         // 3. 扣分
         if (result == QuitResult.PENALIZED) {
-            int penalty = SystemConfig.getInt("meetup.quit.penalty_under_6h", 25);
+            int penalty = SystemConfig.getInt(SystemConfigKey.MEETUP_QUIT_PENALTY_UNDER_6H);
             // TODO: 调用评分域扣分
             log.info("退出扣分: userId={}, meetupId={}, penalty={}", userId, meetupId, penalty);
         }

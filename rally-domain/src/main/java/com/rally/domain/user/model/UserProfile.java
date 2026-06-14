@@ -110,6 +110,13 @@ public class UserProfile {
         profile.completeOnboarding(cmd.getNtrpScore(), cmd.getVideos());
     }
 
+    /**
+     * 追加一条视频
+     */
+    public void addVideo(VideoVO video) {
+        profile.addVideo(video);
+    }
+
     public void assertBasic() {
         user.assertBasicComplete();
     }

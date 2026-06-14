@@ -8,6 +8,7 @@ import com.rally.domain.meetup.gateway.NearbyGateway;
 import com.rally.domain.meetup.gateway.RegistrationGateway;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -124,7 +125,7 @@ public class MeetupQueryDomainService {
      * UNION SQL searchAfter 游标分页，review deadline 过滤在 SQL 中完成
      */
     private PageDTO<MeetupCardDTO> listPending(String userId, String lastId, int limit) {
-        int deadlineDays = SystemConfig.getInt("review.deadline_days", 30);
+        int deadlineDays = SystemConfig.getInt(SystemConfigKey.REVIEW_DEADLINE_DAYS);
         PageDTO<MeetupData> pageResult = meetupGateway.listPendingMeetups(userId, deadlineDays, lastId, limit);
         List<MeetupCardDTO> cardList = pageResult.getList().stream()
                 .map(MeetupDomainConvertMapper.INSTANCE::toMeetupCardDTO)

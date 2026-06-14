@@ -1,6 +1,7 @@
 package com.rally.domain.score;
 
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.enums.RatingLevelEnum;
 import com.rally.domain.user.model.TennisProfileData;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +29,9 @@ public class ProfileLevelManager {
         BigDecimal calibration = profileData.getCalibrationScore();
 
         // 读取权重
-        float w1 = SystemConfig.getFloat("score.weights.reputation", 0.5f);
-        float w2 = SystemConfig.getFloat("score.weights.credibility", 0.3f);
-        float w3 = SystemConfig.getFloat("score.weights.calibration", 0.2f);
+        float w1 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_REPUTATION);
+        float w2 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_CREDIBILITY);
+        float w3 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_CALIBRATION);
 
         // 三维分（缺失则用默认值）
         BigDecimal rep = reputation != null ? reputation : BigDecimal.valueOf(100);
@@ -41,9 +42,9 @@ public class ProfileLevelManager {
         float total = rep.floatValue() * w1 + cred.floatValue() * w2 + cal.floatValue() * w3;
 
         // 等级落档
-        int sThreshold = SystemConfig.getInt("score.rating.s_threshold", 90);
-        int aThreshold = SystemConfig.getInt("score.rating.a_threshold", 75);
-        int bThreshold = SystemConfig.getInt("score.rating.b_threshold", 55);
+        int sThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_S_THRESHOLD);
+        int aThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_A_THRESHOLD);
+        int bThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_B_THRESHOLD);
 
         RatingLevelEnum level;
         if (total >= sThreshold) {

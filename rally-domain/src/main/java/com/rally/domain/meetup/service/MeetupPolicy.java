@@ -10,6 +10,7 @@ import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupPublishCmd;
 import com.rally.domain.system.CityConfig;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +44,7 @@ public class MeetupPolicy {
      * 校验当日发布上限
      */
     private void assertTimes(String userId) {
-        int publishLimit = SystemConfig.getInt("anti_abuse.publish_per_day_limit", 5);
+        int publishLimit = SystemConfig.getInt(SystemConfigKey.ANTI_ABUSE_PUBLISH_PER_DAY_LIMIT);
         long todayCount = meetupGateway.countTodayActive(userId);
         if (todayCount >= publishLimit) {
             throw new BusinessException(BizErrorCode.PUBLISH_LIMIT_EXCEEDED);
@@ -136,7 +137,7 @@ public class MeetupPolicy {
      */
     public void assertEdit(Meetup meetup, MeetupPublishCmd cmd) {
         MeetupData data = meetup.getData();
-        int lockMinutes = SystemConfig.getInt("meetup.edit_lock_minutes_before_start", 60);
+        int lockMinutes = SystemConfig.getInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START);
 
         // 1. 权限和状态校验
         if (!meetup.canEdit(data.getCreatorId(), lockMinutes)) {

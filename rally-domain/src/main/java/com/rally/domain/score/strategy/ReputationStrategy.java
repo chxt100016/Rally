@@ -1,6 +1,7 @@
 package com.rally.domain.score.strategy;
 
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.recap.enums.AttendanceEnum;
 import com.rally.domain.recap.gateway.ReviewGateway;
 import com.rally.domain.recap.model.ReviewData;
@@ -101,9 +102,9 @@ public class ReputationStrategy implements ScoreStrategy {
      */
     private int resolveDelta(String verdict) {
         return switch (verdict) {
-            case "no_show" -> SystemConfig.getInt("score.reputation.no_show", -25);
-            case "late" -> SystemConfig.getInt("score.reputation.late", -10);
-            default -> SystemConfig.getInt("score.reputation.on_time", 2);
+            case "no_show" -> SystemConfig.getInt(SystemConfigKey.SCORE_REPUTATION_NO_SHOW);
+            case "late" -> SystemConfig.getInt(SystemConfigKey.SCORE_REPUTATION_LATE);
+            default -> SystemConfig.getInt(SystemConfigKey.SCORE_REPUTATION_ON_TIME);
         };
     }
 

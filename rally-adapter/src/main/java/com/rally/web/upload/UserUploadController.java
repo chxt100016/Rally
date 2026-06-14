@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user/upload")
-public class VideoController {
+public class UserUploadController {
 
     @Resource
     private VideoAppService videoAppService;

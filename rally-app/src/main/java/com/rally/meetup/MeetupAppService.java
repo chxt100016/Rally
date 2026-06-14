@@ -8,6 +8,7 @@ import com.rally.domain.meetup.model.MeetupEditCmd;
 import com.rally.domain.meetup.service.MeetupPolicy;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,10 +99,10 @@ public class MeetupAppService {
 
         // 3. 阶梯扣分（如果有人报名）
         if (data.getCurrentPlayers() > 1) {
-            int penalty24h = SystemConfig.getInt("meetup.cancel.penalty_24h_out", 5);
-            int penalty12h = SystemConfig.getInt("meetup.cancel.penalty_12_24h", 10);
-            int penalty6h = SystemConfig.getInt("meetup.cancel.penalty_6_12h", 15);
-            int penaltyUnder6h = SystemConfig.getInt("meetup.cancel.penalty_under_6h", 25);
+            int penalty24h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_24H_OUT);
+            int penalty12h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_12_24H);
+            int penalty6h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_6_12H);
+            int penaltyUnder6h = SystemConfig.getInt(SystemConfigKey.MEETUP_CANCEL_PENALTY_UNDER_6H);
             int penalty = meetupDomainService.calculateCancelPenalty(
                     data.getStartTime(), penalty24h, penalty12h, penalty6h, penaltyUnder6h);
             if (penalty > 0) {

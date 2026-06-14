@@ -1,6 +1,7 @@
 package com.rally.domain.system;
 
 import com.alibaba.fastjson2.JSON;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.system.gateway.SysConfigLoader;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -111,6 +112,24 @@ public class SystemConfig {
         }
 
         return value != null ? value : defaultValue;
+    }
+
+    // ==================== 枚举 key 重载（默认值取自枚举 defaultValue） ====================
+
+    public static String getString(SystemConfigKey key) {
+        return getString(key.getKey(), key.getDefaultValue());
+    }
+
+    public static int getInt(SystemConfigKey key) {
+        return getInt(key.getKey(), Integer.parseInt(key.getDefaultValue()));
+    }
+
+    public static float getFloat(SystemConfigKey key) {
+        return getFloat(key.getKey(), Float.parseFloat(key.getDefaultValue()));
+    }
+
+    public static boolean getBool(SystemConfigKey key) {
+        return getBool(key.getKey(), Boolean.parseBoolean(key.getDefaultValue()));
     }
 
     // ==================== 内部方法 ====================

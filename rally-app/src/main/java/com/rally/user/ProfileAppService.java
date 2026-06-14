@@ -1,10 +1,12 @@
 package com.rally.user;
 
+import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.log.model.ProfileChangeLogData;
 import com.rally.utils.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.log.gateway.ProfileChangeLogGateway;
 import com.rally.domain.user.gateway.TennisProfileGateway;
@@ -13,6 +15,7 @@ import com.rally.domain.user.model.*;
 import com.rally.domain.log.ProfileLogService;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.db.user.convert.UserConvertMapper;
+import com.rally.user.convert.UserAppConvertMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,6 +61,20 @@ public class ProfileAppService {
     }
 
     /**
+     * 上传视频，追加到我的视频列表
+     */
+    @Transactional
+    public MyProfileDTO uploadVideo(UploadVideoCmd cmd) {
+        String userId = UserContext.get();
+        UserProfile userProfile = userProfileDomainService.get(userId);
+        QiniuConfiguration.buildSignedUrl(cmd.getKey());
+        userProfile.addVideo(UserAppConvertMapper.INSTANCE.toVideoVO(cmd));
+        userProfileDomainService.save(userProfile);
+
+        return myProfileAppService.getMyProfile();
+    }
+
+    /**
      * 自评修改
      */
     @Transactional
@@ -92,8 +109,8 @@ public class ProfileAppService {
         }
 
         if (isBad) {
-            int requiredMatches = SystemConfig.getInt("score.review_period.required_matches", 3);
-            int penaltyCredibility = SystemConfig.getInt("score.review_period.penalty_credibility", 50);
+            int requiredMatches = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_REQUIRED_MATCHES);
+            int penaltyCredibility = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_PENALTY_CREDIBILITY);
             profileRecordService.saveReviewResetLog(userId, remaining, requiredMatches, meetupId);
             tennisProfileGateway.updateScoreFields(userId, null,
                     new BigDecimal(penaltyCredibility), null, null);

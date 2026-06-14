@@ -12,6 +12,7 @@ import com.rally.domain.recap.service.RecapDomainService;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.system.CityConfig;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.model.*;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.utils.UserContext;
@@ -133,20 +134,20 @@ public class MyProfileAppService {
     /** 构建评分明细列表 */
     private List<ScoreItemDTO> buildScoreItemList(TennisProfileData profileData) {
         List<ScoreItemDTO> items = new ArrayList<>();
-        items.add(buildOneScoreItem("信誉分", "reputation", profileData.getReputationScore(), "score.info.reputation", 1));
-        items.add(buildOneScoreItem("可信度", "credibility", profileData.getCredibilityScore(), "score.info.credibility", 2));
-        items.add(buildOneScoreItem("校准度", "calibration", profileData.getCalibrationScore(), "score.info.calibration", 3));
+        items.add(buildOneScoreItem("信誉分", "reputation", profileData.getReputationScore(), SystemConfigKey.SCORE_INFO_REPUTATION, 1));
+        items.add(buildOneScoreItem("可信度", "credibility", profileData.getCredibilityScore(), SystemConfigKey.SCORE_INFO_CREDIBILITY, 2));
+        items.add(buildOneScoreItem("校准度", "calibration", profileData.getCalibrationScore(), SystemConfigKey.SCORE_INFO_CALIBRATION, 3));
         return items;
     }
 
     /** 构建单个评分明细项 */
-    private ScoreItemDTO buildOneScoreItem(String name, String key, BigDecimal score, String infoConfigKey, Integer sort) {
+    private ScoreItemDTO buildOneScoreItem(String name, String key, BigDecimal score, SystemConfigKey infoConfigKey, Integer sort) {
         return new ScoreItemDTO()
                 .setName(name)
                 .setKey(key)
                 .setValue(score != null ? score.toPlainString() : "0")
                 .setMaxValue("1500")
-                .setInfo(SystemConfig.getString(infoConfigKey, ""))
+                .setInfo(SystemConfig.getString(infoConfigKey))
                 .setSort(sort);
     }
 

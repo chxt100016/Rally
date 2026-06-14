@@ -7,6 +7,7 @@ import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.VideoTokenVO;
@@ -34,14 +35,14 @@ public class VideoAppService {
         TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
                 .orElse(null);
         if (profileData != null) {
-            int maxCount = SystemConfig.getInt("user.video.max_count", 3);
+            int maxCount = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT);
             List<VideoVO> currentVideos = profileData.getVideos();
             if (currentVideos != null && currentVideos.size() >= maxCount) {
                 throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED);
             }
         }
 
-        int maxSizeMb = SystemConfig.getInt("user.video.max_size_mb", 5);
+        int maxSizeMb = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB);
         return this.generateUploadToken(userId, maxSizeMb);
     }
 
@@ -75,7 +76,7 @@ public class VideoAppService {
      */
     public VideoTokenVO getAvatarUploadToken(String ext) {
         String userId = UserContext.get();
-        int maxSizeMb = SystemConfig.getInt("user.avatar.max_size_mb", 5);
+        int maxSizeMb = SystemConfig.getInt(SystemConfigKey.USER_AVATAR_MAX_SIZE_MB);
         return this.generateAvatarUploadToken(userId, ext, maxSizeMb);
     }
 

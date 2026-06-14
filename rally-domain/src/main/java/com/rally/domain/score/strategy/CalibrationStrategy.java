@@ -1,6 +1,7 @@
 package com.rally.domain.score.strategy;
 
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.recap.gateway.ReviewGateway;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.score.enums.ScoreDimensionEnum;
@@ -52,7 +53,7 @@ public class CalibrationStrategy implements ScoreStrategy {
         List<ReviewData> votes = reviewGateway.listByToUserAndType(userId, "ntrp_vote");
 
         // 2. 反滥用剔除（超出部分剔除，保留前 N=3 张 lower 票）
-        int lowerVoteMax = SystemConfig.getInt("anti_abuse.lower_vote_max_per_target", 3);
+        int lowerVoteMax = SystemConfig.getInt(SystemConfigKey.ANTI_ABUSE_LOWER_VOTE_MAX_PER_TARGET);
         Map<String, Integer> lowerCountByFrom = new HashMap<>();
         int nHigher = 0, nSame = 0, nLower = 0;
 
@@ -78,9 +79,9 @@ public class CalibrationStrategy implements ScoreStrategy {
         int total = nHigher + nSame + nLower;
 
         // 3. 票数不足：给默认分 80
-        int minVotes = SystemConfig.getInt("score.calibration.min_votes", 10);
+        int minVotes = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_MIN_VOTES);
         if (total < minVotes) {
-            int insufficientScore = SystemConfig.getInt("score.calibration.score_insufficient", 80);
+            int insufficientScore = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_INSUFFICIENT);
             BigDecimal after = BigDecimal.valueOf(insufficientScore);
             change.setAfter(after);
             change.setValue(after.subtract(before));
@@ -94,23 +95,23 @@ public class CalibrationStrategy implements ScoreStrategy {
         String direction = biasLow >= biasHigh ? "ABOVE" : "BELOW";
 
         // 5. 档位落分
-        double t1 = SystemConfig.getFloat("score.calibration.deviation_t1", 0.20f);
-        double t2 = SystemConfig.getFloat("score.calibration.deviation_t2", 0.50f);
+        double t1 = SystemConfig.getFloat(SystemConfigKey.SCORE_CALIBRATION_DEVIATION_T1);
+        double t2 = SystemConfig.getFloat(SystemConfigKey.SCORE_CALIBRATION_DEVIATION_T2);
 
         int score;
         if (deviation < t1) {
-            score = SystemConfig.getInt("score.calibration.score_under_t1", 100);
+            score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_UNDER_T1);
         } else if (deviation < t2) {
             if ("BELOW".equals(direction)) {
-                score = SystemConfig.getInt("score.calibration.score_below_t1_t2", 75);
+                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_BELOW_T1_T2);
             } else {
-                score = SystemConfig.getInt("score.calibration.score_above_t1_t2", 50);
+                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_ABOVE_T1_T2);
             }
         } else {
             if ("BELOW".equals(direction)) {
-                score = SystemConfig.getInt("score.calibration.score_below_t2", 55);
+                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_BELOW_T2);
             } else {
-                score = SystemConfig.getInt("score.calibration.score_above_t2", 20);
+                score = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_ABOVE_T2);
             }
         }
 

@@ -1,6 +1,7 @@
 package com.rally.domain.score.strategy;
 
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.meetup.gateway.MeetupGateway;
 import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.model.ScoreChange;
@@ -45,18 +46,18 @@ public class CredibilityStrategy implements ScoreStrategy {
         change.setBefore(before);
 
         // 1. 近窗口完成约球加分
-        int matchWindowDays = SystemConfig.getInt("score.credibility.match_window_days", 90);
+        int matchWindowDays = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_WINDOW_DAYS);
         long matchCount = meetupGateway.countFinishedMatches(userId, matchWindowDays);
-        int matchPerScore = SystemConfig.getInt("score.credibility.match_per_score", 6);
-        int matchScoreCap = SystemConfig.getInt("score.credibility.match_score_cap", 60);
+        int matchPerScore = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_PER_SCORE);
+        int matchScoreCap = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_SCORE_CAP);
         int sMatch = (int) Math.min(matchCount * matchPerScore, matchScoreCap);
 
         // 2. 视频加分
         int videoCount = profileGateway.findByUserId(userId)
                 .map(p -> p.getVideos() != null ? p.getVideos().size() : 0)
                 .orElse(0);
-        int videoPerScore = SystemConfig.getInt("score.credibility.video_per_score", 5);
-        int videoCap = SystemConfig.getInt("score.credibility.video_cap", 25);
+        int videoPerScore = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_VIDEO_PER_SCORE);
+        int videoCap = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_VIDEO_CAP);
         int sVideo = Math.min(videoCount * videoPerScore, videoCap);
 
         // 3. UTR 加分（MVP 恒为 0）

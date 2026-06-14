@@ -2,6 +2,7 @@ package com.rally.domain.system;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.system.gateway.SysConfigLoader;
 import com.rally.domain.system.model.Location;
 import org.springframework.stereotype.Component;
@@ -48,7 +49,7 @@ public class CityConfig {
      * 获取开通城市编码列表
      */
     public static List<String> getOpenedCities() {
-        String str = SystemConfig.getString("meetup.city.opened_codes", "[]");
+        String str = SystemConfig.getString(SystemConfigKey.MEETUP_CITY_OPENED_CODES);
         try {
             return Arrays.asList(str.split(","));
         } catch (Exception e) {
