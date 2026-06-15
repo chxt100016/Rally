@@ -35,12 +35,11 @@ public class RegistrationDomainService {
      */
     public RegistrationStatusEnum join(Meetup meetup, UserProfile userProfile, LocalDateTime autoWithdrawAt) {
         // 1. 调用聚合根 join 方法（校验 + 创建报名记录）
-        RegistrationData registration = meetup.join(userProfile, autoWithdrawAt);
+        RegistrationStatusEnum status = meetup.join(userProfile, autoWithdrawAt);
 
-        // 2. 只保存新增的报名记录
-        registrationGateway.save(registration);
-
-        return registration.getStatus();
+        // 2. 持久化（自动计算 currentPlayers）
+        meetupGateway.save(meetup);
+        return status;
     }
 
     /**

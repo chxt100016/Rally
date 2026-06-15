@@ -24,22 +24,7 @@ public class RegistrationGatewayImpl implements RegistrationGateway {
     private static final MeetupConvertMapper MAPPER = MeetupConvertMapper.INSTANCE;
 
 
-    @Override
-    public void save(RegistrationData data) {
-        RegistrationPO po = MAPPER.toRegistrationPO(data);
-        if (data.getBizId() != null) {
-            RegistrationPO existing = get(data.getBizId());
-            if (existing != null) {
-                po.setId(existing.getId());
-                registrationService.updateById(po);
-                return;
-            }
-        } else {
-            // 新增时生成 bizId
-            po.setBizId(IdWorker.getIdStr());
-        }
-        registrationService.save(po);
-    }
+
 
     @Override
     public RegistrationData findByBizId(String bizId) {

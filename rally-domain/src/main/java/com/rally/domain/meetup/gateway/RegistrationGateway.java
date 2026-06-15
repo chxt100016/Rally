@@ -9,10 +9,7 @@ import java.util.List;
  * 报名/注册表读写网关接口（记录所有参与者：创建者、等待审批、已通过等）
  */
 public interface RegistrationGateway {
-    /**
-     * 保存报名记录（新增或更新）
-     */
-    void save(RegistrationData data);
+
 
     /**
      * 根据 bizId 查询

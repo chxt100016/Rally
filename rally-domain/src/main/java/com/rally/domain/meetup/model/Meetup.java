@@ -163,11 +163,12 @@ public class Meetup {
 
     /**
      * 报名（包含校验 + 创建报名记录）
-     * @param userProfile 用户档案领域对象
+     *
+     * @param userProfile    用户档案领域对象
      * @param autoWithdrawAt 自动撤回时间，可为 null
-     * @return 新增的报名记录
+     * @return
      */
-    public RegistrationData join(UserProfile userProfile, LocalDateTime autoWithdrawAt) {
+    public RegistrationStatusEnum join(UserProfile userProfile, LocalDateTime autoWithdrawAt) {
         // 1. 校验
         assertCanJoin(userProfile);
 
@@ -180,9 +181,8 @@ public class Meetup {
         // 3. 根据加入模式设置状态
         registration.setStatus(data.getJoinMode() == JoinModeEnum.DIRECT ? RegistrationStatusEnum.JOINED : RegistrationStatusEnum.PENDING);
 
-        this.registrations.add(registration);
+        return registration.getStatus();
 
-        return registration;
     }
 
     /**
