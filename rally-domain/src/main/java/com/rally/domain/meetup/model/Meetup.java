@@ -180,6 +180,7 @@ public class Meetup {
 
         // 3. 根据加入模式设置状态
         registration.setStatus(data.getJoinMode() == JoinModeEnum.DIRECT ? RegistrationStatusEnum.JOINED : RegistrationStatusEnum.PENDING);
+        this.registrations.add(registration);
 
         return registration.getStatus();
 
