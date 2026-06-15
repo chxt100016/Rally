@@ -29,4 +29,8 @@ public class TennisTournamentEntryRepository {
                         (a, b) -> a
                 ));
     }
+
+    public List<TennisTournamentEntryPO> listByDrawIds(List<Long> drawIds) {
+        return tennisTournamentEntryService.listByDrawIds(drawIds);
+    }
 }

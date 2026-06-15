@@ -1,8 +1,11 @@
 package com.rally.tennis;
 
+import com.rally.db.tennis.entity.TennisDrawPO;
 import com.rally.db.tennis.entity.TennisMatchPO;
 import com.rally.db.tennis.entity.TennisPlayerPO;
+import com.rally.db.tennis.entity.TennisTournamentEntryPO;
 import com.rally.db.tennis.entity.TennisTournamentPO;
+import com.rally.db.tennis.repository.TennisDrawRepository;
 import com.rally.db.tennis.repository.TennisMatchRepository;
 import com.rally.db.tennis.repository.TennisPlayerRepository;
 import com.rally.db.tennis.repository.TennisTournamentEntryRepository;
@@ -28,6 +31,9 @@ public class TennisContentAppService {
 
     @Resource
     private TennisTournamentRepository tennisTournamentRepository;
+
+    @Resource
+    private TennisDrawRepository tennisDrawRepository;
 
     @Resource
     private TennisMatchRepository tennisMatchRepository;
@@ -121,6 +127,193 @@ public class TennisContentAppService {
 
 
         this.image(sb);
+        return sb.toString();
+    }
+
+    public String generateSeedListContent(List<String> tournamentIds, TranslationLanguageEnum language) {
+        if (CollectionUtils.isEmpty(tournamentIds)) {
+            return "";
+        }
+
+        // 1. 查询赛事
+        List<TennisTournamentPO> tournaments = tennisTournamentRepository.listByTournamentIds(tournamentIds);
+        if (CollectionUtils.isEmpty(tournaments)) {
+            return "";
+        }
+
+        // 过滤 category
+        tournaments = tournaments.stream().filter(this::isCategoryKept).toList();
+        if (CollectionUtils.isEmpty(tournaments)) {
+            return "";
+        }
+
+        // 2. 查询 draw
+        List<TennisDrawPO> draws = tennisDrawRepository.listByTournamentIds(tournamentIds);
+        if (CollectionUtils.isEmpty(draws)) {
+            return "";
+        }
+
+        // tournamentId -> drawIds
+        Map<String, List<Long>> tournamentDrawMap = draws.stream()
+                .collect(Collectors.groupingBy(
+                        TennisDrawPO::getTournamentId,
+                        Collectors.mapping(TennisDrawPO::getId, Collectors.toList())
+                ));
+
+        // 3. 查询所有种子 entries
+        List<Long> allDrawIds = draws.stream().map(TennisDrawPO::getId).toList();
+        List<TennisTournamentEntryPO> allEntries = tennisTournamentEntryRepository.listByDrawIds(allDrawIds);
+        List<TennisTournamentEntryPO> seededEntries = allEntries.stream()
+                .filter(e -> e.getSeed() != null && e.getSeed() > 0)
+                .toList();
+        if (CollectionUtils.isEmpty(seededEntries)) {
+            return "";
+        }
+
+        // 4. 查询球员
+        Set<String> playerIds = seededEntries.stream()
+                .map(TennisTournamentEntryPO::getPlayerId)
+                .collect(Collectors.toSet());
+        List<TennisPlayerPO> players = tennisPlayerRepository.listByPlayerIds(new ArrayList<>(playerIds));
+        Map<String, TennisPlayerPO> playerMap = players.stream()
+                .collect(Collectors.toMap(TennisPlayerPO::getPlayerId, p -> p, (a, b) -> a));
+
+        // 5. 翻译：赛事名、城市、球员名
+        Map<String, String> translations = collectSeedTranslations(tournaments, players, language);
+
+        // 6. 按 tournament 分组生成 MD
+        Map<String, TennisTournamentPO> tournamentMap = tournaments.stream()
+                .collect(Collectors.toMap(TennisTournamentPO::getTournamentId, t -> t, (a, b) -> a));
+
+        // 按 tournamentId 分组 seed entries
+        // 需要通过 drawId 反查 tournamentId
+        Map<Long, String> drawToTournamentMap = new HashMap<>();
+        for (TennisDrawPO draw : draws) {
+            drawToTournamentMap.put(draw.getId(), draw.getTournamentId());
+        }
+
+        Map<String, List<TennisTournamentEntryPO>> seedsByTournament = new LinkedHashMap<>();
+        for (TennisTournamentEntryPO entry : seededEntries) {
+            String tid = drawToTournamentMap.get(entry.getDrawId());
+            if (tid != null) {
+                seedsByTournament.computeIfAbsent(tid, k -> new ArrayList<>()).add(entry);
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String tid : seedsByTournament.keySet()) {
+            TennisTournamentPO tournament = tournamentMap.get(tid);
+            if (tournament == null) continue;
+
+            List<TennisTournamentEntryPO> entries = seedsByTournament.get(tid);
+            if (CollectionUtils.isEmpty(entries)) continue;
+
+            if (!first) {
+                sb.append("\n\n");
+            }
+
+            sb.append(buildTournamentSeedMd(tournament, entries, playerMap, translations));
+            first = false;
+        }
+
+        return sb.toString();
+    }
+
+    private Map<String, String> collectSeedTranslations(List<TennisTournamentPO> tournaments,
+                                                         List<TennisPlayerPO> players,
+                                                         TranslationLanguageEnum language) {
+        Set<TranslationKey> keys = new HashSet<>();
+        for (TennisTournamentPO t : tournaments) {
+            if (t.getName() != null) {
+                keys.add(new TranslationKey(TranslationEntityTypeEnum.TOURNAMENT, t.getName(), language));
+            }
+            if (t.getCity() != null) {
+                keys.add(new TranslationKey(TranslationEntityTypeEnum.CITY, t.getCity(), language));
+            }
+        }
+        for (TennisPlayerPO p : players) {
+            String name = p.getLastName() != null ? p.getLastName() : p.getFirstName();
+            if (name != null) {
+                keys.add(new TranslationKey(TranslationEntityTypeEnum.PLAYER, name, language));
+            }
+        }
+        Map<TranslationKey, String> translationMap = tennisTranslationService.translate(keys, language);
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<TranslationKey, String> entry : translationMap.entrySet()) {
+            TranslationKey key = entry.getKey();
+            result.put(key.getEntityType() + ":" + key.getOriginalText(), entry.getValue());
+        }
+        return result;
+    }
+
+    private String buildTournamentSeedMd(TennisTournamentPO tournament,
+                                          List<TennisTournamentEntryPO> entries,
+                                          Map<String, TennisPlayerPO> playerMap,
+                                          Map<String, String> translations) {
+        StringBuilder sb = new StringBuilder();
+
+        // 赛事名称（翻译）
+        String tournamentName = translations.getOrDefault(
+                TranslationEntityTypeEnum.TOURNAMENT + ":" + tournament.getName(),
+                tournament.getName()
+        );
+
+        // 城市（翻译）
+        String city = translations.getOrDefault(
+                TranslationEntityTypeEnum.CITY + ":" + tournament.getCity(),
+                tournament.getCity()
+        );
+
+        // 场地类型
+        String surface = resolveSurfaceLabel(tournament.getSurface());
+        // 赛事级别
+        String category = resolveCategoryLabel(tournament.getCategory());
+        // tour
+        String tour = tournament.getTour();
+
+        // 标题行
+        sb.append("# ").append(tournamentName).append(" 种子列表\n");
+        // 信息行
+        List<String> infoParts = new ArrayList<>();
+        if (surface != null && !surface.isEmpty()) infoParts.add(surface);
+        if (category != null && !category.isEmpty()) infoParts.add(category);
+        if (city != null && !city.isEmpty()) infoParts.add(city);
+        if (tour != null && !tour.isEmpty()) infoParts.add(tour);
+        sb.append(String.join(" | ", infoParts)).append("\n\n");
+
+        // 表头
+        sb.append("| 种子 | 球员 | 国籍 | 排名 |\n");
+        sb.append("|------|------|------|------|\n");
+
+        // 按种子排序
+        entries.sort(Comparator.comparingInt(TennisTournamentEntryPO::getSeed));
+
+        for (TennisTournamentEntryPO entry : entries) {
+            TennisPlayerPO player = playerMap.get(entry.getPlayerId());
+            String playerName = player != null
+                    ? (player.getLastName() != null ? player.getLastName() : player.getFirstName())
+                    : entry.getPlayerId();
+            // 翻译球员名
+            playerName = translations.getOrDefault(
+                    TranslationEntityTypeEnum.PLAYER + ":" + playerName,
+                    playerName
+            );
+
+            String nationality = player != null ? player.getNationality() : "";
+            String flag = nationality != null ? getFlagEmoji(nationality) : "";
+            if (flag == null) flag = "";
+
+            Integer rank = player != null ? player.getRank() : null;
+            String rankStr = rank != null ? String.valueOf(rank) : "-";
+
+            sb.append("| ").append(entry.getSeed())
+              .append(" | ").append(flag).append(playerName)
+              .append(" | ").append(nationality != null ? nationality : "")
+              .append(" | ").append(rankStr)
+              .append(" |\n");
+        }
+
         return sb.toString();
     }
 

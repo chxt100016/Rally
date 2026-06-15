@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/tennis/content")
@@ -22,5 +23,12 @@ public class TennisContentController {
             @RequestParam("date") LocalDate date,
             @RequestParam(value = "lang", defaultValue = "ZH_CN") TranslationLanguageEnum lang) {
         return tennisContentAppService.generateDailyContent(date, lang);
+    }
+
+    @GetMapping(value = "/seeds", produces = "text/plain;charset=UTF-8")
+    public String getSeedList(
+            @RequestParam("tournamentIds") List<String> tournamentIds,
+            @RequestParam(value = "lang", defaultValue = "ZH_CN") TranslationLanguageEnum lang) {
+        return tennisContentAppService.generateSeedListContent(tournamentIds, lang);
     }
 }

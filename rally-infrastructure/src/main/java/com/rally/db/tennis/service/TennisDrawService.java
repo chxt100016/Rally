@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rally.db.tennis.entity.TennisDrawPO;
 import com.rally.db.tennis.mapper.TennisDrawMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -18,6 +21,15 @@ public class TennisDrawService extends ServiceImpl<TennisDrawMapper, TennisDrawP
                 .eq(TennisDrawPO::getDrawType, drawType)
                 .one();
         return po != null ? po.getId() : null;
+    }
+
+    public List<TennisDrawPO> listByTournamentIds(List<String> tournamentIds) {
+        if (CollectionUtils.isEmpty(tournamentIds)) {
+            return List.of();
+        }
+        return this.lambdaQuery()
+                .in(TennisDrawPO::getTournamentId, tournamentIds)
+                .list();
     }
 
     @Transactional(rollbackFor = Exception.class)
