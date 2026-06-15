@@ -282,10 +282,6 @@ public class TennisContentAppService {
         if (tour != null && !tour.isEmpty()) infoParts.add(tour);
         sb.append(String.join(" | ", infoParts)).append("\n\n");
 
-        // 表头
-        sb.append("| 种子 | 球员 | 国籍 | 排名 |\n");
-        sb.append("|------|------|------|------|\n");
-
         // 按种子排序
         entries.sort(Comparator.comparingInt(TennisTournamentEntryPO::getSeed));
 
@@ -304,14 +300,7 @@ public class TennisContentAppService {
             String flag = nationality != null ? getFlagEmoji(nationality) : "";
             if (flag == null) flag = "";
 
-            Integer rank = player != null ? player.getRank() : null;
-            String rankStr = rank != null ? String.valueOf(rank) : "-";
-
-            sb.append("| ").append(entry.getSeed())
-              .append(" | ").append(flag).append(playerName)
-              .append(" | ").append(nationality != null ? nationality : "")
-              .append(" | ").append(rankStr)
-              .append(" |\n");
+            sb.append(flag).append(playerName).append("[").append(entry.getSeed()).append("]\n");
         }
 
         return sb.toString();
