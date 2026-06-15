@@ -68,7 +68,7 @@ public class MeetupDetailAppService {
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
                 .setParticipants(buildParticipantVOList(meetup, participantUserIds, profileMap))
                 .setRecap(actionState == ActionStateEnum.FINISHED ? buildRecap(meetupId) : null)
-                .setUnreadCount(actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED  ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null);
+                .setUnreadCount(actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.ONGOING_JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED  ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null);
 
     }
 
