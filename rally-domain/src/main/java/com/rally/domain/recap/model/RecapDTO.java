@@ -11,6 +11,9 @@ import java.util.Map;
 @Data
 public class RecapDTO {
 
+    //可评价球友
+    private List<String> waitlistIds;
+
     // ==================== 当前用户已填评价（按 toUser 分组） ====================
     /** key = toUserId, value = 该用户对应的评价列表 */
     private Map<String, List<ReviewItem>> myReviews;
@@ -44,9 +47,17 @@ public class RecapDTO {
         private Integer scoreVersion;
         private String setFormat;
         private String sideAPlayer1;
+        private String sideAPlayer1Nickname;
+        private String sideAPlayer1Avatar;
         private String sideAPlayer2;
+        private String sideAPlayer2Nickname;
+        private String sideAPlayer2Avatar;
         private String sideBPlayer1;
+        private String sideBPlayer1Nickname;
+        private String sideBPlayer1Avatar;
         private String sideBPlayer2;
+        private String sideBPlayer2Nickname;
+        private String sideBPlayer2Avatar;
         private Integer sideAScore;
         private Integer sideBScore;
     }

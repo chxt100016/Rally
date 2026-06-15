@@ -3,6 +3,7 @@ package com.rally.domain.utils;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public interface Assert {
@@ -23,6 +24,19 @@ public interface Assert {
         if (!Objects.equals(o1, o2)) {
             throw new BusinessException(errorCode);
         }
+    }
+
+    static void in(Object o1, BizErrorCode errorCode, Object... objects) {
+        if (Objects.isNull(o1)) {
+            throw new BusinessException(errorCode);
+        }
+        if (Objects.isNull(objects)) {
+            throw new BusinessException(errorCode);
+        }
+        if (Arrays.stream(objects).noneMatch(item -> item.equals(o1))) {
+            throw new BusinessException(errorCode);
+        }
+
     }
 
 

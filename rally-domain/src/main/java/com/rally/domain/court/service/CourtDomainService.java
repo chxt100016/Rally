@@ -3,6 +3,7 @@ package com.rally.domain.court.service;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.rally.domain.court.gateway.CourtGateway;
 import com.rally.domain.court.model.CourtData;
+import com.rally.domain.utils.GeoUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,7 @@ public class CourtDomainService {
 
         // 2. 200m 内视为同一场地，返回已有球场
         for (CourtData court : existingCourts) {
-            double distance = haversineDistance(lng, lat, court.getLng(), court.getLat());
+            double distance = GeoUtils.distance(lat, lng, court.getLat(), court.getLng()) * 1000;
             if (distance <= MERGE_DISTANCE_METERS) {
                 log.info("球场合并：输入位置({}, {}) 与已有球场[{}]距离{}m，合并", lng, lat, court.getName(), String.format("%.1f", distance));
                 return court;
@@ -66,19 +67,5 @@ public class CourtDomainService {
      */
     public CourtData getByBizId(String bizId) {
         return courtGateway.findByBizId(bizId);
-    }
-
-    /**
-     * Haversine 公式计算两点间距离（米）
-     */
-    static double haversineDistance(double lng1, double lat1, double lng2, double lat2) {
-        final double EARTH_RADIUS = 6371000.0;
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLng = Math.toRadians(lng2 - lng1);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return EARTH_RADIUS * c;
     }
 }

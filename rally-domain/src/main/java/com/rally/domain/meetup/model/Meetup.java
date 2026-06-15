@@ -406,14 +406,28 @@ public class Meetup {
         return userIds;
     }
 
-    public void assertEnd() {
+    public List<String> getReviewWaitlistIds(String userId) {
+        List<String> res = new ArrayList<>();
+        for (RegistrationData r : registrations) {
+            if (r.getUserId().equals(userId)) {
+                continue;
+
+            }
+            if (r.isActiveParticipant()) {
+                res.add(r.getUserId());
+            }
+        }
+        return res;
+    }
+
+    public void assertCanReview() {
         MeetupStatusEnum realStatus = getRealStatus();
-        Assert.eq(realStatus, ActionStateEnum.FINISHED, BizErrorCode.MEETUP_NOT_FINISHED);
+        Assert.in(realStatus, BizErrorCode.MEETUP_CANT_REVIEW, MeetupStatusEnum.FINISHED, MeetupStatusEnum.ONGOING);
     }
 
     public void assertReviewAvailable(String userId) {
         assertIn(userId);
-        assertEnd();
+        assertCanReview();
         int deadlineDays = SystemConfig.getInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getKey(), Integer.parseInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getDefaultValue()));
         LocalDateTime deadlineAt = this.getData().getEndTime().plusDays(deadlineDays);
         if (LocalDateTime.now().isAfter(deadlineAt)) {

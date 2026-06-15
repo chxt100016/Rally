@@ -67,7 +67,7 @@ public class MeetupDetailAppService {
                 .setWeather(buildWeather(meetup))
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
                 .setParticipants(buildParticipantVOList(meetup, participantUserIds, profileMap))
-                .setRecap(actionState == ActionStateEnum.FINISHED ? buildRecap(meetupId) : null)
+                .setRecap(actionState == ActionStateEnum.FINISHED ? buildRecap(meetup) : null)
                 .setUnreadCount(actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.ONGOING_JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED  ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null);
 
     }
@@ -146,11 +146,11 @@ public class MeetupDetailAppService {
     /**
      * 构建赛后收集详情 VO
      */
-    public RecapDTO buildRecap(String meetupId) {
+    public RecapDTO buildRecap(Meetup meetup) {
         String currentUserId = UserContext.get();
 
         // 1. 查询当前用户已提交的评价，按 toUserId 分组
-        List<ReviewData> myReviews = recapDomainService.listReviewsByMeetupAndFrom(meetupId, currentUserId);
+        List<ReviewData> myReviews = recapDomainService.listReviewsByMeetupAndFrom(meetup.getMeetupId(), currentUserId);
         Map<String, List<RecapDTO.ReviewItem>> reviewMap = myReviews.stream()
                 .collect(Collectors.groupingBy(
                         ReviewData::getToUserId,
@@ -158,10 +158,11 @@ public class MeetupDetailAppService {
                 ));
 
         // 2. 查询该活动的比分记录
-        List<ScoreRecordData> scoreRecords = recapDomainService.listScoresByMeetup(meetupId);
+        List<ScoreRecordData> scoreRecords = recapDomainService.listScoresByMeetup(meetup.getMeetupId());
 
         // 3. 组装 RecapDTO
         RecapDTO recap = new RecapDTO();
+        recap.setWaitlistIds(meetup.getReviewWaitlistIds(currentUserId));
         recap.setMyReviews(reviewMap);
         recap.setScores(MeetupAppConvertMapper.INSTANCE.toScoreItemList(scoreRecords));
         recap.setScoreFilled(!scoreRecords.isEmpty());

@@ -1,5 +1,6 @@
 package com.rally.meetup.convert;
 
+import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.recap.model.RecapDTO;
@@ -80,11 +81,20 @@ public interface MeetupAppConvertMapper {
     @Mapping(target = "setNum", source = "setNumber")
     @Mapping(target = "scoreVersion", source = "version")
     @Mapping(target = "setFormat", source = "setFormat", qualifiedByName = "setFormatToStr")
+    @Mapping(target = "sideAPlayer1Avatar", source = "sideAPlayer1Avatar", qualifiedByName = "parseAvatar")
+    @Mapping(target = "sideAPlayer2Avatar", source = "sideAPlayer2Avatar", qualifiedByName = "parseAvatar")
+    @Mapping(target = "sideBPlayer1Avatar", source = "sideBPlayer1Avatar", qualifiedByName = "parseAvatar")
+    @Mapping(target = "sideBPlayer2Avatar", source = "sideBPlayer2Avatar", qualifiedByName = "parseAvatar")
     RecapDTO.ScoreItem toScoreItem(ScoreRecordData data);
 
     List<RecapDTO.ScoreItem> toScoreItemList(List<ScoreRecordData> dataList);
 
     // ==================== 枚举转换 ====================
+
+    @Named("parseAvatar")
+    static String parseAvatar(String key) {
+        return QiniuConfiguration.buildSignedUrl(key);
+    }
 
     @Named("reviewTypeToStr")
     static String reviewTypeToStr(com.rally.domain.recap.enums.ReviewTypeEnum value) {

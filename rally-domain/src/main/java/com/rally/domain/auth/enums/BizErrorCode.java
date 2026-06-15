@@ -67,7 +67,7 @@ public enum BizErrorCode {
     REVIEW_DEADLINE_PASSED(42002, "评价已超期"),
     REVIEW_NOT_PARTICIPANT(42003, "非本场参与者"),
     REVIEW_SELF_FORBIDDEN(42004, "不可评价自己"),
-    MEETUP_NOT_FINISHED(42005, "约球未结束"),
+    MEETUP_CANT_REVIEW(42005, "约球不可评价"),
     SCORE_FORMAT_INVALID(42010, "比分不合赛制"),
     SCORE_VERSION_CONFLICT(42011, "比分已被其他参与者更新，请刷新后重试"),
     SCORE_PLAYER_INVALID(42012, "比分选手非法"),
