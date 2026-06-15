@@ -22,24 +22,24 @@ public class ReviewSubmitCmd {
     @NotBlank(message = "约球ID不能为空")
     private String meetupId;
 
-    /** 评价列表 */
+    /** 被评价人 user_id（一次只评价一个用户） */
+    @NotBlank(message = "被评价人不能为空")
+    private String toUserId;
+
+    /** 该用户的评价列表（每个维度一条，TAG 的 value 用逗号分隔） */
     @Valid
     private List<ReviewItem> reviews;
 
     /**
-     * 单条评价
+     * 单条评价（针对 cmd.toUserId 的某个维度）
      */
     @Data
     public static class ReviewItem {
-        /** 被评价人 user_id */
-        @NotBlank(message = "被评价人不能为空")
-        private String toUserId;
-
         /** 评价类型 */
         @NotNull(message = "评价类型不能为空")
         private ReviewTypeEnum type;
 
-        /** 评价值 */
+        /** 评价值（TAG 为逗号分隔的多标签） */
         @NotBlank(message = "评价值不能为空")
         private String value;
     }

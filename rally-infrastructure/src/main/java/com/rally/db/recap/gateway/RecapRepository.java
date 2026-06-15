@@ -10,8 +10,9 @@ import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.recap.gateway.RecapGateway;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ReviewSubmitCmd;
+import com.rally.domain.recap.model.ScoreAddCmd;
 import com.rally.domain.recap.model.ScoreRecordData;
-import com.rally.domain.recap.model.ScoreSubmitCmd;
+import com.rally.domain.recap.model.ScoreUpdateCmd;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.UserData;
 import com.rally.domain.utils.Assert;
@@ -20,11 +21,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -50,106 +49,106 @@ public class RecapRepository implements RecapGateway {
     // ==================== 评价提交 ====================
 
     @Override
-    public void submitReviewItems(String meetupId, String fromUserId, List<ReviewSubmitCmd.ReviewItem> targetReviews) {
+    public void submitReviewItems(String meetupId, String fromUserId, String toUserId, List<ReviewSubmitCmd.ReviewItem> targetReviews) {
         for (ReviewSubmitCmd.ReviewItem item : targetReviews) {
             // 查询是否已存在相同维度的评价（meetupId + fromUserId + toUserId + reviewType）
             ReviewPO existing = reviewService.lambdaQuery()
                     .eq(ReviewPO::getRallyMeetupId, meetupId)
                     .eq(ReviewPO::getFromUserId, fromUserId)
-                    .eq(ReviewPO::getToUserId, item.getToUserId())
+                    .eq(ReviewPO::getToUserId, toUserId)
                     .eq(ReviewPO::getReviewType, item.getType().name())
                     .one();
 
             if (existing != null) {
-                // 存在则更新评价值，利用唯一索引保证原子性
+                // 存在则更新评价值（TAG 为逗号分隔的整串），不删旧
                 reviewService.lambdaUpdate()
                         .eq(ReviewPO::getId, existing.getId())
                         .set(ReviewPO::getReviewValue, item.getValue())
                         .update();
             } else {
                 // 不存在则插入，若并发导致重复则由唯一索引 uk_review_dim 兜底
-                ReviewPO newReview = MAPPER.toReviewPO(item, IdWorker.getIdStr(), meetupId, fromUserId);
+                ReviewPO newReview = MAPPER.toReviewPO(item, IdWorker.getIdStr(), meetupId, fromUserId, toUserId);
                 reviewService.save(newReview);
             }
         }
     }
 
-    // ==================== 比分提交 ====================
+    // ==================== 比分增删改 ====================
 
     @Override
-    public void submitScoreItems(String meetupId, String userId, List<ScoreSubmitCmd.ScoreItem> targetScores, Integer clientVersion, LocalDateTime meetupDate, String venueName) {
-        // 查询该 meetup 已有的比分记录（按盘号索引）
-        Map<Integer, ScoreRecordPO> existingMap = scoreRecordService.lambdaQuery()
-                .eq(ScoreRecordPO::getRallyMeetupId, meetupId)
-                .list()
-                .stream()
-                .collect(Collectors.toMap(ScoreRecordPO::getSetNumber, po -> po));
+    public void addScore(String meetupId, String userId, ScoreAddCmd cmd, LocalDateTime meetupDate, String venueName) {
+        // 同场同盘唯一校验（uk_meetup_set 兜底，这里先行拦截给出友好错误）
+        long exists = scoreRecordService.lambdaQuery().eq(ScoreRecordPO::getRallyMeetupId, meetupId).eq(ScoreRecordPO::getSetNumber, cmd.getSetNum()).count();
+        Assert.isTrue(exists == 0, BizErrorCode.SCORE_SET_DUPLICATE);
 
-        // 批量查询所有选手的用户信息（昵称、头像）
-        Map<String, UserData> userMap = batchQueryUsers(targetScores);
+        ScoreRecordPO record = MAPPER.toScoreRecordPO(cmd, IdWorker.getIdStr(), meetupId, userId);
+        record.setMeetupDate(meetupDate);
+        record.setVenueName(venueName);
+        fillUserinfo(record, queryUsers(cmd.getSideAPlayer1(), cmd.getSideAPlayer2(), cmd.getSideBPlayer1(), cmd.getSideBPlayer2()));
+        scoreRecordService.save(record);
+    }
 
-        List<ScoreRecordPO> toInsert = new ArrayList<>();
-        List<ScoreRecordPO> toUpdate = new ArrayList<>();
+    @Override
+    public void updateScore(String meetupId, String userId, ScoreUpdateCmd cmd, LocalDateTime meetupDate, String venueName) {
+        // 按 bizId 定位记录（雪花永不复用，定位到的就是用户当初看到的那条，天然防 ABA）
+        ScoreRecordPO existing = scoreRecordService.lambdaQuery().eq(ScoreRecordPO::getBizId, cmd.getBizId()).eq(ScoreRecordPO::getRallyMeetupId, meetupId).one();
+        Assert.notNull(existing, BizErrorCode.RECAP_SCORE_NOT_FOUND);
+        // 客户端版本须与库内一致，杜绝同一条记录的并发覆盖（lost update）
+        Assert.isTrue(existing.getVersion().equals(cmd.getVersion()), BizErrorCode.SCORE_VERSION_MISMATCH);
 
-        for (ScoreSubmitCmd.ScoreItem item : targetScores) {
-            ScoreRecordPO existing = existingMap.get(item.getSetNum());
-            if (existing != null) {
-                // 已有该盘记录，准备更新（乐观锁由 updateById 自动处理）
-                existing.setSetFormat(item.getSetFormatType());
-                existing.setSideAPlayer1(item.getSideAPlayer1());
-                existing.setSideAPlayer2(item.getSideAPlayer2());
-                existing.setSideBPlayer1(item.getSideBPlayer1());
-                existing.setSideBPlayer2(item.getSideBPlayer2());
-                existing.setSideAScore(item.getSideAScore());
-                existing.setSideBScore(item.getSideBScore());
-                existing.setSideATiebreakScore(item.getSideATiebreakScore());
-                existing.setSideBTiebreakScore(item.getSideBTiebreakScore());
-                existing.setRecordedBy(userId);
-                existing.setMatchType(item.getMatchType());
-                existing.setMeetupDate(meetupDate);
-                existing.setVenueName(venueName);
-                // 从用户服务填充昵称和头像
-                fillUserinfo(existing, userMap);
-                toUpdate.add(existing);
-            } else {
-                // 新盘记录，准备插入
-                ScoreRecordPO newRecord = MAPPER.toScoreRecordPO(item, IdWorker.getIdStr(), meetupId, userId);
-                newRecord.setMatchType(item.getMatchType());
-                newRecord.setMeetupDate(meetupDate);
-                newRecord.setVenueName(venueName);
-                // 从用户服务填充昵称和头像
-                fillUserinfo(newRecord, userMap);
-                toInsert.add(newRecord);
-            }
-        }
+        existing.setSetNumber(cmd.getSetNum());
+        existing.setSetFormat(cmd.getSetFormatType());
+        existing.setMatchType(cmd.getMatchType());
+        existing.setSideAPlayer1(cmd.getSideAPlayer1());
+        existing.setSideAPlayer2(cmd.getSideAPlayer2());
+        existing.setSideBPlayer1(cmd.getSideBPlayer1());
+        existing.setSideBPlayer2(cmd.getSideBPlayer2());
+        existing.setSideAScore(cmd.getSideAScore());
+        existing.setSideBScore(cmd.getSideBScore());
+        existing.setSideATiebreakScore(cmd.getSideATiebreakScore());
+        existing.setSideBTiebreakScore(cmd.getSideBTiebreakScore());
+        existing.setRecordedBy(userId);
+        existing.setMeetupDate(meetupDate);
+        existing.setVenueName(venueName);
+        // 选手可能变化，先清空旧冗余昵称头像再重填
+        clearUserinfo(existing);
+        fillUserinfo(existing, queryUsers(cmd.getSideAPlayer1(), cmd.getSideAPlayer2(), cmd.getSideBPlayer1(), cmd.getSideBPlayer2()));
 
-        // 批量插入新盘
-        if (!toInsert.isEmpty()) {
-            scoreRecordService.saveBatch(toInsert);
-        }
-        // 逐条更新已有盘（乐观锁：WHERE version = ?）
-        for (ScoreRecordPO record : toUpdate) {
-            boolean success = scoreRecordService.updateById(record);
-            Assert.isTrue(success, BizErrorCode.SCORE_VERSION_MISMATCH);
-        }
+        // 乐观锁：updateById 自动追加 WHERE version = ? 并自增版本
+        boolean success = scoreRecordService.updateById(existing);
+        Assert.isTrue(success, BizErrorCode.SCORE_VERSION_MISMATCH);
+    }
+
+    @Override
+    public void deleteScore(String meetupId, String bizId) {
+        // 按 bizId 删除，幂等；bizId 永不复用，删除的必然是用户当初看到的那条
+        scoreRecordService.lambdaUpdate().eq(ScoreRecordPO::getRallyMeetupId, meetupId).eq(ScoreRecordPO::getBizId, bizId).remove();
     }
 
     /**
-     * 批量查询所有选手的用户信息
+     * 批量查询选手的用户信息（去重、过滤空）
      */
-    private Map<String, UserData> batchQueryUsers(List<ScoreSubmitCmd.ScoreItem> targetScores) {
-        // 收集所有非空的选手 userId（去重）
-        List<String> userIds = targetScores.stream()
-                .flatMap(item -> Stream.of(item.getSideAPlayer1(), item.getSideAPlayer2(), item.getSideBPlayer1(), item.getSideBPlayer2()))
-                .filter(StringUtils::isNotBlank)
-                .distinct()
-                .toList();
-        // 批量查询用户数据
+    private Map<String, UserData> queryUsers(String... playerIds) {
+        List<String> userIds = Stream.of(playerIds).filter(StringUtils::isNotBlank).distinct().toList();
         Map<String, UserData> userMap = new HashMap<>();
         for (String uid : userIds) {
             userGateway.findByUserId(uid).ifPresent(data -> userMap.put(uid, data));
         }
         return userMap;
+    }
+
+    /**
+     * 清空 PO 的冗余昵称与头像字段（修改选手前调用，避免残留旧选手信息）
+     */
+    private void clearUserinfo(ScoreRecordPO po) {
+        po.setSideAPlayer1Nickname(null);
+        po.setSideAPlayer1Avatar(null);
+        po.setSideAPlayer2Nickname(null);
+        po.setSideAPlayer2Avatar(null);
+        po.setSideBPlayer1Nickname(null);
+        po.setSideBPlayer1Avatar(null);
+        po.setSideBPlayer2Nickname(null);
+        po.setSideBPlayer2Avatar(null);
     }
 
     /**

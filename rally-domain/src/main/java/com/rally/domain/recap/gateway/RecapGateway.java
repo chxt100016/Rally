@@ -2,8 +2,9 @@ package com.rally.domain.recap.gateway;
 
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ReviewSubmitCmd;
+import com.rally.domain.recap.model.ScoreAddCmd;
 import com.rally.domain.recap.model.ScoreRecordData;
-import com.rally.domain.recap.model.ScoreSubmitCmd;
+import com.rally.domain.recap.model.ScoreUpdateCmd;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,29 +22,46 @@ public interface RecapGateway {
     // ==================== 评价提交 ====================
 
     /**
-     * 提交评价（gateway 内部完成 diff 判断与落库）
+     * 提交评价（一次一个被评价人，按维度 upsert：存在则更新，不存在则新增，不删旧）
      *
      * @param meetupId      活动 ID
      * @param fromUserId    评价人
-     * @param targetReviews 前端提交的目标评价
+     * @param toUserId      被评价人
+     * @param targetReviews 前端提交的目标评价（每维度一条）
      */
-    void submitReviewItems(String meetupId, String fromUserId, List<ReviewSubmitCmd.ReviewItem> targetReviews);
+    void submitReviewItems(String meetupId, String fromUserId, String toUserId, List<ReviewSubmitCmd.ReviewItem> targetReviews);
 
-    // ==================== 比分提交 ====================
+    // ==================== 比分增删改 ====================
 
     /**
-     * 提交比分（gateway 内部完成版本校验、diff 判断与落库）
-     * <p>
-     * 版本冲突时抛出 ScoreConflictException。
+     * 新增比分（一次一盘，生成雪花 bizId；同场同盘重复抛 SCORE_SET_DUPLICATE）
      *
-     * @param meetupId      活动 ID
-     * @param userId        操作人
-     * @param targetScores  前端提交的目标比分
-     * @param clientVersion 前端回传的版本号
-     * @param meetupDate    比赛日期
-     * @param venueName     比赛场地名称
+     * @param meetupId   活动 ID
+     * @param userId     操作人
+     * @param cmd        新增比分内容
+     * @param meetupDate 比赛日期
+     * @param venueName  比赛场地名称
      */
-    void submitScoreItems(String meetupId, String userId, List<ScoreSubmitCmd.ScoreItem> targetScores, Integer clientVersion, LocalDateTime meetupDate, String venueName);
+    void addScore(String meetupId, String userId, ScoreAddCmd cmd, LocalDateTime meetupDate, String venueName);
+
+    /**
+     * 修改比分（按 bizId 定位、version 乐观锁；版本不一致抛 SCORE_VERSION_MISMATCH，记录不存在抛 RECAP_SCORE_NOT_FOUND）
+     *
+     * @param meetupId   活动 ID
+     * @param userId     操作人
+     * @param cmd        修改比分内容（含 bizId 与 version）
+     * @param meetupDate 比赛日期
+     * @param venueName  比赛场地名称
+     */
+    void updateScore(String meetupId, String userId, ScoreUpdateCmd cmd, LocalDateTime meetupDate, String venueName);
+
+    /**
+     * 删除比分（按 bizId 定位，幂等；bizId 永不复用，天然防 ABA）
+     *
+     * @param meetupId 活动 ID
+     * @param bizId    目标盘记录 bizId
+     */
+    void deleteScore(String meetupId, String bizId);
 
     // ==================== 查询 ====================
 

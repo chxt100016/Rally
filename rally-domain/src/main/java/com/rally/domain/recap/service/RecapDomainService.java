@@ -7,8 +7,8 @@ import com.rally.domain.meetup.model.RegistrationData;
 import com.rally.domain.recap.gateway.RecapGateway;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ReviewSubmitCmd;
-import com.rally.domain.recap.model.ScoreConflictException;
-import com.rally.domain.recap.model.ScoreSubmitCmd;
+import com.rally.domain.recap.model.ScoreAddCmd;
+import com.rally.domain.recap.model.ScoreUpdateCmd;
 import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.score.ScoreManager;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,19 +46,33 @@ public class RecapDomainService {
      * 提交后将 registration 状态从 JOINED → REVIEWED，用于 PENDING tab 判断待办
      */
     @Transactional
-    public void submitReviewItems(Meetup meetup, String userId, List<ReviewSubmitCmd.ReviewItem> targetReviews) {
-
-        recapGateway.submitReviewItems(meetup.getMeetupId(), userId, targetReviews);
+    public void submitReviewItems(Meetup meetup, String userId, String toUserId, List<ReviewSubmitCmd.ReviewItem> targetReviews) {
+        recapGateway.submitReviewItems(meetup.getMeetupId(), userId, toUserId, targetReviews);
         // 评价已提交，标记 registration 状态为 REVIEWED
         registrationGateway.toReviewed(userId);
-
     }
 
     /**
-     * 提交比分（独立事务，调用 gateway 完成版本校验与 diff 落库）
+     * 新增比分（一次一盘）
      */
-    public void submitScoreItems(Meetup meetup, String userId, List<ScoreSubmitCmd.ScoreItem> targetScores, Integer clientVersion, LocalDateTime meetupDate, String venueName) {
-        recapGateway.submitScoreItems(meetup.getMeetupId(), userId, targetScores, clientVersion, meetupDate, venueName);
+    public void addScoreItem(Meetup meetup, String userId, ScoreAddCmd cmd, LocalDateTime meetupDate, String venueName) {
+        recapGateway.addScore(meetup.getMeetupId(), userId, cmd, meetupDate, venueName);
+        // 触发评分重算 TODO
+    }
+
+    /**
+     * 修改比分（一次一盘，bizId 定位 + version 乐观锁）
+     */
+    public void updateScoreItem(Meetup meetup, String userId, ScoreUpdateCmd cmd, LocalDateTime meetupDate, String venueName) {
+        recapGateway.updateScore(meetup.getMeetupId(), userId, cmd, meetupDate, venueName);
+        // 触发评分重算 TODO
+    }
+
+    /**
+     * 删除比分（一次一盘，bizId 定位）
+     */
+    public void deleteScoreItem(Meetup meetup, String bizId) {
+        recapGateway.deleteScore(meetup.getMeetupId(), bizId);
         // 触发评分重算 TODO
     }
 

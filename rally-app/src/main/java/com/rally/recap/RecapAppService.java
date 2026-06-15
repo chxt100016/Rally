@@ -2,9 +2,10 @@ package com.rally.recap;
 
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.service.MeetupDomainService;
-import com.rally.domain.recap.enums.RecapOverallStatus;
 import com.rally.domain.recap.model.ReviewSubmitCmd;
-import com.rally.domain.recap.model.ScoreSubmitCmd;
+import com.rally.domain.recap.model.ScoreAddCmd;
+import com.rally.domain.recap.model.ScoreDeleteCmd;
+import com.rally.domain.recap.model.ScoreUpdateCmd;
 import com.rally.domain.recap.service.RecapDomainService;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -29,33 +30,43 @@ public class RecapAppService {
     private final MeetupDomainService meetupDomainService;
 
     /**
-     * 提交比分
-
+     * 新增比分（一次一盘）
      */
-    public void submitScore(ScoreSubmitCmd cmd) {
+    public void addScore(ScoreAddCmd cmd) {
         String userId = UserContext.get();
-        // 1. 获取 Meetup 聚合根（含报名记录）
         Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
         meetup.assertReviewAvailable(userId);
-
-        // 2. 从 Meetup 冗余提取比赛日期和场地名称
-        recapDomainService.submitScoreItems(meetup, userId, cmd.getScores(), cmd.getScoreVersion(),
-                meetup.getData().getStartTime(), meetup.getData().getCourtName());
+        recapDomainService.addScoreItem(meetup, userId, cmd, meetup.getData().getStartTime(), meetup.getData().getCourtName());
     }
 
     /**
-     * 提交评价
+     * 修改比分（一次一盘，bizId 定位 + version 乐观锁）
+     */
+    public void updateScore(ScoreUpdateCmd cmd) {
+        String userId = UserContext.get();
+        Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
+        meetup.assertReviewAvailable(userId);
+        recapDomainService.updateScoreItem(meetup, userId, cmd, meetup.getData().getStartTime(), meetup.getData().getCourtName());
+    }
+
+    /**
+     * 删除比分（一次一盘，bizId 定位）
+     */
+    public void deleteScore(ScoreDeleteCmd cmd) {
+        String userId = UserContext.get();
+        Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
+        meetup.assertReviewAvailable(userId);
+        recapDomainService.deleteScoreItem(meetup, cmd.getBizId());
+    }
+
+    /**
+     * 提交评价（一次评价一个用户）
      */
     public void submitReview(ReviewSubmitCmd cmd) {
         cmd.getReviews().forEach(item -> ReviewSubmitCmd.assertValidReviewValue(item.getType(), item.getValue()));
         String userId = UserContext.get();
-
-        // 1. 获取 Meetup 聚合根（含报名记录）
         Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
         meetup.assertReviewAvailable(userId);
-        // 2. 提交评价
-        recapDomainService.submitReviewItems(meetup, userId, cmd.getReviews());
-
-
+        recapDomainService.submitReviewItems(meetup, userId, cmd.getToUserId(), cmd.getReviews());
     }
 }

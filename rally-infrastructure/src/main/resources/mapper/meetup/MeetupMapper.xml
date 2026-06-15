@@ -70,6 +70,12 @@
                AND NOT EXISTS (
                    SELECT 1 FROM rally_meetup_score s WHERE s.rally_meetup_id = m.biz_id
                ))
+            UNION
+            (SELECT m.* FROM rally_meetup m
+             WHERE EXISTS (
+                 SELECT 1 FROM rally_meetup_chat_user cu
+                 WHERE cu.meetup_id = m.biz_id AND cu.user_id = #{userId} AND cu.unread_count > 0
+             ))
         ) t
         <where>
             <if test="lastId != null and lastId != ''">
