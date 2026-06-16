@@ -40,6 +40,7 @@ public interface MeetupAppConvertMapper {
     // ==================== MeetupData → MeetupCardDTO ====================
 
     @Mapping(target = "meetupId", source = "bizId")
+    @Mapping(target = "primaryLabel", ignore = true)
     MeetupCardDTO toMeetupCardDTO(MeetupData data);
 
     List<MeetupCardDTO> toMeetupCardDTOList(List<MeetupData> dataList);

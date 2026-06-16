@@ -42,4 +42,6 @@ public class MeetupData {
     private LocalDateTime updateTime;
     /** 距离（米），按距离排序时设置 */
     private Double distanceMeters;
+    /** 待处理原因，PENDING tab 时设置 */
+    private PendingReasonEnum pendingReason;
 }

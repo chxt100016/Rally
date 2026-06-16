@@ -28,6 +28,7 @@ public interface MeetupConvertMapper {
     @Mapping(target = "joinMode", source = "joinMode", qualifiedByName = "strToJoinMode")
     @Mapping(target = "status", source = "status", qualifiedByName = "strToMeetupStatus")
     @Mapping(target = "costItems", source = "costItems", qualifiedByName = "jsonToCostItems")
+    @Mapping(target = "pendingReason", source = "pendingReason", qualifiedByName = "strToPendingReason")
     MeetupData toMeetupData(MeetupPO po);
 
     List<MeetupData> toMeetupDataList(List<MeetupPO> poList);
@@ -41,6 +42,7 @@ public interface MeetupConvertMapper {
     @Mapping(target = "costItems", source = "costItems", qualifiedByName = "costItemsToJson")
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
+    @Mapping(target = "pendingReason", ignore = true)
     MeetupPO toMeetupPO(MeetupData data);
 
     // ==================== 枚举转换 ====================
@@ -93,6 +95,11 @@ public interface MeetupConvertMapper {
     @Named("meetupStatusToStr")
     static String meetupStatusToStr(MeetupStatusEnum value) {
         return value == null ? null : value.name();
+    }
+
+    @Named("strToPendingReason")
+    static PendingReasonEnum strToPendingReason(String value) {
+        return value == null ? null : PendingReasonEnum.valueOf(value);
     }
 
     @Named("strToWaitlistStatus")

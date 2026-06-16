@@ -48,10 +48,10 @@
         ORDER BY create_time DESC
     </select>
 
-    <!-- PENDING tab：创建人有待审批 + 参与者已结束未录比分，UNION searchAfter 游标分页 -->
+    <!-- PENDING tab：创建人有待审批 + 参与者已结束未录比分 + 有未读消息，UNION searchAfter 游标分页 -->
     <select id="listPendingMeetups" resultType="com.rally.db.meetup.entity.MeetupPO">
         SELECT * FROM (
-            (SELECT m.* FROM rally_meetup m
+            (SELECT m.*, 'PENDING_APPROVAL' AS _pending_reason FROM rally_meetup m
              WHERE m.creator_id = #{userId}
                AND m.status IN ('OPEN','FULL') AND m.end_time &gt; NOW()
                AND EXISTS (
@@ -59,7 +59,7 @@
                    WHERE r.rally_meetup_id = m.biz_id AND r.status = 'pending'
                ))
             UNION
-            (SELECT m.* FROM rally_meetup m
+            (SELECT m.*, 'PENDING_REVIEW' AS _pending_reason FROM rally_meetup m
              WHERE (m.status = 'FINISHED' OR (m.status IN ('OPEN','FULL') AND m.end_time &lt; NOW()))
                AND m.end_time + INTERVAL #{deadlineDays} DAY &gt; NOW()
                AND EXISTS (
@@ -71,7 +71,7 @@
                    SELECT 1 FROM rally_meetup_score s WHERE s.rally_meetup_id = m.biz_id
                ))
             UNION
-            (SELECT m.* FROM rally_meetup m
+            (SELECT m.*, 'UNREAD_MESSAGES' AS _pending_reason FROM rally_meetup m
              WHERE EXISTS (
                  SELECT 1 FROM rally_meetup_chat_user cu
                  WHERE cu.meetup_id = m.biz_id AND cu.user_id = #{userId} AND cu.unread_count > 0

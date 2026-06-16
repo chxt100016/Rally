@@ -25,7 +25,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -176,9 +178,11 @@ public class MyProfileAppService {
         List<ScoreRecordData> records = recapDomainService.listScoresByUserId(userId);
         long singleCount = records.stream().filter(record -> record.getMatchType() == MatchTypeEnum.SINGLE).count();
         long doubleCount = records.stream().filter(record -> record.getMatchType() == MatchTypeEnum.DOUBLE).count();
+        // 批量获取所有玩家头像（避免从 score 表冗余读取）
+        Map<String, UserProfile> profiles = batchFetchPlayerProfiles(records);
         List<MyProfileSetScoreDTO.SetItem> setItems = records.stream()
                 .limit(SET_SCORE_ITEM_LIMIT)
-                .map(record -> buildSetItem(userId, record))
+                .map(record -> buildSetItem(userId, record, profiles))
                 .collect(Collectors.toList());
         return new MyProfileSetScoreDTO()
                 .setTotal((long) records.size())
@@ -187,8 +191,20 @@ public class MyProfileAppService {
                 .setSetItems(setItems);
     }
 
+    /** 批量获取战绩中所有玩家的档案（用于取头像） */
+    private Map<String, UserProfile> batchFetchPlayerProfiles(List<ScoreRecordData> records) {
+        List<String> playerIds = records.stream()
+                .flatMap(r -> Arrays.asList(
+                        r.getSideAPlayer1(), r.getSideAPlayer2(),
+                        r.getSideBPlayer1(), r.getSideBPlayer2()).stream())
+                .filter(id -> id != null)
+                .distinct()
+                .collect(Collectors.toList());
+        return userProfileDomainService.listMap(playerIds);
+    }
+
     /** 构建单条战绩明细：根据当前用户所在阵营与比分判断胜负 */
-    private MyProfileSetScoreDTO.SetItem buildSetItem(String userId, ScoreRecordData record) {
+    private MyProfileSetScoreDTO.SetItem buildSetItem(String userId, ScoreRecordData record, Map<String, UserProfile> profiles) {
         boolean userInSideA = userId.equals(record.getSideAPlayer1()) || userId.equals(record.getSideAPlayer2());
         boolean sideAWin = resolveSideAWin(record);
         ResultTypeEnum resultType = (userInSideA == sideAWin) ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
@@ -198,12 +214,20 @@ public class MyProfileAppService {
                 .setTitle(title)
                 .setResultType(resultType)
                 .setMatchType(record.getMatchType())
-                .setSideAPlayer1AvatarUrl(record.getSideAPlayer1Avatar())
-                .setSideAPlayer2AvatarUrl(record.getSideAPlayer2Avatar())
+                .setSideAPlayer1AvatarUrl(getAvatarUrl(profiles, record.getSideAPlayer1()))
+                .setSideAPlayer2AvatarUrl(getAvatarUrl(profiles, record.getSideAPlayer2()))
                 .setSideAScore(String.valueOf(record.getSideAScore()))
-                .setSideBPlayer1AvatarUrl(record.getSideBPlayer1Avatar())
-                .setSideBPlayer2AvatarUrl(record.getSideBPlayer2Avatar())
+                .setSideBPlayer1AvatarUrl(getAvatarUrl(profiles, record.getSideBPlayer1()))
+                .setSideBPlayer2AvatarUrl(getAvatarUrl(profiles, record.getSideBPlayer2()))
                 .setSideBScore(String.valueOf(record.getSideBScore()));
+    }
+
+    /** 从 profiles map 获取玩家头像（带签名URL） */
+    private String getAvatarUrl(Map<String, UserProfile> profiles, String playerId) {
+        if (playerId == null) return null;
+        UserProfile profile = profiles.get(playerId);
+        if (profile == null || profile.getUser() == null) return null;
+        return QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl());
     }
 
     /** 判定 A 侧是否胜出：常规比分相同（如 6:6）时按抢七比分判定 */

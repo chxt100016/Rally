@@ -24,8 +24,8 @@ public class MeetupCardDTO {
     private String districtName;
     private String courtName;
     private LevelModeEnum levelMode;
-    private BigDecimal levelMin;
-    private BigDecimal levelMax;
+    private String levelMin;
+    private String levelMax;
     private MeetupStatusEnum status;
     private Double distanceKm;
     /** 主标签：OPEN 状态展示区域名，其余状态展示状态文案 */

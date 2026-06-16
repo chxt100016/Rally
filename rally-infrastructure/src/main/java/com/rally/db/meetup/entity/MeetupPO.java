@@ -1,6 +1,7 @@
 package com.rally.db.meetup.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -48,4 +49,7 @@ public class MeetupPO {
     private String courtIndex;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+    /** 待处理原因（SQL 计算列，非表字段） */
+    @TableField(exist = false)
+    private String pendingReason;
 }

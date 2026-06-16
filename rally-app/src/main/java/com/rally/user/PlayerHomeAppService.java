@@ -3,9 +3,11 @@ package com.rally.user;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.enums.UserMeetupTabEnum;
 import com.rally.domain.meetup.model.MeetupCardDTO;
+import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.UserMeetupListCmd;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.MeetupQueryDomainService;
+import com.rally.meetup.MeetupCardPackingService;
 import com.rally.domain.recap.UserReviewDomainService;
 import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
 import com.rally.domain.score.ProfileLevelManager;
@@ -37,6 +39,9 @@ public class PlayerHomeAppService {
 
     @Resource
     private MeetupQueryDomainService meetupQueryDomainService;
+
+    @Resource
+    private MeetupCardPackingService meetupCardPackingService;
 
     @Resource
     private UserReviewDomainService userReviewDomainService;
@@ -95,7 +100,10 @@ public class PlayerHomeAppService {
         UserMeetupListCmd recentCmd = new UserMeetupListCmd();
         recentCmd.setTab(UserMeetupTabEnum.RECENT);
         recentCmd.setSize(3);
-        List<MeetupCardDTO> recentMeetups = meetupQueryDomainService.listByUser(recentCmd, userId).getList();
+        List<MeetupData> recentDataList = meetupQueryDomainService.listByUser(recentCmd, userId).getList();
+        List<MeetupCardDTO> recentMeetups = recentDataList.stream()
+                .map(data -> meetupCardPackingService.packCardForTab(data, UserMeetupTabEnum.RECENT))
+                .toList();
         return new PlayerHomeMeetupDTO().setCompletedCount((int) completedCount).setRecentMeetups(recentMeetups);
     }
 
