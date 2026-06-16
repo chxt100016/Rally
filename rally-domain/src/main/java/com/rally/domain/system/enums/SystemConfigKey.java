@@ -119,6 +119,7 @@ public enum SystemConfigKey {
 
     /** 约球结束后允许评价的截止天数 */
     REVIEW_DEADLINE_DAYS("review.deadline_days", "约球结束后允许评价的截止天数", "30"),
+    REVIEW_DEFAULT_TAGS("review.default_tag", "约球评价可用默认标签", "正手好,反手好,拉球稳,发球好,跑得快,球很转"),
 
     // ==================== 防滥用 ====================
 

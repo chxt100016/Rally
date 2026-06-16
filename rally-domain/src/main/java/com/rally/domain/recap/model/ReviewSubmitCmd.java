@@ -40,7 +40,6 @@ public class ReviewSubmitCmd {
         private ReviewTypeEnum type;
 
         /** 评价值（TAG 为逗号分隔的多标签） */
-        @NotBlank(message = "评价值不能为空")
         private String value;
     }
 
@@ -51,7 +50,7 @@ public class ReviewSubmitCmd {
         boolean valid = switch (type) {
             case LEVEL_VOTE -> isValidEnum(NtrpVoteEnum.class, value);
             case ATTENDANCE_VOTE -> isValidEnum(AttendanceEnum.class, value);
-            case TAG -> value != null && !value.isBlank();
+            case TAG -> value != null;
         };
         Assert.isTrue(valid, BizErrorCode.RECAP_REVIEW_INVALID_VALUE);
     }

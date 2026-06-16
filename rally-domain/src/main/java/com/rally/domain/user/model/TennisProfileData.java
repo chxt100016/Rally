@@ -141,4 +141,27 @@ public class TennisProfileData {
         }
         this.videos.add(video);
     }
+
+    /**
+     * 删除一条视频
+     */
+    public void deleteVideo(String key) {
+        if (this.videos == null) {
+            return;
+        }
+        this.videos.removeIf(v -> v.getKey().equals(key));
+    }
+
+    /**
+     * 修改视频标题
+     */
+    public void updateVideo(String key, String title) {
+        if (this.videos == null) {
+            return;
+        }
+        this.videos.stream()
+                .filter(v -> v.getKey().equals(key))
+                .findFirst()
+                .ifPresent(v -> v.setTitle(title));
+    }
 }

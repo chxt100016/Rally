@@ -11,7 +11,10 @@ import java.util.Map;
 @Data
 public class RecapDTO {
 
-    //可评价球友
+    // 默认标签
+    private List<String> defaultTags;
+
+    // 可评价球友
     private List<String> waitlistIds;
 
     // ==================== 当前用户已填评价（按 toUser 分组） ====================

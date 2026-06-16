@@ -75,6 +75,32 @@ public class ProfileAppService {
     }
 
     /**
+     * 删除视频
+     */
+    @Transactional
+    public MyProfileDTO deleteVideo(DeleteVideoCmd cmd) {
+        String userId = UserContext.get();
+        UserProfile userProfile = userProfileDomainService.get(userId);
+        userProfile.deleteVideo(cmd.getKey());
+        userProfileDomainService.save(userProfile);
+
+        return myProfileAppService.getMyProfile();
+    }
+
+    /**
+     * 修改视频
+     */
+    @Transactional
+    public MyProfileDTO updateVideo(UpdateVideoCmd cmd) {
+        String userId = UserContext.get();
+        UserProfile userProfile = userProfileDomainService.get(userId);
+        userProfile.updateVideo(cmd.getKey(), cmd.getTitle());
+        userProfileDomainService.save(userProfile);
+
+        return myProfileAppService.getMyProfile();
+    }
+
+    /**
      * 自评修改
      */
     @Transactional

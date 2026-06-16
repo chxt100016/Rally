@@ -117,6 +117,20 @@ public class UserProfile {
         profile.addVideo(video);
     }
 
+    /**
+     * 删除一条视频
+     */
+    public void deleteVideo(String key) {
+        profile.deleteVideo(key);
+    }
+
+    /**
+     * 修改视频标题
+     */
+    public void updateVideo(String key, String title) {
+        profile.updateVideo(key, title);
+    }
+
     public void assertBasic() {
         user.assertBasicComplete();
     }

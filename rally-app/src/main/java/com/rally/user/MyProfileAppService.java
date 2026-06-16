@@ -236,6 +236,8 @@ public class MyProfileAppService {
                         .setUrl(QiniuConfiguration.buildSignedUrl(video.getKey()))
                         .setTitle(video.getTitle()))
                 .collect(Collectors.toList()));
+        videoDTO.setMaxCount(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getDefaultValue())));
+        videoDTO.setMaxSizeMb(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getDefaultValue())));
         return videoDTO;
     }
 }

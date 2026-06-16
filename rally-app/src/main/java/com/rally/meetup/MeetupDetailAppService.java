@@ -10,9 +10,9 @@ import com.rally.domain.recap.model.RecapDTO;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.recap.service.RecapDomainService;
-import com.rally.domain.utils.GeoUtils;
-import com.rally.meetup.convert.MeetupAppConvertMapper;
 import com.rally.domain.score.ProfileLevelManager;
+import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
@@ -20,6 +20,7 @@ import com.rally.utils.SunUtils;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -166,6 +167,11 @@ public class MeetupDetailAppService {
         recap.setMyReviews(reviewMap);
         recap.setScores(MeetupAppConvertMapper.INSTANCE.toScoreItemList(scoreRecords));
         recap.setScoreFilled(!scoreRecords.isEmpty());
+        String defaultTag = SystemConfig.getString(SystemConfigKey.REVIEW_DEFAULT_TAGS.getKey(), null);
+        if (StringUtils.isNotBlank(defaultTag)) {
+            recap.setDefaultTags(List.of(defaultTag.split(",")));
+        }
+
         return recap;
     }
 

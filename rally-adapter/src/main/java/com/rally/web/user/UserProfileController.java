@@ -58,12 +58,4 @@ public class UserProfileController {
     public Result<MyProfileDTO> updateNtrp(@RequestBody @Valid NtrpUpdateCmd cmd) {
         return Result.ok(profileAppService.updateNtrp(cmd));
     }
-
-    /**
-     * 上传视频
-     */
-    @PostMapping("/upload/video")
-    public Result<MyProfileDTO> uploadVideo(@RequestBody @Valid UploadVideoCmd cmd) {
-        return Result.ok(profileAppService.uploadVideo(cmd));
-    }
 }
