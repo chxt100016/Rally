@@ -48,6 +48,8 @@ public class PlayerHomeAppService {
      * 球员主页
      */
     public PlayerHomeDTO getPlayerHome(String targetUserId) {
+        // 校验登录
+        UserContext.get();
         UserProfile userProfile = userProfileDomainService.get(targetUserId);
         UserData userData = userProfile.getUser();
         TennisProfileData profileData = userProfile.getProfile();
