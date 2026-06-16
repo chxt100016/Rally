@@ -13,6 +13,9 @@ public class PlayerHomeDTO {
     /** 基础用户信息 */
     private MyProfileUserDTO user;
 
+    /** 关注统计 */
+    private PlayerHomeStatsDTO stats;
+
     /** 约球信息 */
     private PlayerHomeMeetupDTO meetup;
 

@@ -14,6 +14,7 @@ import com.rally.domain.system.CityConfig;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.model.*;
+import com.rally.domain.user.service.UserFollowDomainService;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.utils.UserContext;
 import jakarta.annotation.Resource;
@@ -47,6 +48,9 @@ public class MyProfileAppService {
     @Resource
     private RecapDomainService recapDomainService;
 
+    @Resource
+    private UserFollowDomainService userFollowDomainService;
+
     /** 战绩明细展示数量 */
     private static final int SET_SCORE_ITEM_LIMIT = 5;
 
@@ -78,8 +82,8 @@ public class MyProfileAppService {
     private MyProfileStatsDTO buildStats(String userId) {
         long completedCount = meetupDomainService.countFinishedMeetups(userId);
         return new MyProfileStatsDTO()
-                .setFollowerCount(0L)
-                .setFollowingCount(0L)
+                .setFollowerCount(userFollowDomainService.countFollowers(userId))
+                .setFollowingCount(userFollowDomainService.countFollowing(userId))
                 .setCompletedCount(completedCount);
     }
 

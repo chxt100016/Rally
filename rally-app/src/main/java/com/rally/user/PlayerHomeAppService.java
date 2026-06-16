@@ -10,7 +10,9 @@ import com.rally.domain.recap.UserReviewDomainService;
 import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.user.model.*;
+import com.rally.domain.user.service.UserFollowDomainService;
 import com.rally.domain.user.service.UserProfileDomainService;
+import com.rally.utils.UserContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,9 @@ public class PlayerHomeAppService {
     @Resource
     private UserReviewDomainService userReviewDomainService;
 
+    @Resource
+    private UserFollowDomainService userFollowDomainService;
+
     /**
      * 球员主页
      */
@@ -49,6 +54,7 @@ public class PlayerHomeAppService {
 
         return new PlayerHomeDTO()
                 .setUser(buildUserDTO(userData))
+                .setStats(buildStatsDTO(targetUserId))
                 .setMeetup(buildMeetupDTO(targetUserId))
                 .setReview(buildReviewDTO(targetUserId))
                 .setLevel(buildLevelDTO(profileData))
@@ -57,6 +63,14 @@ public class PlayerHomeAppService {
     }
 
     // ========== 各子 DTO 构建方法 ==========
+
+    /** 构建关注统计 DTO（含当前登录用户是否已关注 TA） */
+    private PlayerHomeStatsDTO buildStatsDTO(String targetUserId) {
+        return new PlayerHomeStatsDTO()
+                .setFollowerCount(userFollowDomainService.countFollowers(targetUserId))
+                .setFollowingCount(userFollowDomainService.countFollowing(targetUserId))
+                .setIsFollowed(userFollowDomainService.isFollowed(UserContext.get(), targetUserId));
+    }
 
     /** 构建用户基本信息 DTO */
     private MyProfileUserDTO buildUserDTO(UserData userData) {
