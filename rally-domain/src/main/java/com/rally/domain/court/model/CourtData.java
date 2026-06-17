@@ -1,5 +1,7 @@
 package com.rally.domain.court.model;
 
+import com.rally.domain.court.enums.CourtSourceEnum;
+import com.rally.domain.court.enums.CourtStatusEnum;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,6 +13,7 @@ import java.time.LocalDateTime;
 public class CourtData {
     private String bizId;
     private String name;
+    private String alias;
     private String address;
     private Double lng;
     private Double lat;
@@ -18,6 +21,8 @@ public class CourtData {
     private String districtCode;
     private Integer total;
     private String remark;
+    private CourtSourceEnum source;
+    private CourtStatusEnum status;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }
