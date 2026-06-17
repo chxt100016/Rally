@@ -21,7 +21,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -121,10 +120,10 @@ public class MyProfileAppService {
 
         return new MyProfileLevelDTO()
                 .setNtrpScore(profileData.getNtrpScore().setScale(1, RoundingMode.HALF_UP).toString())
-                .setSubTitle("NTRP 当前水平 · 系统认证")
+                .setSubTitle("NTRP 当前水平")
                 .setNoticeTitle(noticeTitle)
                 .setNoticeContent(noticeContent)
-                .setNoticeInfo("手动修改后将进入 90 天 冻结期，期间系统不再自动调整你的水平，请谨慎操作")
+                .setNoticeInfo("手动修改后将进入 90天冻结期，请谨慎操作")
                 .setCanModify((cooldownDays == null || cooldownDays == 0) && (remainingMatches == null || remainingMatches == 0));
 
     }
@@ -147,11 +146,11 @@ public class MyProfileAppService {
     }
 
     /** 构建单个评分明细项 */
-    private ScoreItemDTO buildOneScoreItem(String name, String key, BigDecimal score, SystemConfigKey infoConfigKey, Integer sort) {
+    private ScoreItemDTO buildOneScoreItem(String name, String key, Integer score, SystemConfigKey infoConfigKey, Integer sort) {
         return new ScoreItemDTO()
                 .setName(name)
                 .setKey(key)
-                .setValue(score != null ? score.toPlainString() : "0")
+                .setValue(score != null ? String.valueOf(score) : "0")
                 .setMaxValue(SystemConfig.getString(SystemConfigKey.SCORE_MAX.getKey()))
                 .setInfo(SystemConfig.getString(infoConfigKey.getKey()))
                 .setSort(sort);

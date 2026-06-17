@@ -22,9 +22,9 @@ public class TennisProfilePO {
     private LocalDateTime ntrpUpdatedAt;
     /** tbc/normal/under_review */
     private String status;
-    private BigDecimal reputationScore;
-    private BigDecimal credibilityScore;
-    private BigDecimal calibrationScore;
+    private Integer reputationScore;
+    private Integer credibilityScore;
+    private Integer calibrationScore;
     private Boolean isUnderReview;
     private Integer reviewRemainingMatches;
     private Boolean isNewbie;

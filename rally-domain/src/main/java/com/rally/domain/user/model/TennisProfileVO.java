@@ -16,9 +16,9 @@ public class TennisProfileVO {
     private BigDecimal ntrpScore;
     private BigDecimal utrScore;
     private Boolean isNewbie;
-    private BigDecimal reputationScore;
-    private BigDecimal credibilityScore;
-    private BigDecimal calibrationScore;
+    private Integer reputationScore;
+    private Integer credibilityScore;
+    private Integer calibrationScore;
     private String status;
     private Boolean isUnderReview;
     private Integer reviewRemainingMatches;

@@ -7,7 +7,6 @@ import com.rally.domain.user.model.TennisProfileData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.math.BigDecimal;
 
 /**
  * 总分聚合计算器（纯函数式工具，非策略）
@@ -24,9 +23,9 @@ public class ProfileLevelManager {
         if (profileData == null) {
             return StringUtils.EMPTY;
         }
-        BigDecimal reputation = profileData.getReputationScore();
-        BigDecimal credibility = profileData.getCredibilityScore();
-        BigDecimal calibration = profileData.getCalibrationScore();
+        Integer reputation = profileData.getReputationScore();
+        Integer credibility = profileData.getCredibilityScore();
+        Integer calibration = profileData.getCalibrationScore();
 
         // 读取权重
         float w1 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_REPUTATION.getKey());
@@ -36,13 +35,13 @@ public class ProfileLevelManager {
 
 
         // 计算总分
-        float total = reputation.floatValue() * w1 + credibility.floatValue() * w2 + calibration.floatValue() * w3;
+        float total = reputation * w1 + credibility * w2 + calibration * w3;
 
         // 等级落档
         int sThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_S_THRESHOLD.getKey());
         int aThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_A_THRESHOLD.getKey());
         int bThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_B_THRESHOLD.getKey());
-        int cThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_C_THRESHOLD.getKey());
+
 
         RatingLevelEnum level;
         if (total >= sThreshold) {

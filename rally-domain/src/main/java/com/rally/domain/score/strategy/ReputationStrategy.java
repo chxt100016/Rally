@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -42,9 +41,9 @@ public class ReputationStrategy implements ScoreStrategy {
         change.setRefId(ctx.getMeetupId());
 
         // 获取当前信誉分
-        BigDecimal before = profileGateway.findByUserId(userId)
+        Integer before = profileGateway.findByUserId(userId)
                 .map(TennisProfileData::getReputationScore)
-                .orElse(BigDecimal.valueOf(100));
+                .orElse(100);
         change.setBefore(before);
 
         // 查本场所有对该用户的出勤评价
@@ -58,12 +57,10 @@ public class ReputationStrategy implements ScoreStrategy {
         int delta = resolveDelta(verdict);
 
         // 计算新分（下限 0，上限 100）
-        BigDecimal after = before.add(BigDecimal.valueOf(delta));
-        after = after.max(BigDecimal.ZERO);
-        after = after.min(BigDecimal.valueOf(100));
+        int after = Math.max(0, Math.min(100, before + delta));
 
         change.setAfter(after);
-        change.setValue(after.subtract(before));
+        change.setValue(after - before);
         change.setReason(resolveReason(verdict));
         change.setRemark("出勤评价: " + verdict);
 

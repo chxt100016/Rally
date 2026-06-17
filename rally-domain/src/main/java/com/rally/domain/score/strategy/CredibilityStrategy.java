@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 
 /**
  * 可信度策略（全量重算分）
@@ -40,9 +39,9 @@ public class CredibilityStrategy implements ScoreStrategy {
         change.setReason(ChangeReasonEnum.SYSTEM);
 
         // 获取当前可信度
-        BigDecimal before = profileGateway.findByUserId(userId)
+        Integer before = profileGateway.findByUserId(userId)
                 .map(TennisProfileData::getCredibilityScore)
-                .orElse(BigDecimal.ZERO);
+                .orElse(0);
         change.setBefore(before);
 
         // 1. 近窗口完成约球加分
@@ -69,9 +68,8 @@ public class CredibilityStrategy implements ScoreStrategy {
         // 5. 核查期遇「差」覆盖
         // TODO: 需要检查核查期状态，暂降为 penalty_credibility
 
-        BigDecimal after = BigDecimal.valueOf(credibility);
-        change.setAfter(after);
-        change.setValue(after.subtract(before));
+        change.setAfter(credibility);
+        change.setValue(credibility - before);
 
         return change;
     }

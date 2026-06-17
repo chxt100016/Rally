@@ -9,7 +9,6 @@ import com.rally.domain.user.model.VideoVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,8 +59,8 @@ public class TennisProfileGatewayImpl implements TennisProfileGateway {
     }
 
     @Override
-    public void updateScoreFields(String userId, BigDecimal reputationScore, BigDecimal credibilityScore,
-                                  BigDecimal calibrationScore, Boolean isNewbie) {
+    public void updateScoreFields(String userId, Integer reputationScore, Integer credibilityScore,
+                                  Integer calibrationScore, Boolean isNewbie) {
         repository.updateScoreFields(userId, reputationScore, credibilityScore, calibrationScore, isNewbie);
     }
 }

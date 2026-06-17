@@ -3,7 +3,6 @@ package com.rally.domain.user.gateway;
 import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.VideoVO;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +31,6 @@ public interface TennisProfileGateway {
     /**
      * 更新评分字段（由评分域调用）
      */
-    void updateScoreFields(String userId, BigDecimal reputationScore, BigDecimal credibilityScore,
-                           BigDecimal calibrationScore, Boolean isNewbie);
+    void updateScoreFields(String userId, Integer reputationScore, Integer credibilityScore,
+                           Integer calibrationScore, Boolean isNewbie);
 }

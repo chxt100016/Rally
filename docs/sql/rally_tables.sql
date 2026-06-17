@@ -38,10 +38,9 @@ CREATE TABLE `user_tennis_profile` (
   `utr_score`         DECIMAL(4,2) DEFAULT NULL COMMENT 'UTR 三方接入选填，MVP 预留不实现',
   `ntrp_updated_at`   DATETIME     DEFAULT NULL COMMENT 'NTRP 最后修改时间，冷却期计算基准',
   `status`            VARCHAR(16) NOT NULL DEFAULT 'tbc' COMMENT '档案状态（裁定 D2）：tbc 未填写 / normal 正常 / under_review 核查期',
-  `reputation_score`  DECIMAL(5,2) NOT NULL DEFAULT 100 COMMENT '信誉分，默认 100，由评分域写入（spec-04）',
-  `credibility_score` DECIMAL(5,2) NOT NULL DEFAULT 0  COMMENT '可信度，由评分域写入（spec-04）',
-  `calibration_score` DECIMAL(5,2) NOT NULL DEFAULT 80 COMMENT '校准度，票数不足默认 80（裁定 D8），由评分域写入',
-
+  `reputation_score`  int NOT NULL DEFAULT 0 COMMENT '信誉分',
+  `credibility_score` int NOT NULL DEFAULT 0  COMMENT '可信度',
+  `calibration_score` int NOT NULL DEFAULT 0 COMMENT '校准度',
   `is_under_review`        TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '是否核查期，与 status=under_review 同步冗余，便于查询',
   `review_remaining_matches` INT        DEFAULT NULL COMMENT '核查期剩余需完成场次，触发核查期时写入，每完成一场减 1，归零后解除',
   `is_newbie`              TINYINT(1)   NOT NULL DEFAULT 1 COMMENT '新人角标，收到 >=3 次评价后置 0（score.newbie.min_reviews）',

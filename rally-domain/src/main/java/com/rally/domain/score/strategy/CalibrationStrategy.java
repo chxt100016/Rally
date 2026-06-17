@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +43,9 @@ public class CalibrationStrategy implements ScoreStrategy {
         change.setReason(ChangeReasonEnum.SYSTEM);
 
         // 获取当前校准度
-        BigDecimal before = profileGateway.findByUserId(userId)
+        Integer before = profileGateway.findByUserId(userId)
                 .map(TennisProfileData::getCalibrationScore)
-                .orElse(BigDecimal.valueOf(80));
+                .orElse(80);
         change.setBefore(before);
 
         // 1. 拉取所有对该用户的 ntrp_vote 投票
@@ -82,9 +81,8 @@ public class CalibrationStrategy implements ScoreStrategy {
         int minVotes = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_MIN_VOTES.getKey());
         if (total < minVotes) {
             int insufficientScore = SystemConfig.getInt(SystemConfigKey.SCORE_CALIBRATION_SCORE_INSUFFICIENT.getKey());
-            BigDecimal after = BigDecimal.valueOf(insufficientScore);
-            change.setAfter(after);
-            change.setValue(after.subtract(before));
+            change.setAfter(insufficientScore);
+            change.setValue(insufficientScore - before);
             return change;
         }
 
@@ -115,9 +113,8 @@ public class CalibrationStrategy implements ScoreStrategy {
             }
         }
 
-        BigDecimal after = BigDecimal.valueOf(score);
-        change.setAfter(after);
-        change.setValue(after.subtract(before));
+        change.setAfter(score);
+        change.setValue(score - before);
         change.setRemark("偏差=" + String.format("%.2f", deviation) + ", 方向=" + direction);
 
         return change;

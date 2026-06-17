@@ -5,7 +5,6 @@ import com.rally.db.user.service.TennisProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,8 +38,8 @@ public class TennisProfileRepository {
         return tennisProfileService.updateById(profile);
     }
 
-    public void updateScoreFields(String userId, BigDecimal reputationScore, BigDecimal credibilityScore,
-                                  BigDecimal calibrationScore, Boolean isNewbie) {
+    public void updateScoreFields(String userId, Integer reputationScore, Integer credibilityScore,
+                                  Integer calibrationScore, Boolean isNewbie) {
         tennisProfileService.lambdaUpdate()
                 .eq(TennisProfilePO::getUserId, userId)
                 .set(reputationScore != null, TennisProfilePO::getReputationScore, reputationScore)

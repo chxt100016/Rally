@@ -25,9 +25,9 @@ public class TennisProfileData {
     private BigDecimal utrScore;
     private LocalDateTime ntrpUpdatedAt;
     private ProfileStatusEnum status;
-    private BigDecimal reputationScore;
-    private BigDecimal credibilityScore;
-    private BigDecimal calibrationScore;
+    private Integer reputationScore;
+    private Integer credibilityScore;
+    private Integer calibrationScore;
     private Boolean isUnderReview;
     private Integer reviewRemainingMatches;
     private Boolean isNewbie;
@@ -77,7 +77,7 @@ public class TennisProfileData {
         if (credibilityScore == null) {
             return lowDays;
         }
-        float credibility = credibilityScore.floatValue();
+        int credibility = credibilityScore;
         if (credibility < 30) {
             return lowDays;
         } else if (credibility < 60) {
@@ -128,10 +128,9 @@ public class TennisProfileData {
         this.ntrpScore = ntrpScore;
         this.videos = videos;
         this.status = ProfileStatusEnum.NORMAL;
-        this.ntrpUpdatedAt = LocalDateTime.now();
-        this.reputationScore = SystemConfig.getBigDecimal(SystemConfigKey.SCORE_INIT_REPUTATION.getKey());
-        this.credibilityScore = SystemConfig.getBigDecimal(SystemConfigKey.SCORE_INIT_CREDIBILITY.getKey());
-        this.calibrationScore = SystemConfig.getBigDecimal(SystemConfigKey.SCORE_INIT_CALIBRATION.getKey());
+        this.reputationScore = SystemConfig.getInt(SystemConfigKey.SCORE_INIT_REPUTATION.getKey());
+        this.credibilityScore = SystemConfig.getInt(SystemConfigKey.SCORE_INIT_CREDIBILITY.getKey());
+        this.calibrationScore = SystemConfig.getInt(SystemConfigKey.SCORE_INIT_CALIBRATION.getKey());
     }
 
     /**

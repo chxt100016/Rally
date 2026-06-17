@@ -82,13 +82,11 @@ public enum SystemConfigKey {
     /** 校准度在综合评分中的权重 */
     SCORE_WEIGHTS_CALIBRATION("score.weights.calibration", "校准度在综合评分中的权重", "0.2"),
     /** 综合评分达到 S 档的分数阈值 */
-    SCORE_RATING_S_THRESHOLD("score.rating.s_threshold", "综合评分 S 档的分数阈值", "3300"),
+    SCORE_RATING_S_THRESHOLD("score.rating.s_threshold", "综合评分 S 档的分数阈值", "1200"),
     /** 综合评分达到 A 档的分数阈值 */
-    SCORE_RATING_A_THRESHOLD("score.rating.a_threshold", "综合评分 A 档的分数阈值", "3000"),
+    SCORE_RATING_A_THRESHOLD("score.rating.a_threshold", "综合评分 A 档的分数阈值", "1000"),
     /** 综合评分达到 B 档的分数阈值 */
-    SCORE_RATING_B_THRESHOLD("score.rating.b_threshold", "综合评分 B 档的分数阈值", "2400"),
-    /** 综合评分达到 C 档的分数阈值 */
-    SCORE_RATING_C_THRESHOLD("score.rating.c_threshold", "综合评分 C 档的分数阈值", "2800"),
+    SCORE_RATING_B_THRESHOLD("score.rating.b_threshold", "综合评分 B 档的分数阈值", "800"),
     /** 用户注册初始信誉分 */
     SCORE_INIT_REPUTATION("score.init.reputation", "用户注册初始信誉分", "1000"),
     /** 用户注册初始可信度 */
@@ -150,7 +148,7 @@ public enum SystemConfigKey {
     /** 用户上传头像的文件大小上限（MB） */
     USER_AVATAR_MAX_SIZE_MB("user.avatar.max_size_mb", "用户上传头像的文件大小上限（MB）", "5"),
     USER_HINT_VIDEO("user.hint.video", "", "· 单个视频时长 ≤ 60 秒，大小 ≤ 20MB\n· 建议横屏拍摄，画面清晰稳定\n· 完整展示正手 / 反手 / 发球等技术动作\n· 每位用户最多上传 3 个视频"),
-    USER_HINT_NTRP("user.hint.ntrp", "", "不懂ntrp是什么你就去百度可以吗？？")
+    USER_HINT_NTRP("user.hint.ntrp", "", "")
 
     ;
 

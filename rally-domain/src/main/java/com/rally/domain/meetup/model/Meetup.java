@@ -9,7 +9,6 @@ import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.utils.Assert;
 import lombok.Getter;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -255,9 +254,9 @@ public class Meetup {
         if (userProfile.getProfile() == null || userProfile.getProfile().getReputationScore() == null) {
             return;
         }
-        BigDecimal reputationScore = userProfile.getProfile().getReputationScore();
-        BigDecimal threshold = SystemConfig.getBigDecimal(SystemConfigKey.MEETUP_JOIN_MIN_REPUTATION_SCORE.getKey());
-        if (reputationScore.compareTo(threshold) < 0) {
+        Integer reputationScore = userProfile.getProfile().getReputationScore();
+        int threshold = SystemConfig.getInt(SystemConfigKey.MEETUP_JOIN_MIN_REPUTATION_SCORE.getKey());
+        if (reputationScore < threshold) {
             throw new BusinessException(BizErrorCode.LOW_REPUTATION_BANNED);
         }
     }

@@ -4,7 +4,6 @@ import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.user.enums.RatingLevelEnum;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,16 +17,16 @@ public class ScoreResult {
     private String userId;
 
     /** 信誉分 */
-    private BigDecimal reputation;
+    private Integer reputation;
 
     /** 可信度 */
-    private BigDecimal credibility;
+    private Integer credibility;
 
     /** 校准度 */
-    private BigDecimal calibration;
+    private Integer calibration;
 
     /** 总分（三维加权） */
-    private BigDecimal total;
+    private Integer total;
 
     /** 球友评级 */
     private RatingLevelEnum ratingLevel;

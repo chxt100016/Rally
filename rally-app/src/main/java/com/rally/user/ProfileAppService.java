@@ -153,7 +153,7 @@ public class ProfileAppService {
             int penaltyCredibility = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_PENALTY_CREDIBILITY.getKey());
             profileRecordService.saveReviewResetLog(userId, remaining, requiredMatches, meetupId);
             tennisProfileGateway.updateScoreFields(userId, null,
-                    new BigDecimal(penaltyCredibility), null, null);
+                    penaltyCredibility, null, null);
         } else {
             BigDecimal newRemaining = remaining.subtract(BigDecimal.ONE);
             profileRecordService.saveReviewAdvanceLog(userId, remaining, newRemaining, meetupId);
