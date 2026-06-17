@@ -256,7 +256,7 @@ public class Meetup {
             return;
         }
         BigDecimal reputationScore = userProfile.getProfile().getReputationScore();
-        BigDecimal threshold = new BigDecimal(SystemConfig.getString(SystemConfigKey.MEETUP_JOIN_MIN_REPUTATION_SCORE.getKey(), SystemConfigKey.MEETUP_JOIN_MIN_REPUTATION_SCORE.getDefaultValue()));
+        BigDecimal threshold = SystemConfig.getBigDecimal(SystemConfigKey.MEETUP_JOIN_MIN_REPUTATION_SCORE.getKey());
         if (reputationScore.compareTo(threshold) < 0) {
             throw new BusinessException(BizErrorCode.LOW_REPUTATION_BANNED);
         }
@@ -280,7 +280,7 @@ public class Meetup {
 
         // 3. 判断是否在 6h 内
         long hoursUntilStart = Duration.between(LocalDateTime.now(), data.getStartTime()).toHours();
-        int thresholdHours = SystemConfig.getInt(SystemConfigKey.MEETUP_QUIT_PENALTY_THRESHOLD_HOURS.getKey(), Integer.parseInt(SystemConfigKey.MEETUP_QUIT_PENALTY_THRESHOLD_HOURS.getDefaultValue()));
+        int thresholdHours = SystemConfig.getInt(SystemConfigKey.MEETUP_QUIT_PENALTY_THRESHOLD_HOURS.getKey());
         return hoursUntilStart < thresholdHours ? QuitResult.PENALIZED : QuitResult.NORMAL;
     }
 
@@ -356,7 +356,7 @@ public class Meetup {
             if (realStatus == MeetupStatusEnum.ONGOING) {
                 return ActionStateEnum.ONGOING_JOINED;
             }
-            int lockMinutes = SystemConfig.getInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START.getKey(), Integer.parseInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START.getDefaultValue()));
+            int lockMinutes = SystemConfig.getInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START.getKey());
             boolean locked = LocalDateTime.now().isAfter(data.getStartTime().minusMinutes(lockMinutes));
             return locked ? ActionStateEnum.OWNER_EDIT_LOCKED : ActionStateEnum.OWNER_EDITABLE;
         }
@@ -428,7 +428,7 @@ public class Meetup {
     public void assertReviewAvailable(String userId) {
         assertIn(userId);
         assertCanReview();
-        int deadlineDays = SystemConfig.getInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getKey(), Integer.parseInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getDefaultValue()));
+        int deadlineDays = SystemConfig.getInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getKey());
         LocalDateTime deadlineAt = this.getData().getEndTime().plusDays(deadlineDays);
         if (LocalDateTime.now().isAfter(deadlineAt)) {
             throw new BusinessException(BizErrorCode.REVIEW_DEADLINE_PASSED);

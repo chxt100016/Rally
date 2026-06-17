@@ -71,9 +71,9 @@ public class TennisProfileData {
      * 根据可信度档位解析 NTRP 冷却总天数：可信度越高冷却越久
      */
     private int resolveNtrpCooldownDays() {
-        int lowDays = SystemConfig.getInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_LOW_DAYS.getKey(), Integer.parseInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_LOW_DAYS.getDefaultValue()));
-        int midDays = SystemConfig.getInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_MID_DAYS.getKey(), Integer.parseInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_MID_DAYS.getDefaultValue()));
-        int highDays = SystemConfig.getInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_HIGH_DAYS.getKey(), Integer.parseInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_HIGH_DAYS.getDefaultValue()));
+        int lowDays = SystemConfig.getInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_LOW_DAYS.getKey());
+        int midDays = SystemConfig.getInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_MID_DAYS.getKey());
+        int highDays = SystemConfig.getInt(SystemConfigKey.SCORE_NTRP_COOLDOWN_HIGH_DAYS.getKey());
         if (credibilityScore == null) {
             return lowDays;
         }
@@ -93,11 +93,11 @@ public class TennisProfileData {
      */
     public int triggerReviewIfNeeded(BigDecimal newNtrp) {
         BigDecimal delta = ntrpScore != null ? newNtrp.subtract(ntrpScore) : BigDecimal.ZERO;
-        BigDecimal triggerDelta = new BigDecimal(SystemConfig.getString(SystemConfigKey.SCORE_REVIEW_PERIOD_TRIGGER_NTRP_DELTA.getKey(), SystemConfigKey.SCORE_REVIEW_PERIOD_TRIGGER_NTRP_DELTA.getDefaultValue()));
+        BigDecimal triggerDelta = SystemConfig.getBigDecimal(SystemConfigKey.SCORE_REVIEW_PERIOD_TRIGGER_NTRP_DELTA.getKey());
         if (delta.compareTo(triggerDelta) < 0) {
             return -1;
         }
-        int requiredMatches = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_REQUIRED_MATCHES.getKey(), Integer.parseInt(SystemConfigKey.SCORE_REVIEW_PERIOD_REQUIRED_MATCHES.getDefaultValue()));
+        int requiredMatches = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_REQUIRED_MATCHES.getKey());
         this.status = ProfileStatusEnum.UNDER_REVIEW;
         this.isUnderReview = true;
         this.reviewRemainingMatches = requiredMatches;
@@ -129,6 +129,9 @@ public class TennisProfileData {
         this.videos = videos;
         this.status = ProfileStatusEnum.NORMAL;
         this.ntrpUpdatedAt = LocalDateTime.now();
+        this.reputationScore = SystemConfig.getBigDecimal(SystemConfigKey.SCORE_INIT_REPUTATION.getKey());
+        this.credibilityScore = SystemConfig.getBigDecimal(SystemConfigKey.SCORE_INIT_CREDIBILITY.getKey());
+        this.calibrationScore = SystemConfig.getBigDecimal(SystemConfigKey.SCORE_INIT_CALIBRATION.getKey());
     }
 
     /**

@@ -124,7 +124,7 @@ public class MeetupQueryDomainService {
      * UNION SQL searchAfter 游标分页，review deadline 过滤在 SQL 中完成
      */
     private PageDTO<MeetupData> listPending(String userId, String lastId, int limit) {
-        int deadlineDays = SystemConfig.getInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getKey(), Integer.parseInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getDefaultValue()));
+        int deadlineDays = SystemConfig.getInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getKey());
         return meetupGateway.listPendingMeetups(userId, deadlineDays, lastId, limit);
     }
 

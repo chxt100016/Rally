@@ -83,7 +83,7 @@ public class RegistrationAppService {
 
         // 3. 扣分
         if (result == QuitResult.PENALIZED) {
-            int penalty = SystemConfig.getInt(SystemConfigKey.MEETUP_QUIT_PENALTY_UNDER_6H.getKey(), Integer.parseInt(SystemConfigKey.MEETUP_QUIT_PENALTY_UNDER_6H.getDefaultValue()));
+            int penalty = SystemConfig.getInt(SystemConfigKey.MEETUP_QUIT_PENALTY_UNDER_6H.getKey());
             // TODO: 调用评分域扣分
             log.info("退出扣分: userId={}, meetupId={}, penalty={}", userId, meetupId, penalty);
         }

@@ -1,177 +1,141 @@
 package com.rally.domain.system;
 
-import com.alibaba.fastjson2.JSON;
-import com.rally.domain.system.enums.SystemConfigKey;
-import com.rally.domain.system.gateway.SysConfigLoader;
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.rally.domain.system.enums.SystemConfigKey;
+import com.rally.domain.system.gateway.SysConfigLoader;
+
 /**
- * 系统配置静态提供者。
- * 启动时通过 SysConfigLoader 全量加载到内存。
- * 对外提供静态方法，调用方无需注入。
+ * 系统配置读取工具类，提供 getString / getInt / getLong / getBigDecimal 等便捷方法。
+ * 底层数据通过 {@link SysConfigLoader} 从 DB 加载并缓存在内存中。
+ * 若 DB 中无对应配置，则使用 {@link SystemConfigKey} 枚举中定义的默认值。
  */
-@Slf4j
-@Component
 public class SystemConfig {
 
-    private final SysConfigLoader loader;
+    private static final Map<String, String> systemConfigMap = new ConcurrentHashMap<>();
+    private static SysConfigLoader sysConfigLoader;
 
-    /** 静态单例引用 */
-    private static volatile SystemConfig instance;
-
-    /** 缓存键 = scope + '|' + configKey，value = 字符串化的 configValue */
-    private final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>();
-
-    /** key -> defaultValue 映射，从枚举初始化，用于缓存未命中时回退 */
-    private static final Map<String, String> KEY_DEFAULT_MAP = new ConcurrentHashMap<>();
-
-    static {
-        // 从枚举构建 key -> defaultValue 映射
-        Arrays.stream(SystemConfigKey.values()).forEach(e -> KEY_DEFAULT_MAP.put(e.getKey(), e.getDefaultValue()));
+    public static void setSysConfigLoader(SysConfigLoader sysConfigLoader) {
+        SystemConfig.sysConfigLoader = sysConfigLoader;
     }
 
-    public SystemConfig(SysConfigLoader loader) {
-        this.loader = loader;
+    public static void init() {
+        systemConfigMap.clear();
+        sysConfigLoader.loadAll().forEach(systemConfigMap::put);
     }
 
-    @PostConstruct
-    public void init() {
-        instance = this;
-        reload();
-    }
-
-    // ==================== 静态方法 ====================
+    // ==================== 便捷读取方法 ====================
 
     /**
-     * 获取字符串配置值。
-     * 若缓存中不存在该 key，则从枚举 SystemConfigKey 的 defaultValue 中获取；
-     * 若枚举中也不存在，则返回传入的 defaultValue 参数。
+     * 获取字符串类型的配置值，若 DB 中不存在则使用枚举默认值
+     *
+     * @param key 配置 key
+     * @return 配置值、枚举默认值或 null
      */
-    public static String getString(String key, String defaultValue) {
-        return getString(key, "global", defaultValue);
+    public static String getString(String key) {
+        String val = systemConfigMap.get(key);
+        if (val != null) {
+            return val;
+        }
+        SystemConfigKey configKey = SystemConfigKey.getByKey(key);
+        return configKey != null ? configKey.getDefaultValue() : null;
     }
 
     /**
-     * 获取 int 配置值。
-     * 若缓存中不存在该 key，则从枚举 SystemConfigKey 的 defaultValue 中获取；
-     * 若枚举中也不存在，则返回传入的 defaultValue 参数。
+     * 获取整型配置值，若 DB 中不存在则使用枚举默认值
+     *
+     * @param key 配置 key
+     * @return 配置值、枚举默认值或 0
      */
-    public static int getInt(String key, int defaultValue) {
-        // 先尝试从枚举默认值获取
-        String enumDefault = KEY_DEFAULT_MAP.get(key);
-        String value = getString(key, "global", enumDefault != null ? enumDefault : String.valueOf(defaultValue));
-        if (value == null) {
-            return defaultValue;
+    public static int getInt(String key) {
+        String val = systemConfigMap.get(key);
+        if (val != null) {
+            try {
+                return Integer.parseInt(val);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
         }
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            log.warn("配置项 {} 解析 int 失败，回退默认值: {}", key, defaultValue);
-            return defaultValue;
+        SystemConfigKey configKey = SystemConfigKey.getByKey(key);
+        if (configKey != null) {
+            try {
+                return Integer.parseInt(configKey.getDefaultValue());
+            } catch (NumberFormatException e) {
+                return 0;
+            }
         }
+        return 0;
     }
 
     /**
-     * 获取 float 配置值。
-     * 若缓存中不存在该 key，则从枚举 SystemConfigKey 的 defaultValue 中获取；
-     * 若枚举中也不存在，则返回传入的 defaultValue 参数。
+     * 获取长整型配置值，若 DB 中不存在则使用枚举默认值
+     *
+     * @param key 配置 key
+     * @return 配置值、枚举默认值或 0L
      */
-    public static float getFloat(String key, float defaultValue) {
-        String enumDefault = KEY_DEFAULT_MAP.get(key);
-        String value = getString(key, "global", enumDefault != null ? enumDefault : String.valueOf(defaultValue));
-        if (value == null) {
-            return defaultValue;
+    public static long getLong(String key) {
+        String val = systemConfigMap.get(key);
+        if (val != null) {
+            try {
+                return Long.parseLong(val);
+            } catch (NumberFormatException e) {
+                return 0L;
+            }
         }
-        try {
-            return Float.parseFloat(value);
-        } catch (NumberFormatException e) {
-            log.warn("配置项 {} 解析 float 失败，回退默认值: {}", key, defaultValue);
-            return defaultValue;
+        SystemConfigKey configKey = SystemConfigKey.getByKey(key);
+        if (configKey != null) {
+            try {
+                return Long.parseLong(configKey.getDefaultValue());
+            } catch (NumberFormatException e) {
+                return 0L;
+            }
         }
+        return 0L;
     }
 
     /**
-     * 获取 boolean 配置值。
-     * 若缓存中不存在该 key，则从枚举 SystemConfigKey 的 defaultValue 中获取；
-     * 若枚举中也不存在，则返回传入的 defaultValue 参数。
+     * 获取浮点型配置值，若 DB 中不存在则使用枚举默认值
+     *
+     * @param key 配置 key
+     * @return 配置值、枚举默认值或 0f
      */
-    public static boolean getBool(String key, boolean defaultValue) {
-        String enumDefault = KEY_DEFAULT_MAP.get(key);
-        String value = getString(key, "global", enumDefault != null ? enumDefault : String.valueOf(defaultValue));
-        if (value == null) {
-            return defaultValue;
+    public static float getFloat(String key) {
+        String val = systemConfigMap.get(key);
+        if (val != null) {
+            try {
+                return Float.parseFloat(val);
+            } catch (NumberFormatException e) {
+                return 0f;
+            }
         }
-        try {
-            return Boolean.parseBoolean(value);
-        } catch (Exception e) {
-            log.warn("配置项 {} 解析 bool 失败，回退默认值: {}", key, defaultValue);
-            return defaultValue;
+        SystemConfigKey configKey = SystemConfigKey.getByKey(key);
+        if (configKey != null) {
+            try {
+                return Float.parseFloat(configKey.getDefaultValue());
+            } catch (NumberFormatException e) {
+                return 0f;
+            }
         }
+        return 0f;
     }
 
     /**
-     * 获取 JSON 配置值。
-     * 若缓存中不存在该 key，则从枚举 SystemConfigKey 的 defaultValue 中获取；
-     * 若枚举中也不存在，则返回传入的 defaultValue 参数。
+     * 获取 BigDecimal 类型的配置值，若 DB 中不存在则使用枚举默认值
+     *
+     * @param key 配置 key
+     * @return 配置值、枚举默认值或 BigDecimal.ZERO
      */
-    public static <T> T getJson(String key, Class<T> cls, T defaultValue) {
-        String enumDefault = KEY_DEFAULT_MAP.get(key);
-        String value = getString(key, "global", enumDefault);
-        if (value == null) {
-            return defaultValue;
+    public static BigDecimal getBigDecimal(String key) {
+        String val = systemConfigMap.get(key);
+        if (val != null) {
+            return new BigDecimal(val);
         }
-        try {
-            return JSON.parseObject(value, cls);
-        } catch (Exception e) {
-            log.warn("配置项 {} 解析 JSON 失败，回退默认值: {}", key, defaultValue);
-            return defaultValue;
+        SystemConfigKey configKey = SystemConfigKey.getByKey(key);
+        if (configKey != null) {
+            return new BigDecimal(configKey.getDefaultValue());
         }
-    }
-
-    /**
-     * 获取字符串配置值（带 scope）。
-     * 优先级：scope 专属值 > global 值 > 枚举默认值 > 传入的 defaultValue
-     */
-    public static String getString(String key, String scope, String defaultValue) {
-        SystemConfig inst = instance;
-        if (inst == null) {
-            log.warn("SystemConfig 尚未初始化，key={} 回退默认值", key);
-            return defaultValue;
-        }
-        // 先查 scope 专属值
-        String cacheKey = scope + "|" + key;
-        String value = inst.cache.get(cacheKey);
-
-        // scope 非 global 时，未命中回退 global
-        if (value == null && !"global".equals(scope)) {
-            cacheKey = "global|" + key;
-            value = inst.cache.get(cacheKey);
-        }
-
-        // 缓存未命中时，尝试从枚举默认值获取
-        if (value == null) {
-            value = KEY_DEFAULT_MAP.get(key);
-        }
-
-        return value != null ? value : defaultValue;
-    }
-
-    // ==================== 内部方法 ====================
-
-    private void reload() {
-        try {
-            Map<String, String> allConfigs = loader.loadAll();
-            cache.clear();
-            cache.putAll(allConfigs);
-            log.info("配置缓存加载完成，共 {} 项", cache.size());
-        } catch (Exception e) {
-            log.error("配置缓存加载失败", e);
-        }
+        return BigDecimal.ZERO;
     }
 }

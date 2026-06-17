@@ -42,14 +42,14 @@ public class VideoAppService {
         TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
                 .orElse(null);
         if (profileData != null) {
-            int maxCount = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getDefaultValue()));
+            int maxCount = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getKey());
             List<VideoVO> currentVideos = profileData.getVideos();
             if (currentVideos != null && currentVideos.size() >= maxCount) {
                 throw new BusinessException(BizErrorCode.VIDEO_LIMIT_EXCEEDED);
             }
         }
 
-        int maxSizeMb = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getDefaultValue()));
+        int maxSizeMb = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getKey());
         return this.generateUploadToken(userId, maxSizeMb);
     }
 
@@ -89,7 +89,7 @@ public class VideoAppService {
      */
     public VideoTokenVO getAvatarUploadToken(String ext) {
         String userId = UserContext.get();
-        int maxSizeMb = SystemConfig.getInt(SystemConfigKey.USER_AVATAR_MAX_SIZE_MB.getKey(), Integer.parseInt(SystemConfigKey.USER_AVATAR_MAX_SIZE_MB.getDefaultValue()));
+        int maxSizeMb = SystemConfig.getInt(SystemConfigKey.USER_AVATAR_MAX_SIZE_MB.getKey());
         return this.generateAvatarUploadToken(userId, ext, maxSizeMb);
     }
 

@@ -29,22 +29,20 @@ public class ProfileLevelManager {
         BigDecimal calibration = profileData.getCalibrationScore();
 
         // 读取权重
-        float w1 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_REPUTATION.getKey(), Float.parseFloat(SystemConfigKey.SCORE_WEIGHTS_REPUTATION.getDefaultValue()));
-        float w2 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_CREDIBILITY.getKey(), Float.parseFloat(SystemConfigKey.SCORE_WEIGHTS_CREDIBILITY.getDefaultValue()));
-        float w3 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_CALIBRATION.getKey(), Float.parseFloat(SystemConfigKey.SCORE_WEIGHTS_CALIBRATION.getDefaultValue()));
+        float w1 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_REPUTATION.getKey());
+        float w2 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_CREDIBILITY.getKey());
+        float w3 = SystemConfig.getFloat(SystemConfigKey.SCORE_WEIGHTS_CALIBRATION.getKey());
 
-        // 三维分（缺失则用默认值）
-        BigDecimal rep = reputation != null ? reputation : BigDecimal.valueOf(100);
-        BigDecimal cred = credibility != null ? credibility : BigDecimal.ZERO;
-        BigDecimal cal = calibration != null ? calibration : BigDecimal.valueOf(80);
+
 
         // 计算总分
-        float total = rep.floatValue() * w1 + cred.floatValue() * w2 + cal.floatValue() * w3;
+        float total = reputation.floatValue() * w1 + credibility.floatValue() * w2 + calibration.floatValue() * w3;
 
         // 等级落档
-        int sThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_S_THRESHOLD.getKey(), Integer.parseInt(SystemConfigKey.SCORE_RATING_S_THRESHOLD.getDefaultValue()));
-        int aThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_A_THRESHOLD.getKey(), Integer.parseInt(SystemConfigKey.SCORE_RATING_A_THRESHOLD.getDefaultValue()));
-        int bThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_B_THRESHOLD.getKey(), Integer.parseInt(SystemConfigKey.SCORE_RATING_B_THRESHOLD.getDefaultValue()));
+        int sThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_S_THRESHOLD.getKey());
+        int aThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_A_THRESHOLD.getKey());
+        int bThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_B_THRESHOLD.getKey());
+        int cThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_C_THRESHOLD.getKey());
 
         RatingLevelEnum level;
         if (total >= sThreshold) {

@@ -149,8 +149,8 @@ public class ProfileAppService {
         }
 
         if (isBad) {
-            int requiredMatches = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_REQUIRED_MATCHES.getKey(), Integer.parseInt(SystemConfigKey.SCORE_REVIEW_PERIOD_REQUIRED_MATCHES.getDefaultValue()));
-            int penaltyCredibility = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_PENALTY_CREDIBILITY.getKey(), Integer.parseInt(SystemConfigKey.SCORE_REVIEW_PERIOD_PENALTY_CREDIBILITY.getDefaultValue()));
+            int requiredMatches = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_REQUIRED_MATCHES.getKey());
+            int penaltyCredibility = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_PENALTY_CREDIBILITY.getKey());
             profileRecordService.saveReviewResetLog(userId, remaining, requiredMatches, meetupId);
             tennisProfileGateway.updateScoreFields(userId, null,
                     new BigDecimal(penaltyCredibility), null, null);

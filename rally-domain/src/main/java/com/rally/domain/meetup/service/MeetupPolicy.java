@@ -44,7 +44,7 @@ public class MeetupPolicy {
      * 校验当日发布上限
      */
     private void assertTimes(String userId) {
-        int publishLimit = SystemConfig.getInt(SystemConfigKey.ANTI_ABUSE_PUBLISH_PER_DAY_LIMIT.getKey(), Integer.parseInt(SystemConfigKey.ANTI_ABUSE_PUBLISH_PER_DAY_LIMIT.getDefaultValue()));
+        int publishLimit = SystemConfig.getInt(SystemConfigKey.ANTI_ABUSE_PUBLISH_PER_DAY_LIMIT.getKey());
         long todayCount = meetupGateway.countTodayActive(userId);
         if (todayCount >= publishLimit) {
             throw new BusinessException(BizErrorCode.PUBLISH_LIMIT_EXCEEDED);
@@ -137,7 +137,7 @@ public class MeetupPolicy {
      */
     public void assertEdit(Meetup meetup, MeetupPublishCmd cmd) {
         MeetupData data = meetup.getData();
-        int lockMinutes = SystemConfig.getInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START.getKey(), Integer.parseInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START.getDefaultValue()));
+        int lockMinutes = SystemConfig.getInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START.getKey());
 
         // 1. 权限和状态校验
         if (!meetup.canEdit(data.getCreatorId(), lockMinutes)) {

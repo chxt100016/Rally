@@ -29,7 +29,7 @@ public class SystemController {
      */
     @GetMapping("/config")
     public Result<String> getConfig(@RequestParam("key") String key) {
-        String value = SystemConfig.getString(key, null);
+        String value = SystemConfig.getString(key);
         return Result.ok(value);
     }
 
@@ -43,7 +43,7 @@ public class SystemController {
     public Result<Map<String, String>> batchGetConfig(@RequestBody List<String> keys) {
         Map<String, String> result = new LinkedHashMap<>();
         for (String key : keys) {
-            String value = SystemConfig.getString(key, null);
+            String value = SystemConfig.getString(key);
             if (value != null) {
                 result.put(key, value);
             }

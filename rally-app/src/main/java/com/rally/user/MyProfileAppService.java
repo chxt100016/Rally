@@ -152,8 +152,8 @@ public class MyProfileAppService {
                 .setName(name)
                 .setKey(key)
                 .setValue(score != null ? score.toPlainString() : "0")
-                .setMaxValue("1500")
-                .setInfo(SystemConfig.getString(infoConfigKey.getKey(), infoConfigKey.getDefaultValue()))
+                .setMaxValue(SystemConfig.getString(SystemConfigKey.SCORE_MAX.getKey()))
+                .setInfo(SystemConfig.getString(infoConfigKey.getKey()))
                 .setSort(sort);
     }
 
@@ -260,9 +260,9 @@ public class MyProfileAppService {
                         .setUrl(QiniuConfiguration.buildSignedUrl(video.getKey()))
                         .setTitle(video.getTitle()))
                 .collect(Collectors.toList()));
-        videoDTO.setMaxCount(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getDefaultValue())));
-        videoDTO.setMaxSizeMb(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getDefaultValue())));
-        videoDTO.setMaxSecond(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SECOND.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_SECOND.getDefaultValue())));
+        videoDTO.setMaxCount(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getKey()));
+        videoDTO.setMaxSizeMb(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getKey()));
+        videoDTO.setMaxSecond(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SECOND.getKey()));
         return videoDTO;
     }
 }

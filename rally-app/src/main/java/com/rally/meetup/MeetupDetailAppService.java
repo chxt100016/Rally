@@ -167,7 +167,7 @@ public class MeetupDetailAppService {
         recap.setMyReviews(reviewMap);
         recap.setScores(MeetupAppConvertMapper.INSTANCE.toScoreItemList(scoreRecords));
         recap.setScoreFilled(!scoreRecords.isEmpty());
-        String defaultTag = SystemConfig.getString(SystemConfigKey.REVIEW_DEFAULT_TAGS.getKey(), null);
+        String defaultTag = SystemConfig.getString(SystemConfigKey.REVIEW_DEFAULT_TAGS.getKey());
         if (StringUtils.isNotBlank(defaultTag)) {
             recap.setDefaultTags(List.of(defaultTag.split(",")));
         }
