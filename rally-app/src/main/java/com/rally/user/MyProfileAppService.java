@@ -262,6 +262,7 @@ public class MyProfileAppService {
                 .collect(Collectors.toList()));
         videoDTO.setMaxCount(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getDefaultValue())));
         videoDTO.setMaxSizeMb(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getDefaultValue())));
+        videoDTO.setMaxSecond(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SECOND.getKey(), Integer.parseInt(SystemConfigKey.USER_VIDEO_MAX_SECOND.getDefaultValue())));
         return videoDTO;
     }
 }

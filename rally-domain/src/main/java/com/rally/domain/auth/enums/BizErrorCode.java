@@ -37,7 +37,8 @@ public enum BizErrorCode {
     UNDER_REVIEW_LOCKED(40006, "核查期内不可进行该操作"),
     PROFILE_NOT_FOUND(40007, "档案不存在"),
     VIDEO_CALLBACK_INVALID(40008, "视频回调校验失败"),
-    USER_INCOMPLETE(4009, "请先完善用户信息"),
+    VIDEO_AT_LEAST_ONE(40009, "至少需要保留一个视频"),
+    USER_INCOMPLETE(40010, "请先完善用户信息"),
     FOLLOW_SELF_NOT_ALLOWED(40010, "不能关注自己"),
 
     // ========== 约球域 41001-41999 ==========

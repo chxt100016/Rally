@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 球员档案领域数据
@@ -146,8 +145,8 @@ public class TennisProfileData {
      * 删除一条视频
      */
     public void deleteVideo(String key) {
-        if (this.videos == null) {
-            return;
+        if (this.videos == null || this.videos.size() <= 1) {
+            throw new BusinessException(BizErrorCode.VIDEO_AT_LEAST_ONE);
         }
         this.videos.removeIf(v -> v.getKey().equals(key));
     }

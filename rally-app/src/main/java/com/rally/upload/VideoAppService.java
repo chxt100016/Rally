@@ -2,6 +2,7 @@ package com.rally.upload;
 
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
+import com.rally.client.qiniu.QiniuClient;
 import com.rally.utils.UserContext;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.auth.enums.BizErrorCode;
@@ -12,6 +13,7 @@ import com.rally.domain.user.gateway.TennisProfileGateway;
 import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.VideoTokenVO;
 import com.rally.domain.user.model.VideoVO;
+import com.rally.domain.utils.Assert;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,9 @@ public class VideoAppService {
 
     @Resource
     private TennisProfileGateway tennisProfileGateway;
+
+    @Resource
+    private QiniuClient qiniuClient;
 
     /**
      * 获取视频直传凭证
@@ -67,8 +72,14 @@ public class VideoAppService {
             videos = new ArrayList<>();
         }
 
+        // 校验至少保留一个视频
+        Assert.isTrue(videos.size() > 1, BizErrorCode.VIDEO_AT_LEAST_ONE);
+
         videos.removeIf(video -> video.getKey().equals(key));
         tennisProfileGateway.updateVideos(userId, videos);
+
+        // 删除七牛云视频
+        qiniuClient.deleteFile(key);
     }
 
 

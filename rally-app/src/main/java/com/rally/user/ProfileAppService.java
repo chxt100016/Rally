@@ -1,5 +1,6 @@
 package com.rally.user;
 
+import com.rally.client.qiniu.QiniuClient;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.log.model.ProfileChangeLogData;
 import com.rally.utils.UserContext;
@@ -14,6 +15,7 @@ import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.*;
 import com.rally.domain.log.ProfileLogService;
 import com.rally.domain.user.service.UserProfileDomainService;
+import com.rally.domain.utils.Assert;
 import com.rally.db.user.convert.UserConvertMapper;
 import com.rally.user.convert.UserAppConvertMapper;
 import jakarta.annotation.Resource;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -45,6 +48,9 @@ public class ProfileAppService {
 
     @Resource
     private MyProfileAppService myProfileAppService;
+
+    @Resource
+    private QiniuClient qiniuClient;
 
     /**
      * 编辑资料
@@ -81,8 +87,16 @@ public class ProfileAppService {
     public MyProfileDTO deleteVideo(DeleteVideoCmd cmd) {
         String userId = UserContext.get();
         UserProfile userProfile = userProfileDomainService.get(userId);
+
+        // 校验至少保留一个视频
+        List<VideoVO> videos = userProfile.getProfile().getVideos();
+        Assert.isTrue(videos != null && videos.size() > 1, BizErrorCode.VIDEO_AT_LEAST_ONE);
+
         userProfile.deleteVideo(cmd.getKey());
         userProfileDomainService.save(userProfile);
+
+        // 删除七牛云视频
+        qiniuClient.deleteFile(cmd.getKey());
 
         return myProfileAppService.getMyProfile();
     }

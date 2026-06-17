@@ -19,6 +19,8 @@ public class MyProfileVideoDTO {
 
     private Integer maxSizeMb;
 
+    private Integer maxSecond;
+
     /** 视频列表 */
     private List<VideoItemDTO> data;
 }

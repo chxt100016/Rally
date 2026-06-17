@@ -3,6 +3,7 @@ package com.rally.client.qiniu;
 import com.google.gson.Gson;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
+import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.Region;
 import com.qiniu.storage.UploadManager;
@@ -19,10 +20,30 @@ import java.util.UUID;
 public class QiniuClient {
 
     private final UploadManager uploadManager;
+    private final Configuration configuration;
 
     public QiniuClient() {
-        Configuration cfg = new Configuration(Region.autoRegion());
-        this.uploadManager = new UploadManager(cfg);
+        this.configuration = new Configuration(Region.autoRegion());
+        this.uploadManager = new UploadManager(configuration);
+    }
+
+    /**
+     * 删除七牛云文件
+     * @param key 文件key
+     */
+    public void deleteFile(String key) {
+        Auth auth = Auth.create(QiniuConfiguration.getAccessKey(), QiniuConfiguration.getSecretKey());
+        BucketManager bucketManager = new BucketManager(auth, configuration);
+        try {
+            log.info("qiniu delete: key={}", key);
+            bucketManager.delete(QiniuConfiguration.getBucket(), key);
+        } catch (QiniuException e) {
+            log.error("七牛云删除文件失败: key={}, code={}, msg={}", key, e.code(), e.getMessage());
+            // 忽略文件不存在的情况
+            if (e.code() != 612) {
+                throw new RuntimeException("七牛云删除文件失败: " + key, e);
+            }
+        }
     }
 
     public String uploadImage(byte[] data, String dir, String filename) throws QiniuException {
