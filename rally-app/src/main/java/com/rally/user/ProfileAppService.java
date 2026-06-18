@@ -52,6 +52,7 @@ public class ProfileAppService {
     @Resource
     private QiniuClient qiniuClient;
 
+
     /**
      * 编辑资料
      */

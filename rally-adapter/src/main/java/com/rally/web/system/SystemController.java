@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,20 @@ public class SystemController {
     public Result<String> getConfig(@RequestParam("key") String key) {
         String value = SystemConfig.getString(key);
         return Result.ok(value);
+    }
+
+    /**
+     * 获取群聊二维码（base64）
+     *
+     * @return { qrcode: "data:image/png;base64,..." }
+     */
+    @GetMapping("/qrcode")
+    public Result<Map<String, String>> getQrcode() {
+        String qrcode = SystemConfig.getString("system.group.qrcode");
+        if (qrcode == null || qrcode.isEmpty()) {
+            return Result.ok(Collections.emptyMap());
+        }
+        return Result.ok(Collections.singletonMap("qrcode", qrcode));
     }
 
     /**

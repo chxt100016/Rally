@@ -148,7 +148,12 @@ public enum SystemConfigKey {
     /** 用户上传头像的文件大小上限（MB） */
     USER_AVATAR_MAX_SIZE_MB("user.avatar.max_size_mb", "用户上传头像的文件大小上限（MB）", "5"),
     USER_HINT_VIDEO("user.hint.video", "", "· 单个视频时长 ≤ 60 秒，大小 ≤ 20MB\n· 建议横屏拍摄，画面清晰稳定\n· 完整展示正手 / 反手 / 发球等技术动作\n· 每位用户最多上传 3 个视频"),
-    USER_HINT_NTRP("user.hint.ntrp", "", "")
+    USER_HINT_NTRP("user.hint.ntrp", "", ""),
+
+    // ==================== 系统 ====================
+
+    /** 群聊二维码（base64） */
+    SYSTEM_GROUP_QRCODE("system.group.qrcode", "群聊二维码 base64", "")
 
     ;
 
