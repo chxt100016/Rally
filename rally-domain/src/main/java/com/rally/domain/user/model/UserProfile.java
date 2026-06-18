@@ -136,7 +136,7 @@ public class UserProfile {
     }
 
     public void assertCompleted() {
-        assertBasic();
+//        assertBasic();
         Assert.isTrue(hasProfile(), BizErrorCode.USER_INCOMPLETE);
     }
 

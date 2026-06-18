@@ -5,6 +5,7 @@ import com.qiniu.storage.DownloadUrl;
 import com.qiniu.util.Auth;
 import lombok.Data;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -54,6 +55,9 @@ public class QiniuConfiguration {
      * @return 完整的 CDN 访问地址
      */
     public static String buildSignedUrl(String key) {
+        if (StringUtils.isBlank(key)) {
+            return null;
+        }
         boolean useHttps = domain.startsWith("https");
         String domainHost = domain.replaceFirst("^https?://", "");
         DownloadUrl downloadUrl = new DownloadUrl(domainHost, useHttps, key);

@@ -59,12 +59,12 @@ public class MyProfileAppService {
     private static final DateTimeFormatter SET_TITLE_DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd");
 
     /**
-     * 我的档案（新版）
+     * 我的档案
      */
     public MyProfileDTO getMyProfile() {
         String userId = UserContext.get();
         UserProfile userProfile = userProfileDomainService.get(userId);
-        userProfile.assertBasic();
+
 
         boolean hasProfile = userProfile.hasProfile();
         return new MyProfileDTO()
