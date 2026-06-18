@@ -37,7 +37,7 @@ public class ProfileLevelManager {
         // 计算总分
         float total = reputation * w1 + credibility * w2 + calibration * w3;
 
-        // 等级落档
+        // 等级落 档
         int sThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_S_THRESHOLD.getKey());
         int aThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_A_THRESHOLD.getKey());
         int bThreshold = SystemConfig.getInt(SystemConfigKey.SCORE_RATING_B_THRESHOLD.getKey());
