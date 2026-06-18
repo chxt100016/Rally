@@ -1,5 +1,6 @@
 package com.rally.meetup;
 
+import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.utils.UserContext;
 import com.rally.domain.court.service.CourtDomainService;
 import com.rally.domain.meetup.gateway.NearbyGateway;
@@ -31,6 +32,8 @@ public class MeetupAppService {
 
     private final CourtDomainService courtDomainService;
 
+    private final ChatDomainService chatDomainService;
+
     /**
      * 发布约球
      */
@@ -42,7 +45,10 @@ public class MeetupAppService {
         meetupPolicy.assertPublish(userId, cmd);
 
         // 2. 构建 MeetupData 并持久化（含创建者自动报名）
-        meetupDomainService.save(userId, cmd);
+        String meetupId = meetupDomainService.save(userId, cmd);
+
+        // 加入群聊
+        chatDomainService.join(meetupId, userId);
 
         // 3. 球场查找或创建（200m 范围内合并）
         courtDomainService.findOrCreate(cmd.getCourtName(), cmd.getCourtAddress(), cmd.getCourtLng(), cmd.getCourtLat(), cmd.getCityCode(), cmd.getDistrictCode(), null);
