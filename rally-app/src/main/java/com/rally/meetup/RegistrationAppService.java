@@ -1,15 +1,16 @@
 package com.rally.meetup;
 
-import com.rally.utils.UserContext;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.QuitResult;
+import com.rally.domain.meetup.model.RegistrationApproveCmd;
+import com.rally.domain.meetup.model.RegistrationRejectCmd;
+import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.RegistrationDomainService;
-import com.rally.domain.system.SystemConfig;
-import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
+import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class RegistrationAppService {
     private final MeetupDomainService meetupDomainService;
     private final RegistrationDomainService registrationDomainService;
     private final UserProfileDomainService userProfileDomainService;
+    private final ChatDomainService chatDomainService;
 
     /**
      * 报名
@@ -43,6 +45,12 @@ public class RegistrationAppService {
 
         // 2. 报名（聚合根校验 + 创建报名记录 + 持久化）
         RegistrationStatusEnum status = registrationDomainService.join(meetup, userProfile, autoWithdrawAt);
+
+        // 加入群聊
+        if (RegistrationStatusEnum.JOINED == status) {
+            this.chatDomainService.join(meetupId, userId);
+        }
+
 
         // 3. 发送通知（app 层负责）
         if (status == RegistrationStatusEnum.JOINED) {
@@ -81,12 +89,14 @@ public class RegistrationAppService {
         // 2. 退出（聚合根校验 + 持久化），返回是否需扣分
         QuitResult result = registrationDomainService.quit(meetup, userId);
 
+        // 退出群聊
+        this.chatDomainService.quit(meetupId, userId);
+
         // 3. 扣分
-        if (result == QuitResult.PENALIZED) {
-            int penalty = SystemConfig.getInt(SystemConfigKey.MEETUP_QUIT_PENALTY_UNDER_6H.getKey());
-            // TODO: 调用评分域扣分
-            log.info("退出扣分: userId={}, meetupId={}, penalty={}", userId, meetupId, penalty);
-        }
+        // TODO: 调用评分域扣分
+
+        // 4. 通知
+        // 通知
 
         // 4. 日志
         log.info("退出成功: userId={}, meetupId={}", userId, meetupId);
@@ -96,37 +106,38 @@ public class RegistrationAppService {
      * 审批通过
      */
     @Transactional
-    public void approve(String registrationId) {
+    public void approve(RegistrationApproveCmd cmd) {
         String currentUserId = UserContext.get();
 
         // 1. 获取约球 ID 并加载聚合根
-        String meetupId = registrationDomainService.getMeetupIdByRegistration(registrationId);
-        Meetup meetup = meetupDomainService.get(meetupId);
+        Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
 
         // 2. 审批通过（聚合根校验 + 持久化）
-        registrationDomainService.approve(meetup, registrationId, currentUserId);
+        registrationDomainService.approve(meetup, cmd.getRegistrationId(), currentUserId);
+
+        // 加入群聊
+        this.chatDomainService.join(cmd.getMeetupId(), currentUserId);
 
         // 3. 发送通知
         // TODO: 调用通知域
-        log.info("审批通过: registrationId={}", registrationId);
+        log.info("审批通过: registrationId={}", cmd.getRegistrationId());
     }
 
     /**
      * 审批拒绝（仅创建人）
      */
     @Transactional
-    public void reject(String registrationId) {
+    public void reject(RegistrationRejectCmd cmd) {
         String currentUserId = UserContext.get();
 
         // 1. 获取约球 ID 并加载聚合根
-        String meetupId = registrationDomainService.getMeetupIdByRegistration(registrationId);
-        Meetup meetup = meetupDomainService.get(meetupId);
+        Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
 
         // 2. 审批拒绝（聚合根校验 + 持久化）
-        registrationDomainService.reject(meetup, registrationId, currentUserId);
+        registrationDomainService.reject(meetup, cmd.getRegistrationId(), currentUserId);
 
         // 3. 发送通知
         // TODO: 调用通知域
-        log.info("审批拒绝: registrationId={}", registrationId);
+        log.info("审批拒绝: registrationId={}", cmd.getRegistrationId());
     }
 }

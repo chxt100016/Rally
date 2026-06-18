@@ -57,7 +57,7 @@ public class RegistrationController {
      */
     @PostMapping("/approve")
     public Result<Void> approve(@RequestBody @Valid RegistrationApproveCmd cmd) {
-        registrationAppService.approve(cmd.getRegistrationId());
+        registrationAppService.approve(cmd);
         return Result.ok();
     }
 
@@ -66,7 +66,7 @@ public class RegistrationController {
      */
     @PostMapping("/reject")
     public Result<Void> reject(@RequestBody @Valid RegistrationRejectCmd cmd) {
-        registrationAppService.reject(cmd.getRegistrationId());
+        registrationAppService.reject(cmd);
         return Result.ok();
     }
 }

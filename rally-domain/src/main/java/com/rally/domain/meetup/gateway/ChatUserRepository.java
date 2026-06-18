@@ -19,6 +19,11 @@ public interface ChatUserRepository {
      */
     ChatUserData findByMeetupIdAndUserId(String meetupId, String userId);
 
+    /**
+     * 判断用户是否已加入聊天
+     */
+    boolean existsByMeetupIdAndUserId(String meetupId, String userId);
+
 
 
     /**
@@ -35,4 +40,9 @@ public interface ChatUserRepository {
      * 增加活动所有用户的未读数（发消息时调用，排除发送者）
      */
     void incrementUnreadCountForAllExceptSender(String meetupId, String senderId);
+
+    /**
+     * 删除聊天用户
+     */
+    void deleteByMeetupIdAndUserId(String meetupId, String userId);
 }

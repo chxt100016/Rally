@@ -103,14 +103,4 @@ public class RegistrationDomainService {
         meetupGateway.save(meetup);
     }
 
-    /**
-     * 根据报名记录 ID 获取约球 ID（供 app 层加载聚合根用）
-     * @param registrationId 报名记录 ID
-     * @return 约球 ID
-     */
-    public String getMeetupIdByRegistration(String registrationId) {
-        RegistrationData registration = registrationGateway.findByBizId(registrationId);
-        Assert.notNull(registration, BizErrorCode.WAITLIST_NOT_FOUND);
-        return registration.getRallyMeetupId();
-    }
 }

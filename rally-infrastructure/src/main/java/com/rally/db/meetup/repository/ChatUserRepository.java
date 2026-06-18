@@ -37,6 +37,14 @@ public class ChatUserRepository implements com.rally.domain.meetup.gateway.ChatU
     }
 
     @Override
+    public boolean existsByMeetupIdAndUserId(String meetupId, String userId) {
+        LambdaQueryWrapper<ChatUserPO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ChatUserPO::getMeetupId, meetupId)
+                .eq(ChatUserPO::getUserId, userId);
+        return chatUserService.count(wrapper) > 0;
+    }
+
+    @Override
     public void updateLastReadMessageId(String meetupId, String userId, String lastReadMessageId) {
         LambdaUpdateWrapper<ChatUserPO> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(ChatUserPO::getMeetupId, meetupId)
@@ -61,5 +69,13 @@ public class ChatUserRepository implements com.rally.domain.meetup.gateway.ChatU
                 .ne(ChatUserPO::getUserId, senderId)
                 .setSql("unread_count = unread_count + 1");
         chatUserService.update(wrapper);
+    }
+
+    @Override
+    public void deleteByMeetupIdAndUserId(String meetupId, String userId) {
+        LambdaQueryWrapper<ChatUserPO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ChatUserPO::getMeetupId, meetupId)
+                .eq(ChatUserPO::getUserId, userId);
+        chatUserService.remove(wrapper);
     }
 }

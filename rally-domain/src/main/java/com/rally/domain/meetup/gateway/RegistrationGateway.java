@@ -12,11 +12,6 @@ public interface RegistrationGateway {
 
 
     /**
-     * 根据 bizId 查询
-     */
-    RegistrationData findByBizId(String bizId);
-
-    /**
      * 查询用户在某约球的最新有效报名（pending/JOINED）
      */
     RegistrationData findActiveByMeetupAndUser(String meetupId, String userId);

@@ -48,11 +48,8 @@ public class ChatAppService {
         String userId = UserContext.get();
         assertIn(meetupId, userId);
 
-        // 无游标（首拉/清缓存）时历史回溯上限
-        String fixedLastMessageId = chatDomainService.fixLastMessageId(lastMessageId, meetupId);
-
         // 拉取消息
-        List<ChatMessageData> messages = chatDomainService.pull(meetupId, userId, fixedLastMessageId, limit);
+        List<ChatMessageData> messages = chatDomainService.pull(meetupId, userId, lastMessageId, limit);
 
         // 转换消息列表
         List<ChatMessageDTO> messageDTOs = ChatAppConvertMapper.INSTANCE.toChatMessageDTO(messages);

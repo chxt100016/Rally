@@ -6,8 +6,9 @@ import com.rally.domain.meetup.gateway.ChatUserRepository;
 import com.rally.domain.meetup.model.ChatMessageData;
 import com.rally.domain.meetup.model.ChatSendCmd;
 import com.rally.domain.meetup.model.ChatUserData;
-import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.user.model.UserProfile;
+import com.rally.domain.utils.Assert;
+import com.rally.domain.auth.enums.BizErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,29 @@ public class ChatDomainService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatUserRepository chatUserRepository;
-    private final MeetupDomainService meetupDomainService;
+
+    /**
+     * 加入聊天
+     */
+    public void join(String meetupId, String userId) {
+        boolean exists = chatUserRepository.existsByMeetupIdAndUserId(meetupId, userId);
+        Assert.isTrue(!exists, BizErrorCode.ALREADY_JOINED_CHAT);
+
+        ChatUserData chatUser = new ChatUserData();
+        chatUser.setBizId(IdWorker.getIdStr());
+        chatUser.setMeetupId(meetupId);
+        chatUser.setUserId(userId);
+        chatUser.setUnreadCount(0);
+        chatUser.setJoinedAt(LocalDateTime.now());
+        chatUserRepository.save(chatUser);
+    }
+
+    /**
+     * 退出聊天
+     */
+    public void quit(String meetupId, String userId) {
+        chatUserRepository.deleteByMeetupIdAndUserId(meetupId, userId);
+    }
 
     /**
      * 发送消息
@@ -58,6 +81,10 @@ public class ChatDomainService {
      * 拉取消息
      */
     public List<ChatMessageData> pull(String meetupId, String userId, String lastMessageId, Integer limit) {
+        // 无游标（首拉/清缓存）时历史回溯上限200条：超过则把游标定位到最近200条之前，从那里开始拉
+        if (StringUtils.isBlank(lastMessageId)) {
+            lastMessageId = chatMessageRepository.findCursorBeforeRecent(meetupId, MAX_HISTORY_COUNT);
+        }
 
         List<ChatMessageData> messages = chatMessageRepository.findByMeetupId(meetupId, lastMessageId, limit);
 
@@ -67,25 +94,7 @@ public class ChatDomainService {
         return messages;
     }
 
-    /**
-     * 无游标（首拉/清缓存）时历史回溯上限200条：超过则把游标定位到最近200条之前，从那里开始拉
-     */
-    public String fixLastMessageId(String lastMessageId, String meetupId) {
-        if (StringUtils.isBlank(lastMessageId)) {
-            lastMessageId = chatMessageRepository.findCursorBeforeRecent(meetupId, MAX_HISTORY_COUNT);
-        }
-        return lastMessageId;
-    }
 
-    /**
-     * 计算下次拉取的游标：取本次最后一条消息的bizId，无新消息则维持前端传入的位置
-     */
-    private String resolveNextCursor(List<ChatMessageData> messages, String lastMessageId) {
-        if (messages.isEmpty()) {
-            return lastMessageId;
-        }
-        return messages.get(messages.size() - 1).getBizId();
-    }
 
     /**
      * 维护数据库的已读状态：清零未读数，已读位置只前进不后退（防止清缓存重拉历史时把已读位置回退）

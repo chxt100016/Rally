@@ -26,11 +26,6 @@ public class RegistrationGatewayImpl implements RegistrationGateway {
 
 
 
-    @Override
-    public RegistrationData findByBizId(String bizId) {
-        RegistrationPO po = get(bizId);
-        return MAPPER.toRegistrationData(po);
-    }
 
     @Override
     public RegistrationData findActiveByMeetupAndUser(String meetupId, String userId) {

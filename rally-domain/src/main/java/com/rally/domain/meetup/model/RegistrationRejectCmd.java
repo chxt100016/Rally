@@ -10,6 +10,10 @@ import lombok.Data;
 public class RegistrationRejectCmd {
 
     /** 报名ID */
+    @NotBlank(message = "活动id不能为空")
+    private String meetupId;
+
+    /** 报名ID */
     @NotBlank(message = "报名ID不能为空")
     private String registrationId;
 }

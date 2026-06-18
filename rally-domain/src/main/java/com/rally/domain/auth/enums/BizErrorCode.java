@@ -78,6 +78,7 @@ public enum BizErrorCode {
     // ========== 聊天域 41101-41199 ==========
     CHAT_USER_NOT_FOUND(41101, "聊天用户不存在"),
     CHAT_MESSAGE_EMPTY(41102, "消息内容不能为空"),
+    ALREADY_JOINED_CHAT(41103, "你已加入该聊天"),
 
     // ========== 球场域 44001-44999 ==========
     COURT_NOT_FOUND(44001, "球场不存在"),
