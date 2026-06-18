@@ -68,7 +68,7 @@ public class MeetupDetailAppService {
                 .setWeather(buildWeather(meetup))
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
                 .setParticipants(buildParticipantVOList(meetup, participantUserIds, profileMap))
-                .setRecap(actionState == ActionStateEnum.FINISHED ? buildRecap(meetup) : null)
+                .setRecap(meetup.canReview() ? buildRecap(meetup) : null)
                 .setUnreadCount(actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.ONGOING_JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED  ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null);
 
     }

@@ -420,8 +420,12 @@ public class Meetup {
     }
 
     public void assertCanReview() {
+        Assert.isTrue(canReview(), BizErrorCode.MEETUP_CANT_REVIEW);
+    }
+
+    public boolean canReview() {
         MeetupStatusEnum realStatus = getRealStatus();
-        Assert.in(realStatus, BizErrorCode.MEETUP_CANT_REVIEW, MeetupStatusEnum.FINISHED, MeetupStatusEnum.ONGOING);
+        return realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.ONGOING;
     }
 
     public void assertReviewAvailable(String userId) {
