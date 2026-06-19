@@ -55,7 +55,7 @@ public class MeetupDetailAppService {
             log.info("from share, userId: {}, shareUserId:{}", currentUserId, shareUserId);
         }
 
-        // 1 获取聚合根（含报名记录）
+        // 1 获取聚合根 （含报名记录）
         Meetup meetup = meetupDomainService.get(meetupId);
 
         // 2 按视角获取参与者列表，批量查询用户信息（creatorId 兜底，确保创建人信息可查）
