@@ -209,7 +209,8 @@ public class MyProfileAppService {
         boolean isWin = (userInSideA && "A".equals(record.getWinSide())) || (!userInSideA && "B".equals(record.getWinSide()));
         ResultTypeEnum resultType = isWin ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
         String matchTypeLabel = record.getMatchType() == MatchTypeEnum.DOUBLE ? "双打" : "单打";
-        String title = record.getMeetupDate().format(SET_TITLE_DATE_FORMATTER) + " " + matchTypeLabel + " " + buildSetFormatLabel(record);
+        String formatLabel = record.getSetFormat() == SetFormatEnum.TIEBREAK ? "抢分" : "局";
+        String title = record.getMeetupDate().format(SET_TITLE_DATE_FORMATTER) + " · " + matchTypeLabel + " · " + formatLabel;
         return new MyProfileSetScoreDTO.SetItem()
                 .setTitle(title)
                 .setResultType(resultType)
@@ -228,15 +229,6 @@ public class MyProfileAppService {
         UserProfile profile = profiles.get(playerId);
         if (profile == null || profile.getUser() == null) return null;
         return QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl());
-    }
-
-    /** 构建赛制标签：常规局按本盘最大局数显示「X局」，抢七统一显示「抢分」 */
-    private String buildSetFormatLabel(ScoreRecordData record) {
-        if (record.getSetFormat() == SetFormatEnum.TIEBREAK) {
-            return "抢分";
-        }
-        int games = Math.max(record.getSideAScore(), record.getSideBScore()) - 1;
-        return games + "局";
     }
 
     /** 构建视频信息 DTO */

@@ -359,9 +359,12 @@ public class Meetup {
             if (realStatus == MeetupStatusEnum.ONGOING) {
                 return ActionStateEnum.ONGOING_JOINED;
             }
+            boolean hasOtherParticipants = registrations.stream()
+                    .filter(RegistrationData::isActiveParticipant)
+                    .anyMatch(r -> !isCreator(r.getUserId()));
             int lockMinutes = SystemConfig.getInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START.getKey());
             boolean locked = LocalDateTime.now().isAfter(data.getStartTime().minusMinutes(lockMinutes));
-            return locked ? ActionStateEnum.OWNER_EDIT_LOCKED : ActionStateEnum.OWNER_EDITABLE;
+            return (locked && hasOtherParticipants) ? ActionStateEnum.OWNER_EDIT_LOCKED : ActionStateEnum.OWNER_EDITABLE;
         }
 
         // 访客视角：根据报名状态判断

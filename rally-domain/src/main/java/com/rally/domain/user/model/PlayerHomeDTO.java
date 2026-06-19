@@ -30,4 +30,7 @@ public class PlayerHomeDTO {
 
     /** 视频信息 */
     private MyProfileVideoDTO video;
+
+    /** 最近10场比分 */
+    private MyProfileSetScoreDTO setScore;
 }

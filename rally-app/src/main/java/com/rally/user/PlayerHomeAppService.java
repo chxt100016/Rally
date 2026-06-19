@@ -1,6 +1,9 @@
 package com.rally.user;
 
 import com.rally.config.property.QiniuConfiguration;
+import com.rally.domain.meetup.enums.MatchTypeEnum;
+import com.rally.domain.meetup.enums.ResultTypeEnum;
+import com.rally.domain.recap.enums.SetFormatEnum;
 import com.rally.domain.meetup.enums.UserMeetupTabEnum;
 import com.rally.domain.meetup.model.MeetupCardDTO;
 import com.rally.domain.meetup.model.MeetupData;
@@ -10,6 +13,8 @@ import com.rally.domain.meetup.service.MeetupQueryDomainService;
 import com.rally.meetup.MeetupCardPackingService;
 import com.rally.domain.recap.UserReviewDomainService;
 import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
+import com.rally.domain.recap.model.ScoreRecordData;
+import com.rally.domain.recap.service.RecapDomainService;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.user.model.*;
 import com.rally.domain.user.service.UserFollowDomainService;
@@ -20,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +37,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class PlayerHomeAppService {
+
+    private static final int LIST_LIMIT = 10;
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd");
 
     @Resource
     private UserProfileDomainService userProfileDomainService;
@@ -46,6 +55,9 @@ public class PlayerHomeAppService {
 
     @Resource
     private UserReviewDomainService userReviewDomainService;
+
+    @Resource
+    private RecapDomainService recapDomainService;
 
     @Resource
     private UserFollowDomainService userFollowDomainService;
@@ -67,7 +79,8 @@ public class PlayerHomeAppService {
                 .setReview(buildReviewDTO(targetUserId))
                 .setLevel(buildLevelDTO(profileData))
                 .setScore(buildScoreDTO(profileData))
-                .setVideo(buildVideoDTO(profileData));
+                .setVideo(buildVideoDTO(profileData))
+                .setSetScore(buildSetScoreDTO(targetUserId));
     }
 
     // ========== 各子 DTO 构建方法 ==========
@@ -88,7 +101,7 @@ public class PlayerHomeAppService {
         return new MyProfileUserDTO()
                 .setUserId(userData.getUserId())
                 .setNickname(userData.getNickname())
-                .setAvatarUrl(QiniuConfiguration.buildSignedUrl(userData.getAvatarUrl()))
+                .setAvatarUrl(buildSignedUrl(userData.getAvatarUrl()))
                 .setGender(userData.getGender())
                 .setBirthday(userData.getBirthday())
                 .setCityCode(userData.getCityCode())
@@ -142,7 +155,7 @@ public class PlayerHomeAppService {
             videoDTO.setData(videos.stream()
                     .map(video -> new VideoItemDTO()
                             .setKey(video.getKey())
-                            .setUrl(QiniuConfiguration.buildSignedUrl(video.getKey()))
+                            .setUrl(buildSignedUrl(video.getKey()))
                             .setCoverUrl(QiniuConfiguration.buildCover(video.getKey()))
                             .setTitle(StringUtils.isBlank(video.getTitle()) ? "未命名" : video.getTitle()))
                     .collect(Collectors.toList()));
@@ -151,5 +164,44 @@ public class PlayerHomeAppService {
             videoDTO.setData(new ArrayList<>());
         }
         return videoDTO;
+    }
+
+    /** 构建最近10场比分 DTO（头像使用比分记录中的冗余数据） */
+    private MyProfileSetScoreDTO buildSetScoreDTO(String userId) {
+        List<ScoreRecordData> records = recapDomainService.listScoresByUserId(userId);
+        long singleCount = records.stream().filter(r -> r.getMatchType() == MatchTypeEnum.SINGLE).count();
+        long doubleCount = records.stream().filter(r -> r.getMatchType() == MatchTypeEnum.DOUBLE).count();
+        List<MyProfileSetScoreDTO.SetItem> setItems = records.stream()
+                .limit(LIST_LIMIT)
+                .map(r -> buildSetItem(userId, r))
+                .toList();
+        return new MyProfileSetScoreDTO()
+                .setTotal((long) records.size())
+                .setSingleCount(singleCount)
+                .setDoubleCount(doubleCount)
+                .setSetItems(setItems);
+    }
+
+    private MyProfileSetScoreDTO.SetItem buildSetItem(String userId, ScoreRecordData record) {
+        boolean userInSideA = userId.equals(record.getSideAPlayer1()) || userId.equals(record.getSideAPlayer2());
+        boolean isWin = (userInSideA && "A".equals(record.getWinSide())) || (!userInSideA && "B".equals(record.getWinSide()));
+        ResultTypeEnum resultType = isWin ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
+        String matchTypeLabel = record.getMatchType() == MatchTypeEnum.DOUBLE ? "双打" : "单打";
+        String formatLabel = record.getSetFormat() == SetFormatEnum.TIEBREAK ? "抢分" : "局";
+        String title = record.getMeetupDate().format(DATE_FORMATTER) + " · " + matchTypeLabel + " · " + formatLabel;
+        return new MyProfileSetScoreDTO.SetItem()
+                .setTitle(title)
+                .setResultType(resultType)
+                .setMatchType(record.getMatchType())
+                .setSideAPlayer1AvatarUrl(buildSignedUrl(record.getSideAPlayer1Avatar()))
+                .setSideAPlayer2AvatarUrl(buildSignedUrl(record.getSideAPlayer2Avatar()))
+                .setSideAScore(String.valueOf(record.getSideAScore()))
+                .setSideBPlayer1AvatarUrl(buildSignedUrl(record.getSideBPlayer1Avatar()))
+                .setSideBPlayer2AvatarUrl(buildSignedUrl(record.getSideBPlayer2Avatar()))
+                .setSideBScore(String.valueOf(record.getSideBScore()));
+    }
+
+    private String buildSignedUrl(String key) {
+        return StringUtils.isBlank(key) ? null : QiniuConfiguration.buildSignedUrl(key);
     }
 }
