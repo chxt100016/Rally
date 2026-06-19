@@ -77,6 +77,7 @@ public class RecapRepository implements RecapGateway {
 
     @Override
     public void addScore(String meetupId, String userId, ScoreAddCmd cmd, LocalDateTime meetupDate, String venueName) {
+        validateWinSide(cmd.getWinSide(), cmd.getSideAScore(), cmd.getSideBScore(), cmd.getSideATiebreakScore(), cmd.getSideBTiebreakScore());
         // 同场同盘唯一校验（uk_meetup_set 兜底，这里先行拦截给出友好错误）
         long exists = scoreRecordService.lambdaQuery().eq(ScoreRecordPO::getRallyMeetupId, meetupId).eq(ScoreRecordPO::getSetNumber, cmd.getSetNum()).count();
         Assert.isTrue(exists == 0, BizErrorCode.SCORE_SET_DUPLICATE);
@@ -90,6 +91,7 @@ public class RecapRepository implements RecapGateway {
 
     @Override
     public void updateScore(String meetupId, String userId, ScoreUpdateCmd cmd, LocalDateTime meetupDate, String venueName) {
+        validateWinSide(cmd.getWinSide(), cmd.getSideAScore(), cmd.getSideBScore(), cmd.getSideATiebreakScore(), cmd.getSideBTiebreakScore());
         // 按 bizId 定位记录（雪花永不复用，定位到的就是用户当初看到的那条，天然防 ABA）
         ScoreRecordPO existing = scoreRecordService.lambdaQuery().eq(ScoreRecordPO::getBizId, cmd.getBizId()).eq(ScoreRecordPO::getRallyMeetupId, meetupId).one();
         Assert.notNull(existing, BizErrorCode.RECAP_SCORE_NOT_FOUND);
@@ -107,6 +109,7 @@ public class RecapRepository implements RecapGateway {
         existing.setSideBScore(cmd.getSideBScore());
         existing.setSideATiebreakScore(cmd.getSideATiebreakScore());
         existing.setSideBTiebreakScore(cmd.getSideBTiebreakScore());
+        existing.setWinSide(cmd.getWinSide());
         existing.setRecordedBy(userId);
         existing.setMeetupDate(meetupDate);
         existing.setVenueName(venueName);
@@ -178,6 +181,16 @@ public class RecapRepository implements RecapGateway {
                 po.setSideBPlayer2Nickname(b2.getNickname());
                 po.setSideBPlayer2Avatar(b2.getAvatarUrl());
             }
+        }
+    }
+
+    private void validateWinSide(String winSide, Integer sideAScore, Integer sideBScore, Integer sideATiebreakScore, Integer sideBTiebreakScore) {
+        Assert.isTrue("A".equals(winSide) || "B".equals(winSide), BizErrorCode.INVALID_WIN_SIDE);
+        if (sideAScore.equals(sideBScore)) {
+            Assert.isTrue(sideATiebreakScore != null && sideBTiebreakScore != null, BizErrorCode.INVALID_WIN_SIDE);
+            Assert.isTrue(sideATiebreakScore > sideBTiebreakScore ? "A".equals(winSide) : "B".equals(winSide), BizErrorCode.INVALID_WIN_SIDE);
+        } else {
+            Assert.isTrue(sideAScore > sideBScore ? "A".equals(winSide) : "B".equals(winSide), BizErrorCode.INVALID_WIN_SIDE);
         }
     }
 

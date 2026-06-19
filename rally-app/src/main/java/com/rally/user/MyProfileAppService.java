@@ -203,11 +203,11 @@ public class MyProfileAppService {
         return userProfileDomainService.listMap(playerIds);
     }
 
-    /** 构建单条战绩明细：根据当前用户所在阵营与比分判断胜负 */
+    /** 构建单条战绩明细：根据当前用户所在阵营与持久化的获胜边判断胜负 */
     private MyProfileSetScoreDTO.SetItem buildSetItem(String userId, ScoreRecordData record, Map<String, UserProfile> profiles) {
         boolean userInSideA = userId.equals(record.getSideAPlayer1()) || userId.equals(record.getSideAPlayer2());
-        boolean sideAWin = resolveSideAWin(record);
-        ResultTypeEnum resultType = (userInSideA == sideAWin) ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
+        boolean isWin = (userInSideA && "A".equals(record.getWinSide())) || (!userInSideA && "B".equals(record.getWinSide()));
+        ResultTypeEnum resultType = isWin ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
         String matchTypeLabel = record.getMatchType() == MatchTypeEnum.DOUBLE ? "双打" : "单打";
         String title = record.getMeetupDate().format(SET_TITLE_DATE_FORMATTER) + " " + matchTypeLabel + " " + buildSetFormatLabel(record);
         return new MyProfileSetScoreDTO.SetItem()
@@ -228,16 +228,6 @@ public class MyProfileAppService {
         UserProfile profile = profiles.get(playerId);
         if (profile == null || profile.getUser() == null) return null;
         return QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl());
-    }
-
-    /** 判定 A 侧是否胜出：常规比分相同（如 6:6）时按抢七比分判定 */
-    private boolean resolveSideAWin(ScoreRecordData record) {
-        Integer sideAScore = record.getSideAScore();
-        Integer sideBScore = record.getSideBScore();
-        if (sideAScore.equals(sideBScore) && record.getSideATiebreakScore() != null && record.getSideBTiebreakScore() != null) {
-            return record.getSideATiebreakScore() > record.getSideBTiebreakScore();
-        }
-        return sideAScore > sideBScore;
     }
 
     /** 构建赛制标签：常规局按本盘最大局数显示「X局」，抢七统一显示「抢分」 */

@@ -57,6 +57,8 @@ public class ScoreRecordData {
     private Integer sideATiebreakScore;
     /** B 侧抢七比分（本盘 6:6 时记录） */
     private Integer sideBTiebreakScore;
+    /** 获胜边: A / B */
+    private String winSide;
     /** 记录人 user_id */
     private String recordedBy;
     /** 乐观锁版本号 */

@@ -80,8 +80,6 @@ public interface MeetupAppConvertMapper {
     // ==================== ScoreRecordData → RecapDTO.ScoreItem ====================
 
     @Mapping(target = "setNum", source = "setNumber")
-    @Mapping(target = "scoreVersion", source = "version")
-    @Mapping(target = "setFormat", source = "setFormat", qualifiedByName = "setFormatToStr")
     @Mapping(target = "sideAPlayer1Avatar", source = "sideAPlayer1Avatar", qualifiedByName = "parseAvatar")
     @Mapping(target = "sideAPlayer2Avatar", source = "sideAPlayer2Avatar", qualifiedByName = "parseAvatar")
     @Mapping(target = "sideBPlayer1Avatar", source = "sideBPlayer1Avatar", qualifiedByName = "parseAvatar")
@@ -102,8 +100,4 @@ public interface MeetupAppConvertMapper {
         return value == null ? null : value.name();
     }
 
-    @Named("setFormatToStr")
-    static String setFormatToStr(com.rally.domain.recap.enums.SetFormatEnum value) {
-        return value == null ? null : value.name();
-    }
 }

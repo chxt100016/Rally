@@ -55,4 +55,8 @@ public class ScoreAddCmd {
 
     /** B 侧抢七比分（本盘 6:6 时填写） */
     private Integer sideBTiebreakScore;
+
+    /** 获胜边: A / B */
+    @NotBlank(message = "获胜边不能为空")
+    private String winSide;
 }

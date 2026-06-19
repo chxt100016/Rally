@@ -89,7 +89,8 @@ public enum BizErrorCode {
     RECAP_REVIEW_INVALID_TYPE(43003, "评价类型不合法"),
     RECAP_REVIEW_INVALID_VALUE(43004, "评价值不合法"),
     SCORE_VERSION_MISMATCH(43005, "比分版本不一致，请刷新后重试"),
-    RECAP_SCORE_NOT_FOUND(43006, "比分记录不存在");
+    RECAP_SCORE_NOT_FOUND(43006, "比分记录不存在"),
+    INVALID_WIN_SIDE(43007, "获胜边无效");
 
     private final int code;
     private final String message;

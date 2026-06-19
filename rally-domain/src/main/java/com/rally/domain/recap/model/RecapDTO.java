@@ -1,5 +1,6 @@
 package com.rally.domain.recap.model;
 
+import com.rally.domain.recap.enums.SetFormatEnum;
 import lombok.Data;
 
 import java.util.List;
@@ -47,8 +48,8 @@ public class RecapDTO {
         private String bizId;
         private Integer setNum;
         /** 比分版本号，下次 submit 回传做乐观锁 */
-        private Integer scoreVersion;
-        private String setFormat;
+        private Integer version;
+        private SetFormatEnum setFormat;
         private String sideAPlayer1;
         private String sideAPlayer1Nickname;
         private String sideAPlayer1Avatar;
@@ -63,5 +64,7 @@ public class RecapDTO {
         private String sideBPlayer2Avatar;
         private Integer sideAScore;
         private Integer sideBScore;
+        /** 获胜边: A / B */
+        private String winSide;
     }
 }

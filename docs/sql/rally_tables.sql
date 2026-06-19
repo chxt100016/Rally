@@ -191,6 +191,7 @@ CREATE TABLE `rally_meetup_score` (
   `side_b_score`    INT         NOT NULL COMMENT 'B 侧本盘比分',
   `side_a_tiebreak_score` INT   DEFAULT NULL COMMENT 'A 侧抢七比分（本盘 6:6 时记录）',
   `side_b_tiebreak_score` INT   DEFAULT NULL COMMENT 'B 侧抢七比分（本盘 6:6 时记录）',
+  `win_side`        VARCHAR(4)  NOT NULL DEFAULT '' COMMENT '获胜边: A / B',
   `recorded_by`     VARCHAR(32) NOT NULL COMMENT '记录人 user_id（任意参与者可代记）',
   `version`         INT         NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
   `create_time`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
