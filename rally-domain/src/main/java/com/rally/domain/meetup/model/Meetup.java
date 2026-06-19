@@ -167,7 +167,7 @@ public class Meetup {
      * @param autoWithdrawAt 自动撤回时间，可为 null
      * @return
      */
-    public RegistrationStatusEnum join(UserProfile userProfile, LocalDateTime autoWithdrawAt) {
+    public RegistrationStatusEnum join(UserProfile userProfile, LocalDateTime autoWithdrawAt, boolean fromShare) {
         // 1. 校验
         assertCanJoin(userProfile);
 
@@ -227,6 +227,8 @@ public class Meetup {
 
         // 6. 信誉分门槛校验
         checkReputationScore(userProfile);
+
+
     }
 
     /**
@@ -288,7 +290,7 @@ public class Meetup {
      * @param registrationId 报名记录 ID
      * @param currentUserId 当前用户 ID（审批人）
      */
-    public void approve(String registrationId, String currentUserId) {
+    public String approve(String registrationId, String currentUserId) {
         // 1. 查找报名记录
         RegistrationData registration = findRegistrationById(registrationId);
         Assert.notNull(registration, BizErrorCode.WAITLIST_NOT_FOUND);
@@ -302,6 +304,8 @@ public class Meetup {
 
         // 4. 更新状态
         registration.setStatus(RegistrationStatusEnum.JOINED);
+
+        return registration.getUserId();
     }
 
     /**
@@ -436,5 +440,10 @@ public class Meetup {
         if (LocalDateTime.now().isAfter(deadlineAt)) {
             throw new BusinessException(BizErrorCode.REVIEW_DEADLINE_PASSED);
         }
+    }
+
+    public boolean canChat(String userId) {
+        ActionStateEnum actionState = this.getActionState(userId);
+        return actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.ONGOING_JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED;
     }
 }

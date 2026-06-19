@@ -16,6 +16,8 @@ public class VideoItemDTO {
     /** 视频访问URL */
     private String url;
 
+    private String coverUrl;
+
     private String image;
 
     private String title;

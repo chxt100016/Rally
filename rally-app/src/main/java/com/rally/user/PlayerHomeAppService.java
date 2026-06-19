@@ -17,6 +17,7 @@ import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.utils.UserContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -142,7 +143,8 @@ public class PlayerHomeAppService {
                     .map(video -> new VideoItemDTO()
                             .setKey(video.getKey())
                             .setUrl(QiniuConfiguration.buildSignedUrl(video.getKey()))
-                            .setTitle(video.getTitle()))
+                            .setCoverUrl(QiniuConfiguration.buildCover(video.getKey()))
+                            .setTitle(StringUtils.isBlank(video.getTitle()) ? "未命名" : video.getTitle()))
                     .collect(Collectors.toList()));
         } else {
             videoDTO.setTotal(0);

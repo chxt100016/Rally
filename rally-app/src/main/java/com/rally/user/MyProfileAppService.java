@@ -19,6 +19,7 @@ import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.utils.UserContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.RoundingMode;
@@ -257,7 +258,8 @@ public class MyProfileAppService {
                 .map(video -> new VideoItemDTO()
                         .setKey(video.getKey())
                         .setUrl(QiniuConfiguration.buildSignedUrl(video.getKey()))
-                        .setTitle(video.getTitle()))
+                        .setCoverUrl(QiniuConfiguration.buildCover(video.getKey()))
+                        .setTitle(StringUtils.isBlank(video.getTitle()) ? "未命名" : video.getTitle()))
                 .collect(Collectors.toList()));
         videoDTO.setMaxCount(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getKey()));
         videoDTO.setMaxSizeMb(SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_SIZE_MB.getKey()));

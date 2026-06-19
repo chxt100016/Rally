@@ -30,7 +30,7 @@ public class RegistrationController {
      */
     @PostMapping("/join")
     public Result<Void> join(@RequestBody @Valid MeetupJoinCmd cmd) {
-        registrationAppService.join(cmd.getMeetupId(), cmd.getAutoWithdrawAt());
+        registrationAppService.join(cmd);
         return Result.ok();
     }
 

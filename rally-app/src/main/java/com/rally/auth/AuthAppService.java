@@ -49,6 +49,8 @@ public class AuthAppService {
             isNewUser = false;
         } else {
             UserData newUser = new UserData();
+            newUser.setAvatarUrl("default/avatar.jpeg");
+            newUser.setNickname("球员");
             UserData savedUser = userGateway.createUser(newUser);
             userId = savedUser.getUserId();
 
@@ -62,16 +64,10 @@ public class AuthAppService {
             isNewUser = true;
         }
 
-        boolean needCompleteInfo = needCompleteInfo(userId);
         String token = TokenUtils.issue(userId);
-        return new LoginResultVO(token, userId, isNewUser, needCompleteInfo);
+        return new LoginResultVO(token, userId, isNewUser, isNewUser);
     }
 
-    private boolean needCompleteInfo(String userId) {
-        return userGateway.findByUserId(userId)
-                .map(user -> StringUtils.isBlank(user.getNickname()) || StringUtils.isBlank(user.getAvatarUrl()))
-                .orElse(true);
-    }
 
     public void completeRegistration(CompleteRegistrationCmd cmd) {
         String userId = UserContext.get();

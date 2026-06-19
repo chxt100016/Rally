@@ -17,4 +17,6 @@ public class MeetupJoinCmd {
 
     /** 自动撤回时间 */
     private LocalDateTime autoWithdrawAt;
+
+    private String shareUserId;
 }

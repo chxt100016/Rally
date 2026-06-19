@@ -69,4 +69,17 @@ public class QiniuConfiguration {
             throw new RuntimeException("构建签名URL失败: " + key, e);
         }
     }
+
+    /**
+     * 生成封面图 URL，将 key 的后缀替换为 .jpg
+     * @param key 存储 key
+     * @return 封面图的签名 URL
+     */
+    public static String buildCover(String key) {
+        if (StringUtils.isBlank(key)) {
+            return null;
+        }
+        String coverKey = key.substring(0, key.lastIndexOf(".")) + ".jpg";
+        return buildSignedUrl(coverKey);
+    }
 }

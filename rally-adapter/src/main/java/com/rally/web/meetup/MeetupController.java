@@ -66,7 +66,7 @@ public class MeetupController {
      * 约球详情
      */
     @GetMapping("/detail/{meetupId}")
-    public Result<MeetupDetailDTO> detail(@PathVariable("meetupId") String meetupId) {
-        return Result.ok(meetupDetailAppService.detail(meetupId));
+    public Result<MeetupDetailDTO> detail(@PathVariable("meetupId") String meetupId, @RequestParam(value = "shareUserId", required = false) String shareUserId) {
+        return Result.ok(meetupDetailAppService.detail(meetupId, shareUserId));
     }
 }

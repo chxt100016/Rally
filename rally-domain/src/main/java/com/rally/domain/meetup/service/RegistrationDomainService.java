@@ -33,9 +33,9 @@ public class RegistrationDomainService {
      * @param autoWithdrawAt 自动撤回时间，可为 null
      * @return 报名状态
      */
-    public RegistrationStatusEnum join(Meetup meetup, UserProfile userProfile, LocalDateTime autoWithdrawAt) {
+    public RegistrationStatusEnum join(Meetup meetup, UserProfile userProfile, LocalDateTime autoWithdrawAt, boolean fromShare) {
         // 1. 调用聚合根 join 方法（校验 + 创建报名记录）
-        RegistrationStatusEnum status = meetup.join(userProfile, autoWithdrawAt);
+        RegistrationStatusEnum status = meetup.join(userProfile, autoWithdrawAt, fromShare);
 
         // 2. 持久化（自动计算 currentPlayers）
         meetupGateway.save(meetup);
@@ -81,12 +81,14 @@ public class RegistrationDomainService {
      * @param registrationId 报名记录 ID
      * @param currentUserId 当前用户 ID（审批人）
      */
-    public void approve(Meetup meetup, String registrationId, String currentUserId) {
+    public String approve(Meetup meetup, String registrationId, String currentUserId) {
         // 1. 调用聚合根 approve（校验 + 更新状态）
-        meetup.approve(registrationId, currentUserId);
+        String userId = meetup.approve(registrationId, currentUserId);
 
         // 2. 持久化（自动计算 currentPlayers）
         meetupGateway.save(meetup);
+
+        return userId;
     }
 
     /**

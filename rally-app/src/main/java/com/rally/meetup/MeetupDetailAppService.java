@@ -47,10 +47,13 @@ public class MeetupDetailAppService {
     /**
      * 查询约球详情（重构后返回 MeetupDetailDTO）
      */
-    public MeetupDetailDTO detail(String meetupId) {
+    public MeetupDetailDTO detail(String meetupId, String shareUserId) {
+
         String currentUserId = UserContext.get();
-        UserProfile currentUser = userProfileDomainService.get(currentUserId);
-        currentUser.assertCompleted();
+        // 通过分享页面进入
+        if (shareUserId != null) {
+            log.info("from share, userId: {}, shareUserId:{}", currentUserId, shareUserId);
+        }
 
         // 1 获取聚合根（含报名记录）
         Meetup meetup = meetupDomainService.get(meetupId);
@@ -69,7 +72,7 @@ public class MeetupDetailAppService {
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
                 .setParticipants(buildParticipantVOList(meetup, participantUserIds, profileMap))
                 .setRecap(meetup.canReview() ? buildRecap(meetup) : null)
-                .setUnreadCount(actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.ONGOING_JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED  ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null);
+                .setUnreadCount(meetup.canChat(currentUserId) ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null);
 
     }
 
