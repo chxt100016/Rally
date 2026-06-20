@@ -55,6 +55,7 @@ public enum BizErrorCode {
     NOT_JOINED(41008, "你未报名该约球"),
     TIME_CONFLICT(41009, "同一时间段已有其他约球，无法报名"),
     GENDER_NOT_MATCH(41010, "性别不符合该约球要求"),
+    LEVEL_NOT_MATCH(41022, "水平不符合该约球要求"),
     EDIT_LOCKED(41011, "临近开始，约球信息已锁定不可编辑"),
     PUBLISH_LIMIT_EXCEEDED(41012, "今日发布已达上限"),
     LOW_REPUTATION_BANNED(41013, "信誉分过低，暂时无法报名"),

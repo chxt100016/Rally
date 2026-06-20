@@ -2,6 +2,7 @@ package com.rally.domain.user.model;
 
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.meetup.enums.ResultTypeEnum;
+import com.rally.domain.recap.enums.SetFormatEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,9 +29,13 @@ public class MyProfileSetScoreDTO {
     @NoArgsConstructor
     @Accessors(chain = true)
     public static class SetItem{
-        private String title;
-        private ResultTypeEnum resultType; //winLose
+        private ResultTypeEnum resultType;
+        private String resultTypeShow;
         private MatchTypeEnum matchType;
+        private String matchTypeShow;
+        private SetFormatEnum setFormat;
+        private String setFormatShow;
+        private String date;
         private String sideAPlayer1AvatarUrl;
         private String sideAPlayer2AvatarUrl;
         private String sideAScore;

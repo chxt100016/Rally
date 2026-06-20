@@ -6,7 +6,6 @@ import com.rally.domain.meetup.enums.ResultTypeEnum;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.recap.UserReviewDomainService;
 import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
-import com.rally.domain.recap.enums.SetFormatEnum;
 import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.recap.service.RecapDomainService;
 import com.rally.domain.score.ProfileLevelManager;
@@ -208,13 +207,14 @@ public class MyProfileAppService {
         boolean userInSideA = userId.equals(record.getSideAPlayer1()) || userId.equals(record.getSideAPlayer2());
         boolean isWin = (userInSideA && "A".equals(record.getWinSide())) || (!userInSideA && "B".equals(record.getWinSide()));
         ResultTypeEnum resultType = isWin ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
-        String matchTypeLabel = record.getMatchType() == MatchTypeEnum.DOUBLE ? "双打" : "单打";
-        String formatLabel = record.getSetFormat() == SetFormatEnum.TIEBREAK ? "抢分" : "局";
-        String title = record.getMeetupDate().format(SET_TITLE_DATE_FORMATTER) + " · " + matchTypeLabel + " · " + formatLabel;
         return new MyProfileSetScoreDTO.SetItem()
-                .setTitle(title)
                 .setResultType(resultType)
+                .setResultTypeShow(resultType.getShow())
                 .setMatchType(record.getMatchType())
+                .setMatchTypeShow(record.getMatchType().getName())
+                .setSetFormat(record.getSetFormat())
+                .setSetFormatShow(record.getSetFormat().getShow())
+                .setDate(record.getMeetupDate().format(SET_TITLE_DATE_FORMATTER))
                 .setSideAPlayer1AvatarUrl(getAvatarUrl(profiles, record.getSideAPlayer1()))
                 .setSideAPlayer2AvatarUrl(getAvatarUrl(profiles, record.getSideAPlayer2()))
                 .setSideAScore(String.valueOf(record.getSideAScore()))

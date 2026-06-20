@@ -9,6 +9,7 @@ import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.utils.Assert;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -228,7 +229,44 @@ public class Meetup {
         // 6. 信誉分门槛校验
         checkReputationScore(userProfile);
 
+        // 7. 级别限制校验
+        checkLevelLimit(userProfile);
 
+    }
+
+    private void checkLevelLimit(UserProfile userProfile) {
+        if (data.getLevelMode() == null) {
+            return;
+        }
+        if (userProfile.getProfile() == null || userProfile.getProfile().getNtrpScore() == null) {
+            return;
+        }
+        BigDecimal userLevel = userProfile.getProfile().getNtrpScore();
+        switch (data.getLevelMode()) {
+            case RANGE:
+                if ((data.getLevelMin() != null && userLevel.compareTo(data.getLevelMin()) < 0)
+                        || (data.getLevelMax() != null && userLevel.compareTo(data.getLevelMax()) > 0)) {
+                    throw new BusinessException(BizErrorCode.LEVEL_NOT_MATCH);
+                }
+                break;
+            case EXACT:
+                if (data.getLevelMin() != null && userLevel.compareTo(data.getLevelMin()) != 0) {
+                    throw new BusinessException(BizErrorCode.LEVEL_NOT_MATCH);
+                }
+                break;
+            case ABOVE:
+                if (data.getLevelMin() != null && userLevel.compareTo(data.getLevelMin()) < 0) {
+                    throw new BusinessException(BizErrorCode.LEVEL_NOT_MATCH);
+                }
+                break;
+            case BELOW:
+                if (data.getLevelMax() != null && userLevel.compareTo(data.getLevelMax()) > 0) {
+                    throw new BusinessException(BizErrorCode.LEVEL_NOT_MATCH);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     /**
