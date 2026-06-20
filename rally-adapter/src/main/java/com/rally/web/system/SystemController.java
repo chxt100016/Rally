@@ -1,5 +1,6 @@
 package com.rally.web.system;
 
+import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.tennis.model.Result;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,12 +41,9 @@ public class SystemController {
      * @return { qrcode: "data:image/png;base64,..." }
      */
     @GetMapping("/qrcode")
-    public Result<Map<String, String>> getQrcode() {
-        String qrcode = SystemConfig.getString("system.group.qrcode");
-        if (qrcode == null || qrcode.isEmpty()) {
-            return Result.ok(Collections.emptyMap());
-        }
-        return Result.ok(Collections.singletonMap("qrcode", qrcode));
+    public Result<String> getQrcode() {
+        String url = QiniuConfiguration.buildSignedUrl("default/qrcode.jpg");
+        return Result.ok(url);
     }
 
     /**
