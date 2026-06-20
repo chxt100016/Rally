@@ -168,7 +168,7 @@ public class Meetup {
      * @param autoWithdrawAt 自动撤回时间，可为 null
      * @return
      */
-    public RegistrationStatusEnum join(UserProfile userProfile, LocalDateTime autoWithdrawAt, boolean fromShare) {
+    public RegistrationStatusEnum join(UserProfile userProfile, LocalDateTime autoWithdrawAt) {
         // 1. 校验
         assertCanJoin(userProfile);
 

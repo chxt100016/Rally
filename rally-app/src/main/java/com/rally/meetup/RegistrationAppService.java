@@ -37,23 +37,19 @@ public class RegistrationAppService {
 
         UserProfile userProfile = userProfileDomainService.get(userId);
         // 不是通过分享进入需要校验信息是否完整
-        boolean fromShare = false;
-        if (shareUserId == null) {
-            userProfile.assertCompleted();
-        } else {
-            fromShare = true;
+        userProfile.assertCompleted();
+
+        if (shareUserId != null) {
             log.info("Joining meetup with shared, userId:{}, shareUserId={}",  userId, shareUserId);
+
         }
 
 
         // 1. 查询领域对象
         Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
 
-
-
-
         // 2. 报名（聚合根校验 + 创建报名记录 + 持久化）
-        RegistrationStatusEnum status = registrationDomainService.join(meetup, userProfile, cmd.getAutoWithdrawAt(), fromShare);
+        RegistrationStatusEnum status = registrationDomainService.join(meetup, userProfile, cmd.getAutoWithdrawAt());
 
         // 加入群聊
         if (RegistrationStatusEnum.JOINED == status) {

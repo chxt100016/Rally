@@ -34,5 +34,8 @@ public enum ActionStateEnum {
 
     // 终态
     FINISHED,
-    CLOSED
+    FINISHED_JOINED,
+    CLOSED,
+    CLOSED_JOINED,
+    ;
 }

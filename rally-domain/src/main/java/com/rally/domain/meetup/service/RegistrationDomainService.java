@@ -33,9 +33,9 @@ public class RegistrationDomainService {
      * @param autoWithdrawAt 自动撤回时间，可为 null
      * @return 报名状态
      */
-    public RegistrationStatusEnum join(Meetup meetup, UserProfile userProfile, LocalDateTime autoWithdrawAt, boolean fromShare) {
+    public RegistrationStatusEnum join(Meetup meetup, UserProfile userProfile, LocalDateTime autoWithdrawAt) {
         // 1. 调用聚合根 join 方法（校验 + 创建报名记录）
-        RegistrationStatusEnum status = meetup.join(userProfile, autoWithdrawAt, fromShare);
+        RegistrationStatusEnum status = meetup.join(userProfile, autoWithdrawAt);
 
         // 2. 持久化（自动计算 currentPlayers）
         meetupGateway.save(meetup);
