@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 约球报名入参
@@ -19,4 +20,7 @@ public class MeetupJoinCmd {
     private LocalDateTime autoWithdrawAt;
 
     private String shareUserId;
+
+    /** 本次微信订阅授权成功的通知场景（NoticeScene name 列表） */
+    private List<String> acceptedNoticeScenes;
 }

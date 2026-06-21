@@ -8,9 +8,13 @@ import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.model.MeetupEditCmd;
 import com.rally.domain.meetup.service.MeetupPolicy;
 import com.rally.domain.meetup.service.MeetupDomainService;
+import com.rally.domain.notify.enums.NoticeScene;
+import com.rally.domain.notify.enums.NotifyBizType;
+import com.rally.domain.notify.service.NotifySubscribeService;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
+import com.rally.notify.MeetupNotifyAssembler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +38,8 @@ public class MeetupAppService {
 
     private final ChatDomainService chatDomainService;
 
+    private final NotifySubscribeService notifySubscribeService;
+
     /**
      * 发布约球
      */
@@ -49,6 +55,9 @@ public class MeetupAppService {
 
         // 加入群聊
         chatDomainService.join(meetupId, userId);
+
+        // 创建人订阅授权建额度（需审批活动前端可含 PENDING_APPROVAL）
+        notifySubscribeService.grant(userId, NotifyBizType.MEETUP, meetupId, MeetupNotifyAssembler.parseScenes(cmd.getAcceptedNoticeScenes()));
 
         // 3. 球场查找或创建（200m 范围内合并）
         courtDomainService.findOrCreate(cmd.getCourtName(), cmd.getCourtAddress(), cmd.getCourtLng(), cmd.getCourtLat(), cmd.getCityCode(), cmd.getDistrictCode(), null);
@@ -124,8 +133,8 @@ public class MeetupAppService {
             log.warn("GEO 清理失败: {}", e.getMessage());
         }
 
-        // 5. 发送取消通知（交叉引用 05）
-        // TODO: 调用通知域发送取消通知
+        // 5. 发送取消通知给全体已加入参与人（创建人除外）
+        notifySubscribeService.notify(NotifyBizType.MEETUP, meetupId, NoticeScene.MEETUP_CANCEL, meetup.getActiveParticipantIds(userId), MeetupNotifyAssembler.meetupCancelData(data), uid -> meetupDomainService.shouldNotice(meetupId, uid));
         log.info("约球已关闭: meetupId={}", meetupId);
     }
 }

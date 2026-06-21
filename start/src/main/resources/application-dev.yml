@@ -16,3 +16,8 @@ qiniu:
   secret-key: ${QINIU_SECRET_KEY}
   bucket: rallyo
   domain: https://static.fantasticmonkey.top
+
+wechat:
+  mini:
+    # 联调期订阅消息跳转开发版；用体验版测试改为 trial
+    subscribe-miniprogram-state: developer

@@ -29,12 +29,12 @@ public enum ActionStateEnum {
     OWNER_EDITABLE,
     OWNER_EDIT_LOCKED,
 
-    ONGOING,          // 约球进行中，未报名访客不可加入
-    ONGOING_JOINED,   // 约球进行中，参与者已加入
+    ONGOING,          // 约球进行中，访客不可操作
+    ONGOING_JOINED,   // 约球进行中，参与者已加入  可查看群聊、可编辑比分、可评价。
 
     // 终态
-    FINISHED,
-    FINISHED_JOINED,
+    FINISHED,               // 约球结束， 访客不可操作
+    FINISHED_JOINED,        // 约球
     CLOSED,
     CLOSED_JOINED,
     ;

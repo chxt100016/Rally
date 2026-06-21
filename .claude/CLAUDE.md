@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 构建整个项目（跳过测试）
 mvn clean package -DskipTests
 ```
+
 ## COLA 架构分层
 项目严格遵循 COLA 5.0 架构，
 - 模块依赖方向：

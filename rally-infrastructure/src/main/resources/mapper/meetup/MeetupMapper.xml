@@ -71,10 +71,18 @@
                    SELECT 1 FROM rally_meetup_score s WHERE s.rally_meetup_id = m.biz_id
                ))
             UNION
+            <!-- IM 可读状态见 RegistrationStatusEnum.getImAvailable() -->
             (SELECT m.*, 'UNREAD_MESSAGES' AS _pending_reason FROM rally_meetup m
              WHERE EXISTS (
                  SELECT 1 FROM rally_meetup_chat_user cu
                  WHERE cu.meetup_id = m.biz_id AND cu.user_id = #{userId} AND cu.unread_count > 0
+             )
+             AND (
+                 m.creator_id = #{userId}
+                 OR EXISTS (
+                     SELECT 1 FROM rally_meetup_registration r
+                     WHERE r.rally_meetup_id = m.biz_id AND r.user_id = #{userId} AND r.status IN ('JOINED','REVIEWED')
+                 )
              ))
         ) t
         <where>

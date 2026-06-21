@@ -91,4 +91,7 @@ public class MeetupPublishCmd {
 
     /** 场地索引，前端透传存储 */
     private String courtIndex;
+
+    /** 本次微信订阅授权成功的通知场景（NoticeScene name 列表，需审批活动可含 PENDING_APPROVAL） */
+    private List<String> acceptedNoticeScenes;
 }

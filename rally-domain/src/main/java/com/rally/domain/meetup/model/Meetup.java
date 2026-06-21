@@ -96,6 +96,25 @@ public class Meetup {
         return userId.equals(data.getCreatorId());
     }
 
+    /** 是否为参与者（创建人或已加入的报名用户） */
+    public boolean isParticipant(String userId) {
+        if (isCreator(userId)) {
+            return true;
+        }
+        RegistrationData registration = findActiveRegistration(userId);
+        return registration != null && registration.isActiveParticipant();
+    }
+
+    /** 是否应给该用户发送通知（仍是活动成员：创建人或有效参与者；已退出/被拒则不再通知） */
+    public boolean shouldNotice(String userId) {
+        return isParticipant(userId);
+    }
+
+    /** 是否存在创建人以外的有效参与者 */
+    public boolean hasOtherParticipants() {
+        return registrations.stream().filter(RegistrationData::isActiveParticipant).anyMatch(r -> !isCreator(r.getUserId()));
+    }
+
     /** 断言当前用户为创建人，否则抛出异常 */
     public void assertOwner(String userId) {
         if (!isCreator(userId)) {
@@ -384,25 +403,27 @@ public class Meetup {
         MeetupStatusEnum realStatus = getRealStatus();
         boolean isCreator = isCreator(currentUserId);
 
-        // 终态：全部置灰（不区分创建人/访客）
-        if (realStatus == MeetupStatusEnum.FINISHED) {
-            return ActionStateEnum.FINISHED;
-        }
-        if (realStatus == MeetupStatusEnum.CLOSED) {
-            return ActionStateEnum.CLOSED;
+        // 创建人 + 无其他参与者：永远处于可编辑状态
+        if (isCreator && !hasOtherParticipants()) {
+            return ActionStateEnum.OWNER_EDITABLE;
         }
 
-        // 创建人视角
+        // 终态：参与者保留 _JOINED 变体（仍可群聊等），其余置灰
+        if (realStatus == MeetupStatusEnum.FINISHED) {
+            return isParticipant(currentUserId) ? ActionStateEnum.FINISHED_JOINED : ActionStateEnum.FINISHED;
+        }
+        if (realStatus == MeetupStatusEnum.CLOSED) {
+            return isParticipant(currentUserId) ? ActionStateEnum.CLOSED_JOINED : ActionStateEnum.CLOSED;
+        }
+
+        // 创建人视角（此时必有其他参与者）
         if (isCreator) {
             if (realStatus == MeetupStatusEnum.ONGOING) {
                 return ActionStateEnum.ONGOING_JOINED;
             }
-            boolean hasOtherParticipants = registrations.stream()
-                    .filter(RegistrationData::isActiveParticipant)
-                    .anyMatch(r -> !isCreator(r.getUserId()));
             int lockMinutes = SystemConfig.getInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START.getKey());
             boolean locked = LocalDateTime.now().isAfter(data.getStartTime().minusMinutes(lockMinutes));
-            return (locked && hasOtherParticipants) ? ActionStateEnum.OWNER_EDIT_LOCKED : ActionStateEnum.OWNER_EDITABLE;
+            return locked ? ActionStateEnum.OWNER_EDIT_LOCKED : ActionStateEnum.OWNER_EDITABLE;
         }
 
         // 访客视角：根据报名状态判断
@@ -450,6 +471,13 @@ public class Meetup {
         return userIds;
     }
 
+    /**
+     * 获取除指定用户外的全部有效参与者 userId（用于群发通知，excludeUserId 传 null 表示全部）
+     */
+    public List<String> getActiveParticipantIds(String excludeUserId) {
+        return registrations.stream().filter(RegistrationData::isActiveParticipant).map(RegistrationData::getUserId).filter(uid -> !uid.equals(excludeUserId)).toList();
+    }
+
     public List<String> getReviewWaitlistIds(String userId) {
         List<String> res = new ArrayList<>();
         for (RegistrationData r : registrations) {
@@ -485,6 +513,6 @@ public class Meetup {
 
     public boolean canChat(String userId) {
         ActionStateEnum actionState = this.getActionState(userId);
-        return actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.ONGOING_JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED;
+        return actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.ONGOING_JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED || actionState == ActionStateEnum.FINISHED_JOINED || actionState == ActionStateEnum.CLOSED_JOINED;
     }
 }

@@ -28,3 +28,7 @@ wechat:
         app-id: ${WECHAT_APP_ID}
         secret: ${WECHAT_SECRET}
         code2session-url: https://api.weixin.qq.com/sns/jscode2session
+        access-token-url: https://api.weixin.qq.com/cgi-bin/token
+        subscribe-send-url: https://api.weixin.qq.com/cgi-bin/message/subscribe/send
+        # 订阅消息跳转版本: developer(开发版)/trial(体验版)/formal(正式版)。开发联调期请在 dev 配置改为 developer 或 trial
+        subscribe-miniprogram-state: formal

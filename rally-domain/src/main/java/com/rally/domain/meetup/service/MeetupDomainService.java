@@ -95,6 +95,14 @@ public class MeetupDomainService {
 
 
     /**
+     * 校验用户当前是否仍在活动中（通知发送前的成员校验，避免给已退出用户发通知）
+     */
+    public boolean shouldNotice(String meetupId, String userId) {
+        Meetup meetup = get(meetupId);
+        return meetup.shouldNotice(userId);
+    }
+
+    /**
      * 统计用户已完成的约球次数
      */
     public long countFinishedMeetups(String userId) {
