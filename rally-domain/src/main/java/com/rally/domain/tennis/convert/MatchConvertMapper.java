@@ -1,4 +1,4 @@
-package com.rally.tennis.convert;
+package com.rally.domain.tennis.convert;
 
 import com.rally.domain.tennis.model.SetScoreData;
 import com.rally.domain.tennis.model.SetScoreVO;
