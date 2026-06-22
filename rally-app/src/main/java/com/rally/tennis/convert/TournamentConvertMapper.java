@@ -2,7 +2,7 @@ package com.rally.tennis.convert;
 
 import com.rally.client.qiniu.QiniuClient;
 import com.rally.config.property.QiniuConfiguration;
-import com.rally.db.tennis.entity.TennisTournamentPO;
+import com.rally.domain.tennis.model.TournamentData;
 import com.rally.domain.tennis.model.TournamentDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -11,9 +11,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/**
- * 赛事 PO → DTO 转换器
- */
 @Mapper
 public interface TournamentConvertMapper {
 
@@ -28,33 +25,22 @@ public interface TournamentConvertMapper {
     @Mapping(target = "surfaceLabel", source = "surface")
     @Mapping(target = "startDate", source = "startDate", qualifiedByName = "formatDate")
     @Mapping(target = "endDate", source = "endDate", qualifiedByName = "formatDate")
-    @Mapping(target = "status", ignore = true)       // 由 @AfterMapping 从日期派生
-    @Mapping(target = "statusLabel", ignore = true)   // 由 @AfterMapping 根据 status 填充
-    @Mapping(target = "groupId", ignore = true)       // 由外部通过 @Context 传入
-    @Mapping(target = "backgroundUrl", ignore = true) // 由 @AfterMapping 通过 QiniuClient 生成
-    TournamentDTO toDTO(TennisTournamentPO po, @Context String groupId, @Context QiniuClient qiniuClient);
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "statusLabel", ignore = true)
+    @Mapping(target = "groupId", ignore = true)
+    @Mapping(target = "backgroundUrl", ignore = true)
+    TournamentDTO toDTO(TournamentData data, @Context String groupId, @Context QiniuClient qiniuClient);
 
-    List<TournamentDTO> toDTOList(List<TennisTournamentPO> poList, @Context String groupId, @Context QiniuClient qiniuClient);
+    List<TournamentDTO> toDTOList(List<TournamentData> dataList, @Context String groupId, @Context QiniuClient qiniuClient);
 
-    /**
-     * 映射完成后：派生展示状态、填充 statusLabel、生成背景图 URL
-     */
     @AfterMapping
-    default void fillDerivedFields(TennisTournamentPO po,
-                                   @Context String groupId,
-                                   @Context QiniuClient qiniuClient,
-                                   @MappingTarget TournamentDTO dto) {
-        // 从日期派生展示状态
-        String displayStatus = deriveStatus(po);
+    default void fillDerivedFields(TournamentData data, @Context String groupId, @Context QiniuClient qiniuClient, @MappingTarget TournamentDTO dto) {
+        String displayStatus = deriveStatus(data);
         dto.setStatus(displayStatus);
         dto.setStatusLabel(resolveStatusLabel(displayStatus));
-
-        // groupId 从外部传入
         dto.setGroupId(groupId);
-
-        // 生成背景图签名 URL
-        if (po.getBackgroundPath() != null && !po.getBackgroundPath().isBlank()) {
-            dto.setBackgroundUrl(QiniuConfiguration.buildSignedUrl(po.getBackgroundPath()));
+        if (data.getBackgroundPath() != null && !data.getBackgroundPath().isBlank()) {
+            dto.setBackgroundUrl(QiniuConfiguration.buildSignedUrl(data.getBackgroundPath()));
         }
     }
 
@@ -78,12 +64,12 @@ public interface TournamentConvertMapper {
         return date != null ? date.format(DATE_FMT) : null;
     }
 
-    default String deriveStatus(TennisTournamentPO po) {
+    default String deriveStatus(TournamentData data) {
         LocalDate today = LocalDate.now();
-        if (po.getEndDate() != null && today.isAfter(po.getEndDate())) {
+        if (data.getEndDate() != null && today.isAfter(data.getEndDate())) {
             return "FINISHED";
         }
-        if (po.getStartDate() != null && today.isBefore(po.getStartDate())) {
+        if (data.getStartDate() != null && today.isBefore(data.getStartDate())) {
             return "UPCOMING";
         }
         return "ONGOING";

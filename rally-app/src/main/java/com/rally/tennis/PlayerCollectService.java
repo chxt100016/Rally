@@ -8,7 +8,7 @@ import com.rally.client.tennistv.model.MatchesResponse;
 import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaDrawsResponse;
 import com.rally.client.wta.model.WtaRankingsResponse;
-import com.rally.db.tennis.repository.TennisPlayerRepository;
+import com.rally.domain.tennis.gateway.TennisPlayerGateway;
 import com.rally.tennis.convert.PlayerAppConvertMapper;
 import com.rally.tennis.model.Player;
 import jakarta.annotation.Resource;
@@ -25,7 +25,7 @@ import java.util.List;
 public class PlayerCollectService {
 
     @Resource
-    private TennisPlayerRepository tennisPlayerRepository;
+    private TennisPlayerGateway tennisPlayerGateway;
 
     @Resource
     private AtpClient atpClient;
@@ -33,9 +33,6 @@ public class PlayerCollectService {
     @Resource
     private WtaClient wtaClient;
 
-    /**
-     * 从 live matches 响应中提取球员
-     */
     public int collect(List<MatchesResponse.MatchInfo> matches) {
         List<Player> players = new ArrayList<>();
         if (matches == null) {
@@ -71,9 +68,6 @@ public class PlayerCollectService {
         this.savePlayers(allPlayers);
     }
 
-    /**
-     * 从签表 fixture 中提取球员（teamTop + teamBottom）
-     */
     public List<Player> extractFromDrawFixture(AtpDrawsResponse.Fixture fixture) {
         List<Player> players = new ArrayList<>();
         if (fixture.getResult() == null) {
@@ -92,9 +86,6 @@ public class PlayerCollectService {
         return players;
     }
 
-    /**
-     * 从 OOP match detail 中提取球员
-     */
     public List<Player> extractFromOopMatch(AtpOopResponse.MatchDetail detail) {
         List<Player> players = new ArrayList<>();
         if (detail.getPlayerTeam1() != null) {
@@ -106,13 +97,10 @@ public class PlayerCollectService {
         return players;
     }
 
-    /**
-     * 批量保存球员，tour 未设置的默认为 ATP
-     */
     public void savePlayers(List<Player> players) {
         if (CollectionUtils.isEmpty(players)) return;
         players.stream().filter(p -> p.getTour() == null).forEach(p -> p.setTour("ATP"));
-        tennisPlayerRepository.saveOrUpdateBatch(PlayerAppConvertMapper.INSTANCE.toPlayerPOList(players));
+        tennisPlayerGateway.saveOrUpdateBatch(PlayerAppConvertMapper.INSTANCE.toPlayerDataList(players));
     }
 
     public void wtaFromDraw(WtaDrawsResponse response) {
@@ -122,7 +110,6 @@ public class PlayerCollectService {
         }
         List<Player> players = new ArrayList<>();
         for (WtaDrawsResponse.DrawEntry entry : response.getData().getDraw()) {
-            // 跳过 BYE 位置
             if ("0".equals(entry.getPlayerId())) {
                 continue;
             }
@@ -141,8 +128,7 @@ public class PlayerCollectService {
             return;
         }
         players.forEach(p -> p.setTour(tour));
-        tennisPlayerRepository.saveOrUpdateBatch(
-                PlayerAppConvertMapper.INSTANCE.toPlayerPOList(players));
+        tennisPlayerGateway.saveOrUpdateBatch(PlayerAppConvertMapper.INSTANCE.toPlayerDataList(players));
     }
 
     public void atpRank() {
@@ -208,6 +194,4 @@ public class PlayerCollectService {
             return null;
         }
     }
-
-
 }

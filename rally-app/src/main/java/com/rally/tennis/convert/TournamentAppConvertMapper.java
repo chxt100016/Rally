@@ -1,7 +1,7 @@
 package com.rally.tennis.convert;
 
 import com.rally.client.tennistv.model.MatchesResponse;
-import com.rally.db.tennis.entity.TennisTournamentPO;
+import com.rally.domain.tennis.model.TournamentData;
 import com.rally.tennis.model.Tournament;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -27,11 +27,11 @@ public interface TournamentAppConvertMapper {
     Tournament toTournament(MatchesResponse.TournamentInfo info);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
-    TennisTournamentPO toTournamentPO(Tournament tournament);
+    @Mapping(target = "imagePath", ignore = true)
+    @Mapping(target = "backgroundPath", ignore = true)
+    TournamentData toTournamentData(Tournament tournament);
 
-    List<TennisTournamentPO> toTournamentPOList(List<Tournament> tournaments);
+    List<TournamentData> toTournamentDataList(List<Tournament> tournaments);
 
     default java.time.LocalDate parseDate(String dateStr) {
         if (dateStr == null || dateStr.isEmpty()) return null;

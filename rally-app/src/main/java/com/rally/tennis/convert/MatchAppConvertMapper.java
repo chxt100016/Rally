@@ -1,7 +1,7 @@
 package com.rally.tennis.convert;
 
 import com.rally.client.tennistv.model.MatchesResponse;
-import com.rally.db.tennis.entity.TennisMatchPO;
+import com.rally.domain.tennis.model.MatchData;
 import com.rally.domain.tennis.model.TennisRoundEnum;
 import com.rally.tennis.model.Match;
 import com.rally.tennis.model.MatchStatus;
@@ -11,7 +11,6 @@ import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Mapper(uses = {PlayerAppConvertMapper.class})
@@ -40,13 +39,12 @@ public interface MatchAppConvertMapper {
     @Mapping(target = "matchDate", expression = "java(parseMatchDate(info.getMatchDate()))")
     Match toMatch(MatchesResponse.MatchInfo info);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
-    @Mapping(target = "matchDate", source = "matchDate")
-    TennisMatchPO toMatchPO(Match match);
+    @Mapping(target = "tennisMatchId", ignore = true)
+    @Mapping(target = "courtSeq", ignore = true)
+    @Mapping(target = "scheduledAtText", ignore = true)
+    MatchData toMatchData(Match match);
 
-    List<TennisMatchPO> toMatchPOList(List<Match> matches);
+    List<MatchData> toMatchDataList(List<Match> matches);
 
     default String buildPlayerName(MatchesResponse.PlayerTeam team) {
         if (team == null) return null;
@@ -82,7 +80,6 @@ public interface MatchAppConvertMapper {
         }
     }
 
-    // 从 matchId 末尾提取数字，如 MS008 → 8，WS12 → 12
     default Integer extractMatchNumber(String matchId) {
         if (matchId == null || matchId.isEmpty()) return null;
         String digits = matchId.replaceAll("\\D+", "");

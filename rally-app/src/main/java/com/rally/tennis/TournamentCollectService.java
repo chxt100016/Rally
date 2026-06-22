@@ -4,10 +4,10 @@ import com.rally.client.tennistv.TennisTvClient;
 import com.rally.client.tennistv.model.MatchesResponse;
 import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaTournamentsResponse;
-import com.rally.db.tennis.entity.TennisTournamentEntryPO;
-import com.rally.db.tennis.entity.TennisTournamentPO;
-import com.rally.db.tennis.repository.TennisTournamentEntryRepository;
-import com.rally.db.tennis.repository.TennisTournamentRepository;
+import com.rally.domain.tennis.gateway.TennisEntryGateway;
+import com.rally.domain.tennis.gateway.TennisTournamentGateway;
+import com.rally.domain.tennis.model.TournamentData;
+import com.rally.domain.tennis.model.TournamentEntryData;
 import com.rally.tennis.convert.TournamentAppConvertMapper;
 import com.rally.tennis.convert.WtaTournamentAppConvertMapper;
 import com.rally.tennis.model.Tournament;
@@ -32,42 +32,38 @@ public class TournamentCollectService {
     private WtaClient wtaClient;
 
     @Resource
-    private TennisTournamentRepository tennisTournamentRepository;
+    private TennisTournamentGateway tennisTournamentGateway;
 
     @Resource
-    private TennisTournamentEntryRepository tennisTournamentEntryRepository;
+    private TennisEntryGateway tennisEntryGateway;
 
-    /**
-     * 查询当前时间在 start_date 和 end_date 之间的赛事
-     */
-    public List<TennisTournamentPO> current() {
+    public List<TournamentData> current() {
         LocalDate today = LocalDate.now();
-        return tennisTournamentRepository.findCurrentTournaments(today);
+        return tennisTournamentGateway.findCurrentTournaments(today);
     }
 
     public boolean exists(String tournamentId) {
-        return tennisTournamentRepository.exists(tournamentId);
+        return tennisTournamentGateway.exists(tournamentId);
     }
 
     public void saveEntries(List<TournamentEntry> entries) {
         if (CollectionUtils.isEmpty(entries)) return;
-        List<TennisTournamentEntryPO> pos = new ArrayList<>();
+        List<TournamentEntryData> dataList = new ArrayList<>();
         for (TournamentEntry entry : entries) {
-            TennisTournamentEntryPO po = new TennisTournamentEntryPO();
-            po.setPlayerId(entry.getPlayerId());
-            po.setDrawId(entry.getDrawId());
-            po.setSeed(entry.getSeed());
-            po.setEntryType(entry.getEntryType());
-            pos.add(po);
+            TournamentEntryData data = new TournamentEntryData();
+            data.setPlayerId(entry.getPlayerId());
+            data.setDrawId(entry.getDrawId());
+            data.setSeed(entry.getSeed());
+            data.setEntryType(entry.getEntryType());
+            dataList.add(data);
         }
-        tennisTournamentEntryRepository.saveEntries(pos);
+        tennisEntryGateway.saveEntries(dataList);
     }
 
     public void collectTournament(int year) {
         this.atp(year);
         this.wta(year);
     }
-
 
     public void atp(int year) {
         List<MatchesResponse.TournamentInfo> infos = tennisTvClient.getTournaments(year);
@@ -78,33 +74,20 @@ public class TournamentCollectService {
                 .map(TournamentAppConvertMapper.INSTANCE::toTournament)
                 .peek(item -> item.setTour("ATP"))
                 .toList();
-        tennisTournamentRepository.saveOrUpdateBatch(TournamentAppConvertMapper.INSTANCE.toTournamentPOList(tournaments));
+        tennisTournamentGateway.saveOrUpdateBatch(TournamentAppConvertMapper.INSTANCE.toTournamentDataList(tournaments));
         log.info("ATP赛事采集完成: year={}, 数量={}", year, tournaments.size());
     }
 
-
-
-
-    /**
-     * 拉取并保存指定年份的 WTA 赛事
-     */
     public void wta(int year) {
         WtaTournamentsResponse response = wtaClient.getTournaments(year);
         if (response == null || CollectionUtils.isEmpty(response.getContent())) {
             log.warn("从WTA API获取赛事列表为空, year={}", year);
             return;
         }
-
         List<Tournament> tournaments = response.getContent().stream()
                 .map(WtaTournamentAppConvertMapper.INSTANCE::toTournament)
                 .toList();
-        List<TennisTournamentPO> poList = WtaTournamentAppConvertMapper.INSTANCE.toTournamentPOList(tournaments);
-        tennisTournamentRepository.saveOrUpdateBatch(poList);
-
-        log.info("WTA赛事采集完成: year={}, 数量={}", year, poList.size());
+        tennisTournamentGateway.saveOrUpdateBatch(WtaTournamentAppConvertMapper.INSTANCE.toTournamentDataList(tournaments));
+        log.info("WTA赛事采集完成: year={}, 数量={}", year, tournaments.size());
     }
-
-
-
-
 }

@@ -7,6 +7,7 @@ import com.rally.domain.tennis.model.PlayerSeedData;
 import com.rally.domain.tennis.model.SetScoreData;
 import com.rally.domain.tennis.model.TennisDrawData;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -66,4 +67,9 @@ public interface MatchQueryGateway {
      * 查询球员在某签表中的种子信息
      */
     PlayerSeedData getSeedByDrawIdAndPlayerId(Long drawId, String playerId);
+
+    /**
+     * 根据赛事ID列表和日期查询比赛
+     */
+    List<MatchData> findByTournamentIdsAndDate(List<String> tournamentIds, LocalDate date);
 }

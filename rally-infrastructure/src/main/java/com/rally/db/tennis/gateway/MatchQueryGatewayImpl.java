@@ -18,6 +18,8 @@ import com.rally.domain.tennis.model.PlayerSeedData;
 import com.rally.domain.tennis.model.SetScoreData;
 import com.rally.domain.tennis.model.TennisDrawData;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -220,5 +222,11 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
         data.setPlayerId(po.getPlayerId());
         data.setSeed(po.getSeed() != null ? po.getSeed().intValue() : null);
         return data;
+    }
+
+    @Override
+    public List<MatchData> findByTournamentIdsAndDate(List<String> tournamentIds, LocalDate date) {
+        List<TennisMatchPO> list = matchService.findByTournamentIdsAndDate(tournamentIds, date);
+        return list.stream().map(this::toMatchData).toList();
     }
 }

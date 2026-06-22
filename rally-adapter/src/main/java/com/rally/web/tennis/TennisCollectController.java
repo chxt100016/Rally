@@ -1,7 +1,7 @@
 package com.rally.web.tennis;
 
-import com.rally.db.tennis.entity.TennisTournamentPO;
 import com.rally.db.user.entity.UserPO;
+import com.rally.domain.tennis.model.TournamentData;
 import com.rally.db.user.mapper.UserMapper;
 import com.rally.tennis.TennisCollectFacade;
 import com.rally.utils.TokenUtils;
@@ -61,7 +61,7 @@ public class TennisCollectController {
     @GetMapping("/completed")
     public String completed(@RequestParam("tournamentId") String tournamentId,
                             @RequestParam("year") Integer year) {
-        TennisTournamentPO tournament = new TennisTournamentPO();
+        TournamentData tournament = new TournamentData();
         tournament.setTournamentId(tournamentId);
         tournament.setYear(year);
         tennisCollectFacade.completed(tournament);

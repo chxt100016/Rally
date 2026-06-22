@@ -3,7 +3,7 @@ package com.rally.tennis.convert;
 import com.rally.client.tennistv.model.AtpDrawsResponse;
 import com.rally.client.tennistv.model.MatchesResponse;
 import com.rally.client.tennistv.model.AtpOopResponse;
-import com.rally.db.tennis.entity.TennisPlayerPO;
+import com.rally.domain.tennis.model.PlayerData;
 import com.rally.tennis.model.Player;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -45,10 +45,7 @@ public interface PlayerAppConvertMapper {
     @Mapping(target = "hand", ignore = true)
     Player toPlayerFromOop(AtpOopResponse.PlayerTeam team);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
-    TennisPlayerPO toPlayerPO(Player player);
+    PlayerData toPlayerData(Player player);
 
-    List<TennisPlayerPO> toPlayerPOList(List<Player> players);
+    List<PlayerData> toPlayerDataList(List<Player> players);
 }

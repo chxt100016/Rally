@@ -1,7 +1,7 @@
 package com.rally.tennis.convert;
 
 import com.rally.client.atp.model.AtpTournamentsResponse;
-import com.rally.db.tennis.entity.TennisTournamentPO;
+import com.rally.domain.tennis.model.TournamentData;
 import com.rally.tennis.model.Tournament;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -34,11 +34,11 @@ public interface AtpTournamentAppConvertMapper {
     Tournament toTournament(AtpTournamentsResponse.TournamentItem item);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
-    TennisTournamentPO toTournamentPO(Tournament tournament);
+    @Mapping(target = "imagePath", ignore = true)
+    @Mapping(target = "backgroundPath", ignore = true)
+    TournamentData toTournamentData(Tournament tournament);
 
-    List<TennisTournamentPO> toTournamentPOList(List<Tournament> tournaments);
+    List<TournamentData> toTournamentDataList(List<Tournament> tournaments);
 
     @Named("locationToCity")
     default String locationToCity(String location) {

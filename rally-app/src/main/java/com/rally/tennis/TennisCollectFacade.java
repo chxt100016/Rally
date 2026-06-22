@@ -1,7 +1,7 @@
 package com.rally.tennis;
 
-import com.rally.db.tennis.entity.TennisTournamentPO;
-import com.rally.db.tennis.repository.TennisTournamentRepository;
+import com.rally.domain.tennis.gateway.TennisTournamentGateway;
+import com.rally.domain.tennis.model.TournamentData;
 import com.rally.tennis.model.TourEnums;
 import com.rally.tennis.parser.CollectType;
 import com.rally.tennis.parser.DrawParams;
@@ -26,22 +26,19 @@ public class TennisCollectFacade {
     private MatchCollectManager matchCollectManager;
 
     @Resource
-    private TennisTournamentRepository tennisTournamentRepository;
-
-
+    private TennisTournamentGateway tennisTournamentGateway;
 
     public void tournaments(int year) {
         tournamentCollectService.collectTournament(year);
     }
 
     public void currentDraws() {
-        List<TennisTournamentPO> tournaments = tournamentCollectService.current();
+        List<TournamentData> tournaments = tournamentCollectService.current();
         if (CollectionUtils.isEmpty(tournaments)) {
             log.info("当前无进行中的赛事");
             return;
         }
-
-        for (TennisTournamentPO tournament : tournaments) {
+        for (TournamentData tournament : tournaments) {
             try {
                 this.draws(tournament);
             } catch (Exception e) {
@@ -50,7 +47,7 @@ public class TennisCollectFacade {
         }
     }
 
-    public void draws(TennisTournamentPO tournament) {
+    public void draws(TournamentData tournament) {
         DrawParams params = new DrawParams(tournament.getTournamentId(), tournament.getYear(), tournament.getTour());
         switch (TourEnums.valueOf(tournament.getTour())) {
             case ATP -> matchCollectManager.collect(CollectType.ATP_APP_DRAW, params);
@@ -60,28 +57,25 @@ public class TennisCollectFacade {
                     matchCollectManager.collect(CollectType.ATP_APP_COMPLETED, params);
                 } else {
                     matchCollectManager.collect(CollectType.WTA_DRAW, params);
-
                 }
-
             }
         }
     }
 
-    public void completed(TennisTournamentPO tournament) {
+    public void completed(TournamentData tournament) {
         DrawParams params = new DrawParams(tournament.getTournamentId(), tournament.getYear(), tournament.getTour());
         matchCollectManager.collect(CollectType.ATP_APP_COMPLETED, params);
     }
 
     public void oop() {
-        List<TennisTournamentPO> current = tournamentCollectService.current();
-        for (TennisTournamentPO item : current) {
+        List<TournamentData> current = tournamentCollectService.current();
+        for (TournamentData item : current) {
             if ("WTA".equals(item.getTour())) {
                 if (item.getCategory().equals("GS")) {
                     matchCollectManager.collect(CollectType.ATP_SCHEDULE_FOR_WTA, new DrawParams(item.getTournamentId(), item.getYear(), item.getTour()));
                 } else {
                     matchCollectManager.collect(CollectType.WTA_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear(), item.getTour()));
                 }
-
             } else if ("ATP".equals(item.getTour())) {
                 matchCollectManager.collect(CollectType.ATP_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear(), item.getTour()));
             }
@@ -89,12 +83,9 @@ public class TennisCollectFacade {
     }
 
     public void liveMatch() {
-//        matchCollectManager.collect(CollectType.ATP_LIVE, null);
-
-        List<TennisTournamentPO> tournaments = tournamentCollectService.current();
+        List<TournamentData> tournaments = tournamentCollectService.current();
         if (CollectionUtils.isEmpty(tournaments)) return;
-
-        for (TennisTournamentPO tournament : tournaments) {
+        for (TournamentData tournament : tournaments) {
             matchCollectManager.collect(CollectType.ATP_APP_LIVE, new DrawParams(tournament.getTournamentId(), tournament.getYear(), tournament.getTour()));
         }
     }
@@ -105,8 +96,7 @@ public class TennisCollectFacade {
     }
 
     public void draws(String tournamentId) {
-        TennisTournamentPO byTournamentId = this.tennisTournamentRepository.findByTournamentId(tournamentId);
+        TournamentData byTournamentId = tennisTournamentGateway.findByTournamentId(tournamentId);
         this.draws(byTournamentId);
     }
-
 }

@@ -2,7 +2,7 @@ package com.rally.tennis;
 
 import com.qiniu.common.QiniuException;
 import com.rally.client.qiniu.QiniuClient;
-import com.rally.db.tennis.repository.TennisTournamentRepository;
+import com.rally.domain.tennis.gateway.TennisTournamentGateway;
 import com.rally.domain.utils.ImageCompressor;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,19 +24,15 @@ public class TennisUploadAppService {
     private QiniuClient qiniuClient;
 
     @Resource
-    private TennisTournamentRepository tennisTournamentRepository;
+    private TennisTournamentGateway tennisTournamentGateway;
 
     public TournamentImageResult uploadTournamentImage(MultipartFile file, String tournamentId) throws IOException, QiniuException {
         byte[] originalBytes = file.getBytes();
         String format = resolveFormat(file.getContentType(), file.getOriginalFilename());
-
         byte[] compressedBytes = ImageCompressor.compress(new ByteArrayInputStream(originalBytes), format, compressKb);
-
         String imageKey = qiniuClient.uploadImage(originalBytes, DIR, tournamentId);
         String backgroundKey = qiniuClient.uploadImage(compressedBytes, DIR, tournamentId + "_background");
-
-        tennisTournamentRepository.updateImagePaths(tournamentId, imageKey, backgroundKey);
-
+        tennisTournamentGateway.updateImagePaths(tournamentId, imageKey, backgroundKey);
         return new TournamentImageResult(imageKey, backgroundKey);
     }
 

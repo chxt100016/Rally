@@ -1,7 +1,7 @@
 package com.rally.tennis;
 
-import com.rally.db.tennis.entity.TennisTournamentPO;
-import com.rally.db.tennis.repository.TennisTournamentRepository;
+import com.rally.domain.tennis.gateway.TennisTournamentGateway;
+import com.rally.domain.tennis.model.TournamentData;
 import com.rally.domain.tennis.model.TournamentPromptVO;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,14 +36,12 @@ public class TennisPromptService {
     );
 
     @Resource
-    private TennisTournamentRepository tennisTournamentRepository;
+    private TennisTournamentGateway tennisTournamentGateway;
 
     public String generatePrompt(String tournamentId) {
-        TennisTournamentPO po = tennisTournamentRepository.findByTournamentId(tournamentId);
-        if (po == null) {
-            return null;
-        }
-        return buildPrompt(po);
+        TournamentData data = tennisTournamentGateway.findByTournamentId(tournamentId);
+        if (data == null) return null;
+        return buildPrompt(data);
     }
 
     public List<TournamentPromptVO> listPendingPrompts() {
@@ -51,22 +49,20 @@ public class TennisPromptService {
         LocalDate dateFrom = today.minusMonths(1);
         LocalDate dateTo = today.plusMonths(1);
 
-        List<TennisTournamentPO> list = tennisTournamentRepository.listPendingBackground(dateFrom, dateTo);
-        if (CollectionUtils.isEmpty(list)) {
-            return List.of();
-        }
+        List<TournamentData> list = tennisTournamentGateway.listPendingBackground(dateFrom, dateTo);
+        if (CollectionUtils.isEmpty(list)) return List.of();
 
         return list.stream()
-                .filter(po -> isCategoryKept(po.getCategory()))
-                .map(po -> {
+                .filter(data -> isCategoryKept(data.getCategory()))
+                .map(data -> {
                     TournamentPromptVO vo = new TournamentPromptVO();
-                    vo.setTournamentId(po.getTournamentId());
-                    vo.setName(po.getName());
-                    vo.setCategory(po.getCategory());
-                    vo.setSurface(po.getSurface());
-                    vo.setCity(po.getCity());
-                    vo.setStartDate(po.getStartDate() != null ? po.getStartDate().format(DATE_FMT) : null);
-                    vo.setPrompt(buildPrompt(po));
+                    vo.setTournamentId(data.getTournamentId());
+                    vo.setName(data.getName());
+                    vo.setCategory(data.getCategory());
+                    vo.setSurface(data.getSurface());
+                    vo.setCity(data.getCity());
+                    vo.setStartDate(data.getStartDate() != null ? data.getStartDate().format(DATE_FMT) : null);
+                    vo.setPrompt(buildPrompt(data));
                     return vo;
                 }).toList();
     }
@@ -82,11 +78,11 @@ public class TennisPromptService {
         }
     }
 
-    private String buildPrompt(TennisTournamentPO po) {
-        String category = po.getCategory() != null ? po.getCategory().trim() : "";
-        String surface  = po.getSurface()  != null ? po.getSurface().trim().toLowerCase() : "";
-        String city     = po.getCity()     != null ? po.getCity().trim() : "";
-        String name     = po.getName()     != null ? po.getName().trim() : "";
+    private String buildPrompt(TournamentData data) {
+        String category = data.getCategory() != null ? data.getCategory().trim() : "";
+        String surface  = data.getSurface()  != null ? data.getSurface().trim().toLowerCase() : "";
+        String city     = data.getCity()     != null ? data.getCity().trim() : "";
+        String name     = data.getName()     != null ? data.getName().trim() : "";
 
         String surfaceDesc = SURFACE_DESC.getOrDefault(surface, surface);
         String levelLabel  = resolveLevelLabel(category);

@@ -1,10 +1,9 @@
 package com.rally.tennis;
 
 import com.rally.client.tennistv.model.MatchesResponse;
-import com.rally.db.tennis.entity.TennisMatchPO;
-import com.rally.db.tennis.entity.TennisSetScorePO;
-import com.rally.db.tennis.repository.TennisMatchRepository;
-import com.rally.db.tennis.repository.TennisSetScoreRepository;
+import com.rally.domain.tennis.gateway.TennisMatchCollectGateway;
+import com.rally.domain.tennis.model.MatchData;
+import com.rally.domain.tennis.model.SetScoreData;
 import com.rally.tennis.convert.MatchAppConvertMapper;
 import com.rally.tennis.model.Match;
 import com.rally.tennis.model.SetScore;
@@ -23,66 +22,44 @@ import java.util.stream.Collectors;
 public class MatchCollectService {
 
     @Resource
-    private TennisMatchRepository tennisMatchRepository;
-
-    @Resource
-    private TennisSetScoreRepository tennisSetScoreRepository;
-
+    private TennisMatchCollectGateway tennisMatchCollectGateway;
 
     public int collect(List<MatchesResponse.MatchInfo> matches) {
-        if (CollectionUtils.isEmpty(matches)) {
-            return 0;
-        }
-        List<Match> data = matches.stream()
-                .map(MatchAppConvertMapper.INSTANCE::toMatch)
-                .toList();
+        if (CollectionUtils.isEmpty(matches)) return 0;
+        List<Match> data = matches.stream().map(MatchAppConvertMapper.INSTANCE::toMatch).toList();
         this.saveMatches(data);
         return data.size();
     }
 
-
     public void saveMatches(List<Match> matches) {
-        if (CollectionUtils.isEmpty(matches)) {
-            return;
-        }
-        List<TennisMatchPO> matchPOs = MatchAppConvertMapper.INSTANCE.toMatchPOList(matches);
-        // saveOrUpdateBatch 内部会通过 peek 将数据库自增 id 回填到 matchPOs
-        tennisMatchRepository.saveOrUpdateBatch(matchPOs);
+        if (CollectionUtils.isEmpty(matches)) return;
+        List<MatchData> matchDataList = MatchAppConvertMapper.INSTANCE.toMatchDataList(matches);
+        List<MatchData> savedMatches = tennisMatchCollectGateway.saveOrUpdateBatch(matchDataList);
 
-        // 构建 matchId|drawId → tennis_match.id 映射，供盘分写入时关联
-        Map<String, Long> matchKeyToId = matchPOs.stream()
-                .filter(m -> m.getId() != null && m.getMatchId() != null)
-                .collect(Collectors.toMap(uniqueKey -> uniqueKey.getMatchId() + "|" + uniqueKey.getDrawId(),
-                        TennisMatchPO::getId, (a, b) -> a));
+        Map<String, Long> matchKeyToId = savedMatches.stream()
+                .filter(m -> m.getTennisMatchId() != null && m.getMatchId() != null)
+                .collect(Collectors.toMap(m -> m.getMatchId() + "|" + m.getDrawId(), MatchData::getTennisMatchId, (a, b) -> a));
 
         saveSetScores(matches, matchKeyToId);
     }
 
-
-
-
     private void saveSetScores(List<Match> matches, Map<String, Long> matchKeyToId) {
-        List<TennisSetScorePO> allSetScores = new ArrayList<>();
+        List<SetScoreData> allSetScores = new ArrayList<>();
         for (Match match : matches) {
-            if (CollectionUtils.isEmpty(match.getSets()) || match.getMatchId() == null) {
-                continue;
-            }
+            if (CollectionUtils.isEmpty(match.getSets()) || match.getMatchId() == null) continue;
             Long tennisMatchId = matchKeyToId.get(match.getMatchId() + "|" + match.getDrawId());
-            if (tennisMatchId == null) {
-                continue;
-            }
+            if (tennisMatchId == null) continue;
             for (SetScore setScore : match.getSets()) {
-                TennisSetScorePO po = new TennisSetScorePO();
-                po.setTennisMatchId(tennisMatchId);
-                po.setSetNumber(setScore.getSetNumber());
-                po.setP1Games(setScore.getP1Games());
-                po.setP2Games(setScore.getP2Games());
-                po.setP1Tiebreak(setScore.getP1Tiebreak());
-                po.setP2Tiebreak(setScore.getP2Tiebreak());
-                allSetScores.add(po);
+                SetScoreData data = new SetScoreData();
+                data.setTennisMatchId(tennisMatchId);
+                data.setSetNumber(setScore.getSetNumber());
+                data.setP1Games(setScore.getP1Games());
+                data.setP2Games(setScore.getP2Games());
+                data.setP1Tiebreak(setScore.getP1Tiebreak());
+                data.setP2Tiebreak(setScore.getP2Tiebreak());
+                allSetScores.add(data);
             }
         }
-        tennisSetScoreRepository.saveOrUpdateBatch(allSetScores);
+        tennisMatchCollectGateway.saveSetScores(allSetScores);
     }
-
 }

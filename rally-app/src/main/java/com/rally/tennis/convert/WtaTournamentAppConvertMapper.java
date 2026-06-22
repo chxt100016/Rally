@@ -1,7 +1,7 @@
 package com.rally.tennis.convert;
 
 import com.rally.client.wta.model.WtaTournamentsResponse;
-import com.rally.db.tennis.entity.TennisTournamentPO;
+import com.rally.domain.tennis.model.TournamentData;
 import com.rally.tennis.model.Tournament;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -39,11 +39,11 @@ public interface WtaTournamentAppConvertMapper {
     }
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
-    TennisTournamentPO toTournamentPO(Tournament tournament);
+    @Mapping(target = "imagePath", ignore = true)
+    @Mapping(target = "backgroundPath", ignore = true)
+    TournamentData toTournamentData(Tournament tournament);
 
-    List<TennisTournamentPO> toTournamentPOList(List<Tournament> tournaments);
+    List<TournamentData> toTournamentDataList(List<Tournament> tournaments);
 
     @Named("groupToId")
     default String groupToId(WtaTournamentsResponse.TournamentGroup group) {
@@ -53,13 +53,10 @@ public interface WtaTournamentAppConvertMapper {
     @Named("groupToCategory")
     default String groupToCategory(WtaTournamentsResponse.TournamentGroup group) {
         if (group == null) return null;
-
         if (group.getLevel().contains("Grand Slam")) {
             return "GS";
         }
-
         return group.getLevel().replace("WTA", "").trim();
-
     }
 
     @Named("longToInt")

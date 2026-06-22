@@ -1,6 +1,6 @@
 package com.rally.tennis;
 
-import com.rally.db.tennis.repository.TennisPlayerRepository;
+import com.rally.domain.tennis.gateway.TennisPlayerGateway;
 import com.rally.domain.tennis.model.*;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
 import com.rally.translation.TennisTranslationService;
@@ -18,35 +18,34 @@ public class TennisPlayerQueryService {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Resource
-    private TennisPlayerRepository tennisPlayerRepository;
+    private TennisPlayerGateway tennisPlayerGateway;
 
     @Resource
     private TennisTranslationService tennisTranslationService;
 
     public List<PlayerQueryVO> queryPlayers(String tour) {
         if (tour == null || tour.isBlank()) return List.of();
-        List<com.rally.db.tennis.entity.TennisPlayerPO> players =
-                tennisPlayerRepository.listByTourOrderByRank(tour.toUpperCase());
+        List<PlayerData> players = tennisPlayerGateway.listByTourOrderByRank(tour.toUpperCase());
         LocalDate today = LocalDate.now();
         List<PlayerQueryVO> result = players.stream()
-                .map(po -> toPlayerQueryVO(po, today))
+                .map(p -> toPlayerQueryVO(p, today))
                 .toList();
         tennisTranslationService.players(result, TranslationLanguageEnum.ZH_CN);
         return result;
     }
 
-    private PlayerQueryVO toPlayerQueryVO(com.rally.db.tennis.entity.TennisPlayerPO po, LocalDate today) {
+    private PlayerQueryVO toPlayerQueryVO(PlayerData player, LocalDate today) {
         PlayerQueryVO vo = new PlayerQueryVO();
-        vo.setId(po.getPlayerId());
-        vo.setRank(po.getRank());
-        String first = po.getFirstName() != null ? po.getFirstName() : "";
-        String last  = po.getLastName()  != null ? po.getLastName()  : "";
+        vo.setId(player.getPlayerId());
+        vo.setRank(player.getRank());
+        String first = player.getFirstName() != null ? player.getFirstName() : "";
+        String last  = player.getLastName()  != null ? player.getLastName()  : "";
         vo.setName((first + " " + last).trim());
-        vo.setCountry(CountryEnum.getCountry(po.getNationality()));
-        vo.setPoints(po.getPoints());
-        if (po.getBirthDate() != null) {
-            vo.setAge(Period.between(po.getBirthDate(), today).getYears());
-            vo.setBirthDate(po.getBirthDate().format(DATE_FMT));
+        vo.setCountry(CountryEnum.getCountry(player.getNationality()));
+        vo.setPoints(player.getPoints());
+        if (player.getBirthDate() != null) {
+            vo.setAge(Period.between(player.getBirthDate(), today).getYears());
+            vo.setBirthDate(player.getBirthDate().format(DATE_FMT));
         }
         return vo;
     }
