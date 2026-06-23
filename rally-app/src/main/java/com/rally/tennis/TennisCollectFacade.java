@@ -50,7 +50,13 @@ public class TennisCollectFacade {
     public void draws(TournamentData tournament) {
         DrawParams params = new DrawParams(tournament.getTournamentId(), tournament.getYear(), tournament.getTour());
         switch (TourEnums.valueOf(tournament.getTour())) {
-            case ATP -> matchCollectManager.collect(CollectType.ATP_APP_DRAW, params);
+            case ATP -> {
+                if (tournament.getCategory().equals("GS")) {
+                    matchCollectManager.collect(CollectType.ATP_APP_DRAW, params);
+                } else {
+                    matchCollectManager.collect(CollectType.ATP_DRAW, params);
+                }
+            }
             case WTA -> {
                 if (tournament.getCategory().equals("GS")) {
                     matchCollectManager.collect(CollectType.ATP_APP_DRAW, params);
@@ -77,7 +83,11 @@ public class TennisCollectFacade {
                     matchCollectManager.collect(CollectType.WTA_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear(), item.getTour()));
                 }
             } else if ("ATP".equals(item.getTour())) {
-                matchCollectManager.collect(CollectType.ATP_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear(), item.getTour()));
+                if (item.getCategory().equals("GS")) {
+                    matchCollectManager.collect(CollectType.ATP_SCHEDULE, new DrawParams(item.getTournamentId(), item.getYear(), item.getTour()));
+                } else {
+                    matchCollectManager.collect(CollectType.ATP_OOP, new DrawParams(item.getTournamentId(), item.getYear(), item.getTour()));
+                }
             }
         }
     }

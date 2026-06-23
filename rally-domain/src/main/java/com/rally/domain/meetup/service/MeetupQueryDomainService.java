@@ -87,11 +87,13 @@ public class MeetupQueryDomainService {
                 .peek(data -> data.setDistanceMeters(distanceMap.get(data.getBizId())))
                 .toList();
 
-        // 5. searchAfter 游标：定位上一页最后一条记录，取其后 pageSize+1 条
+        // 5. searchAfter 游标：解码出 bizId，定位上一页最后一条记录，取其后 pageSize+1 条
+        PageCursor cursor = PageCursor.decode(query.getLastId());
+        String lastBizId = cursor != null ? cursor.getBizId() : null;
         int start = 0;
-        if (StringUtils.isNotBlank(query.getLastId())) {
+        if (StringUtils.isNotBlank(lastBizId)) {
             for (int i = 0; i < sortedData.size(); i++) {
-                if (sortedData.get(i).getBizId().equals(query.getLastId())) {
+                if (sortedData.get(i).getBizId().equals(lastBizId)) {
                     start = i + 1;
                     break;
                 }
@@ -108,12 +110,15 @@ public class MeetupQueryDomainService {
     public PageDTO<MeetupData> listByUser(UserMeetupListCmd cmd, String userId) {
         // searchAfter：多查1条用于判断 hasMore，limit = size + 1
         int limit = cmd.getSize() + 1;
+        // 用户 Tab 为单字段游标，解码出 bizId 即可
+        PageCursor cursor = PageCursor.decode(cmd.getLastId());
+        String lastId = cursor != null ? cursor.getBizId() : null;
         return switch (cmd.getTab()) {
-            case PENDING -> listPending(userId, cmd.getLastId(), limit);
-            case IN_PROGRESS -> listInProgress(userId, cmd.getLastId(), limit);
-            case MY_PUBLISH -> listMyPublish(userId, cmd.getLastId(), limit);
-            case COMPLETED -> listCompleted(userId, cmd.getLastId(), limit);
-            case RECENT -> listRecent(userId, cmd.getLastId(), limit);
+            case PENDING -> listPending(userId, lastId, limit);
+            case IN_PROGRESS -> listInProgress(userId, lastId, limit);
+            case MY_PUBLISH -> listMyPublish(userId, lastId, limit);
+            case COMPLETED -> listCompleted(userId, lastId, limit);
+            case RECENT -> listRecent(userId, lastId, limit);
         };
     }
 

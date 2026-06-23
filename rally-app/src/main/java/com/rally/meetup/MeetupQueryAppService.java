@@ -1,5 +1,6 @@
 package com.rally.meetup;
 
+import com.rally.domain.meetup.enums.MeetupSortEnum;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.MeetupQueryDomainService;
 import com.rally.utils.UserContext;
@@ -35,7 +36,27 @@ public class MeetupQueryAppService {
         List<MeetupData> pageData = hasMore ? dataList.subList(0, query.getPageSize()) : dataList;
 
         List<MeetupCardDTO> res = pageData.stream().map(item -> packingService.packCard(item, query.getLng(), query.getLat())).toList();
-        return new PageDTO<>(res, null, hasMore);
+        PageDTO<MeetupCardDTO> page = new PageDTO<>(res, null, hasMore);
+        page.setNextCursor(buildNextCursor(pageData, query.getSort(), hasMore));
+        return page;
+    }
+
+    /** 生成下一页游标：时间排序用 (startTime, bizId) 复合游标，距离排序用 bizId */
+    private String buildNextCursor(List<MeetupData> pageData, MeetupSortEnum sort, boolean hasMore) {
+        if (!hasMore || pageData.isEmpty()) {
+            return null;
+        }
+        MeetupData last = pageData.get(pageData.size() - 1);
+        PageCursor cursor = sort == MeetupSortEnum.TIME ? PageCursor.ofTime(last.getStartTime(), last.getBizId()) : PageCursor.ofBizId(last.getBizId());
+        return PageCursor.encode(cursor);
+    }
+
+    /** 生成下一页游标：仅 bizId（用户 Tab 单字段游标） */
+    private String buildBizIdCursor(List<MeetupData> pageData, boolean hasMore) {
+        if (!hasMore || pageData.isEmpty()) {
+            return null;
+        }
+        return PageCursor.encode(PageCursor.ofBizId(pageData.get(pageData.size() - 1).getBizId()));
     }
 
     /**
@@ -47,7 +68,9 @@ public class MeetupQueryAppService {
         List<MeetupCardDTO> cardList = pageResult.getList().stream()
                 .map(data -> packingService.packCardForTab(data, cmd.getTab()))
                 .toList();
-        return new PageDTO<>(cardList, null, pageResult.getHasMore());
+        PageDTO<MeetupCardDTO> page = new PageDTO<>(cardList, null, pageResult.getHasMore());
+        page.setNextCursor(buildBizIdCursor(pageResult.getList(), pageResult.getHasMore()));
+        return page;
     }
 
 }

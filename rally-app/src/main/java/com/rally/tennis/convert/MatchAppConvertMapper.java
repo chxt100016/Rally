@@ -41,7 +41,6 @@ public interface MatchAppConvertMapper {
 
     @Mapping(target = "tennisMatchId", ignore = true)
     @Mapping(target = "courtSeq", ignore = true)
-    @Mapping(target = "scheduledAtText", ignore = true)
     MatchData toMatchData(Match match);
 
     List<MatchData> toMatchDataList(List<Match> matches);

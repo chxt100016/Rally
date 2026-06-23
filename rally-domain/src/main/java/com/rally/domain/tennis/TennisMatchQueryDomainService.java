@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 public class TennisMatchQueryDomainService {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
 
     @Resource
     private MatchQueryGateway matchQueryGateway;
@@ -110,11 +108,49 @@ public class TennisMatchQueryDomainService {
         return result;
     }
 
-    public List<MatchGroupDTO> upcomingCourtGroups(List<String> tournamentIds) {
+    public List<MatchGroupDTO> upcomingDateGroups(List<String> tournamentIds) {
         List<MatchQueryVO> matches = upcomingMatches(tournamentIds);
         if (matches.isEmpty()) return List.of();
         Map<String, String> tourMap = tournamentTourMap(tournamentIds);
 
+        // 先按日期分组（matches 已按 scheduledAt 升序，日期插入顺序天然升序）
+        Map<String, List<MatchQueryVO>> dateMap = new LinkedHashMap<>();
+        for (MatchQueryVO m : matches) {
+            dateMap.computeIfAbsent(m.getDate() != null ? m.getDate() : "", k -> new ArrayList<>()).add(m);
+        }
+
+        LocalDate base = baseDate(dateMap.keySet());
+        List<MatchGroupDTO> dateGroups = new ArrayList<>();
+        for (Map.Entry<String, List<MatchQueryVO>> entry : dateMap.entrySet()) {
+            MatchGroupDTO dateGroup = new MatchGroupDTO();
+            dateGroup.setKey(entry.getKey());
+            dateGroup.setName(dateLabel(entry.getKey(), base));
+            dateGroup.setChildren(buildCourtGroups(entry.getValue(), tourMap));
+            dateGroups.add(dateGroup);
+        }
+        dateGroups.sort(Comparator.comparing(g -> StringUtils.isNotBlank(g.getKey()) ? g.getKey() : "9999-99-99"));
+        return dateGroups;
+    }
+
+    /** 锚点日期：数据中最早日期与今天取较早者，跨天比赛的过去日期据此显示为「今天」 */
+    private LocalDate baseDate(Set<String> dates) {
+        LocalDate base = LocalDate.now();
+        for (String d : dates) {
+            if (StringUtils.isBlank(d)) continue;
+            LocalDate parsed = LocalDate.parse(d, DATE_FMT);
+            if (parsed.isBefore(base)) base = parsed;
+        }
+        return base;
+    }
+
+    private String dateLabel(String date, LocalDate base) {
+        if (StringUtils.isBlank(date)) return date;
+        if (date.equals(base.format(DATE_FMT))) return "今天";
+        if (date.equals(base.plusDays(1).format(DATE_FMT))) return "明天";
+        return date;
+    }
+
+    private List<MatchGroupDTO> buildCourtGroups(List<MatchQueryVO> matches, Map<String, String> tourMap) {
         Map<String, List<MatchQueryVO>> courtMap = new LinkedHashMap<>();
         for (MatchQueryVO m : matches) {
             courtMap.computeIfAbsent(m.getCourt() != null ? m.getCourt() : "", k -> new ArrayList<>()).add(m);
@@ -125,6 +161,7 @@ public class TennisMatchQueryDomainService {
         for (Map.Entry<String, List<MatchQueryVO>> entry : courtMap.entrySet()) {
             List<MatchQueryVO> courtMatches = entry.getValue();
             MatchGroupDTO dto = new MatchGroupDTO();
+            dto.setKey(courtMatches.get(0).getCourt());
             dto.setName(courtMatches.get(0).getCourt());
             dto.setData(courtMatches);
             courts.add(dto);
@@ -140,8 +177,8 @@ public class TennisMatchQueryDomainService {
                 if (seedB == null) return -1;
                 return seedA - seedB;
             }
-            String keyA = a.getName() != null ? a.getName() : "";
-            String keyB = b.getName() != null ? b.getName() : "";
+            String keyA = a.getKey() != null ? a.getKey() : "";
+            String keyB = b.getKey() != null ? b.getKey() : "";
             return courtTourOrderMap.getOrDefault(keyA, 2) - courtTourOrderMap.getOrDefault(keyB, 2);
         });
 
@@ -160,6 +197,7 @@ public class TennisMatchQueryDomainService {
         List<MatchGroupDTO> rounds = new ArrayList<>();
         for (Map.Entry<String, List<MatchQueryVO>> entry : roundMap.entrySet()) {
             MatchGroupDTO dto = new MatchGroupDTO();
+            dto.setKey(entry.getKey());
             dto.setName(TennisRoundEnum.labelOf(entry.getKey()));
             dto.setData(entry.getValue());
             rounds.add(dto);
@@ -234,14 +272,11 @@ public class TennisMatchQueryDomainService {
         vo.setCourt(match.getCourt());
         vo.setCourtSeq(match.getCourtSeq());
         vo.setRound(match.getRoundName());
-        vo.setRoundLabel(TennisRoundEnum.labelOf(match.getRoundName()));
-        vo.setSchedulingType(match.getScheduledAtText());
+        vo.setRoundShow(TennisRoundEnum.labelOf(match.getRoundName()));
         vo.setDate(match.getMatchDate() != null ? match.getMatchDate().format(DATE_FMT) : null);
         vo.setStartedAt(match.getStartedAt());
         vo.setScheduledAt(match.getScheduledAt());
-        if (match.getScheduledAt() != null) {
-            vo.setScheduledTime(match.getScheduledAt().format(TIME_FMT));
-        }
+        vo.setScheduledShow(ScheduledAtTextEnum.toShow(match.getScheduledAtText(), match.getScheduledAt()));
         vo.setPlayer1(buildPlayerVO(match.getPlayer1Id(), match.getTournamentId(), playerMap, seedMap));
         vo.setPlayer2(buildPlayerVO(match.getPlayer2Id(), match.getTournamentId(), playerMap, seedMap));
         List<SetScoreData> setScoreList = setScoreMap.getOrDefault(match.getTennisMatchId(), List.of());
@@ -251,7 +286,7 @@ public class TennisMatchQueryDomainService {
         vo.setCurrentSet(CollectionUtils.isEmpty(sets) ? null : sets.size());
         vo.setCurrentSetScore(buildCurrentSetScore(sets));
         vo.setWinnerId(match.getWinnerId());
-        vo.setDuration(calculateDuration(match));
+        vo.setDurationShow(durationShow(match.getDurationMinutes()));
         return vo;
     }
 
@@ -279,23 +314,12 @@ public class TennisMatchQueryDomainService {
         return lastSet.getPlayer1() + "-" + lastSet.getPlayer2();
     }
 
-    private String calculateDuration(MatchData match) {
-        if (match.getDurationMinutes() != null) {
-            int hours = match.getDurationMinutes() / 60;
-            int mins = match.getDurationMinutes() % 60;
-            if (hours > 0) return hours + "h" + (mins > 0 ? mins + "m" : "");
-            return mins + "m";
-        }
-        if ("live".equals(match.getStatus()) && match.getStartedAt() != null) {
-            long minutes = java.time.Duration.between(match.getStartedAt(), LocalDateTime.now()).toMinutes();
-            if (minutes >= 0) {
-                int hours = (int) (minutes / 60);
-                int mins = (int) (minutes % 60);
-                if (hours > 0) return "已开始 " + hours + "h" + (mins > 0 ? mins + "m" : "");
-                return "已开始 " + mins + "m";
-            }
-        }
-        return null;
+    private String durationShow(Integer durationMinutes) {
+        if (durationMinutes == null) return null;
+        int hours = durationMinutes / 60;
+        int mins = durationMinutes % 60;
+        if (hours > 0) return hours + "h" + (mins > 0 ? mins + "m" : "");
+        return mins + "m";
     }
 
     private Integer getMinSeed(List<MatchQueryVO> matches) {

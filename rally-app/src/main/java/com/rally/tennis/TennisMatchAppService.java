@@ -24,7 +24,7 @@ public class TennisMatchAppService {
     public TennisMatchDTO upcoming(List<String> tournamentIds) {
         TennisMatchDTO dto = new TennisMatchDTO();
         dto.setSeed(tennisMatchQueryDomainService.seedGroups(tournamentIds));
-        dto.setMatch(tennisMatchQueryDomainService.upcomingCourtGroups(tournamentIds));
+        dto.setMatch(tennisMatchQueryDomainService.upcomingDateGroups(tournamentIds));
         translate(dto);
         return dto;
     }
@@ -42,7 +42,7 @@ public class TennisMatchAppService {
         List<MatchQueryVO> matches = new ArrayList<>();
         if (dto.getMatch() != null) {
             for (MatchGroupDTO group : dto.getMatch()) {
-                if (group.getData() != null) matches.addAll(group.getData());
+                collectMatches(group, matches);
             }
         }
         tennisTranslationService.matches(matches, TranslationLanguageEnum.ZH_CN);
@@ -54,5 +54,12 @@ public class TennisMatchAppService {
             }
         }
         tennisTranslationService.seeds(seeds, TranslationLanguageEnum.ZH_CN);
+    }
+
+    private void collectMatches(MatchGroupDTO group, List<MatchQueryVO> out) {
+        if (group.getData() != null) out.addAll(group.getData());
+        if (group.getChildren() != null) {
+            for (MatchGroupDTO child : group.getChildren()) collectMatches(child, out);
+        }
     }
 }

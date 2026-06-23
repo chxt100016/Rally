@@ -30,7 +30,7 @@ public class MeetupListCmd {
     @Min(value = 1, message = "每页数量最小为1")
     private Integer pageSize = 10;
 
-    /** 上一页最后一条记录的 meetupId（searchAfter 游标，首页不传） */
+    /** 上一页游标（searchAfter）：取上次响应的 nextCursor 原样回传，首页不传 */
     private String lastId;
 
     /** 经度（距离排序必传） */

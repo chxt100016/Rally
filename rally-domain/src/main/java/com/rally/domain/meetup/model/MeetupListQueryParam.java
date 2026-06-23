@@ -41,8 +41,12 @@ public class MeetupListQueryParam {
     private Integer pageNo;
     /** 每页数量 */
     private Integer pageSize;
-    /** 上一页最后一条记录的 bizId（searchAfter 游标） */
+    /** 上一页最后一条记录的 bizId（searchAfter 游标，用户 Tab 单字段游标用） */
     private String lastId;
+    /** 上一页最后一条的开球时间（时间排序复合游标用） */
+    private LocalDateTime lastStartTime;
+    /** 上一页最后一条的 bizId（时间排序复合游标的 tie-breaker） */
+    private String lastBizId;
     /** 查询限制条数（searchAfter: size + 1用于判断hasMore） */
     private Integer limit;
 }

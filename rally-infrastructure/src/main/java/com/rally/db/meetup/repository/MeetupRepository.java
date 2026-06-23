@@ -9,7 +9,6 @@ import com.rally.db.meetup.mapper.MeetupMapper;
 import com.rally.db.meetup.service.MeetupService;
 import com.rally.domain.meetup.model.MeetupListQueryParam;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
@@ -163,8 +162,8 @@ public class MeetupRepository {
 
     /**
      * 查询可报名的约球列表（带筛选、排序、searchAfter 游标分页）
-     * bizId 为雪花 ID，与创建时间同序，按 bizId 倒序排列并作为游标使用
-     * 返回 pageSize+1 条，供 app 层判断是否还有下一页
+     * 按开球时间 startTime 升序（即将开打在前），bizId 作为同开球时间的 tie-breaker，
+     * 游标为 (startTime, bizId) 复合游标。返回 pageSize+1 条，供 app 层判断是否还有下一页
      */
     public List<MeetupPO> listNew(MeetupListQueryParam param) {
         LambdaQueryWrapper<MeetupPO> wrapper = new LambdaQueryWrapper<>();
@@ -204,10 +203,14 @@ public class MeetupRepository {
             );
         }
 
-        // searchAfter 游标：取 bizId 小于上一页最后一条记录的数据
-        wrapper.lt(StringUtils.isNotBlank(param.getLastId()), MeetupPO::getBizId, param.getLastId())
-                .orderByDesc(MeetupPO::getBizId)
-                .last("LIMIT " + (param.getPageSize() + 1));
+        // searchAfter 复合游标：(startTime, bizId) 升序，取游标之后的数据
+        // startTime > lastStart OR (startTime = lastStart AND bizId > lastBizId)
+        if (param.getLastStartTime() != null) {
+            LocalDateTime lastStart = param.getLastStartTime();
+            String lastBizId = param.getLastBizId();
+            wrapper.and(w -> w.gt(MeetupPO::getStartTime, lastStart).or(o -> o.eq(MeetupPO::getStartTime, lastStart).gt(MeetupPO::getBizId, lastBizId)));
+        }
+        wrapper.orderByAsc(MeetupPO::getStartTime).orderByAsc(MeetupPO::getBizId).last("LIMIT " + (param.getPageSize() + 1));
 
         return meetupService.list(wrapper);
     }

@@ -16,11 +16,10 @@ public class MatchQueryVO {
     private String court;
     private Integer courtSeq;
     private String round;
-    private String roundLabel;
+    private String roundShow;
     private String status;
     private String statusLabel;
-    private String schedulingType;
-    private String scheduledTime;
+    private String scheduledShow;
     private String date;
     private PlayerVO player1;
     private PlayerVO player2;
@@ -30,5 +29,5 @@ public class MatchQueryVO {
     private Integer currentSet;
     private String currentSetScore;
     private String winnerId;
-    private String duration;
+    private String durationShow;
 }
