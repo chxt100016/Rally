@@ -35,7 +35,7 @@ ALTER TABLE tour_match ADD INDEX idx_tour_match_player2 (player2_id);
 -- 5. 重命名索引（tour_set_score 表）
 ALTER TABLE tour_set_score DROP INDEX uk_tennis_set_match_id_set_number;
 ALTER TABLE tour_set_score ADD UNIQUE KEY uk_tour_set_match_id_set_number (tour_match_id, set_number);
-ALTER TABLE tour_set_score DROP INDEX idx_tennis_set_tour_match_id;
+ALTER TABLE tour_set_score DROP INDEX idx_tennis_set_tennis_match_id;
 ALTER TABLE tour_set_score ADD INDEX idx_tour_set_tour_match_id (tour_match_id);
 
 -- 6. 重命名字段（tour_set_score 表）
