@@ -7,8 +7,8 @@ import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.model.ScoreChange;
 import com.rally.domain.score.model.ScoreContext;
 import com.rally.domain.user.enums.ChangeReasonEnum;
-import com.rally.domain.user.gateway.TennisProfileGateway;
-import com.rally.domain.user.model.TennisProfileData;
+import com.rally.domain.user.gateway.TourProfileGateway;
+import com.rally.domain.user.model.TourProfileData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class CredibilityStrategy implements ScoreStrategy {
 
     private final MeetupGateway meetupGateway;
-    private final TennisProfileGateway profileGateway;
+    private final TourProfileGateway profileGateway;
 
     @Override
     public ScoreDimensionEnum dimension() {
@@ -40,7 +40,7 @@ public class CredibilityStrategy implements ScoreStrategy {
 
         // 获取当前可信度
         Integer before = profileGateway.findByUserId(userId)
-                .map(TennisProfileData::getCredibilityScore)
+                .map(TourProfileData::getCredibilityScore)
                 .orElse(0);
         change.setBefore(before);
 

@@ -4,7 +4,7 @@ import com.rally.domain.recap.model.ReviewSubmitCmd;
 import com.rally.domain.recap.model.ScoreAddCmd;
 import com.rally.domain.recap.model.ScoreDeleteCmd;
 import com.rally.domain.recap.model.ScoreUpdateCmd;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.recap.RecapAppService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;

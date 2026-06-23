@@ -1,6 +1,6 @@
 package com.rally.web.user;
 
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.domain.user.model.*;
 import com.rally.user.ProfileAppService;
 import jakarta.annotation.Resource;

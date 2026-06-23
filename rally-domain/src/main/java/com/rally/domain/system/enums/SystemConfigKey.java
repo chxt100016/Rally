@@ -135,7 +135,7 @@ public enum SystemConfigKey {
     // ==================== 防滥用 ====================
 
     /** 每日发布约球数量上限 */
-    ANTI_ABUSE_PUBLISH_PER_DAY_LIMIT("anti_abuse.publish_per_day_limit", "每日发布约球数量上限", "5"),
+    ANTI_ABUSE_PUBLISH_PER_DAY_LIMIT("anti_abuse.publish_per_day_limit", "每日发布约球数量上限", "50"),
 
     // ==================== 用户上传 ====================
 

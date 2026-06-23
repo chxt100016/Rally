@@ -9,8 +9,8 @@ import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.model.ScoreChange;
 import com.rally.domain.score.model.ScoreContext;
 import com.rally.domain.user.enums.ChangeReasonEnum;
-import com.rally.domain.user.gateway.TennisProfileGateway;
-import com.rally.domain.user.model.TennisProfileData;
+import com.rally.domain.user.gateway.TourProfileGateway;
+import com.rally.domain.user.model.TourProfileData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ import java.util.List;
 public class ReputationStrategy implements ScoreStrategy {
 
     private final ReviewGateway reviewGateway;
-    private final TennisProfileGateway profileGateway;
+    private final TourProfileGateway profileGateway;
 
     @Override
     public ScoreDimensionEnum dimension() {
@@ -42,7 +42,7 @@ public class ReputationStrategy implements ScoreStrategy {
 
         // 获取当前信誉分
         Integer before = profileGateway.findByUserId(userId)
-                .map(TennisProfileData::getReputationScore)
+                .map(TourProfileData::getReputationScore)
                 .orElse(100);
         change.setBefore(before);
 

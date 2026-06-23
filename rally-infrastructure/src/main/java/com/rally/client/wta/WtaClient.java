@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class WtaClient {
 
-    private static final String BASE_URI = "https://api.wtatennis.com/tennis/tournaments";
+    private static final String BASE_URI = "https://api.wtatennis.com/tour/tournaments";
 
     public WtaTournamentsResponse getTournaments(int year) {
         try {

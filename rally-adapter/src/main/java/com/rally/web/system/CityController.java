@@ -1,6 +1,6 @@
 package com.rally.web.system;
 
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.system.CityAppService;
 import com.rally.system.model.CityDTO;
 import lombok.RequiredArgsConstructor;

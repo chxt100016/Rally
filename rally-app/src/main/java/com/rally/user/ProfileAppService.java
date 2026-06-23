@@ -10,7 +10,7 @@ import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.log.gateway.ProfileChangeLogGateway;
-import com.rally.domain.user.gateway.TennisProfileGateway;
+import com.rally.domain.user.gateway.TourProfileGateway;
 import com.rally.domain.user.gateway.UserGateway;
 import com.rally.domain.user.model.*;
 import com.rally.domain.log.ProfileLogService;
@@ -32,7 +32,7 @@ import java.util.Optional;
 public class ProfileAppService {
 
     @Resource
-    private TennisProfileGateway tennisProfileGateway;
+    private TourProfileGateway tourProfileGateway;
 
     @Resource
     private ProfileChangeLogGateway profileChangeLogGateway;
@@ -132,7 +132,7 @@ public class ProfileAppService {
      */
     @Transactional
     public void advanceReviewProgress(String userId, String meetupId, boolean isBad) {
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
+        TourProfileData profileData = tourProfileGateway.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
 
         if (!profileData.getIsUnderReview()) {
@@ -153,7 +153,7 @@ public class ProfileAppService {
             int requiredMatches = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_REQUIRED_MATCHES.getKey());
             int penaltyCredibility = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_PENALTY_CREDIBILITY.getKey());
             profileRecordService.saveReviewResetLog(userId, remaining, requiredMatches, meetupId);
-            tennisProfileGateway.updateScoreFields(userId, null,
+            tourProfileGateway.updateScoreFields(userId, null,
                     penaltyCredibility, null, null);
         } else {
             BigDecimal newRemaining = remaining.subtract(BigDecimal.ONE);
@@ -169,11 +169,11 @@ public class ProfileAppService {
      */
     @Transactional
     public void releaseReview(String userId) {
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
+        TourProfileData profileData = tourProfileGateway.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
 
         profileData.setStatus(ProfileStatusEnum.NORMAL);
         profileData.setIsUnderReview(false);
-        tennisProfileGateway.update(profileData);
+        tourProfileGateway.update(profileData);
     }
 }

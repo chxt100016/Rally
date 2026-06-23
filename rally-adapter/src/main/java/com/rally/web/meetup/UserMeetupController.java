@@ -3,7 +3,7 @@ package com.rally.web.meetup;
 import com.rally.domain.meetup.model.MeetupCardDTO;
 import com.rally.domain.meetup.model.PageDTO;
 import com.rally.domain.meetup.model.UserMeetupListCmd;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.meetup.MeetupQueryAppService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;

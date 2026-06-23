@@ -2,7 +2,7 @@ package com.rally.domain.user.service;
 
 import com.rally.domain.log.ProfileLogService;
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.user.gateway.TennisProfileGateway;
+import com.rally.domain.user.gateway.TourProfileGateway;
 import com.rally.domain.user.gateway.UserProfileGateway;
 import com.rally.domain.user.model.UserProfile;
 import jakarta.annotation.Resource;
@@ -24,7 +24,7 @@ public class UserProfileDomainService {
     private UserProfileGateway userProfileGateway;
 
     @Resource
-    private TennisProfileGateway tennisProfileGateway;
+    private TourProfileGateway tourProfileGateway;
 
     @Resource
     private ProfileLogService profileRecordService;
@@ -88,7 +88,7 @@ public class UserProfileDomainService {
 
         // 3. 更新 NTRP
         userProfile.updateNtrpScore(newNtrp);
-        tennisProfileGateway.update(userProfile.getProfile());
+        tourProfileGateway.update(userProfile.getProfile());
 
         // 4. 记录 NTRP 变更日志
         profileRecordService.saveNtrpChangeLog(userProfile.getUser().getUserId(), oldNtrp, newNtrp);

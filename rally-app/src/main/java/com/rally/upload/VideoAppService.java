@@ -9,8 +9,8 @@ import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
-import com.rally.domain.user.gateway.TennisProfileGateway;
-import com.rally.domain.user.model.TennisProfileData;
+import com.rally.domain.user.gateway.TourProfileGateway;
+import com.rally.domain.user.model.TourProfileData;
 import com.rally.domain.user.model.VideoTokenVO;
 import com.rally.domain.user.model.VideoVO;
 import com.rally.domain.utils.Assert;
@@ -29,7 +29,7 @@ import java.util.List;
 public class VideoAppService {
 
     @Resource
-    private TennisProfileGateway tennisProfileGateway;
+    private TourProfileGateway tourProfileGateway;
 
     @Resource
     private QiniuClient qiniuClient;
@@ -39,7 +39,7 @@ public class VideoAppService {
      */
     public VideoTokenVO getVideoUploadToken() {
         String userId = UserContext.get();
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
+        TourProfileData profileData = tourProfileGateway.findByUserId(userId)
                 .orElse(null);
         if (profileData != null) {
             int maxCount = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getKey());
@@ -65,7 +65,7 @@ public class VideoAppService {
             throw new BusinessException(BizErrorCode.VIDEO_NOT_OWNED);
         }
 
-        TennisProfileData profileData = tennisProfileGateway.findByUserId(userId)
+        TourProfileData profileData = tourProfileGateway.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
         List<VideoVO> videos = profileData.getVideos();
         if (videos == null) {
@@ -76,7 +76,7 @@ public class VideoAppService {
         Assert.isTrue(videos.size() > 1, BizErrorCode.VIDEO_AT_LEAST_ONE);
 
         videos.removeIf(video -> video.getKey().equals(key));
-        tennisProfileGateway.updateVideos(userId, videos);
+        tourProfileGateway.updateVideos(userId, videos);
 
         // 删除七牛云视频
         qiniuClient.deleteFile(key);

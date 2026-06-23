@@ -3,7 +3,7 @@ package com.rally.web.config;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.AuthException;
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -5,7 +5,7 @@ import com.rally.domain.meetup.model.MeetupQuitCmd;
 import com.rally.domain.meetup.model.MeetupWithdrawCmd;
 import com.rally.domain.meetup.model.RegistrationApproveCmd;
 import com.rally.domain.meetup.model.RegistrationRejectCmd;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.meetup.RegistrationAppService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;

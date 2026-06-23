@@ -1,6 +1,6 @@
 package com.rally.web.content;
 
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.domain.translation.TranslationPromptBuilder;
 import com.rally.domain.translation.model.TranslationData;
 import com.rally.translation.TranslationAppService;

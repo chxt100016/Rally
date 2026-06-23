@@ -24,8 +24,8 @@ mvn clean package -DskipTests
 - 所有请求接口前缀在配置文件中配置了`/api/rally`
 - 任何方法的返回值都不应该用optional
 - **Domain 层不能直接调用 Infrastructure**。跨层访问必须通过 Gateway 模式：
-  1. 在 `rally-domain/src/main/java/com/rally/domain/tennis/gateway/` 定义接口
-  2. 在 `rally-infrastructure/src/main/java/com/rally/db/tennis/repository/` 用 `@Component` 实现该接口
+  1. 在 `rally-domain/src/main/java/com/rally/domain/tour/gateway/` 定义接口
+  2. 在 `rally-infrastructure/src/main/java/com/rally/db/tour/repository/` 用 `@Component` 实现该接口
 - FastJson2 作为 HTTP 消息转换器（`rally-infrastructure/config/FastJsonConfigClass.java`）
 - 枚举的name要使用大写
 - 对外返回的对象都以DTO结尾

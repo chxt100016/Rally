@@ -1,6 +1,6 @@
 package com.rally.web.upload;
 
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.upload.UploadAppService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

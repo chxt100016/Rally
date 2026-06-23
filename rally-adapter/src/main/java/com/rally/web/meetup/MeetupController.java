@@ -1,7 +1,7 @@
 package com.rally.web.meetup;
 
 import com.rally.domain.meetup.model.*;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.meetup.MeetupAppService;
 import com.rally.meetup.MeetupDetailAppService;
 import com.rally.meetup.MeetupQueryAppService;

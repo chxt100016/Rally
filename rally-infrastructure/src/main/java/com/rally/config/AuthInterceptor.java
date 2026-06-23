@@ -3,7 +3,7 @@ package com.rally.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.model.TokenPayload;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.utils.TokenUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;

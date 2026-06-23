@@ -5,7 +5,7 @@ import com.rally.domain.auth.exception.AuthException;
 import com.rally.domain.auth.model.CompleteRegistrationCmd;
 import com.rally.domain.auth.model.LoginResultVO;
 import com.rally.domain.auth.model.WechatLoginCmd;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;

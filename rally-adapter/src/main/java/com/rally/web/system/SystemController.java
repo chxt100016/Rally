@@ -2,7 +2,7 @@ package com.rally.web.system;
 
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.system.SystemConfig;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

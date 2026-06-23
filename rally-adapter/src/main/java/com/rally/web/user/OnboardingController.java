@@ -1,6 +1,6 @@
 package com.rally.web.user;
 
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.domain.user.model.MyProfileDTO;
 import com.rally.domain.user.model.OnboardingCmd;
 import com.rally.user.OnboardingAppService;

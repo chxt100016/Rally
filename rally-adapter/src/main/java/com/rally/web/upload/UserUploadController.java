@@ -1,7 +1,7 @@
 package com.rally.web.upload;
 
 import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.domain.user.model.VideoTokenVO;
 import com.rally.upload.VideoAppService;
 import jakarta.annotation.Resource;

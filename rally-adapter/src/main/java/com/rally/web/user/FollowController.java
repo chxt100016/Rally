@@ -1,7 +1,7 @@
 package com.rally.web.user;
 
 import com.rally.domain.meetup.model.PageDTO;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.domain.user.model.FollowCmd;
 import com.rally.domain.user.model.FollowListCmd;
 import com.rally.domain.user.model.FollowUserDTO;

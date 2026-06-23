@@ -1,6 +1,6 @@
 package com.rally.wechat.user;
 
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import com.rally.domain.user.model.DeleteVideoCmd;
 import com.rally.domain.user.model.MyProfileDTO;
 import com.rally.domain.user.model.UpdateVideoCmd;

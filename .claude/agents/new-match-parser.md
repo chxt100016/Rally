@@ -28,19 +28,19 @@ permissionMode: bypassPermissions
 
 ## 第二步：生成代码
 
-根据用户回答，在 `rally-app/src/main/java/com/rally/tennis/parser/` 下生成 `{Tour}{Scene}MatchParser.java`。
+根据用户回答，在 `rally-app/src/main/java/com/rally/tour/parser/` 下生成 `{Tour}{Scene}MatchParser.java`。
 
 ### Draw 场景模板
 
 ```java
-package com.rally.tennis.parser;
+package com.rally.tour.parser;
 
 import com.rally.client.{pkg}.{Client};
 import com.rally.client.{pkg}.model.{RawResponse};
-import com.rally.tennis.model.Discipline;
-import com.rally.tennis.model.Match;
-import com.rally.tennis.model.Player;
-import com.rally.tennis.model.TournamentEntry;
+import com.rally.tour.model.Discipline;
+import com.rally.tour.model.Match;
+import com.rally.tour.model.Player;
+import com.rally.tour.model.TournamentEntry;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -113,14 +113,14 @@ public class {Tour}DrawMatchParser extends MatchParser<{R}, {S}> {
 ### OOP 场景模板
 
 ```java
-package com.rally.tennis.parser;
+package com.rally.tour.parser;
 
 import com.rally.client.{pkg}.{Client};
 import com.rally.client.{pkg}.model.{RawResponse};
-import com.rally.tennis.model.Discipline;
-import com.rally.tennis.model.Match;
-import com.rally.tennis.model.Player;
-import com.rally.tennis.model.TournamentEntry;
+import com.rally.tour.model.Discipline;
+import com.rally.tour.model.Match;
+import com.rally.tour.model.Player;
+import com.rally.tour.model.TournamentEntry;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -193,16 +193,16 @@ public class {Tour}OopMatchParser extends MatchParser<{R}, {S}> {
 ### Live 场景模板
 
 ```java
-package com.rally.tennis.parser;
+package com.rally.tour.parser;
 
 import com.rally.client.{pkg}.{Client};
 import com.rally.client.{pkg}.model.{RawResponse};
-import com.rally.tennis.model.Discipline;
-import com.rally.tennis.model.Match;
-import com.rally.tennis.model.MatchStatus;
-import com.rally.tennis.model.Player;
-import com.rally.tennis.model.SetScore;
-import com.rally.tennis.model.TournamentEntry;
+import com.rally.tour.model.Discipline;
+import com.rally.tour.model.Match;
+import com.rally.tour.model.MatchStatus;
+import com.rally.tour.model.Player;
+import com.rally.tour.model.SetScore;
+import com.rally.tour.model.TournamentEntry;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;

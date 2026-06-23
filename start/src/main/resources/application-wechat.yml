@@ -7,7 +7,7 @@ spring:
         type: com.zaxxer.hikari.HikariDataSource
 
 job:
-  tennis:
+  tour:
     enabled: false
     collect:
       draws:

@@ -3,7 +3,7 @@ package com.rally.web.court;
 import com.rally.court.CourtQueryAppService;
 import com.rally.domain.court.model.CourtDTO;
 import com.rally.domain.court.model.CourtQueryCmd;
-import com.rally.domain.tennis.model.Result;
+import com.rally.domain.tour.model.Result;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
