@@ -16,11 +16,14 @@ import java.util.List;
 public interface MatchQueryGateway {
 
     /**
-     * 根据 tournamentId 列表查询比赛
-     * @param tournamentIds tournamentId 列表
-     * @return 比赛列表
+     * 根据 tournamentId 列表查询已结束比赛（status = FINISHED）
      */
-    List<MatchData> listByTournamentIds(List<String> tournamentIds);
+    List<MatchData> listFinishedByTournamentIds(List<String> tournamentIds);
+
+    /**
+     * 根据 tournamentId 列表查询未结束比赛（status != FINISHED 且有比赛日期）
+     */
+    List<MatchData> listUnfinishedByTournamentIds(List<String> tournamentIds);
 
     /**
      * 根据 tennis_match.id 列表查询盘分

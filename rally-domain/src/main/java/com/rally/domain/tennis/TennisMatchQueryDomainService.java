@@ -1,52 +1,122 @@
 package com.rally.domain.tennis;
 
+import com.rally.domain.tennis.convert.MatchConvertMapper;
+import com.rally.domain.tennis.gateway.MatchQueryGateway;
+import com.rally.domain.tennis.gateway.TennisTournamentGateway;
 import com.rally.domain.tennis.model.*;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TennisMatchQueryDomainService {
 
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
+
     @Resource
-    private MatchDataLoader matchDataLoader;
+    private MatchQueryGateway matchQueryGateway;
 
-    public TennisMatchDTO getUpcoming(List<String> tournamentIds) {
-        TennisMatchDTO dto = emptyDTO();
-        if (CollectionUtils.isEmpty(tournamentIds)) return dto;
-        MatchDataLoader.MatchLoadResult loaded = matchDataLoader.loadAndSplit(tournamentIds);
-        if (loaded.empty) return dto;
-        dto.setSeed(buildSeedGroups(loaded));
-        dto.setMatch(buildCourtGroups(loaded));
-        return dto;
+    @Resource
+    private TennisTournamentGateway tennisTournamentGateway;
+
+    // ==================== 扁平查询：每个方法各自独立查询所需数据 ====================
+
+    /**
+     * 种子球员列表。淘汰状态用全部已结束比赛计算（今天输球立即标记淘汰）。
+     */
+    public List<SeedVO> seeds(List<String> tournamentIds) {
+        if (CollectionUtils.isEmpty(tournamentIds)) return List.of();
+        List<PlayerSeedData> seedData = matchQueryGateway.listSeedsByTournamentIds(tournamentIds);
+        if (CollectionUtils.isEmpty(seedData)) return List.of();
+
+        Map<String, String> eliminatedRoundMap = buildEliminatedRoundMap(matchQueryGateway.listFinishedByTournamentIds(tournamentIds));
+
+        List<String> seedPlayerIds = seedData.stream().map(PlayerSeedData::getPlayerId).distinct().toList();
+        Map<String, PlayerData> playerMap = matchQueryGateway.listPlayersByPlayerIds(seedPlayerIds).stream().collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
+        Map<String, String> tourMap = tournamentTourMap(tournamentIds);
+
+        return seedData.stream()
+                .filter(s -> s.getSeed() != null && s.getSeed() != 0)
+                .map(s -> toSeedVO(s, playerMap, tourMap, eliminatedRoundMap))
+                .sorted(Comparator.comparing(SeedVO::getSeed, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
     }
 
-    public TennisMatchDTO getFinished(List<String> tournamentIds) {
-        TennisMatchDTO dto = emptyDTO();
-        if (CollectionUtils.isEmpty(tournamentIds)) return dto;
-        MatchDataLoader.MatchLoadResult loaded = matchDataLoader.loadAndSplit(tournamentIds);
-        if (loaded.empty) return dto;
-        dto.setSeed(buildSeedGroups(loaded));
-        dto.setMatch(buildRoundGroups(loaded));
-        return dto;
+    /**
+     * 未结束比赛 + 今天已结束的比赛（与某场未结束比赛同一天），按计划开始时间升序。
+     */
+    public List<MatchQueryVO> upcomingMatches(List<String> tournamentIds) {
+        if (CollectionUtils.isEmpty(tournamentIds)) return List.of();
+        List<MatchData> unfinished = matchQueryGateway.listUnfinishedByTournamentIds(tournamentIds);
+        Set<LocalDate> upcomingDates = unfinished.stream().map(MatchData::getMatchDate).filter(Objects::nonNull).collect(Collectors.toSet());
+
+        List<MatchData> matches = new ArrayList<>(unfinished);
+        if (!upcomingDates.isEmpty()) {
+            matchQueryGateway.listFinishedByTournamentIds(tournamentIds).stream()
+                    .filter(m -> m.getMatchDate() != null && upcomingDates.contains(m.getMatchDate()))
+                    .forEach(matches::add);
+        }
+
+        List<MatchQueryVO> vos = toMatchVOs(matches, tournamentIds);
+        vos.sort(Comparator.comparing(MatchQueryVO::getScheduledAt, Comparator.nullsLast(Comparator.naturalOrder())));
+        return vos;
     }
 
-    private TennisMatchDTO emptyDTO() {
-        TennisMatchDTO dto = new TennisMatchDTO();
-        dto.setSeed(List.of());
-        dto.setMatch(List.of());
-        return dto;
+    /**
+     * 全部已结束比赛，按实际开始时间倒序。
+     */
+    public List<MatchQueryVO> finishedMatches(List<String> tournamentIds) {
+        if (CollectionUtils.isEmpty(tournamentIds)) return List.of();
+        List<MatchQueryVO> vos = toMatchVOs(matchQueryGateway.listFinishedByTournamentIds(tournamentIds), tournamentIds);
+        vos.sort(Comparator.comparing(MatchQueryVO::getStartedAt, Comparator.nullsLast(Comparator.reverseOrder())));
+        return vos;
     }
 
-    private List<MatchGroupDTO> buildCourtGroups(MatchDataLoader.MatchLoadResult loaded) {
-        List<MatchQueryVO> upcomingMatches = loaded.upcomingMatches;
-        upcomingMatches.sort(Comparator.comparing(MatchQueryVO::getScheduledAt, Comparator.nullsLast(Comparator.naturalOrder())));
+    // ==================== 分组视图：在扁平结果上做分组 ====================
+
+    public List<SeedGroupDTO> seedGroups(List<String> tournamentIds) {
+        List<SeedVO> seeds = seeds(tournamentIds);
+
+        Map<String, List<SeedVO>> grouped = new LinkedHashMap<>();
+        grouped.put("ATP", new ArrayList<>());
+        grouped.put("WTA", new ArrayList<>());
+        grouped.put("OUT", new ArrayList<>());
+        for (SeedVO seed : seeds) {
+            if (seed.getStatus() == SeedStatusEnum.ELIMINATED) {
+                grouped.get("OUT").add(seed);
+            } else if ("ATP".equalsIgnoreCase(seed.getTour())) {
+                grouped.get("ATP").add(seed);
+            } else {
+                grouped.get("WTA").add(seed);
+            }
+        }
+
+        List<SeedGroupDTO> result = new ArrayList<>();
+        for (Map.Entry<String, List<SeedVO>> entry : grouped.entrySet()) {
+            if (entry.getValue().isEmpty()) continue;
+            SeedGroupDTO dto = new SeedGroupDTO();
+            dto.setType(entry.getKey());
+            dto.setData(entry.getValue());
+            result.add(dto);
+        }
+        return result;
+    }
+
+    public List<MatchGroupDTO> upcomingCourtGroups(List<String> tournamentIds) {
+        List<MatchQueryVO> matches = upcomingMatches(tournamentIds);
+        if (matches.isEmpty()) return List.of();
+        Map<String, String> tourMap = tournamentTourMap(tournamentIds);
 
         Map<String, List<MatchQueryVO>> courtMap = new LinkedHashMap<>();
-        for (MatchQueryVO m : upcomingMatches) {
+        for (MatchQueryVO m : matches) {
             courtMap.computeIfAbsent(m.getCourt() != null ? m.getCourt() : "", k -> new ArrayList<>()).add(m);
         }
 
@@ -58,7 +128,7 @@ public class TennisMatchQueryDomainService {
             dto.setName(courtMatches.get(0).getCourt());
             dto.setData(courtMatches);
             courts.add(dto);
-            boolean hasAtp = courtMatches.stream().anyMatch(m -> "ATP".equalsIgnoreCase(loaded.tournamentTourMap.getOrDefault(m.getTournamentId(), "")));
+            boolean hasAtp = courtMatches.stream().anyMatch(m -> "ATP".equalsIgnoreCase(tourMap.getOrDefault(m.getTournamentId(), "")));
             courtTourOrderMap.put(entry.getKey(), hasAtp ? 0 : 1);
         }
 
@@ -78,12 +148,12 @@ public class TennisMatchQueryDomainService {
         return courts;
     }
 
-    private List<MatchGroupDTO> buildRoundGroups(MatchDataLoader.MatchLoadResult loaded) {
-        List<MatchQueryVO> finishedMatches = loaded.finishedMatches;
-        finishedMatches.sort(Comparator.comparing(MatchQueryVO::getStartedAt, Comparator.nullsLast(Comparator.reverseOrder())));
+    public List<MatchGroupDTO> finishedRoundGroups(List<String> tournamentIds) {
+        List<MatchQueryVO> matches = finishedMatches(tournamentIds);
+        if (matches.isEmpty()) return List.of();
 
         Map<String, List<MatchQueryVO>> roundMap = new LinkedHashMap<>();
-        for (MatchQueryVO m : finishedMatches) {
+        for (MatchQueryVO m : matches) {
             roundMap.computeIfAbsent(m.getRound() != null ? m.getRound() : "", k -> new ArrayList<>()).add(m);
         }
 
@@ -99,63 +169,133 @@ public class TennisMatchQueryDomainService {
         return rounds;
     }
 
-    private List<SeedGroupDTO> buildSeedGroups(MatchDataLoader.MatchLoadResult loaded) {
-        Map<String, String> eliminatedRoundMap = new HashMap<>();
-        for (MatchQueryVO m : loaded.finishedMatches) {
+    // ==================== 私有：数据加载 + VO 构建 ====================
+
+    private Map<String, String> tournamentTourMap(List<String> tournamentIds) {
+        return tennisTournamentGateway.listByTournamentIds(tournamentIds).stream().collect(Collectors.toMap(TournamentData::getTournamentId, data -> data.getTour() != null ? data.getTour() : "", (a, b) -> a));
+    }
+
+    private Map<String, String> buildEliminatedRoundMap(List<MatchData> finishedMatches) {
+        Map<String, String> map = new HashMap<>();
+        for (MatchData m : finishedMatches) {
             if (m.getWinnerId() == null) continue;
-            if (m.getPlayer1() != null && !m.getWinnerId().equals(m.getPlayer1().getId())) eliminatedRoundMap.put(m.getPlayer1().getId(), m.getRound());
-            if (m.getPlayer2() != null && !m.getWinnerId().equals(m.getPlayer2().getId())) eliminatedRoundMap.put(m.getPlayer2().getId(), m.getRound());
+            if (m.getPlayer1Id() != null && !m.getWinnerId().equals(m.getPlayer1Id())) map.put(m.getPlayer1Id(), m.getRoundName());
+            if (m.getPlayer2Id() != null && !m.getWinnerId().equals(m.getPlayer2Id())) map.put(m.getPlayer2Id(), m.getRoundName());
         }
+        return map;
+    }
 
-        List<SeedVO> allSeeds = loaded.seeds.stream()
-                .filter(s -> s.getSeed() != null && s.getSeed() != 0)
-                .map(s -> {
-                    SeedVO seedVO = new SeedVO();
-                    seedVO.setPlayerId(s.getPlayerId());
-                    seedVO.setSeed(s.getSeed());
-                    seedVO.setTournamentId(s.getTournamentId());
-                    seedVO.setTour(loaded.tournamentTourMap.getOrDefault(s.getTournamentId(), ""));
-                    PlayerData player = loaded.playerMap.get(s.getPlayerId());
-                    if (player != null) {
-                        seedVO.setName(StringUtils.isNotBlank(player.getLastName()) ? player.getLastName() : player.getFirstName());
-                        seedVO.setCountry(CountryEnum.getCountry(player.getNationality()));
-                    }
-                    String eliminatedRound = eliminatedRoundMap.get(s.getPlayerId());
-                    if (eliminatedRound != null) {
-                        seedVO.setStatus(SeedStatusEnum.ELIMINATED);
-                        seedVO.setLabel(TennisRoundEnum.labelOf(eliminatedRound));
-                    } else {
-                        seedVO.setStatus(SeedStatusEnum.ACTIVE);
-                    }
-                    return seedVO;
-                })
-                .sorted(Comparator.comparing(SeedVO::getSeed, Comparator.nullsLast(Comparator.naturalOrder())))
-                .toList();
+    private SeedVO toSeedVO(PlayerSeedData s, Map<String, PlayerData> playerMap, Map<String, String> tourMap, Map<String, String> eliminatedRoundMap) {
+        SeedVO seedVO = new SeedVO();
+        seedVO.setPlayerId(s.getPlayerId());
+        seedVO.setSeed(s.getSeed());
+        seedVO.setTournamentId(s.getTournamentId());
+        seedVO.setTour(tourMap.getOrDefault(s.getTournamentId(), ""));
+        PlayerData player = playerMap.get(s.getPlayerId());
+        if (player != null) {
+            seedVO.setName(StringUtils.isNotBlank(player.getLastName()) ? player.getLastName() : player.getFirstName());
+            seedVO.setCountry(CountryEnum.getCountry(player.getNationality()));
+        }
+        String eliminatedRound = eliminatedRoundMap.get(s.getPlayerId());
+        if (eliminatedRound != null) {
+            seedVO.setStatus(SeedStatusEnum.ELIMINATED);
+            seedVO.setLabel(TennisRoundEnum.labelOf(eliminatedRound));
+        } else {
+            seedVO.setStatus(SeedStatusEnum.ACTIVE);
+        }
+        return seedVO;
+    }
 
-        Map<String, List<SeedVO>> grouped = new LinkedHashMap<>();
-        grouped.put("ATP", new ArrayList<>());
-        grouped.put("WTA", new ArrayList<>());
-        grouped.put("OUT", new ArrayList<>());
+    private List<MatchQueryVO> toMatchVOs(List<MatchData> matches, List<String> tournamentIds) {
+        List<MatchData> valid = matches.stream().filter(m -> m.getPlayer1Id() != null || m.getPlayer2Id() != null).toList();
+        if (valid.isEmpty()) return new ArrayList<>();
 
-        for (SeedVO seed : allSeeds) {
-            if (seed.getStatus() == SeedStatusEnum.ELIMINATED) {
-                grouped.get("OUT").add(seed);
-            } else if ("ATP".equalsIgnoreCase(seed.getTour())) {
-                grouped.get("ATP").add(seed);
-            } else {
-                grouped.get("WTA").add(seed);
+        Set<String> playerIds = new HashSet<>();
+        for (MatchData m : valid) {
+            if (m.getPlayer1Id() != null) playerIds.add(m.getPlayer1Id());
+            if (m.getPlayer2Id() != null) playerIds.add(m.getPlayer2Id());
+        }
+        Map<String, PlayerData> playerMap = matchQueryGateway.listPlayersByPlayerIds(new ArrayList<>(playerIds)).stream().collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
+        Map<String, Integer> seedMap = matchQueryGateway.listSeedsByTournamentIds(tournamentIds).stream().collect(Collectors.toMap(s -> s.getTournamentId() + ":" + s.getPlayerId(), PlayerSeedData::getSeed, (a, b) -> a));
+        List<Long> tennisMatchIds = valid.stream().map(MatchData::getTennisMatchId).filter(Objects::nonNull).toList();
+        Map<Long, List<SetScoreData>> setScoreMap = matchQueryGateway.listSetScoresByTennisMatchIds(tennisMatchIds).stream().collect(Collectors.groupingBy(SetScoreData::getTennisMatchId));
+
+        List<MatchQueryVO> vos = new ArrayList<>();
+        for (MatchData m : valid) {
+            vos.add(toMatchVO(m, playerMap, setScoreMap, seedMap));
+        }
+        return vos;
+    }
+
+    private MatchQueryVO toMatchVO(MatchData match, Map<String, PlayerData> playerMap, Map<Long, List<SetScoreData>> setScoreMap, Map<String, Integer> seedMap) {
+        MatchQueryVO vo = new MatchQueryVO();
+        vo.setId(match.getMatchId());
+        vo.setTournamentId(match.getTournamentId());
+        vo.setCourt(match.getCourt());
+        vo.setCourtSeq(match.getCourtSeq());
+        vo.setRound(match.getRoundName());
+        vo.setRoundLabel(TennisRoundEnum.labelOf(match.getRoundName()));
+        vo.setSchedulingType(match.getScheduledAtText());
+        vo.setDate(match.getMatchDate() != null ? match.getMatchDate().format(DATE_FMT) : null);
+        vo.setStartedAt(match.getStartedAt());
+        vo.setScheduledAt(match.getScheduledAt());
+        if (match.getScheduledAt() != null) {
+            vo.setScheduledTime(match.getScheduledAt().format(TIME_FMT));
+        }
+        vo.setPlayer1(buildPlayerVO(match.getPlayer1Id(), match.getTournamentId(), playerMap, seedMap));
+        vo.setPlayer2(buildPlayerVO(match.getPlayer2Id(), match.getTournamentId(), playerMap, seedMap));
+        List<SetScoreData> setScoreList = setScoreMap.getOrDefault(match.getTennisMatchId(), List.of());
+        List<SetScoreVO> sets = setScoreList.stream().map(MatchConvertMapper.INSTANCE::toSetScoreVO).toList();
+        vo.setSets(sets);
+        vo.setStatus(match.getStatus());
+        vo.setCurrentSet(CollectionUtils.isEmpty(sets) ? null : sets.size());
+        vo.setCurrentSetScore(buildCurrentSetScore(sets));
+        vo.setWinnerId(match.getWinnerId());
+        vo.setDuration(calculateDuration(match));
+        return vo;
+    }
+
+    private PlayerVO buildPlayerVO(String playerId, String tournamentId, Map<String, PlayerData> playerMap, Map<String, Integer> seedMap) {
+        if (playerId == null) return null;
+        PlayerData player = playerMap.get(playerId);
+        if (player == null) {
+            PlayerVO vo = new PlayerVO();
+            vo.setId(playerId);
+            vo.setName(playerId);
+            return vo;
+        }
+        PlayerVO vo = new PlayerVO();
+        vo.setId(player.getPlayerId());
+        vo.setName(StringUtils.isNotBlank(player.getLastName()) ? player.getLastName() : player.getFirstName());
+        vo.setCountry(CountryEnum.getCountry(player.getNationality()));
+        vo.setSeed(seedMap.getOrDefault(tournamentId + ":" + playerId, null));
+        return vo;
+    }
+
+    private String buildCurrentSetScore(List<SetScoreVO> sets) {
+        if (CollectionUtils.isEmpty(sets)) return null;
+        SetScoreVO lastSet = sets.get(sets.size() - 1);
+        if (lastSet.getPlayer1() == null || lastSet.getPlayer2() == null) return null;
+        return lastSet.getPlayer1() + "-" + lastSet.getPlayer2();
+    }
+
+    private String calculateDuration(MatchData match) {
+        if (match.getDurationMinutes() != null) {
+            int hours = match.getDurationMinutes() / 60;
+            int mins = match.getDurationMinutes() % 60;
+            if (hours > 0) return hours + "h" + (mins > 0 ? mins + "m" : "");
+            return mins + "m";
+        }
+        if ("live".equals(match.getStatus()) && match.getStartedAt() != null) {
+            long minutes = java.time.Duration.between(match.getStartedAt(), LocalDateTime.now()).toMinutes();
+            if (minutes >= 0) {
+                int hours = (int) (minutes / 60);
+                int mins = (int) (minutes % 60);
+                if (hours > 0) return "已开始 " + hours + "h" + (mins > 0 ? mins + "m" : "");
+                return "已开始 " + mins + "m";
             }
         }
-
-        List<SeedGroupDTO> result = new ArrayList<>();
-        for (Map.Entry<String, List<SeedVO>> entry : grouped.entrySet()) {
-            if (entry.getValue().isEmpty()) continue;
-            SeedGroupDTO dto = new SeedGroupDTO();
-            dto.setType(entry.getKey());
-            dto.setData(entry.getValue());
-            result.add(dto);
-        }
-        return result;
+        return null;
     }
 
     private Integer getMinSeed(List<MatchQueryVO> matches) {

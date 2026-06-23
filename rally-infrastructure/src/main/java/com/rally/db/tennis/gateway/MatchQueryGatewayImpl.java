@@ -40,14 +40,25 @@ public class MatchQueryGatewayImpl implements MatchQueryGateway {
     private final TennisDrawService drawService;
 
     @Override
-    public List<MatchData> listByTournamentIds(List<String> tournamentIds) {
+    public List<MatchData> listFinishedByTournamentIds(List<String> tournamentIds) {
         if (CollectionUtils.isEmpty(tournamentIds)) {
             return List.of();
         }
         List<TennisMatchPO> list = matchService.lambdaQuery()
-                .and(w -> w.isNotNull(TennisMatchPO::getMatchDate)
-                        .or()
-                        .eq(TennisMatchPO::getStatus, "FINISHED"))
+                .eq(TennisMatchPO::getStatus, "FINISHED")
+                .in(TennisMatchPO::getTournamentId, tournamentIds)
+                .list();
+        return list.stream().map(this::toMatchData).toList();
+    }
+
+    @Override
+    public List<MatchData> listUnfinishedByTournamentIds(List<String> tournamentIds) {
+        if (CollectionUtils.isEmpty(tournamentIds)) {
+            return List.of();
+        }
+        List<TennisMatchPO> list = matchService.lambdaQuery()
+                .isNotNull(TennisMatchPO::getMatchDate)
+                .and(w -> w.ne(TennisMatchPO::getStatus, "FINISHED").or().isNull(TennisMatchPO::getStatus))
                 .in(TennisMatchPO::getTournamentId, tournamentIds)
                 .list();
         return list.stream().map(this::toMatchData).toList();
