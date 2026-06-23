@@ -20,7 +20,7 @@ public class TennisMatchAppService {
     @Resource
     private TennisTranslationService tennisTranslationService;
 
-    @Cacheable(value = "upcoming", key = "#tournamentIds")
+    @Cacheable(value = "upcoming", key = "#p0")
     public TennisMatchDTO upcoming(List<String> tournamentIds) {
         TennisMatchDTO dto = new TennisMatchDTO();
         dto.setSeed(tennisMatchQueryDomainService.seedGroups(tournamentIds));
@@ -29,7 +29,7 @@ public class TennisMatchAppService {
         return dto;
     }
 
-    @Cacheable(value = "finished", key = "#tournamentIds")
+    @Cacheable(value = "finished", key = "#p0")
     public TennisMatchDTO finished(List<String> tournamentIds) {
         TennisMatchDTO dto = new TennisMatchDTO();
         dto.setSeed(tennisMatchQueryDomainService.seedGroups(tournamentIds));

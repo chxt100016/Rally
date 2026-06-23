@@ -19,12 +19,12 @@ public class TennisMatchController {
     private TennisMatchAppService tennisMatchAppService;
 
     @GetMapping("/upcoming")
-    public Result<TennisMatchDTO> upcoming(@RequestParam("tournamentId") List<String> tournamentIds) {
+    public Result<TennisMatchDTO> upcoming(@RequestParam("tournamentIds") List<String> tournamentIds) {
         return Result.ok(tennisMatchAppService.upcoming(tournamentIds));
     }
 
     @GetMapping("/finished")
-    public Result<TennisMatchDTO> finished(@RequestParam("tournamentId") List<String> tournamentIds) {
+    public Result<TennisMatchDTO> finished(@RequestParam("tournamentIds") List<String> tournamentIds) {
         return Result.ok(tennisMatchAppService.finished(tournamentIds));
     }
 }
