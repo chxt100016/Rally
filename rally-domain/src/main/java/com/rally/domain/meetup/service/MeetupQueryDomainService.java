@@ -156,7 +156,7 @@ public class MeetupQueryDomainService {
     }
 
     /**
-     * 已完成：status=FINISHED/CLOSED 或懒判定已结束（OPEN/FULL 且 end_time < now）
+     * 已完成： status=FINISHED/CLOSED 或懒判定已结束（OPEN/FULL 且 end_time < now）
      */
     private PageDTO<MeetupData> listCompleted(String userId, String lastId, int limit) {
         MeetupListQueryParam param = MeetupListQueryParam.builder()
