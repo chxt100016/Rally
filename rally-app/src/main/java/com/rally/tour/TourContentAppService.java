@@ -1,10 +1,10 @@
 package com.rally.tour;
 
-import com.rally.domain.tour.gateway.MatchQueryGateway;
-import com.rally.domain.tour.gateway.TourDrawGateway;
-import com.rally.domain.tour.gateway.TourEntryGateway;
-import com.rally.domain.tour.gateway.TourPlayerGateway;
-import com.rally.domain.tour.gateway.TourTournamentGateway;
+import com.rally.domain.tour.repository.MatchQueryRepository;
+import com.rally.domain.tour.repository.TourDrawRepository;
+import com.rally.domain.tour.repository.TourEntryRepository;
+import com.rally.domain.tour.repository.TourPlayerRepository;
+import com.rally.domain.tour.repository.TourTournamentRepository;
 import com.rally.domain.tour.model.MatchData;
 import com.rally.domain.tour.model.PlayerData;
 import com.rally.domain.tour.model.TourDrawData;
@@ -30,25 +30,25 @@ public class TourContentAppService {
     private static final DateTimeFormatter MONTH_DAY_FMT = DateTimeFormatter.ofPattern("M月d日");
 
     @Resource
-    private TourTournamentGateway tourTournamentGateway;
+    private TourTournamentRepository tourTournamentRepository;
 
     @Resource
-    private TourDrawGateway tourDrawGateway;
+    private TourDrawRepository tourDrawRepository;
 
     @Resource
-    private MatchQueryGateway matchQueryGateway;
+    private MatchQueryRepository matchQueryRepository;
 
     @Resource
-    private TourPlayerGateway tourPlayerGateway;
+    private TourPlayerRepository tourPlayerRepository;
 
     @Resource
-    private TourEntryGateway tourEntryGateway;
+    private TourEntryRepository tourEntryRepository;
 
     @Resource
     private TourTranslationService tourTranslationService;
 
     public String generateDailyContent(LocalDate date, TranslationLanguageEnum language) {
-        List<TournamentData> tournaments = tourTournamentGateway.findCurrentTournaments(date);
+        List<TournamentData> tournaments = tourTournamentRepository.findCurrentTournaments(date);
         if (CollectionUtils.isEmpty(tournaments)) {
             return "";
         }
@@ -63,7 +63,7 @@ public class TourContentAppService {
         List<String> tournamentIds = tournaments.stream()
                 .map(TournamentData::getTournamentId)
                 .toList();
-        List<MatchData> matches = matchQueryGateway.findByTournamentIdsAndDate(tournamentIds, date);
+        List<MatchData> matches = matchQueryRepository.findByTournamentIdsAndDate(tournamentIds, date);
         if (CollectionUtils.isEmpty(matches)) {
             return "";
         }
@@ -73,14 +73,14 @@ public class TourContentAppService {
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
-        Map<String, Short> seedMap = tourEntryGateway.listSeedMapByDrawIds(drawIds);
+        Map<String, Short> seedMap = tourEntryRepository.listSeedMapByDrawIds(drawIds);
 
         Set<String> playerIds = new HashSet<>();
         for (MatchData match : matches) {
             if (match.getPlayer1Id() != null) playerIds.add(match.getPlayer1Id());
             if (match.getPlayer2Id() != null) playerIds.add(match.getPlayer2Id());
         }
-        List<PlayerData> players = tourPlayerGateway.listByPlayerIds(new ArrayList<>(playerIds));
+        List<PlayerData> players = tourPlayerRepository.listByPlayerIds(new ArrayList<>(playerIds));
         Map<String, PlayerData> playerMap = players.stream()
                 .collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
 
@@ -122,7 +122,7 @@ public class TourContentAppService {
             return "";
         }
 
-        List<TournamentData> tournaments = tourTournamentGateway.listByTournamentIds(tournamentIds);
+        List<TournamentData> tournaments = tourTournamentRepository.listByTournamentIds(tournamentIds);
         if (CollectionUtils.isEmpty(tournaments)) {
             return "";
         }
@@ -132,13 +132,13 @@ public class TourContentAppService {
             return "";
         }
 
-        List<TourDrawData> draws = tourDrawGateway.listByTournamentIds(tournamentIds);
+        List<TourDrawData> draws = tourDrawRepository.listByTournamentIds(tournamentIds);
         if (CollectionUtils.isEmpty(draws)) {
             return "";
         }
 
         List<Long> allDrawIds = draws.stream().map(TourDrawData::getId).toList();
-        List<TournamentEntryData> allEntries = tourEntryGateway.listByDrawIds(allDrawIds);
+        List<TournamentEntryData> allEntries = tourEntryRepository.listByDrawIds(allDrawIds);
         List<TournamentEntryData> seededEntries = allEntries.stream()
                 .filter(e -> e.getSeed() != null && e.getSeed() > 0)
                 .toList();
@@ -149,7 +149,7 @@ public class TourContentAppService {
         Set<String> playerIds = seededEntries.stream()
                 .map(TournamentEntryData::getPlayerId)
                 .collect(Collectors.toSet());
-        List<PlayerData> players = tourPlayerGateway.listByPlayerIds(new ArrayList<>(playerIds));
+        List<PlayerData> players = tourPlayerRepository.listByPlayerIds(new ArrayList<>(playerIds));
         Map<String, PlayerData> playerMap = players.stream()
                 .collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
 

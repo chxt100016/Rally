@@ -1,9 +1,10 @@
 package com.rally.domain.tour;
 
 import com.rally.domain.tour.convert.MatchConvertMapper;
-import com.rally.domain.tour.gateway.MatchQueryGateway;
-import com.rally.domain.tour.gateway.TourTournamentGateway;
+import com.rally.domain.tour.repository.MatchQueryRepository;
+import com.rally.domain.tour.repository.TourTournamentRepository;
 import com.rally.domain.tour.model.*;
+import com.rally.domain.tour.model.MatchStatus;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -20,10 +21,10 @@ public class TourMatchQueryDomainService {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Resource
-    private MatchQueryGateway matchQueryGateway;
+    private MatchQueryRepository matchQueryRepository;
 
     @Resource
-    private TourTournamentGateway tourTournamentGateway;
+    private TourTournamentRepository tourTournamentRepository;
 
     // ==================== 扁平查询：每个方法各自独立查询所需数据 ====================
 
@@ -32,13 +33,13 @@ public class TourMatchQueryDomainService {
      */
     public List<SeedVO> seeds(List<String> tournamentIds) {
         if (CollectionUtils.isEmpty(tournamentIds)) return List.of();
-        List<PlayerSeedData> seedData = matchQueryGateway.listSeedsByTournamentIds(tournamentIds);
+        List<PlayerSeedData> seedData = matchQueryRepository.listSeedsByTournamentIds(tournamentIds);
         if (CollectionUtils.isEmpty(seedData)) return List.of();
 
-        Map<String, String> eliminatedRoundMap = buildEliminatedRoundMap(matchQueryGateway.listFinishedByTournamentIds(tournamentIds));
+        Map<String, String> eliminatedRoundMap = buildEliminatedRoundMap(matchQueryRepository.listFinishedByTournamentIds(tournamentIds));
 
         List<String> seedPlayerIds = seedData.stream().map(PlayerSeedData::getPlayerId).distinct().toList();
-        Map<String, PlayerData> playerMap = matchQueryGateway.listPlayersByPlayerIds(seedPlayerIds).stream().collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
+        Map<String, PlayerData> playerMap = matchQueryRepository.listPlayersByPlayerIds(seedPlayerIds).stream().collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
         Map<String, String> tourMap = tournamentTourMap(tournamentIds);
 
         return seedData.stream()
@@ -53,14 +54,12 @@ public class TourMatchQueryDomainService {
      */
     public List<MatchQueryVO> upcomingMatches(List<String> tournamentIds) {
         if (CollectionUtils.isEmpty(tournamentIds)) return List.of();
-        List<MatchData> unfinished = matchQueryGateway.listUnfinishedByTournamentIds(tournamentIds);
+        List<MatchData> unfinished = matchQueryRepository.listUnfinishedByTournamentIds(tournamentIds);
         Set<LocalDate> upcomingDates = unfinished.stream().map(MatchData::getMatchDate).filter(Objects::nonNull).collect(Collectors.toSet());
 
         List<MatchData> matches = new ArrayList<>(unfinished);
         if (!upcomingDates.isEmpty()) {
-            matchQueryGateway.listFinishedByTournamentIds(tournamentIds).stream()
-                    .filter(m -> m.getMatchDate() != null && upcomingDates.contains(m.getMatchDate()))
-                    .forEach(matches::add);
+            matches.addAll(matchQueryRepository.listFinishedByTournamentIdsAndDates(tournamentIds, upcomingDates));
         }
 
         List<MatchQueryVO> vos = toMatchVOs(matches, tournamentIds);
@@ -73,7 +72,7 @@ public class TourMatchQueryDomainService {
      */
     public List<MatchQueryVO> finishedMatches(List<String> tournamentIds) {
         if (CollectionUtils.isEmpty(tournamentIds)) return List.of();
-        List<MatchQueryVO> vos = toMatchVOs(matchQueryGateway.listFinishedByTournamentIds(tournamentIds), tournamentIds);
+        List<MatchQueryVO> vos = toMatchVOs(matchQueryRepository.listFinishedByTournamentIds(tournamentIds), tournamentIds);
         vos.sort(Comparator.comparing(MatchQueryVO::getStartedAt, Comparator.nullsLast(Comparator.reverseOrder())));
         return vos;
     }
@@ -82,24 +81,12 @@ public class TourMatchQueryDomainService {
 
     public List<SeedGroupDTO> seedGroups(List<String> tournamentIds) {
         List<SeedVO> seeds = seeds(tournamentIds);
-
-        Map<String, List<SeedVO>> grouped = new LinkedHashMap<>();
-        grouped.put("ATP", new ArrayList<>());
-        grouped.put("WTA", new ArrayList<>());
-        grouped.put("OUT", new ArrayList<>());
+        Map<SeedGroupTypeEnum, List<SeedVO>> grouped = new EnumMap<>(SeedGroupTypeEnum.class);
         for (SeedVO seed : seeds) {
-            if (seed.getStatus() == SeedStatusEnum.ELIMINATED) {
-                grouped.get("OUT").add(seed);
-            } else if ("ATP".equalsIgnoreCase(seed.getTour())) {
-                grouped.get("ATP").add(seed);
-            } else {
-                grouped.get("WTA").add(seed);
-            }
+            grouped.computeIfAbsent(SeedGroupTypeEnum.fromSeed(seed), k -> new ArrayList<>()).add(seed);
         }
-
         List<SeedGroupDTO> result = new ArrayList<>();
-        for (Map.Entry<String, List<SeedVO>> entry : grouped.entrySet()) {
-            if (entry.getValue().isEmpty()) continue;
+        for (Map.Entry<SeedGroupTypeEnum, List<SeedVO>> entry : grouped.entrySet()) {
             SeedGroupDTO dto = new SeedGroupDTO();
             dto.setType(entry.getKey());
             dto.setData(entry.getValue());
@@ -210,7 +197,7 @@ public class TourMatchQueryDomainService {
     // ==================== 私有：数据加载 + VO 构建 ====================
 
     private Map<String, String> tournamentTourMap(List<String> tournamentIds) {
-        return tourTournamentGateway.listByTournamentIds(tournamentIds).stream().collect(Collectors.toMap(TournamentData::getTournamentId, data -> data.getTour() != null ? data.getTour() : "", (a, b) -> a));
+        return tourTournamentRepository.listByTournamentIds(tournamentIds).stream().collect(Collectors.toMap(TournamentData::getTournamentId, data -> data.getTour() != null ? data.getTour() : "", (a, b) -> a));
     }
 
     private Map<String, String> buildEliminatedRoundMap(List<MatchData> finishedMatches) {
@@ -253,10 +240,10 @@ public class TourMatchQueryDomainService {
             if (m.getPlayer1Id() != null) playerIds.add(m.getPlayer1Id());
             if (m.getPlayer2Id() != null) playerIds.add(m.getPlayer2Id());
         }
-        Map<String, PlayerData> playerMap = matchQueryGateway.listPlayersByPlayerIds(new ArrayList<>(playerIds)).stream().collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
-        Map<String, Integer> seedMap = matchQueryGateway.listSeedsByTournamentIds(tournamentIds).stream().collect(Collectors.toMap(s -> s.getTournamentId() + ":" + s.getPlayerId(), PlayerSeedData::getSeed, (a, b) -> a));
+        Map<String, PlayerData> playerMap = matchQueryRepository.listPlayersByPlayerIds(new ArrayList<>(playerIds)).stream().collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
+        Map<String, Integer> seedMap = matchQueryRepository.listSeedsByTournamentIds(tournamentIds).stream().collect(Collectors.toMap(s -> s.getTournamentId() + ":" + s.getPlayerId(), PlayerSeedData::getSeed, (a, b) -> a));
         List<Long> tourMatchIds = valid.stream().map(MatchData::getTourMatchId).filter(Objects::nonNull).toList();
-        Map<Long, List<SetScoreData>> setScoreMap = matchQueryGateway.listSetScoresByTourMatchIds(tourMatchIds).stream().collect(Collectors.groupingBy(SetScoreData::getTourMatchId));
+        Map<Long, List<SetScoreData>> setScoreMap = matchQueryRepository.listSetScoresByTourMatchIds(tourMatchIds).stream().collect(Collectors.groupingBy(SetScoreData::getTourMatchId));
 
         List<MatchQueryVO> vos = new ArrayList<>();
         for (MatchData m : valid) {

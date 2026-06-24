@@ -1,7 +1,7 @@
 package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
-import com.rally.domain.meetup.gateway.NearbyGateway;
+import com.rally.domain.meetup.gateway.NearbyRepository;
 import com.rally.domain.meetup.model.MeetupListCmd;
 import com.rally.domain.meetup.model.MeetupListQueryParam;
 import com.rally.domain.meetup.model.NearbyResult;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MeetupQueryPlanner {
 
-    private final NearbyGateway nearbyGateway;
+    private final NearbyRepository nearbyRepository;
 
     /**
      * 构建查询参数（含 Redis GEO 查询，listByTime 用）
@@ -87,7 +87,7 @@ public class MeetupQueryPlanner {
         Assert.notNull(query.getLat(), BizErrorCode.PARAM_ERROR);
 
         double radiusMeters = query.getRadiusKm().multiply(new BigDecimal("1000")).doubleValue();
-        List<NearbyResult> nearbyResults = nearbyGateway.searchByRadius(query.getCityCode(), query.getLng(), query.getLat(), radiusMeters);
+        List<NearbyResult> nearbyResults = nearbyRepository.searchByRadius(query.getCityCode(), query.getLng(), query.getLat(), radiusMeters);
 
         return nearbyResults.stream()
                 .map(NearbyResult::getMeetupId)

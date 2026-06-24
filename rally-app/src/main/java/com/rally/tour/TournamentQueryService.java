@@ -1,7 +1,7 @@
 package com.rally.tour;
 
 import com.rally.client.qiniu.QiniuClient;
-import com.rally.domain.tour.gateway.TourTournamentGateway;
+import com.rally.domain.tour.repository.TourTournamentRepository;
 import com.rally.domain.tour.model.TournamentData;
 import com.rally.domain.tour.model.TournamentDTO;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
@@ -20,7 +20,7 @@ import java.util.List;
 public class TournamentQueryService {
 
     @Resource
-    private TourTournamentGateway tourTournamentGateway;
+    private TourTournamentRepository tourTournamentRepository;
 
     @Resource
     private TourTranslationService tourTranslationService;
@@ -38,7 +38,7 @@ public class TournamentQueryService {
             dateTo = today.plusMonths(1);
         }
 
-        List<TournamentData> list = tourTournamentGateway.listByCondition(dbStatus, type, dateFrom, dateTo);
+        List<TournamentData> list = tourTournamentRepository.listByCondition(dbStatus, type, dateFrom, dateTo);
         if (CollectionUtils.isEmpty(list)) {
             return List.of();
         }

@@ -10,11 +10,6 @@ import java.util.Optional;
 @Service
 public class TourProfileService extends ServiceImpl<TourProfileMapper, TourProfilePO> {
 
-    public TourProfilePO insert(TourProfilePO profile) {
-        this.save(profile);
-        return profile;
-    }
-
     public Optional<TourProfilePO> findByUserId(String userId) {
         return Optional.ofNullable(
                 this.lambdaQuery()

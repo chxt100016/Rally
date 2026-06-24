@@ -2,8 +2,8 @@ package com.rally.domain.user.service;
 
 import com.rally.domain.log.ProfileLogService;
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.user.gateway.TourProfileGateway;
-import com.rally.domain.user.gateway.UserProfileGateway;
+import com.rally.domain.user.gateway.TourProfileRepository;
+import com.rally.domain.user.gateway.UserProfileRepository;
 import com.rally.domain.user.model.UserProfile;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 public class UserProfileDomainService {
 
     @Resource
-    private UserProfileGateway userProfileGateway;
+    private UserProfileRepository userProfileRepository;
 
     @Resource
-    private TourProfileGateway tourProfileGateway;
+    private TourProfileRepository tourProfileRepository;
 
     @Resource
     private ProfileLogService profileRecordService;
@@ -38,14 +38,14 @@ public class UserProfileDomainService {
         }
 
         profile.initializeTBC();
-        userProfileGateway.save(profile);
+        userProfileRepository.save(profile);
     }
 
     /**
      * 查询用户档案，不自动初始化
      */
     public UserProfile get(String userId) {
-        UserProfile profile = userProfileGateway.findByUserId(userId);
+        UserProfile profile = userProfileRepository.findByUserId(userId);
         profile.assertExist();
         return profile;
     }
@@ -59,7 +59,7 @@ public class UserProfileDomainService {
         if (userIds == null || userIds.isEmpty()) {
             return Map.of();
         }
-        return userProfileGateway.findByUserIds(userIds).stream()
+        return userProfileRepository.findByUserIds(userIds).stream()
                 .filter(p -> p != null && p.getUser() != null)
                 .collect(Collectors.toMap(p -> p.getUser().getUserId(), p -> p, (a, b) -> a));
     }
@@ -68,7 +68,7 @@ public class UserProfileDomainService {
      * 保存用户档案
      */
     public void save(UserProfile profile) {
-        userProfileGateway.save(profile);
+        userProfileRepository.save(profile);
     }
 
     /**
@@ -88,7 +88,7 @@ public class UserProfileDomainService {
 
         // 3. 更新 NTRP
         userProfile.updateNtrpScore(newNtrp);
-        tourProfileGateway.update(userProfile.getProfile());
+        tourProfileRepository.update(userProfile.getProfile());
 
         // 4. 记录 NTRP 变更日志
         profileRecordService.saveNtrpChangeLog(userProfile.getUser().getUserId(), oldNtrp, newNtrp);

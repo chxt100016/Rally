@@ -4,8 +4,8 @@ import com.rally.client.tourtv.TourTvClient;
 import com.rally.client.tourtv.model.MatchesResponse;
 import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaTournamentsResponse;
-import com.rally.domain.tour.gateway.TourEntryGateway;
-import com.rally.domain.tour.gateway.TourTournamentGateway;
+import com.rally.domain.tour.repository.TourEntryRepository;
+import com.rally.domain.tour.repository.TourTournamentRepository;
 import com.rally.domain.tour.model.TournamentData;
 import com.rally.domain.tour.model.TournamentEntryData;
 import com.rally.tour.convert.TournamentAppConvertMapper;
@@ -32,18 +32,18 @@ public class TournamentCollectService {
     private WtaClient wtaClient;
 
     @Resource
-    private TourTournamentGateway tourTournamentGateway;
+    private TourTournamentRepository tourTournamentRepository;
 
     @Resource
-    private TourEntryGateway tourEntryGateway;
+    private TourEntryRepository tourEntryRepository;
 
     public List<TournamentData> current() {
         LocalDate today = LocalDate.now();
-        return tourTournamentGateway.findCurrentTournaments(today);
+        return tourTournamentRepository.findCurrentTournaments(today);
     }
 
     public boolean exists(String tournamentId) {
-        return tourTournamentGateway.exists(tournamentId);
+        return tourTournamentRepository.exists(tournamentId);
     }
 
     public void saveEntries(List<TournamentEntry> entries) {
@@ -57,7 +57,7 @@ public class TournamentCollectService {
             data.setEntryType(entry.getEntryType());
             dataList.add(data);
         }
-        tourEntryGateway.saveEntries(dataList);
+        tourEntryRepository.saveEntries(dataList);
     }
 
     public void collectTournament(int year) {
@@ -74,7 +74,7 @@ public class TournamentCollectService {
                 .map(TournamentAppConvertMapper.INSTANCE::toTournament)
                 .peek(item -> item.setTour("ATP"))
                 .toList();
-        tourTournamentGateway.saveOrUpdateBatch(TournamentAppConvertMapper.INSTANCE.toTournamentDataList(tournaments));
+        tourTournamentRepository.saveOrUpdateBatch(TournamentAppConvertMapper.INSTANCE.toTournamentDataList(tournaments));
         log.info("ATP赛事采集完成: year={}, 数量={}", year, tournaments.size());
     }
 
@@ -87,7 +87,7 @@ public class TournamentCollectService {
         List<Tournament> tournaments = response.getContent().stream()
                 .map(WtaTournamentAppConvertMapper.INSTANCE::toTournament)
                 .toList();
-        tourTournamentGateway.saveOrUpdateBatch(WtaTournamentAppConvertMapper.INSTANCE.toTournamentDataList(tournaments));
+        tourTournamentRepository.saveOrUpdateBatch(WtaTournamentAppConvertMapper.INSTANCE.toTournamentDataList(tournaments));
         log.info("WTA赛事采集完成: year={}, 数量={}", year, tournaments.size());
     }
 }

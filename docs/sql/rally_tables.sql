@@ -215,26 +215,6 @@ INSERT INTO `sys_config` (`biz_id`, `config_key`, `config_value`, `value_type`, 
 ('cfg0000000000000069', 'review.score.tiebreak_lead', '2', 'int', 'global', '抢七最低领先分', 1, 0);
 
 -- ============================================================
--- 10. 评分域：批量评分幂等状态表
--- ============================================================
-
-DROP TABLE IF EXISTS `rally_meetup_score_status`;
-CREATE TABLE `rally_meetup_score_status` (
-  `id`                BIGINT      NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `biz_id`            VARCHAR(32) NOT NULL COMMENT '业务唯一 ID（雪花算法字符串）',
-  `meetup_id`         VARCHAR(32) NOT NULL COMMENT '关联 rally_meetup.biz_id（唯一）',
-  `score_version`     INT         NOT NULL DEFAULT 0 COMMENT '重算版本：评价/比分变更时 +1，processed_version 落后则需重算',
-  `processed_version` INT         NOT NULL DEFAULT -1 COMMENT '已处理到的版本号，初始 -1（从未处理）',
-  `processed_at`      DATETIME    DEFAULT NULL COMMENT '最近一次处理完成时间，NULL=从未处理',
-  `create_time`       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time`       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_biz_id` (`biz_id`),
-  UNIQUE KEY `uk_meetup_id` (`meetup_id`),
-  KEY `idx_pending` (`processed_at`) COMMENT '扫描待处理（processed_at IS NULL 或 version 落后）'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='批量评分幂等状态表（score_version 重算控制）';
-
--- ============================================================
 -- 11. 场地域：球场信息表
 -- ============================================================
 

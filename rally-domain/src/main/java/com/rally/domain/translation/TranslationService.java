@@ -2,7 +2,7 @@ package com.rally.domain.translation;
 
 import com.rally.domain.translation.cache.TranslationCache;
 import com.rally.domain.translation.gateway.TranslationClient;
-import com.rally.domain.translation.gateway.TranslationGateway;
+import com.rally.domain.translation.gateway.TranslationRepository;
 import com.rally.domain.translation.model.TranslationData;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.util.List;
 public class TranslationService {
 
     @Resource
-    private TranslationGateway translationGateway;
+    private TranslationRepository translationRepository;
 
     @Resource
     private TranslationClient translationClient;
@@ -36,7 +36,7 @@ public class TranslationService {
      * @return 本次翻译成功的条数
      */
     public int batch() {
-        List<TranslationData> pending = translationGateway.findAllPending();
+        List<TranslationData> pending = translationRepository.findAllPending();
         if (pending.isEmpty()) {
             log.info("无待翻译记录");
             return 0;
@@ -59,7 +59,7 @@ public class TranslationService {
     }
 
     public List<TranslationData> findAllPending() {
-        return translationGateway.findAllPending();
+        return translationRepository.findAllPending();
     }
 
     public int processBatch(List<TranslationData> batch) {
@@ -80,7 +80,7 @@ public class TranslationService {
         }
 
         if (!toUpdate.isEmpty()) {
-            translationGateway.updateBatchTranslatedText(toUpdate);
+            translationRepository.updateBatchTranslatedText(toUpdate);
             translationCache.invalidate();
         }
 

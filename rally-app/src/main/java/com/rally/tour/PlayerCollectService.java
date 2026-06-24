@@ -8,7 +8,7 @@ import com.rally.client.tourtv.model.MatchesResponse;
 import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaDrawsResponse;
 import com.rally.client.wta.model.WtaRankingsResponse;
-import com.rally.domain.tour.gateway.TourPlayerGateway;
+import com.rally.domain.tour.repository.TourPlayerRepository;
 import com.rally.tour.convert.PlayerAppConvertMapper;
 import com.rally.tour.model.Player;
 import jakarta.annotation.Resource;
@@ -25,7 +25,7 @@ import java.util.List;
 public class PlayerCollectService {
 
     @Resource
-    private TourPlayerGateway tourPlayerGateway;
+    private TourPlayerRepository tourPlayerRepository;
 
     @Resource
     private AtpClient atpClient;
@@ -100,7 +100,7 @@ public class PlayerCollectService {
     public void savePlayers(List<Player> players) {
         if (CollectionUtils.isEmpty(players)) return;
         players.stream().filter(p -> p.getTour() == null).forEach(p -> p.setTour("ATP"));
-        tourPlayerGateway.saveOrUpdateBatch(PlayerAppConvertMapper.INSTANCE.toPlayerDataList(players));
+        tourPlayerRepository.saveOrUpdateBatch(PlayerAppConvertMapper.INSTANCE.toPlayerDataList(players));
     }
 
     public void wtaFromDraw(WtaDrawsResponse response) {
@@ -128,7 +128,7 @@ public class PlayerCollectService {
             return;
         }
         players.forEach(p -> p.setTour(tour));
-        tourPlayerGateway.saveOrUpdateBatch(PlayerAppConvertMapper.INSTANCE.toPlayerDataList(players));
+        tourPlayerRepository.saveOrUpdateBatch(PlayerAppConvertMapper.INSTANCE.toPlayerDataList(players));
     }
 
     public void atpRank() {

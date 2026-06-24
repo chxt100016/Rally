@@ -3,7 +3,7 @@ package com.rally.client.wechat;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.rally.config.WechatAppProperties;
 import com.rally.domain.auth.exception.AuthException;
-import com.rally.domain.auth.gateway.WechatGateway;
+import com.rally.domain.auth.gateway.WechatClient;
 import com.rally.domain.auth.model.WechatSession;
 import com.rally.domain.utils.Http;
 import lombok.Data;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class WechatMiniappClient implements WechatGateway {
+public class WechatMiniappClient implements WechatClient {
 
     private final WechatAppProperties properties;
 

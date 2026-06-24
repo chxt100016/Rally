@@ -1,9 +1,9 @@
 package com.rally.domain.score.model;
 
-import com.rally.domain.meetup.gateway.MeetupGateway;
-import com.rally.domain.recap.gateway.ReviewGateway;
-import com.rally.domain.log.gateway.ProfileChangeLogGateway;
-import com.rally.domain.user.gateway.TourProfileGateway;
+import com.rally.domain.meetup.gateway.MeetupRepository;
+import com.rally.domain.recap.gateway.ReviewRepository;
+import com.rally.domain.log.gateway.ProfileChangeLogRepository;
+import com.rally.domain.user.gateway.TourProfileRepository;
 import lombok.Data;
 
 import java.util.List;
@@ -24,15 +24,15 @@ public class ScoreContext {
     private Integer scoreVersion;
 
     /** 只读 Gateway：评价数据 */
-    private ReviewGateway reviewGateway;
+    private ReviewRepository reviewRepository;
 
 
     /** 只读 Gateway：约球数据（参与者、finished 判定） */
-    private MeetupGateway meetupGateway;
+    private MeetupRepository meetupRepository;
 
     /** 写 Gateway：球员档案（三维分/核查期） */
-    private TourProfileGateway profileGateway;
+    private TourProfileRepository profileRepository;
 
     /** 写 Gateway：变更日志 */
-    private ProfileChangeLogGateway changeLogGateway;
+    private ProfileChangeLogRepository changeLogRepository;
 }

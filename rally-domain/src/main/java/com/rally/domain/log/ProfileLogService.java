@@ -2,7 +2,7 @@ package com.rally.domain.log;
 
 import com.rally.domain.user.enums.ChangeLogTypeEnum;
 import com.rally.domain.user.enums.ChangeReasonEnum;
-import com.rally.domain.log.gateway.ProfileChangeLogGateway;
+import com.rally.domain.log.gateway.ProfileChangeLogRepository;
 import com.rally.domain.log.model.ProfileChangeLogData;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 public class ProfileLogService {
 
     @Resource
-    private ProfileChangeLogGateway profileChangeLogGateway;
+    private ProfileChangeLogRepository profileChangeLogRepository;
 
     /**
      * 构建并保存 NTRP 变更日志
@@ -31,7 +31,7 @@ public class ProfileLogService {
         log.setAfterValue(newNtrp);
         log.setValue(delta);
         log.setReason(ChangeReasonEnum.USER);
-        profileChangeLogGateway.save(log);
+        profileChangeLogRepository.save(log);
     }
 
     /**
@@ -45,7 +45,7 @@ public class ProfileLogService {
         log.setAfterValue(new BigDecimal(requiredMatches));
         log.setReason(ChangeReasonEnum.USER);
         log.setRemark("自评向上修改触发核查期");
-        profileChangeLogGateway.save(log);
+        profileChangeLogRepository.save(log);
     }
 
     /**
@@ -60,7 +60,7 @@ public class ProfileLogService {
         log.setReason(ChangeReasonEnum.REVIEW_BAD);
         log.setRefId(meetupId);
         log.setRemark("遇差票重置核查期进度");
-        profileChangeLogGateway.save(log);
+        profileChangeLogRepository.save(log);
     }
 
     /**
@@ -74,6 +74,6 @@ public class ProfileLogService {
         log.setAfterValue(afterRemaining);
         log.setReason(ChangeReasonEnum.SYSTEM);
         log.setRefId(meetupId);
-        profileChangeLogGateway.save(log);
+        profileChangeLogRepository.save(log);
     }
 }

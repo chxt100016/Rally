@@ -1,7 +1,7 @@
 package com.rally.job;
 
-import com.rally.domain.meetup.gateway.MeetupGateway;
-import com.rally.domain.meetup.gateway.NearbyGateway;
+import com.rally.domain.meetup.gateway.MeetupRepository;
+import com.rally.domain.meetup.gateway.NearbyRepository;
 import com.rally.domain.system.CityConfig;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +23,10 @@ import java.util.Set;
 public class MeetupStatusJob {
 
     @Resource
-    private MeetupGateway meetupGateway;
+    private MeetupRepository meetupRepository;
 
     @Resource
-    private NearbyGateway nearbyGateway;
+    private NearbyRepository nearbyRepository;
 
     /**
      * 约球状态兜底（凌晨 2:00）
@@ -36,7 +36,7 @@ public class MeetupStatusJob {
     public void updateFinishedStatus() {
         log.info("开始执行约球状态兜底任务");
         try {
-            int affected = meetupGateway.batchUpdateToFinished();
+            int affected = meetupRepository.batchUpdateToFinished();
             log.info("约球状态兜底任务完成，更新 {} 条记录", affected);
         } catch (Exception e) {
             log.error("约球状态兜底任务异常", e);
@@ -72,10 +72,10 @@ public class MeetupStatusJob {
      */
     private void syncCityGeoData(String cityCode) {
         // 1. 获取 MySQL 中的活跃约球 ID
-        List<String> mysqlIds = meetupGateway.listActiveIds(cityCode);
+        List<String> mysqlIds = meetupRepository.listActiveIds(cityCode);
 
         // 2. 获取 Redis GEO 中的成员
-        Set<String> geoIds = nearbyGateway.members(cityCode);
+        Set<String> geoIds = nearbyRepository.members(cityCode);
 
         // 3. 缺漏补齐：MySQL 有、GEO 无
         for (String meetupId : mysqlIds) {
@@ -89,7 +89,7 @@ public class MeetupStatusJob {
         // 4. 多余清理：GEO 有、MySQL 无
         for (String meetupId : geoIds) {
             if (!mysqlIds.contains(meetupId)) {
-                nearbyGateway.remove(cityCode, meetupId);
+                nearbyRepository.remove(cityCode, meetupId);
                 log.info("GEO 清理: cityCode={}, meetupId={}", cityCode, meetupId);
             }
         }

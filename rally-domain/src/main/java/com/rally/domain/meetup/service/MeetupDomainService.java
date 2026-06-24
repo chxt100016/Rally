@@ -6,9 +6,9 @@ import com.rally.domain.meetup.enums.ActionStateEnum;
 import com.rally.domain.meetup.enums.JoinModeEnum;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
-import com.rally.domain.meetup.gateway.MeetupGateway;
-import com.rally.domain.meetup.gateway.NearbyGateway;
-import com.rally.domain.meetup.gateway.RegistrationGateway;
+import com.rally.domain.meetup.gateway.MeetupRepository;
+import com.rally.domain.meetup.gateway.NearbyRepository;
+import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +28,11 @@ import java.util.List;
 @Slf4j
 public class MeetupDomainService {
 
-    private final MeetupGateway meetupGateway;
+    private final MeetupRepository meetupRepository;
 
-    private final NearbyGateway nearbyGateway;
+    private final NearbyRepository nearbyRepository;
 
-    private final RegistrationGateway registrationGateway;
+    private final RegistrationRepository registrationRepository;
 
     private final MeetupPolicy meetupPolicy;
 
@@ -42,9 +42,9 @@ public class MeetupDomainService {
      * @return Meetup 聚合根（含全部报名记录）
      */
     public Meetup get(String meetupId) {
-        MeetupData data = meetupGateway.findByBizId(meetupId);
+        MeetupData data = meetupRepository.findByBizId(meetupId);
         Assert.notNull(data, BizErrorCode.MEETUP_NOT_FOUND);
-        List<RegistrationData> registrations = registrationGateway.findByMeetupId(meetupId);
+        List<RegistrationData> registrations = registrationRepository.findByMeetupId(meetupId);
         return new Meetup(data, registrations);
     }
 
@@ -59,7 +59,7 @@ public class MeetupDomainService {
         MeetupDomainConvertMapper.INSTANCE.updateMeetupData(meetup.getData(), cmd);
 
         // 2. 保存
-        meetupGateway.save(meetup.getData());
+        meetupRepository.save(meetup.getData());
     }
 
     /**
@@ -70,10 +70,10 @@ public class MeetupDomainService {
         Meetup meetup = MeetupFactory.create(cmd, userId);
 
         // 2. 一次性持久化（约球主表 + 报名记录）
-        meetupGateway.save(meetup);
+        meetupRepository.save(meetup);
 
         // 3. GEO 写入
-        nearbyGateway.add(cmd.getCityCode(), meetup.getData().getBizId(), cmd.getCourtLng(), cmd.getCourtLat());
+        nearbyRepository.add(cmd.getCityCode(), meetup.getData().getBizId(), cmd.getCourtLng(), cmd.getCourtLat());
 
         return meetup.getMeetupId();
     }
@@ -89,7 +89,7 @@ public class MeetupDomainService {
 
         // 2. 更新状态
         meetup.getData().setStatus(MeetupStatusEnum.CLOSED);
-        meetupGateway.save(meetup.getData());
+        meetupRepository.save(meetup.getData());
     }
 
 
@@ -106,7 +106,7 @@ public class MeetupDomainService {
      * 统计用户已完成的约球次数
      */
     public long countFinishedMeetups(String userId) {
-        return meetupGateway.countFinishedByCreatorId(userId);
+        return meetupRepository.countFinishedByCreatorId(userId);
     }
 
     /**

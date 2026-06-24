@@ -7,9 +7,4 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserFollowService extends ServiceImpl<UserFollowMapper, UserFollowPO> {
-
-    public UserFollowPO insert(UserFollowPO po) {
-        this.save(po);
-        return po;
-    }
 }

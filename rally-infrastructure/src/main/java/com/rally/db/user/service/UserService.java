@@ -10,11 +10,6 @@ import java.util.Optional;
 @Service
 public class UserService extends ServiceImpl<UserMapper, UserPO> {
 
-    public UserPO insert(UserPO user) {
-        this.save(user);
-        return user;
-    }
-
     public Optional<UserPO> findByUserId(String userId) {
         return Optional.ofNullable(
                 this.lambdaQuery()

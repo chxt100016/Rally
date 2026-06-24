@@ -2,13 +2,13 @@ package com.rally.domain.score.strategy;
 
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
-import com.rally.domain.recap.gateway.ReviewGateway;
+import com.rally.domain.recap.gateway.ReviewRepository;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.model.ScoreChange;
 import com.rally.domain.score.model.ScoreContext;
 import com.rally.domain.user.enums.ChangeReasonEnum;
-import com.rally.domain.user.gateway.TourProfileGateway;
+import com.rally.domain.user.gateway.TourProfileRepository;
 import com.rally.domain.user.model.TourProfileData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +27,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CalibrationStrategy implements ScoreStrategy {
 
-    private final ReviewGateway reviewGateway;
-    private final TourProfileGateway profileGateway;
+    private final ReviewRepository reviewRepository;
+    private final TourProfileRepository profileRepository;
 
     @Override
     public ScoreDimensionEnum dimension() {
@@ -43,13 +43,13 @@ public class CalibrationStrategy implements ScoreStrategy {
         change.setReason(ChangeReasonEnum.SYSTEM);
 
         // 获取当前校准度
-        Integer before = profileGateway.findByUserId(userId)
+        Integer before = profileRepository.findByUserId(userId)
                 .map(TourProfileData::getCalibrationScore)
                 .orElse(80);
         change.setBefore(before);
 
         // 1. 拉取所有对该用户的 ntrp_vote 投票
-        List<ReviewData> votes = reviewGateway.listByToUserAndType(userId, "ntrp_vote");
+        List<ReviewData> votes = reviewRepository.listByToUserAndType(userId, "ntrp_vote");
 
         // 2. 反滥用剔除（超出部分剔除，保留前 N=3 张 lower 票）
         int lowerVoteMax = SystemConfig.getInt(SystemConfigKey.ANTI_ABUSE_LOWER_VOTE_MAX_PER_TARGET.getKey());

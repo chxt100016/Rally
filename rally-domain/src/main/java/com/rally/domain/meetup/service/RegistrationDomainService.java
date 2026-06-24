@@ -2,8 +2,8 @@ package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
-import com.rally.domain.meetup.gateway.MeetupGateway;
-import com.rally.domain.meetup.gateway.RegistrationGateway;
+import com.rally.domain.meetup.gateway.MeetupRepository;
+import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.QuitResult;
 import com.rally.domain.meetup.model.RegistrationData;
@@ -23,8 +23,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class RegistrationDomainService {
 
-    private final MeetupGateway meetupGateway;
-    private final RegistrationGateway registrationGateway;
+    private final MeetupRepository meetupRepository;
+    private final RegistrationRepository registrationRepository;
 
     /**
      * 保存报名（调用聚合根 join + 持久化）
@@ -38,7 +38,7 @@ public class RegistrationDomainService {
         RegistrationStatusEnum status = meetup.join(userProfile, autoWithdrawAt);
 
         // 2. 持久化（自动计算 currentPlayers）
-        meetupGateway.save(meetup);
+        meetupRepository.save(meetup);
         return status;
     }
 
@@ -49,14 +49,14 @@ public class RegistrationDomainService {
      */
     public void withdraw(String meetupId, String userId) {
         // 1. 查询报名记录
-        RegistrationData registration = registrationGateway.findActiveByMeetupAndUser(meetupId, userId);
+        RegistrationData registration = registrationRepository.findActiveByMeetupAndUser(meetupId, userId);
         Assert.notNull(registration, BizErrorCode.NOT_JOINED);
 
         // 2. 状态校验（委托实体自身行为）
         Assert.isTrue(registration.canWithdraw(), BizErrorCode.WAITLIST_NOT_PENDING);
 
         // 3. 更新状态
-        registrationGateway.updateStatus(registration.getBizId(), RegistrationStatusEnum.WITHDRAWN);
+        registrationRepository.updateStatus(registration.getBizId(), RegistrationStatusEnum.WITHDRAWN);
     }
 
     /**
@@ -70,7 +70,7 @@ public class RegistrationDomainService {
         QuitResult result = meetup.quit(userId);
 
         // 2. 持久化（自动计算 currentPlayers）
-        meetupGateway.save(meetup);
+        meetupRepository.save(meetup);
 
         return result;
     }
@@ -86,7 +86,7 @@ public class RegistrationDomainService {
         String userId = meetup.approve(registrationId, currentUserId);
 
         // 2. 持久化（自动计算 currentPlayers）
-        meetupGateway.save(meetup);
+        meetupRepository.save(meetup);
 
         return userId;
     }
@@ -102,7 +102,7 @@ public class RegistrationDomainService {
         meetup.reject(registrationId, currentUserId);
 
         // 2. 持久化
-        meetupGateway.save(meetup);
+        meetupRepository.save(meetup);
     }
 
 }

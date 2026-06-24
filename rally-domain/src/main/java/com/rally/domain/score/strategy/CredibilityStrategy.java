@@ -2,12 +2,12 @@ package com.rally.domain.score.strategy;
 
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
-import com.rally.domain.meetup.gateway.MeetupGateway;
+import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.model.ScoreChange;
 import com.rally.domain.score.model.ScoreContext;
 import com.rally.domain.user.enums.ChangeReasonEnum;
-import com.rally.domain.user.gateway.TourProfileGateway;
+import com.rally.domain.user.gateway.TourProfileRepository;
 import com.rally.domain.user.model.TourProfileData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +23,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CredibilityStrategy implements ScoreStrategy {
 
-    private final MeetupGateway meetupGateway;
-    private final TourProfileGateway profileGateway;
+    private final MeetupRepository meetupRepository;
+    private final TourProfileRepository profileRepository;
 
     @Override
     public ScoreDimensionEnum dimension() {
@@ -39,20 +39,20 @@ public class CredibilityStrategy implements ScoreStrategy {
         change.setReason(ChangeReasonEnum.SYSTEM);
 
         // 获取当前可信度
-        Integer before = profileGateway.findByUserId(userId)
+        Integer before = profileRepository.findByUserId(userId)
                 .map(TourProfileData::getCredibilityScore)
                 .orElse(0);
         change.setBefore(before);
 
         // 1. 近窗口完成约球加分
         int matchWindowDays = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_WINDOW_DAYS.getKey());
-        long matchCount = meetupGateway.countFinishedMatches(userId, matchWindowDays);
+        long matchCount = meetupRepository.countFinishedMatches(userId, matchWindowDays);
         int matchPerScore = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_PER_SCORE.getKey());
         int matchScoreCap = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_MATCH_SCORE_CAP.getKey());
         int sMatch = (int) Math.min(matchCount * matchPerScore, matchScoreCap);
 
         // 2. 视频加分
-        int videoCount = profileGateway.findByUserId(userId)
+        int videoCount = profileRepository.findByUserId(userId)
                 .map(p -> p.getVideos() != null ? p.getVideos().size() : 0)
                 .orElse(0);
         int videoPerScore = SystemConfig.getInt(SystemConfigKey.SCORE_CREDIBILITY_VIDEO_PER_SCORE.getKey());

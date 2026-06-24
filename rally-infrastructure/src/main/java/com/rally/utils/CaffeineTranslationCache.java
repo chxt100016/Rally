@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.rally.db.translation.convert.TranslationConvertMapper;
 import com.rally.db.translation.entity.TranslationPO;
-import com.rally.db.translation.repository.TranslationRepository;
+import com.rally.db.translation.service.TranslationMybatisService;
 import com.rally.domain.translation.cache.TranslationCache;
 import com.rally.domain.translation.model.TranslationData;
 import com.rally.domain.translation.model.TranslationKey;
@@ -17,11 +17,11 @@ import java.util.stream.Collectors;
 @Component
 public class CaffeineTranslationCache implements TranslationCache {
 
-    private final TranslationRepository translationRepository;
+    private final TranslationMybatisService translationMybatisService;
     private final LoadingCache<TranslationKey, String> cache;
 
-    public CaffeineTranslationCache(TranslationRepository translationRepository) {
-        this.translationRepository = translationRepository;
+    public CaffeineTranslationCache(TranslationMybatisService translationMybatisService) {
+        this.translationMybatisService = translationMybatisService;
         this.cache = Caffeine.newBuilder()
                 .maximumSize(10_000)
                 .expireAfterWrite(30, TimeUnit.MINUTES)
@@ -45,14 +45,17 @@ public class CaffeineTranslationCache implements TranslationCache {
 
     private String loadByKey(TranslationKey key) {
         TranslationPO queryPO = TranslationConvertMapper.INSTANCE.toQueryPO(key);
-        TranslationPO po = translationRepository.findOne(
-                queryPO.getEntityType(), queryPO.getOriginalText(), queryPO.getLanguage());
+        TranslationPO po = translationMybatisService.lambdaQuery()
+                .eq(TranslationPO::getEntityType, queryPO.getEntityType())
+                .eq(TranslationPO::getOriginalText, queryPO.getOriginalText())
+                .eq(TranslationPO::getLanguage, queryPO.getLanguage())
+                .one();
         return po != null ? po.getTranslatedText() : null;
     }
 
     private void loadAll() {
         Map<TranslationKey, String> entries = TranslationConvertMapper.INSTANCE
-                .toDomainList(translationRepository.findAllTranslated())
+                .toDomainList(translationMybatisService.lambdaQuery().isNotNull(TranslationPO::getTranslatedText).list())
                 .stream()
                 .collect(Collectors.toMap(
                         d -> new TranslationKey(d.getEntityType(), d.getOriginalText(), d.getLanguage()),

@@ -1,7 +1,7 @@
 package com.rally.tour;
 
 import com.rally.client.tourtv.model.MatchesResponse;
-import com.rally.domain.tour.gateway.TourMatchCollectGateway;
+import com.rally.domain.tour.repository.TourMatchCollectRepository;
 import com.rally.domain.tour.model.MatchData;
 import com.rally.domain.tour.model.SetScoreData;
 import com.rally.tour.convert.MatchAppConvertMapper;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class MatchCollectService {
 
     @Resource
-    private TourMatchCollectGateway tourMatchCollectGateway;
+    private TourMatchCollectRepository tourMatchCollectRepository;
 
     public int collect(List<MatchesResponse.MatchInfo> matches) {
         if (CollectionUtils.isEmpty(matches)) return 0;
@@ -34,7 +34,7 @@ public class MatchCollectService {
     public void saveMatches(List<Match> matches) {
         if (CollectionUtils.isEmpty(matches)) return;
         List<MatchData> matchDataList = MatchAppConvertMapper.INSTANCE.toMatchDataList(matches);
-        List<MatchData> savedMatches = tourMatchCollectGateway.saveOrUpdateBatch(matchDataList);
+        List<MatchData> savedMatches = tourMatchCollectRepository.saveOrUpdateBatch(matchDataList);
 
         Map<String, Long> matchKeyToId = savedMatches.stream()
                 .filter(m -> m.getTourMatchId() != null && m.getMatchId() != null)
@@ -60,6 +60,6 @@ public class MatchCollectService {
                 allSetScores.add(data);
             }
         }
-        tourMatchCollectGateway.saveSetScores(allSetScores);
+        tourMatchCollectRepository.saveSetScores(allSetScores);
     }
 }

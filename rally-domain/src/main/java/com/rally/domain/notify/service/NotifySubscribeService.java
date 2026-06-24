@@ -4,7 +4,7 @@ import com.rally.domain.notify.enums.NoticeScene;
 import com.rally.domain.notify.enums.NotifyBizType;
 import com.rally.domain.notify.enums.NotifyChannel;
 import com.rally.domain.notify.gateway.Notifier;
-import com.rally.domain.notify.gateway.NotifySubscribeGateway;
+import com.rally.domain.notify.gateway.NotifySubscribeRepository;
 import com.rally.domain.notify.model.NotifyMessage;
 import com.rally.domain.notify.model.NotifyResult;
 import com.rally.domain.notify.model.NotifySubscribe;
@@ -36,7 +36,7 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public class NotifySubscribeService {
 
-    private final NotifySubscribeGateway gateway;
+    private final NotifySubscribeRepository gateway;
     private final List<Notifier> notifiers;
 
     private final Map<NotifyChannel, Notifier> notifierMap = new EnumMap<>(NotifyChannel.class);

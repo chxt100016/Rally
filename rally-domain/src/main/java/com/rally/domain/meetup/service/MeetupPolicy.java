@@ -3,8 +3,8 @@ package com.rally.domain.meetup.service;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
-import com.rally.domain.meetup.gateway.MeetupGateway;
-import com.rally.domain.meetup.gateway.RegistrationGateway;
+import com.rally.domain.meetup.gateway.MeetupRepository;
+import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupPublishCmd;
@@ -24,9 +24,9 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class MeetupPolicy {
 
-    private final MeetupGateway meetupGateway;
+    private final MeetupRepository meetupRepository;
 
-    private final RegistrationGateway registrationGateway;
+    private final RegistrationRepository registrationRepository;
 
     /**
      * 发布前校验：发布上限 + 城市开通 + 字段校验
@@ -45,7 +45,7 @@ public class MeetupPolicy {
      */
     private void assertTimes(String userId) {
         int publishLimit = SystemConfig.getInt(SystemConfigKey.ANTI_ABUSE_PUBLISH_PER_DAY_LIMIT.getKey());
-        long todayCount = meetupGateway.countTodayActive(userId);
+        long todayCount = meetupRepository.countTodayActive(userId);
         if (todayCount >= publishLimit) {
             throw new BusinessException(BizErrorCode.PUBLISH_LIMIT_EXCEEDED);
         }
@@ -150,7 +150,7 @@ public class MeetupPolicy {
         }
 
         // 3. 已有参与者时，不可修改时间、地点、持续时长
-        int participantCount = registrationGateway.countApprovedByMeetupId(data.getBizId());
+        int participantCount = registrationRepository.countApprovedByMeetupId(data.getBizId());
         if (participantCount > 1) {
             boolean timeChanged = cmd.getStartTime() != null
                     && !cmd.getStartTime().equals(data.getStartTime());

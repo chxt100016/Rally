@@ -1,6 +1,6 @@
 package com.rally.tour;
 
-import com.rally.domain.tour.gateway.TourPlayerGateway;
+import com.rally.domain.tour.repository.TourPlayerRepository;
 import com.rally.domain.tour.model.*;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
 import com.rally.translation.TourTranslationService;
@@ -18,14 +18,14 @@ public class TourPlayerQueryService {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Resource
-    private TourPlayerGateway tourPlayerGateway;
+    private TourPlayerRepository tourPlayerRepository;
 
     @Resource
     private TourTranslationService tourTranslationService;
 
     public List<PlayerQueryVO> queryPlayers(String tour) {
         if (tour == null || tour.isBlank()) return List.of();
-        List<PlayerData> players = tourPlayerGateway.listByTourOrderByRank(tour.toUpperCase());
+        List<PlayerData> players = tourPlayerRepository.listByTourOrderByRank(tour.toUpperCase());
         LocalDate today = LocalDate.now();
         List<PlayerQueryVO> result = players.stream()
                 .map(p -> toPlayerQueryVO(p, today))

@@ -3,13 +3,13 @@ package com.rally.domain.score.strategy;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.recap.enums.AttendanceEnum;
-import com.rally.domain.recap.gateway.ReviewGateway;
+import com.rally.domain.recap.gateway.ReviewRepository;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.model.ScoreChange;
 import com.rally.domain.score.model.ScoreContext;
 import com.rally.domain.user.enums.ChangeReasonEnum;
-import com.rally.domain.user.gateway.TourProfileGateway;
+import com.rally.domain.user.gateway.TourProfileRepository;
 import com.rally.domain.user.model.TourProfileData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReputationStrategy implements ScoreStrategy {
 
-    private final ReviewGateway reviewGateway;
-    private final TourProfileGateway profileGateway;
+    private final ReviewRepository reviewRepository;
+    private final TourProfileRepository profileRepository;
 
     @Override
     public ScoreDimensionEnum dimension() {
@@ -41,13 +41,13 @@ public class ReputationStrategy implements ScoreStrategy {
         change.setRefId(ctx.getMeetupId());
 
         // 获取当前信誉分
-        Integer before = profileGateway.findByUserId(userId)
+        Integer before = profileRepository.findByUserId(userId)
                 .map(TourProfileData::getReputationScore)
                 .orElse(100);
         change.setBefore(before);
 
         // 查本场所有对该用户的出勤评价
-        List<ReviewData> attendanceReviews = reviewGateway.findByDimension(
+        List<ReviewData> attendanceReviews = reviewRepository.findByDimension(
                 ctx.getMeetupId(), null, userId, "attendance");
 
         // 判定本场出勤结论（最严优先：任一 no_show → no_show；否则任一 late → late；否则 on_time）

@@ -6,6 +6,6 @@ import java.util.List;
 
 @Data
 public class SeedGroupDTO {
-    private String type;
+    private SeedGroupTypeEnum type;
     private List<SeedVO> data;
 }

@@ -2,7 +2,7 @@ package com.rally.tour;
 
 import com.qiniu.common.QiniuException;
 import com.rally.client.qiniu.QiniuClient;
-import com.rally.domain.tour.gateway.TourTournamentGateway;
+import com.rally.domain.tour.repository.TourTournamentRepository;
 import com.rally.domain.utils.ImageCompressor;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +24,7 @@ public class TourUploadAppService {
     private QiniuClient qiniuClient;
 
     @Resource
-    private TourTournamentGateway tourTournamentGateway;
+    private TourTournamentRepository tourTournamentRepository;
 
     public TournamentImageResult uploadTournamentImage(MultipartFile file, String tournamentId) throws IOException, QiniuException {
         byte[] originalBytes = file.getBytes();
@@ -32,7 +32,7 @@ public class TourUploadAppService {
         byte[] compressedBytes = ImageCompressor.compress(new ByteArrayInputStream(originalBytes), format, compressKb);
         String imageKey = qiniuClient.uploadImage(originalBytes, DIR, tournamentId);
         String backgroundKey = qiniuClient.uploadImage(compressedBytes, DIR, tournamentId + "_background");
-        tourTournamentGateway.updateImagePaths(tournamentId, imageKey, backgroundKey);
+        tourTournamentRepository.updateImagePaths(tournamentId, imageKey, backgroundKey);
         return new TournamentImageResult(imageKey, backgroundKey);
     }
 

@@ -2,9 +2,9 @@ package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.meetup.enums.UserMeetupTabEnum;
-import com.rally.domain.meetup.gateway.MeetupGateway;
-import com.rally.domain.meetup.gateway.NearbyGateway;
-import com.rally.domain.meetup.gateway.RegistrationGateway;
+import com.rally.domain.meetup.gateway.MeetupRepository;
+import com.rally.domain.meetup.gateway.NearbyRepository;
+import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MeetupQueryDomainService {
 
-    private final MeetupGateway meetupGateway;
-    private final NearbyGateway nearbyGateway;
+    private final MeetupRepository meetupRepository;
+    private final NearbyRepository nearbyRepository;
     private final MeetupQueryPlanner queryPlanner;
 
     /**
@@ -42,7 +42,7 @@ public class MeetupQueryDomainService {
         if (param == null) {
             return List.of();
         }
-        return meetupGateway.listAvailable(param);
+        return meetupRepository.listAvailable(param);
     }
 
     /**
@@ -59,9 +59,9 @@ public class MeetupQueryDomainService {
         List<NearbyResult> nearbyResults;
         if (query.getRadiusKm() != null) {
             double radiusMeters = query.getRadiusKm().multiply(new BigDecimal("1000")).doubleValue();
-            nearbyResults = nearbyGateway.searchByRadius(query.getCityCode(), query.getLng(), query.getLat(), radiusMeters);
+            nearbyResults = nearbyRepository.searchByRadius(query.getCityCode(), query.getLng(), query.getLat(), radiusMeters);
         } else {
-            nearbyResults = nearbyGateway.searchAllByDistance(query.getCityCode(), query.getLng(), query.getLat());
+            nearbyResults = nearbyRepository.searchAllByDistance(query.getCityCode(), query.getLng(), query.getLat());
         }
         if (nearbyResults.isEmpty()) {
             return List.of();
@@ -74,7 +74,7 @@ public class MeetupQueryDomainService {
         param.setMeetupIds(nearbyIds);
 
         // 3. 数据库查询（带筛选条件，不分页）
-        List<MeetupData> allData = meetupGateway.listByMeetupIdsWithFilter(param);
+        List<MeetupData> allData = meetupRepository.listByMeetupIdsWithFilter(param);
 
         // 4. 按 Redis 距离顺序排序，并设置距离
         Map<String, Double> distanceMap = nearbyResults.stream()
@@ -130,7 +130,7 @@ public class MeetupQueryDomainService {
      */
     private PageDTO<MeetupData> listPending(String userId, String lastId, int limit) {
         int deadlineDays = SystemConfig.getInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getKey());
-        return meetupGateway.listPendingMeetups(userId, deadlineDays, lastId, limit);
+        return meetupRepository.listPendingMeetups(userId, deadlineDays, lastId, limit);
     }
 
     /**
@@ -167,14 +167,14 @@ public class MeetupQueryDomainService {
      * 最近：用户为创建人或已批准报名的约球，不限状态（球员主页用）
      */
     private PageDTO<MeetupData> listRecent(String userId, String lastId, int limit) {
-        return meetupGateway.listRecentByUser(userId, lastId, limit);
+        return meetupRepository.listRecentByUser(userId, lastId, limit);
     }
 
     // ======================== 内部工具方法 ========================
 
     /** 执行用户维度分页查询（listByUser 各分支用） */
     private PageDTO<MeetupData> doList(MeetupListQueryParam param) {
-        return meetupGateway.listByUserFilter(param);
+        return meetupRepository.listByUserFilter(param);
     }
 
 }

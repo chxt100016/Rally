@@ -1,6 +1,6 @@
 package com.rally.tour;
 
-import com.rally.domain.tour.gateway.TourTournamentGateway;
+import com.rally.domain.tour.repository.TourTournamentRepository;
 import com.rally.domain.tour.model.TournamentData;
 import com.rally.tour.model.TourEnums;
 import com.rally.tour.parser.CollectType;
@@ -26,7 +26,7 @@ public class TourCollectFacade {
     private MatchCollectManager matchCollectManager;
 
     @Resource
-    private TourTournamentGateway tourTournamentGateway;
+    private TourTournamentRepository tourTournamentRepository;
 
     public void tournaments(int year) {
         tournamentCollectService.collectTournament(year);
@@ -106,7 +106,7 @@ public class TourCollectFacade {
     }
 
     public void draws(String tournamentId) {
-        TournamentData byTournamentId = tourTournamentGateway.findByTournamentId(tournamentId);
+        TournamentData byTournamentId = tourTournamentRepository.findByTournamentId(tournamentId);
         this.draws(byTournamentId);
     }
 }

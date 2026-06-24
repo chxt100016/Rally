@@ -1,6 +1,6 @@
 package com.rally.tour;
 
-import com.rally.domain.tour.gateway.TourTournamentGateway;
+import com.rally.domain.tour.repository.TourTournamentRepository;
 import com.rally.domain.tour.model.TournamentData;
 import com.rally.domain.tour.model.TournamentPromptVO;
 import jakarta.annotation.Resource;
@@ -36,10 +36,10 @@ public class TourPromptService {
     );
 
     @Resource
-    private TourTournamentGateway tourTournamentGateway;
+    private TourTournamentRepository tourTournamentRepository;
 
     public String generatePrompt(String tournamentId) {
-        TournamentData data = tourTournamentGateway.findByTournamentId(tournamentId);
+        TournamentData data = tourTournamentRepository.findByTournamentId(tournamentId);
         if (data == null) return null;
         return buildPrompt(data);
     }
@@ -49,7 +49,7 @@ public class TourPromptService {
         LocalDate dateFrom = today.minusMonths(1);
         LocalDate dateTo = today.plusMonths(1);
 
-        List<TournamentData> list = tourTournamentGateway.listPendingBackground(dateFrom, dateTo);
+        List<TournamentData> list = tourTournamentRepository.listPendingBackground(dateFrom, dateTo);
         if (CollectionUtils.isEmpty(list)) return List.of();
 
         return list.stream()

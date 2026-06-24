@@ -3,7 +3,7 @@ package com.rally.meetup;
 import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.utils.UserContext;
 import com.rally.domain.court.service.CourtDomainService;
-import com.rally.domain.meetup.gateway.NearbyGateway;
+import com.rally.domain.meetup.gateway.NearbyRepository;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.model.MeetupEditCmd;
 import com.rally.domain.meetup.service.MeetupPolicy;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MeetupAppService {
 
-    private final NearbyGateway nearbyGateway;
+    private final NearbyRepository nearbyRepository;
 
     private final MeetupDomainService meetupDomainService;
 
@@ -87,8 +87,8 @@ public class MeetupAppService {
         // 5. GEO 更新（如果场地变了）
         if (locationChanged) {
             try {
-                nearbyGateway.remove(data.getCityCode(), meetupId);
-                nearbyGateway.add(data.getCityCode(), meetupId, cmd.getCourtLng(), cmd.getCourtLat());
+                nearbyRepository.remove(data.getCityCode(), meetupId);
+                nearbyRepository.add(data.getCityCode(), meetupId, cmd.getCourtLng(), cmd.getCourtLat());
             } catch (Exception e) {
                 log.warn("GEO 更新失败，不影响主流程: {}", e.getMessage());
             }
@@ -128,7 +128,7 @@ public class MeetupAppService {
 
         // 4. GEO 清理
         try {
-            nearbyGateway.remove(data.getCityCode(), meetupId);
+            nearbyRepository.remove(data.getCityCode(), meetupId);
         } catch (Exception e) {
             log.warn("GEO 清理失败: {}", e.getMessage());
         }

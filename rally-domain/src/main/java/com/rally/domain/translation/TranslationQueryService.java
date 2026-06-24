@@ -2,7 +2,7 @@ package com.rally.domain.translation;
 
 import com.alibaba.fastjson2.JSON;
 import com.rally.domain.translation.cache.TranslationCache;
-import com.rally.domain.translation.gateway.TranslationGateway;
+import com.rally.domain.translation.gateway.TranslationRepository;
 import com.rally.domain.translation.model.TranslationData;
 import com.rally.domain.translation.model.TranslationKey;
 import jakarta.annotation.Resource;
@@ -17,7 +17,7 @@ import java.util.*;
 public class TranslationQueryService {
 
     @Resource
-    private TranslationGateway translationGateway;
+    private TranslationRepository translationRepository;
 
     @Resource
     private TranslationCache translationCache;
@@ -48,7 +48,7 @@ public class TranslationQueryService {
     public void save(List<TranslationData> dataList) {
         for (TranslationData item : dataList) {
             try {
-                this.translationGateway.save(item);
+                this.translationRepository.save(item);
             } catch (Exception e) {
                 log.error("新增翻译实体失败, item:{}", JSON.toJSONString(item), e);
             }
@@ -74,7 +74,7 @@ public class TranslationQueryService {
 
         if (missedQueries.isEmpty()) return result;
 
-        List<TranslationData> dbResults = translationGateway.findBatch(missedQueries);
+        List<TranslationData> dbResults = translationRepository.findBatch(missedQueries);
         Map<String, TranslationData> dbMap = new HashMap<>();
         for (TranslationData d : dbResults) {
             dbMap.put(buildResultKey(d), d);
@@ -101,7 +101,7 @@ public class TranslationQueryService {
 
         if (!toSaveMap.isEmpty()) {
             try {
-                translationGateway.saveBatch(new ArrayList<>(toSaveMap.values()));
+                translationRepository.saveBatch(new ArrayList<>(toSaveMap.values()));
             } catch (Exception e) {
                 log.warn("批量保存翻译记录部分冲突，忽略: count={}", toSaveMap.size(), e);
             }

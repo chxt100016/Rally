@@ -2,7 +2,7 @@ package com.rally.meetup;
 
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.enums.ActionStateEnum;
-import com.rally.domain.meetup.gateway.MeetupGateway;
+import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.domain.meetup.service.MeetupDomainService;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public class MeetupDetailAppService {
 
     private final MeetupDomainService meetupDomainService;
-    private final MeetupGateway meetupGateway;
+    private final MeetupRepository meetupRepository;
     private final UserProfileDomainService userProfileDomainService;
     private final RecapDomainService recapDomainService;
     private final ChatDomainService chatDomainService;
@@ -101,7 +101,7 @@ public class MeetupDetailAppService {
         if (profile != null && profile.getProfile() != null) {
             creator.setNtrpScore(profile.getProfile().getNtrpScore());
         }
-        creator.setPublishMeetupCount(meetupGateway.countByCreatorId(creatorId));
+        creator.setPublishMeetupCount(meetupRepository.countByCreatorId(creatorId));
         return creator;
     }
 

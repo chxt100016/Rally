@@ -1,7 +1,7 @@
 package com.rally.domain.court.service;
 
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import com.rally.domain.court.gateway.CourtGateway;
+import com.rally.domain.court.gateway.CourtRepository;
 import com.rally.domain.court.model.CourtData;
 import com.rally.domain.utils.GeoUtils;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class CourtDomainService {
 
     private static final double MERGE_DISTANCE_METERS = 200.0;
 
-    private final CourtGateway courtGateway;
+    private final CourtRepository courtRepository;
 
     /**
      * 查找或创建球场（200m 范围内合并为同一场地）
@@ -36,7 +36,7 @@ public class CourtDomainService {
     public CourtData findOrCreate(String name, String address, Double lng, Double lat,
                                    String cityCode, String districtCode, Integer total) {
         // 1. 查询同城市所有球场
-        List<CourtData> existingCourts = courtGateway.findByCityCode(cityCode);
+        List<CourtData> existingCourts = courtRepository.findByCityCode(cityCode);
 
         // 2. 200m 内视为同一场地，返回已有球场
         for (CourtData court : existingCourts) {
@@ -57,7 +57,7 @@ public class CourtDomainService {
         newCourt.setCityCode(cityCode);
         newCourt.setDistrictCode(districtCode);
         newCourt.setTotal(total);
-        courtGateway.save(newCourt);
+        courtRepository.save(newCourt);
         log.info("新建球场：{}({},{})", name, lng, lat);
         return newCourt;
     }
@@ -66,6 +66,6 @@ public class CourtDomainService {
      * 根据 bizId 获取球场
      */
     public CourtData getByBizId(String bizId) {
-        return courtGateway.findByBizId(bizId);
+        return courtRepository.findByBizId(bizId);
     }
 }

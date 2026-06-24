@@ -9,9 +9,9 @@ import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.log.gateway.ProfileChangeLogGateway;
-import com.rally.domain.user.gateway.TourProfileGateway;
-import com.rally.domain.user.gateway.UserGateway;
+import com.rally.domain.log.gateway.ProfileChangeLogRepository;
+import com.rally.domain.user.gateway.TourProfileRepository;
+import com.rally.domain.user.gateway.UserRepository;
 import com.rally.domain.user.model.*;
 import com.rally.domain.log.ProfileLogService;
 import com.rally.domain.user.service.UserProfileDomainService;
@@ -32,16 +32,16 @@ import java.util.Optional;
 public class ProfileAppService {
 
     @Resource
-    private TourProfileGateway tourProfileGateway;
+    private TourProfileRepository tourProfileRepository;
 
     @Resource
-    private ProfileChangeLogGateway profileChangeLogGateway;
+    private ProfileChangeLogRepository profileChangeLogRepository;
 
     @Resource
     private ProfileLogService profileRecordService;
 
     @Resource
-    private UserGateway userGateway;
+    private UserRepository userRepository;
 
     @Resource
     private UserProfileDomainService userProfileDomainService;
@@ -59,10 +59,10 @@ public class ProfileAppService {
     @Transactional
     public MyProfileDTO editUser(EditProfileCmd cmd) {
         String userId = UserContext.get();
-        UserData userData = userGateway.findByUserId(userId)
+        UserData userData = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.DATA_NOT_FOUND, "用户不存在"));
         UserConvertMapper.INSTANCE.updateData(userData, cmd);
-        userGateway.updateUser(userData);
+        userRepository.updateUser(userData);
 
         return myProfileAppService.getMyProfile();
     }
@@ -132,14 +132,14 @@ public class ProfileAppService {
      */
     @Transactional
     public void advanceReviewProgress(String userId, String meetupId, boolean isBad) {
-        TourProfileData profileData = tourProfileGateway.findByUserId(userId)
+        TourProfileData profileData = tourProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
 
         if (!profileData.getIsUnderReview()) {
             return;
         }
 
-        Optional<ProfileChangeLogData> latestLog = profileChangeLogGateway.findLatestUnderReviewLog(userId);
+        Optional<ProfileChangeLogData> latestLog = profileChangeLogRepository.findLatestUnderReviewLog(userId);
         if (latestLog.isEmpty()) {
             return;
         }
@@ -153,7 +153,7 @@ public class ProfileAppService {
             int requiredMatches = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_REQUIRED_MATCHES.getKey());
             int penaltyCredibility = SystemConfig.getInt(SystemConfigKey.SCORE_REVIEW_PERIOD_PENALTY_CREDIBILITY.getKey());
             profileRecordService.saveReviewResetLog(userId, remaining, requiredMatches, meetupId);
-            tourProfileGateway.updateScoreFields(userId, null,
+            tourProfileRepository.updateScoreFields(userId, null,
                     penaltyCredibility, null, null);
         } else {
             BigDecimal newRemaining = remaining.subtract(BigDecimal.ONE);
@@ -169,11 +169,11 @@ public class ProfileAppService {
      */
     @Transactional
     public void releaseReview(String userId) {
-        TourProfileData profileData = tourProfileGateway.findByUserId(userId)
+        TourProfileData profileData = tourProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
 
         profileData.setStatus(ProfileStatusEnum.NORMAL);
         profileData.setIsUnderReview(false);
-        tourProfileGateway.update(profileData);
+        tourProfileRepository.update(profileData);
     }
 }

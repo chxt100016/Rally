@@ -1,7 +1,7 @@
 package com.rally.domain.recap;
 
 import com.rally.domain.recap.enums.ReviewTypeEnum;
-import com.rally.domain.recap.gateway.ReviewGateway;
+import com.rally.domain.recap.gateway.ReviewRepository;
 import com.rally.domain.recap.model.ReviewData;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class UserReviewDomainService {
 
     @Resource
-    private ReviewGateway reviewGateway;
+    private ReviewRepository reviewRepository;
 
 
 
@@ -30,7 +30,7 @@ public class UserReviewDomainService {
      */
     public ReviewSummaryDTO getReviewSummary(String toUserId, int tagLimit) {
         // 一次查询获取该用户收到的全部评价
-        List<ReviewData> allReviews = reviewGateway.listAllByToUser(toUserId);
+        List<ReviewData> allReviews = reviewRepository.listAllByToUser(toUserId);
 
         // 统计 LEVEL_VOTE 类型数量
         long levelVoteCount = allReviews.stream()

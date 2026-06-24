@@ -1,6 +1,6 @@
 package com.rally.tour;
 
-import com.rally.domain.tour.gateway.MatchQueryGateway;
+import com.rally.domain.tour.repository.MatchQueryRepository;
 import com.rally.domain.tour.model.*;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
 import com.rally.translation.TourTranslationService;
@@ -17,33 +17,33 @@ import java.util.stream.Collectors;
 public class PlayerTournamentQueryService {
 
     @Resource
-    private MatchQueryGateway matchQueryGateway;
+    private MatchQueryRepository matchQueryRepository;
 
     @Resource
     private TourTranslationService tourTranslationService;
 
     public PlayerTournamentVO query(String tournamentId, Integer year, String playerId, String drawType) {
         // 1. 查询签表
-        TourDrawData draw = matchQueryGateway.getDrawByTournamentIdAndType(tournamentId, year, drawType);
+        TourDrawData draw = matchQueryRepository.getDrawByTournamentIdAndType(tournamentId, year, drawType);
         if (draw == null) {
             return null;
         }
 
         // 2. 查询球员基本信息
-        PlayerDetailData playerDetail = matchQueryGateway.getPlayerById(playerId);
+        PlayerDetailData playerDetail = matchQueryRepository.getPlayerById(playerId);
         if (playerDetail == null) {
             return null;
         }
 
         // 3. 查询球员种子
-        PlayerSeedData seedData = matchQueryGateway.getSeedByDrawIdAndPlayerId(draw.getId(), playerId);
+        PlayerSeedData seedData = matchQueryRepository.getSeedByDrawIdAndPlayerId(draw.getId(), playerId);
         Integer seed = seedData != null ? seedData.getSeed() : null;
 
         // 4. 查询该签表下球员参与的所有比赛
-        List<MatchData> playerMatches = matchQueryGateway.listByDrawIdAndPlayerId(draw.getId(), playerId);
+        List<MatchData> playerMatches = matchQueryRepository.listByDrawIdAndPlayerId(draw.getId(), playerId);
 
         // 5. 查询该签表下所有比赛（用于前方对手推算）
-        List<MatchData> allMatches = matchQueryGateway.listByDrawId(draw.getId());
+        List<MatchData> allMatches = matchQueryRepository.listByDrawId(draw.getId());
         // matchIndex → match 的映射
         Map<Integer, MatchData> indexToMatch = allMatches.stream()
                 .filter(m -> m.getMatchIndex() != null)
@@ -57,7 +57,7 @@ public class PlayerTournamentQueryService {
             if (m.getWinnerId() != null) playerIds.add(m.getWinnerId());
         }
         playerIds.add(playerId);
-        List<PlayerData> playerDataList = matchQueryGateway.listPlayersByPlayerIds(new ArrayList<>(playerIds));
+        List<PlayerData> playerDataList = matchQueryRepository.listPlayersByPlayerIds(new ArrayList<>(playerIds));
         // 对手名字只取 lastName
         Map<String, String> playerNameMap = playerDataList.stream()
                 .collect(Collectors.toMap(PlayerData::getPlayerId,
@@ -74,12 +74,12 @@ public class PlayerTournamentQueryService {
                 .toList();
         List<SetScoreData> setScores = CollectionUtils.isEmpty(tourMatchIds)
                 ? List.of()
-                : matchQueryGateway.listSetScoresByTourMatchIds(tourMatchIds);
+                : matchQueryRepository.listSetScoresByTourMatchIds(tourMatchIds);
         Map<Long, List<SetScoreData>> setScoreMap = setScores.stream()
                 .collect(Collectors.groupingBy(SetScoreData::getTourMatchId));
 
         // 8. 查询所有种子信息（用于前方对手种子推算）
-        List<PlayerSeedData> allSeeds = matchQueryGateway.listSeedsByTournamentIds(List.of(tournamentId));
+        List<PlayerSeedData> allSeeds = matchQueryRepository.listSeedsByTournamentIds(List.of(tournamentId));
         Map<String, Integer> playerSeedMap = allSeeds.stream()
                 .collect(Collectors.toMap(PlayerSeedData::getPlayerId, PlayerSeedData::getSeed, (a, b) -> a));
 

@@ -1,10 +1,10 @@
 package com.rally.domain.recap.service;
 
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
-import com.rally.domain.meetup.gateway.RegistrationGateway;
+import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.RegistrationData;
-import com.rally.domain.recap.gateway.RecapGateway;
+import com.rally.domain.recap.gateway.RecapRepository;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ReviewSubmitCmd;
 import com.rally.domain.recap.model.ScoreAddCmd;
@@ -35,8 +35,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecapDomainService {
 
-    private final RecapGateway recapGateway;
-    private final RegistrationGateway registrationGateway;
+    private final RecapRepository recapRepository;
+    private final RegistrationRepository registrationRepository;
     private final ScoreManager scoreManager;
 
 
@@ -47,16 +47,16 @@ public class RecapDomainService {
      */
     @Transactional
     public void submitReviewItems(Meetup meetup, String userId, String toUserId, List<ReviewSubmitCmd.ReviewItem> targetReviews) {
-        recapGateway.submitReviewItems(meetup.getMeetupId(), userId, toUserId, targetReviews);
+        recapRepository.submitReviewItems(meetup.getMeetupId(), userId, toUserId, targetReviews);
         // 评价已提交，标记 registration 状态为 REVIEWED
-        registrationGateway.toReviewed(userId);
+        registrationRepository.toReviewed(userId);
     }
 
     /**
      * 新增比分（一次一盘）
      */
     public void addScoreItem(Meetup meetup, String userId, ScoreAddCmd cmd, LocalDateTime meetupDate, String venueName) {
-        recapGateway.addScore(meetup.getMeetupId(), userId, cmd, meetupDate, venueName);
+        recapRepository.addScore(meetup.getMeetupId(), userId, cmd, meetupDate, venueName);
         // 触发评分重算 TODO
     }
 
@@ -64,7 +64,7 @@ public class RecapDomainService {
      * 修改比分（一次一盘，bizId 定位 + version 乐观锁）
      */
     public void updateScoreItem(Meetup meetup, String userId, ScoreUpdateCmd cmd, LocalDateTime meetupDate, String venueName) {
-        recapGateway.updateScore(meetup.getMeetupId(), userId, cmd, meetupDate, venueName);
+        recapRepository.updateScore(meetup.getMeetupId(), userId, cmd, meetupDate, venueName);
         // 触发评分重算 TODO
     }
 
@@ -72,7 +72,7 @@ public class RecapDomainService {
      * 删除比分（一次一盘，bizId 定位）
      */
     public void deleteScoreItem(Meetup meetup, String bizId) {
-        recapGateway.deleteScore(meetup.getMeetupId(), bizId);
+        recapRepository.deleteScore(meetup.getMeetupId(), bizId);
         // 触发评分重算 TODO
     }
 
@@ -82,20 +82,20 @@ public class RecapDomainService {
      * 查询某场某人提交的所有评价
      */
     public List<ReviewData> listReviewsByMeetupAndFrom(String meetupId, String fromUserId) {
-        return recapGateway.listReviewsByMeetupAndFrom(meetupId, fromUserId);
+        return recapRepository.listReviewsByMeetupAndFrom(meetupId, fromUserId);
     }
 
     /**
      * 查询该活动的所有比分记录
      */
     public List<ScoreRecordData> listScoresByMeetup(String meetupId) {
-        return recapGateway.listScoresByMeetup(meetupId);
+        return recapRepository.listScoresByMeetup(meetupId);
     }
 
     /**
      * 查询某用户参与的所有比分记录（按比赛日期倒序）
      */
     public List<ScoreRecordData> listScoresByUserId(String userId) {
-        return recapGateway.listScoresByUserId(userId);
+        return recapRepository.listScoresByUserId(userId);
     }
 }
