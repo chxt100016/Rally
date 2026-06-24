@@ -63,6 +63,7 @@ public class TourCollectFacade {
                     matchCollectManager.collect(CollectType.ATP_APP_COMPLETED, params);
                 } else {
                     matchCollectManager.collect(CollectType.WTA_DRAW, params);
+                    matchCollectManager.collect(CollectType.ATP_APP_COMPLETED, params);
                 }
             }
         }
