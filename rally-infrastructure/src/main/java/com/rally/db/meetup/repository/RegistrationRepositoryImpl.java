@@ -50,7 +50,7 @@ public class RegistrationRepositoryImpl implements RegistrationRepository {
     public int countApprovedByMeetupId(String meetupId) {
         Long count = registrationService.lambdaQuery()
                 .eq(RegistrationPO::getRallyMeetupId, meetupId)
-                .eq(RegistrationPO::getStatus, "JOINED")
+                .eq(RegistrationPO::getStatus, RegistrationStatusEnum.JOINED.name())
                 .count();
         return count.intValue();
     }
@@ -101,7 +101,7 @@ public class RegistrationRepositoryImpl implements RegistrationRepository {
         return registrationService.lambdaQuery()
                 .eq(RegistrationPO::getRallyMeetupId, meetupId)
                 .eq(RegistrationPO::getUserId, userId)
-                .in(RegistrationPO::getStatus, "pending", "JOINED")
+                .in(RegistrationPO::getStatus, RegistrationStatusEnum.PENDING.name(), RegistrationStatusEnum.JOINED.name())
                 .one();
     }
     private List<RegistrationPO> list(String meetupId) {

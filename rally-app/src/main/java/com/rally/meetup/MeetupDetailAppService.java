@@ -58,9 +58,9 @@ public class MeetupDetailAppService {
         // 1 获取聚合根 （含报名记录）
         Meetup meetup = meetupDomainService.get(meetupId);
 
-        // 2 按视角获取参与者列表，批量查询用户信息（creatorId 兜底，确保创建人信息可查）
-        List<String> participantUserIds = meetup.getParticipantUserIds(currentUserId);
-        List<String> allQueryUserIds = new ArrayList<>(participantUserIds);
+        // 2 按视角获取参与者报名记录，批量查询用户信息（creatorId 兜底，确保创建人信息可查）
+        List<RegistrationData> participants = meetup.getParticipants(currentUserId);
+        List<String> allQueryUserIds = participants.stream().map(RegistrationData::getUserId).collect(Collectors.toCollection(ArrayList::new));
         allQueryUserIds.add(meetup.getCreatorId());
         Map<String, UserProfile> profileMap = userProfileDomainService.listMap(allQueryUserIds);
 
@@ -70,7 +70,7 @@ public class MeetupDetailAppService {
                 .setActionState(actionState)
                 .setWeather(buildWeather(meetup))
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
-                .setParticipants(buildParticipantVOList(meetup, participantUserIds, profileMap))
+                .setParticipants(buildParticipantVOList(participants, profileMap))
                 .setRecap(meetup.canReview() ? buildRecap(meetup) : null)
                 .setUnreadCount(meetup.canChat(currentUserId) ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null);
 
@@ -107,26 +107,19 @@ public class MeetupDetailAppService {
 
     /**
      * 构建参与者列表（统一方法，展示报名状态）
-     * @param participantUserIds 领域层按视角返回的参与者 userId 列表
+     * @param participants 领域层按视角返回的参与者报名记录
      */
-    private List<ParticipantDTO> buildParticipantVOList(Meetup meetup, List<String> participantUserIds, Map<String, UserProfile> profileMap) {
-        return participantUserIds.stream()
-                .map(uid -> toParticipantVO(uid, profileMap, resolveRegistration(meetup, uid)))
+    private List<ParticipantDTO> buildParticipantVOList(List<RegistrationData> participants, Map<String, UserProfile> profileMap) {
+        return participants.stream()
+                .map(registration -> toParticipantVO(registration, profileMap))
                 .toList();
-    }
-
-    /** 查询用户在该约球中的报名记录（用于创建人视角展示状态与审批） */
-    private RegistrationData resolveRegistration(Meetup meetup, String userId) {
-        return meetup.getRegistrations().stream()
-                .filter(r -> userId.equals(r.getUserId()))
-                .findFirst().orElse(null);
     }
 
     /**
      * 构建单个参与者 VO
      */
-    private ParticipantDTO toParticipantVO(String uid, Map<String, UserProfile> profileMap,
-                                           RegistrationData registration) {
+    private ParticipantDTO toParticipantVO(RegistrationData registration, Map<String, UserProfile> profileMap) {
+        String uid = registration.getUserId();
         ParticipantDTO vo = new ParticipantDTO();
         vo.setUserId(uid);
         UserProfile profile = profileMap.get(uid);
@@ -139,11 +132,9 @@ public class MeetupDetailAppService {
             vo.setNtrpScore(profile.getProfile().getNtrpScore());
             vo.setProfileLevel(ProfileLevelManager.calculate(profile.getProfile()));
         }
-        if (registration != null) {
-            vo.setStatus(registration.getStatus());
-            vo.setRegistrationId(registration.getBizId());
-            vo.setApplyTime(registration.getCreateTime());
-        }
+        vo.setStatus(registration.getStatus());
+        vo.setRegistrationId(registration.getBizId());
+        vo.setApplyTime(registration.getCreateTime());
         return vo;
     }
 

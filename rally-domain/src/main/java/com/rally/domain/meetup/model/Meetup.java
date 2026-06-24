@@ -451,24 +451,19 @@ public class Meetup {
 
 
     /**
-     * 按视角获取报名参与者 userId 列表
+     * 按视角获取报名参与者记录
      * <ul>
      *   <li>创建人视角：已批准 + 待审批</li>
      *   <li>非创建人视角：仅已批准</li>
      * </ul>
      * @param userId 当前用户 ID，内部判断是否为创建人
-     * @return 报名参与者 userId 列表
+     * @return 报名参与者记录列表
      */
-    public List<String> getParticipantUserIds(String userId) {
-        List<String> userIds = new ArrayList<>();
-        for (RegistrationData r : registrations) {
-            if (r.isActiveParticipant()) {
-                userIds.add(r.getUserId());
-            } else if (isCreator(userId) && r.isPending()) {
-                userIds.add(r.getUserId());
-            }
-        }
-        return userIds;
+    public List<RegistrationData> getParticipants(String userId) {
+        boolean creator = isCreator(userId);
+        return registrations.stream()
+                .filter(r -> r.isActiveParticipant() || (creator && r.isPending()))
+                .toList();
     }
 
     /**
