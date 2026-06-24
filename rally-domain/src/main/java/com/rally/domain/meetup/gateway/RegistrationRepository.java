@@ -34,4 +34,8 @@ public interface RegistrationRepository {
     List<RegistrationData> findByMeetupId(String meetupId);
 
     void toReviewed(String userId);
+
+    void toReviewed(String userId, String meetupId);
+
+    void toSkipped(String userId, String meetupId);
 }

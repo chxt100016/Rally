@@ -6,6 +6,7 @@ import com.rally.domain.recap.model.ReviewSubmitCmd;
 import com.rally.domain.recap.model.ScoreAddCmd;
 import com.rally.domain.recap.model.ScoreDeleteCmd;
 import com.rally.domain.recap.model.ScoreUpdateCmd;
+import com.rally.domain.recap.model.SkipReviewCmd;
 import com.rally.domain.recap.service.RecapDomainService;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +58,16 @@ public class RecapAppService {
         Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
         meetup.assertReviewAvailable(userId);
         recapDomainService.deleteScoreItem(meetup, cmd.getBizId());
+    }
+
+    /**
+     * 跳过评价（一键标记无需评价）
+     */
+    public void skipReview(SkipReviewCmd cmd) {
+        String userId = UserContext.get();
+        Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
+        meetup.assertCanReview();
+        recapDomainService.skipReview(meetup, userId);
     }
 
     /**

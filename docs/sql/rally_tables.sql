@@ -127,7 +127,7 @@ CREATE TABLE `rally_meetup_registration` (
   `biz_id`          VARCHAR(32) NOT NULL COMMENT '业务主键（雪花算法字符串）',
   `rally_meetup_id` VARCHAR(32) NOT NULL COMMENT '关联 rally_meetup.biz_id',
   `user_id`         VARCHAR(32) NOT NULL COMMENT '参与人（含创建者），关联 users.user_id',
-  `status`          varchar(16) NOT NULL DEFAULT 'pending' COMMENT '报名状态机：pending/approved/rejected/expired/withdrawn',
+  `status`          varchar(16) NOT NULL DEFAULT 'pending' COMMENT '报名状态机：PENDING/JOINED/REJECTED/WITHDRAWN/REVIEWED/SKIPPED/QUIT',
   `expires_at`      DATETIME    DEFAULT NULL COMMENT '自动撤回失效时间，NULL=不自动撤回',
   `opt_time`        DATETIME    DEFAULT NULL COMMENT '管理人审批操作时间',
   `create_time`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '报名时间',

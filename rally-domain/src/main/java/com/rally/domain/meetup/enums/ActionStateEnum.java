@@ -33,8 +33,9 @@ public enum ActionStateEnum {
     ONGOING_JOINED,   // 约球进行中，参与者已加入  可查看群聊、可编辑比分、可评价。
 
     // 终态
-    FINISHED,               // 约球结束， 访客不可操作
-    FINISHED_JOINED,        // 约球
+    FINISHED,               // 约球结束，访客不可操作
+    FINISHED_JOINED,        // 约球结束，参与者尚未评价 → 展示一键评价入口
+    FINISHED_REVIEWED,      // 约球结束，参与者已评价/已跳过 → 不展示评价入口
     CLOSED,
     CLOSED_JOINED,
     ;

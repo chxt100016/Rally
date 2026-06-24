@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 赛后收集领域服务
@@ -42,14 +44,33 @@ public class RecapDomainService {
 
 
     /**
+     * 跳过评价：JOINED → SKIPPED，从 PENDING tab 移除
+     */
+    @Transactional
+    public void skipReview(Meetup meetup, String userId) {
+        registrationRepository.toSkipped(userId, meetup.getMeetupId());
+    }
+
+    /**
      * 提交评价（独立事务，调用 gateway 完成 diff 落库）
-     * 提交后将 registration 状态从 JOINED → REVIEWED，用于 PENDING tab 判断待办
+     * 所有待评价对象均已有评价记录时，将 registration 状态从 JOINED → REVIEWED
      */
     @Transactional
     public void submitReviewItems(Meetup meetup, String userId, String toUserId, List<ReviewSubmitCmd.ReviewItem> targetReviews) {
         recapRepository.submitReviewItems(meetup.getMeetupId(), userId, toUserId, targetReviews);
-        // 评价已提交，标记 registration 状态为 REVIEWED
-        registrationRepository.toReviewed(userId);
+        if (meetup.hasReview(userId)) {
+            return;
+        }
+        List<String> waitlistIds = meetup.getReviewWaitlistIds(userId);
+        if (waitlistIds.isEmpty()) {
+            registrationRepository.toReviewed(userId, meetup.getMeetupId());
+            return;
+        }
+        Set<String> reviewedIds = recapRepository.listReviewsByMeetupAndFrom(meetup.getMeetupId(), userId)
+                .stream().map(ReviewData::getToUserId).collect(Collectors.toSet());
+        if (reviewedIds.containsAll(waitlistIds)) {
+            registrationRepository.toReviewed(userId, meetup.getMeetupId());
+        }
     }
 
     /**

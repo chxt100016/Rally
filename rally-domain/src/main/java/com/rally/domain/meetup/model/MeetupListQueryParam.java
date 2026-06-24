@@ -37,6 +37,8 @@ public class MeetupListQueryParam {
     private List<String> statusList;
     /** 当前用户 ID（参与人关联查询用） */
     private String userId;
+    /** 报名状态列表（用户维度查询时，过滤有效参与记录用） */
+    private List<String> registrationStatuses;
     /** 页码 */
     private Integer pageNo;
     /** 每页数量 */

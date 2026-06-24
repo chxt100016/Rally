@@ -10,6 +10,7 @@ import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupListQueryParam;
+import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.model.PageDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -137,12 +138,12 @@ public class MeetupRepositoryImpl implements MeetupRepository {
 
     @Override
     public PageDTO<MeetupData> listPendingMeetups(String userId, int deadlineDays, String lastId, int limit) {
-        return toPage(meetupService.listPendingMeetups(userId, deadlineDays, lastId, limit), limit);
+        return toPage(meetupService.listPendingMeetups(userId, deadlineDays, lastId, limit, RegistrationStatusEnum.getParticipated()), limit);
     }
 
     @Override
     public PageDTO<MeetupData> listRecentByUser(String userId, String lastId, int limit) {
-        return toPage(meetupService.listRecentByUser(userId, lastId, limit), limit);
+        return toPage(meetupService.listRecentByUser(userId, lastId, limit, RegistrationStatusEnum.getParticipated()), limit);
     }
 
     /**

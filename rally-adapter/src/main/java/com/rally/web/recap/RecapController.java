@@ -4,6 +4,7 @@ import com.rally.domain.recap.model.ReviewSubmitCmd;
 import com.rally.domain.recap.model.ScoreAddCmd;
 import com.rally.domain.recap.model.ScoreDeleteCmd;
 import com.rally.domain.recap.model.ScoreUpdateCmd;
+import com.rally.domain.recap.model.SkipReviewCmd;
 import com.rally.domain.tour.model.Result;
 import com.rally.recap.RecapAppService;
 import jakarta.annotation.Resource;
@@ -47,6 +48,15 @@ public class RecapController {
     @PostMapping("/score/delete")
     public Result<?> deleteScore(@Valid @RequestBody ScoreDeleteCmd cmd) {
         recapAppService.deleteScore(cmd);
+        return Result.ok();
+    }
+
+    /**
+     * 跳过评价（一键标记无需评价，registration 状态改为 SKIPPED）
+     */
+    @PostMapping("/review/skip")
+    public Result<?> skipReview(@Valid @RequestBody SkipReviewCmd cmd) {
+        recapAppService.skipReview(cmd);
         return Result.ok();
     }
 

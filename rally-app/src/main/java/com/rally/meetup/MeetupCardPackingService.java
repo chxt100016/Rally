@@ -57,7 +57,7 @@ public class MeetupCardPackingService {
             case RECENT, MY_PUBLISH -> effectiveStatusLabel(data);
             case PENDING -> toPendingLabel(data.getPendingReason());
             case IN_PROGRESS -> data.getDistrictName();
-            case COMPLETED -> data.getDistrictName();
+            case COMPLETED -> effectiveStatusLabel(data);
         };
     }
 

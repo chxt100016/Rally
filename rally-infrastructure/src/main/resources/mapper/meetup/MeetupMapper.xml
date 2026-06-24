@@ -13,7 +13,8 @@
             <if test="param.userId != null">
                 AND biz_id IN (
                     SELECT rally_meetup_id FROM rally_meetup_registration
-                    WHERE user_id = #{param.userId} AND status IN ('JOINED','REVIEWED')
+                    WHERE user_id = #{param.userId} AND status IN
+                    <foreach collection="param.registrationStatuses" item="s" open="(" separator="," close=")">#{s}</foreach>
                 )
             </if>
             <!-- IN_PROGRESS: OPEN/FULL 且未到结束时间 -->
@@ -43,7 +44,7 @@
           AND status IN ('OPEN','FULL')
           AND end_time &gt; NOW()
           AND biz_id IN (
-              SELECT rally_meetup_id FROM rally_meetup_registration WHERE status = 'pending'
+              SELECT rally_meetup_id FROM rally_meetup_registration WHERE status = 'PENDING'
           )
         ORDER BY create_time DESC
     </select>
@@ -56,7 +57,7 @@
                AND m.status IN ('OPEN','FULL') AND m.end_time &gt; NOW()
                AND EXISTS (
                    SELECT 1 FROM rally_meetup_registration r
-                   WHERE r.rally_meetup_id = m.biz_id AND r.status = 'pending'
+                   WHERE r.rally_meetup_id = m.biz_id AND r.status = 'PENDING'
                ))
             UNION
             (SELECT m.*, 'PENDING_REVIEW' AS _pending_reason FROM rally_meetup m
@@ -66,12 +67,9 @@
                    SELECT 1 FROM rally_meetup_registration r
                    WHERE r.rally_meetup_id = m.biz_id
                      AND r.user_id = #{userId} AND r.status = 'JOINED'
-               )
-               AND NOT EXISTS (
-                   SELECT 1 FROM rally_meetup_score s WHERE s.rally_meetup_id = m.biz_id
                ))
             UNION
-            <!-- IM 可读状态见 RegistrationStatusEnum.getImAvailable() -->
+            <!-- 参与状态见 RegistrationStatusEnum.getParticipated() -->
             (SELECT m.*, 'UNREAD_MESSAGES' AS _pending_reason FROM rally_meetup m
              WHERE EXISTS (
                  SELECT 1 FROM rally_meetup_chat_user cu
@@ -81,7 +79,7 @@
                  m.creator_id = #{userId}
                  OR EXISTS (
                      SELECT 1 FROM rally_meetup_registration r
-                     WHERE r.rally_meetup_id = m.biz_id AND r.user_id = #{userId} AND r.status IN ('JOINED','REVIEWED')
+                     WHERE r.rally_meetup_id = m.biz_id AND r.user_id = #{userId} AND r.status IN <foreach collection="participatedStatuses" item="s" open="(" separator="," close=")">#{s}</foreach>
                  )
              ))
         ) t
@@ -100,7 +98,7 @@
         WHERE (m.creator_id = #{userId}
            OR EXISTS (
                SELECT 1 FROM rally_meetup_registration r
-               WHERE r.rally_meetup_id = m.biz_id AND r.user_id = #{userId} AND r.status IN ('JOINED','REVIEWED')
+               WHERE r.rally_meetup_id = m.biz_id AND r.user_id = #{userId} AND r.status IN <foreach collection="participatedStatuses" item="s" open="(" separator="," close=")">#{s}</foreach>
            ))
         <if test="lastId != null and lastId != ''">
             AND m.biz_id &lt; #{lastId}

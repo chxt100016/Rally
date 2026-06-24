@@ -19,13 +19,13 @@ public class MeetupService extends ServiceImpl<MeetupMapper, MeetupPO> {
     }
 
     /** PENDING tab：UNION searchAfter 游标分页 */
-    public List<MeetupPO> listPendingMeetups(String userId, int deadlineDays, String lastId, int limit) {
-        return baseMapper.listPendingMeetups(userId, deadlineDays, lastId, limit);
+    public List<MeetupPO> listPendingMeetups(String userId, int deadlineDays, String lastId, int limit, List<String> participatedStatuses) {
+        return baseMapper.listPendingMeetups(userId, deadlineDays, lastId, limit, participatedStatuses);
     }
 
     /** RECENT tab：用户为创建人或已批准报名的约球，不限状态，searchAfter 游标分页 */
-    public List<MeetupPO> listRecentByUser(String userId, String lastId, int limit) {
-        return baseMapper.listRecentByUser(userId, lastId, limit);
+    public List<MeetupPO> listRecentByUser(String userId, String lastId, int limit, List<String> participatedStatuses) {
+        return baseMapper.listRecentByUser(userId, lastId, limit, participatedStatuses);
     }
 
     /**

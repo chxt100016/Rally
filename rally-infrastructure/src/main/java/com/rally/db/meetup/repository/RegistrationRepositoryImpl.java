@@ -61,6 +61,28 @@ public class RegistrationRepositoryImpl implements RegistrationRepository {
     }
 
     @Override
+    public void toReviewed(String userId, String meetupId) {
+        registrationService.lambdaUpdate()
+                .eq(RegistrationPO::getUserId, userId)
+                .eq(RegistrationPO::getRallyMeetupId, meetupId)
+                .eq(RegistrationPO::getStatus, RegistrationStatusEnum.JOINED)
+                .set(RegistrationPO::getStatus, RegistrationStatusEnum.REVIEWED)
+                .set(RegistrationPO::getOptTime, LocalDateTime.now())
+                .update();
+    }
+
+    @Override
+    public void toSkipped(String userId, String meetupId) {
+        registrationService.lambdaUpdate()
+                .eq(RegistrationPO::getUserId, userId)
+                .eq(RegistrationPO::getRallyMeetupId, meetupId)
+                .eq(RegistrationPO::getStatus, RegistrationStatusEnum.JOINED)
+                .set(RegistrationPO::getStatus, RegistrationStatusEnum.SKIPPED)
+                .set(RegistrationPO::getOptTime, LocalDateTime.now())
+                .update();
+    }
+
+    @Override
     public void toReviewed(String userId) {
         this.registrationService.lambdaUpdate()
                 .eq(RegistrationPO::getUserId, userId)
@@ -85,6 +107,7 @@ public class RegistrationRepositoryImpl implements RegistrationRepository {
     private List<RegistrationPO> list(String meetupId) {
         return registrationService.lambdaQuery()
                 .eq(RegistrationPO::getRallyMeetupId, meetupId)
+                .orderByAsc(RegistrationPO::getCreateTime)
                 .list();
     }
 

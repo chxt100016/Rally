@@ -33,9 +33,9 @@ public class RegistrationData {
         return status == RegistrationStatusEnum.PENDING;
     }
 
-    /** 是否为有效参与者状态（JOINED 或 REVIEWED） */
+    /** 是否为有效参与者状态（JOINED / REVIEWED / SKIPPED） */
     public boolean isActiveParticipant() {
-        return status == RegistrationStatusEnum.JOINED || status == RegistrationStatusEnum.REVIEWED;
+        return status == RegistrationStatusEnum.JOINED || status == RegistrationStatusEnum.REVIEWED || status == RegistrationStatusEnum.SKIPPED;
     }
 
     /** 是否可撤回（仅 PENDING） */

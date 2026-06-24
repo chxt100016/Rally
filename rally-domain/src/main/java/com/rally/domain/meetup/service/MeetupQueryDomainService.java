@@ -1,6 +1,7 @@
 package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.enums.UserMeetupTabEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.gateway.NearbyRepository;
@@ -139,6 +140,7 @@ public class MeetupQueryDomainService {
     private PageDTO<MeetupData> listInProgress(String userId, String lastId, int limit) {
         MeetupListQueryParam param = MeetupListQueryParam.builder()
                 .userId(userId).statusList(List.of("OPEN", "FULL"))
+                .registrationStatuses(RegistrationStatusEnum.getParticipated())
                 .lastId(lastId).limit(limit).build();
         return doList(param);
     }
@@ -159,6 +161,7 @@ public class MeetupQueryDomainService {
     private PageDTO<MeetupData> listCompleted(String userId, String lastId, int limit) {
         MeetupListQueryParam param = MeetupListQueryParam.builder()
                 .userId(userId).statusList(List.of("FINISHED", "CLOSED"))
+                .registrationStatuses(RegistrationStatusEnum.getParticipated())
                 .lastId(lastId).limit(limit).build();
         return doList(param);
     }

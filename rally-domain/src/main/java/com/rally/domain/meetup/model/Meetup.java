@@ -185,7 +185,6 @@ public class Meetup {
      *
      * @param userProfile    用户档案领域对象
      * @param autoWithdrawAt 自动撤回时间，可为 null
-     * @return
      */
     public RegistrationStatusEnum join(UserProfile userProfile, LocalDateTime autoWithdrawAt) {
         // 1. 校验
@@ -323,7 +322,7 @@ public class Meetup {
     // ======================== 报名操作（需聚合根上下文） ========================
 
     /**
-     * 退出报名（已加入 → WITHDRAWN）
+     * 退出报名（已加入 → QUIT）
      * @param userId 当前用户 ID
      * @return 退出结果（是否在 6h 内需扣分）
      */
@@ -334,7 +333,7 @@ public class Meetup {
         Assert.isTrue(registration.canQuit(), BizErrorCode.NOT_JOINED);
 
         // 2. 更新状态
-        registration.setStatus(RegistrationStatusEnum.WITHDRAWN);
+        registration.setStatus(RegistrationStatusEnum.QUIT);
 
         // 3. 判断是否在 6h 内
         long hoursUntilStart = Duration.between(LocalDateTime.now(), data.getStartTime()).toHours();
@@ -408,9 +407,10 @@ public class Meetup {
             return ActionStateEnum.OWNER_EDITABLE;
         }
 
-        // 终态：参与者保留 _JOINED 变体（仍可群聊等），其余置灰
+        // 终态：参与者按是否已评价返回不同状态，其余置灰
         if (realStatus == MeetupStatusEnum.FINISHED) {
-            return isParticipant(currentUserId) ? ActionStateEnum.FINISHED_JOINED : ActionStateEnum.FINISHED;
+            if (!isParticipant(currentUserId)) return ActionStateEnum.FINISHED;
+            return hasReview(currentUserId) ? ActionStateEnum.FINISHED_REVIEWED : ActionStateEnum.FINISHED_JOINED;
         }
         if (realStatus == MeetupStatusEnum.CLOSED) {
             return isParticipant(currentUserId) ? ActionStateEnum.CLOSED_JOINED : ActionStateEnum.CLOSED;
@@ -492,6 +492,13 @@ public class Meetup {
         return res;
     }
 
+    /** 用户是否已完成评价（REVIEWED 或 SKIPPED，用于短路判断） */
+    public boolean hasReview(String userId) {
+        return registrations.stream()
+                .filter(r -> userId.equals(r.getUserId()))
+                .anyMatch(r -> r.getStatus() == RegistrationStatusEnum.REVIEWED || r.getStatus() == RegistrationStatusEnum.SKIPPED);
+    }
+
     public void assertCanReview() {
         Assert.isTrue(canReview(), BizErrorCode.MEETUP_CANT_REVIEW);
     }
@@ -513,6 +520,6 @@ public class Meetup {
 
     public boolean canChat(String userId) {
         ActionStateEnum actionState = this.getActionState(userId);
-        return actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.ONGOING_JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED || actionState == ActionStateEnum.FINISHED_JOINED || actionState == ActionStateEnum.CLOSED_JOINED;
+        return actionState == ActionStateEnum.JOINED || actionState == ActionStateEnum.ONGOING_JOINED || actionState == ActionStateEnum.OWNER_EDITABLE || actionState == ActionStateEnum.OWNER_EDIT_LOCKED || actionState == ActionStateEnum.FINISHED_JOINED || actionState == ActionStateEnum.FINISHED_REVIEWED || actionState == ActionStateEnum.CLOSED_JOINED;
     }
 }

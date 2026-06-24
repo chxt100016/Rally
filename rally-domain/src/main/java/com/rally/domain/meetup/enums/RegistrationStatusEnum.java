@@ -10,12 +10,14 @@ public enum RegistrationStatusEnum {
     JOINED,
     REJECTED,
     WITHDRAWN,
+    QUIT,
     REVIEWED,
+    SKIPPED,
 
     ;
 
-    /** 可读取 IM 消息的报名状态（已加入或已参赛复盘） */
-    public static List<String> getImAvailable() {
-        return List.of(JOINED.name(), REVIEWED.name());
+    /** 视为"已参与活动"的报名状态（用于用户维度查询） */
+    public static List<String> getParticipated() {
+        return List.of(JOINED.name(), REVIEWED.name(), SKIPPED.name());
     }
 }
