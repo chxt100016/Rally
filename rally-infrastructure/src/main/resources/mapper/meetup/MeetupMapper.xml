@@ -17,14 +17,14 @@
                     <foreach collection="param.registrationStatuses" item="s" open="(" separator="," close=")">#{s}</foreach>
                 )
             </if>
-            <!-- IN_PROGRESS: OPEN/FULL 且未到结束时间 -->
+            <!-- IN_PROGRESS: 传入状态列表 且未到结束时间 -->
             <if test="param.statusList != null and param.statusList.contains('OPEN')">
-                AND status IN ('OPEN','FULL') AND end_time &gt; NOW()
+                AND status IN <foreach collection="param.statusList" item="s" open="(" separator="," close=")">#{s}</foreach> AND end_time &gt; NOW()
             </if>
-            <!-- COMPLETED: FINISHED/CLOSED 或懒判定已结束 -->
+            <!-- COMPLETED: FINISHED 或懒判定已结束（不含 CLOSED） -->
             <if test="param.statusList != null and param.statusList.contains('FINISHED')">
                 AND (
-                    status IN ('FINISHED','CLOSED')
+                    status = 'FINISHED'
                     OR (status IN ('OPEN','FULL') AND end_time &lt; NOW())
                 )
             </if>

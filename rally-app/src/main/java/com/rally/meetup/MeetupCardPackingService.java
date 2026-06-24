@@ -28,11 +28,11 @@ public class MeetupCardPackingService {
     }
 
     /**
-     * 用户约球列表包装：primaryLabel 统一展示区域名，不计算距离
+     * 用户约球列表包装：MY_PUBLISH 展示状态文案，其余展示区域名，不计算距离
      */
     public MeetupCardDTO packCardForTab(MeetupData data, UserMeetupTabEnum tab) {
         MeetupCardDTO card = MeetupAppConvertMapper.INSTANCE.toMeetupCardDTO(data);
-        card.setPrimaryLabel(data.getDistrictName());
+        card.setPrimaryLabel(tab == UserMeetupTabEnum.MY_PUBLISH ? data.getStatus().getLabel() : data.getDistrictName());
         return card;
     }
 
