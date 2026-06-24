@@ -160,7 +160,7 @@ public class MeetupQueryDomainService {
      */
     private PageDTO<MeetupData> listCompleted(String userId, String lastId, int limit) {
         MeetupListQueryParam param = MeetupListQueryParam.builder()
-                .userId(userId).statusList(List.of("FINISHED", "CLOSED"))
+                .userId(userId).statusList(List.of("FINISHED"))
                 .registrationStatuses(RegistrationStatusEnum.getParticipated())
                 .lastId(lastId).limit(limit).build();
         return doList(param);

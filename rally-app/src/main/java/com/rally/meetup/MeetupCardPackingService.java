@@ -1,15 +1,12 @@
 package com.rally.meetup;
 
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
-import com.rally.domain.meetup.enums.PendingReasonEnum;
 import com.rally.domain.meetup.enums.UserMeetupTabEnum;
 import com.rally.domain.meetup.model.MeetupCardDTO;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.utils.GeoUtils;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 /**
  * 约球卡片包装服务
@@ -31,11 +28,11 @@ public class MeetupCardPackingService {
     }
 
     /**
-     * 用户约球列表包装：按 Tab 计算 primaryLabel，不计算距离
+     * 用户约球列表包装：primaryLabel 统一展示区域名，不计算距离
      */
     public MeetupCardDTO packCardForTab(MeetupData data, UserMeetupTabEnum tab) {
         MeetupCardDTO card = MeetupAppConvertMapper.INSTANCE.toMeetupCardDTO(data);
-        card.setPrimaryLabel(toTabPrimaryLabel(data, tab));
+        card.setPrimaryLabel(data.getDistrictName());
         return card;
     }
 
@@ -49,32 +46,4 @@ public class MeetupCardPackingService {
         };
     }
 
-    /**
-     * 用户约球列表 primaryLabel：按 Tab 区分
-     */
-    private String toTabPrimaryLabel(MeetupData data, UserMeetupTabEnum tab) {
-        return switch (tab) {
-            case RECENT, MY_PUBLISH -> effectiveStatusLabel(data);
-            case PENDING -> toPendingLabel(data.getPendingReason());
-            case IN_PROGRESS -> data.getDistrictName();
-            case COMPLETED -> effectiveStatusLabel(data);
-        };
-    }
-
-    /** OPEN/FULL 且已过结束时间，懒判定为已结束 */
-    private String effectiveStatusLabel(MeetupData data) {
-        boolean expired = (data.getStatus() == MeetupStatusEnum.OPEN || data.getStatus() == MeetupStatusEnum.FULL)
-                && data.getEndTime() != null && data.getEndTime().isBefore(LocalDateTime.now());
-        return expired ? MeetupStatusEnum.FINISHED.getLabel() : data.getStatus().getLabel();
-    }
-
-    /**
-     * 待处理标签：待审批 > 未读 > 待评价（优先级由 SQL UNION 顺序保证）
-     */
-    private String toPendingLabel(PendingReasonEnum reason) {
-        if (reason == null) {
-            return null;
-        }
-        return reason.getLabel();
-    }
 }
