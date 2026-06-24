@@ -2,8 +2,8 @@ package com.rally.db.user.convert;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
-import com.rally.db.user.entity.TourProfilePO;
-import com.rally.domain.user.model.TourProfileData;
+import com.rally.db.user.entity.TennisProfilePO;
+import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.VideoVO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -11,17 +11,17 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 @Mapper
-public interface TourProfileConvertMapper {
+public interface TennisProfileConvertMapper {
 
-    TourProfileConvertMapper INSTANCE = Mappers.getMapper(TourProfileConvertMapper.class);
+    TennisProfileConvertMapper INSTANCE = Mappers.getMapper(TennisProfileConvertMapper.class);
 
     @Named("toData")
     @Mapping(target = "videos", expression = "java(jsonToVideoList(po.getVideos()))")
-    TourProfileData toData(TourProfilePO po);
+    TennisProfileData toData(TennisProfilePO po);
 
     @Named("toPO")
     @Mapping(target = "videos", expression = "java(videoListToJson(data.getVideos()))")
-    TourProfilePO toPO(TourProfileData data);
+    TennisProfilePO toPO(TennisProfileData data);
 
     /**
      * 更新 PO，只更新源对象中非空的字段
@@ -32,7 +32,7 @@ public interface TourProfileConvertMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "videos", expression = "java(videoListToJson(data.getVideos()))")
-    void updatePO(@MappingTarget TourProfilePO po, TourProfileData data);
+    void updatePO(@MappingTarget TennisProfilePO po, TennisProfileData data);
 
     @Named("videoListToJson")
     default String videoListToJson(List<VideoVO> list) {

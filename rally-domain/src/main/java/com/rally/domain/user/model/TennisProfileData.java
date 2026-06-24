@@ -17,7 +17,7 @@ import java.util.List;
  * 球员档案领域数据
  */
 @Data
-public class TourProfileData {
+public class TennisProfileData {
     private String bizId;
     private String userId;
     private List<VideoVO> videos;

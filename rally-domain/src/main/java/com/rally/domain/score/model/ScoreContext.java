@@ -3,7 +3,7 @@ package com.rally.domain.score.model;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.recap.gateway.ReviewRepository;
 import com.rally.domain.log.gateway.ProfileChangeLogRepository;
-import com.rally.domain.user.gateway.TourProfileRepository;
+import com.rally.domain.user.gateway.TennisProfileRepository;
 import lombok.Data;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class ScoreContext {
     private MeetupRepository meetupRepository;
 
     /** 写 Gateway：球员档案（三维分/核查期） */
-    private TourProfileRepository profileRepository;
+    private TennisProfileRepository profileRepository;
 
     /** 写 Gateway：变更日志 */
     private ProfileChangeLogRepository changeLogRepository;

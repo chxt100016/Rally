@@ -8,7 +8,7 @@ RENAME TABLE tennis_draw TO tour_draw;
 RENAME TABLE tennis_tournament_entry TO tour_tournament_entry;
 RENAME TABLE tennis_match TO tour_match;
 RENAME TABLE tennis_set_score TO tour_set_score;
-RENAME TABLE user_tennis_profile TO user_tour_profile;
+
 
 -- 2. 重命名索引（tour_draw 表）
 ALTER TABLE tour_draw DROP INDEX uk_tennis_draw_tournament_year;
@@ -41,8 +41,4 @@ ALTER TABLE tour_set_score ADD INDEX idx_tour_set_tour_match_id (tour_match_id);
 -- 6. 重命名字段（tour_set_score 表）
 ALTER TABLE tour_set_score CHANGE COLUMN tennis_match_id tour_match_id BIGINT NOT NULL COMMENT '关联 tour_match.id';
 
--- 7. 重命名索引（user_tour_profile 表）
-ALTER TABLE user_tour_profile DROP INDEX uk_tennis_profile_user;
-ALTER TABLE user_tour_profile ADD UNIQUE KEY uk_tour_profile_user (user_id);
-ALTER TABLE user_tour_profile DROP INDEX idx_tennis_profile_user_id;
-ALTER TABLE user_tour_profile ADD INDEX idx_tour_profile_user_id (user_id);
+

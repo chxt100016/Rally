@@ -10,7 +10,7 @@ import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.log.gateway.ProfileChangeLogRepository;
-import com.rally.domain.user.gateway.TourProfileRepository;
+import com.rally.domain.user.gateway.TennisProfileRepository;
 import com.rally.domain.user.gateway.UserRepository;
 import com.rally.domain.user.model.*;
 import com.rally.domain.log.ProfileLogService;
@@ -32,7 +32,7 @@ import java.util.Optional;
 public class ProfileAppService {
 
     @Resource
-    private TourProfileRepository tourProfileRepository;
+    private TennisProfileRepository tourProfileRepository;
 
     @Resource
     private ProfileChangeLogRepository profileChangeLogRepository;
@@ -132,7 +132,7 @@ public class ProfileAppService {
      */
     @Transactional
     public void advanceReviewProgress(String userId, String meetupId, boolean isBad) {
-        TourProfileData profileData = tourProfileRepository.findByUserId(userId)
+        TennisProfileData profileData = tourProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
 
         if (!profileData.getIsUnderReview()) {
@@ -169,7 +169,7 @@ public class ProfileAppService {
      */
     @Transactional
     public void releaseReview(String userId) {
-        TourProfileData profileData = tourProfileRepository.findByUserId(userId)
+        TennisProfileData profileData = tourProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
 
         profileData.setStatus(ProfileStatusEnum.NORMAL);

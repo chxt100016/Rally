@@ -9,8 +9,8 @@ import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
-import com.rally.domain.user.gateway.TourProfileRepository;
-import com.rally.domain.user.model.TourProfileData;
+import com.rally.domain.user.gateway.TennisProfileRepository;
+import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.VideoTokenVO;
 import com.rally.domain.user.model.VideoVO;
 import com.rally.domain.utils.Assert;
@@ -29,7 +29,7 @@ import java.util.List;
 public class VideoAppService {
 
     @Resource
-    private TourProfileRepository tourProfileRepository;
+    private TennisProfileRepository tourProfileRepository;
 
     @Resource
     private QiniuClient qiniuClient;
@@ -39,7 +39,7 @@ public class VideoAppService {
      */
     public VideoTokenVO getVideoUploadToken() {
         String userId = UserContext.get();
-        TourProfileData profileData = tourProfileRepository.findByUserId(userId)
+        TennisProfileData profileData = tourProfileRepository.findByUserId(userId)
                 .orElse(null);
         if (profileData != null) {
             int maxCount = SystemConfig.getInt(SystemConfigKey.USER_VIDEO_MAX_COUNT.getKey());
@@ -65,7 +65,7 @@ public class VideoAppService {
             throw new BusinessException(BizErrorCode.VIDEO_NOT_OWNED);
         }
 
-        TourProfileData profileData = tourProfileRepository.findByUserId(userId)
+        TennisProfileData profileData = tourProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(BizErrorCode.PROFILE_NOT_FOUND));
         List<VideoVO> videos = profileData.getVideos();
         if (videos == null) {

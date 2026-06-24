@@ -1,19 +1,19 @@
 package com.rally.db.user.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.rally.db.user.entity.TourProfilePO;
-import com.rally.db.user.mapper.TourProfileMapper;
+import com.rally.db.user.entity.TennisProfilePO;
+import com.rally.db.user.mapper.TennisProfileMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class TourProfileService extends ServiceImpl<TourProfileMapper, TourProfilePO> {
+public class TennisProfileService extends ServiceImpl<TennisProfileMapper, TennisProfilePO> {
 
-    public Optional<TourProfilePO> findByUserId(String userId) {
+    public Optional<TennisProfilePO> findByUserId(String userId) {
         return Optional.ofNullable(
                 this.lambdaQuery()
-                        .eq(TourProfilePO::getUserId, userId)
+                        .eq(TennisProfilePO::getUserId, userId)
                         .last("LIMIT 1")
                         .one()
         );

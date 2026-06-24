@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("user_tour_profile")
-public class TourProfilePO {
+@TableName("user_tennis_profile")
+public class TennisProfilePO {
     @TableId(type = IdType.AUTO)
     private Long id;
     private String bizId;

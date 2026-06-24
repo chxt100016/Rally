@@ -103,7 +103,7 @@ public class MyProfileAppService {
 
     /** 构建等级信息 DTO */
     private MyProfileLevelDTO buildLevelDTO(UserProfile userProfile) {
-        TourProfileData profileData = userProfile.getProfile();
+        TennisProfileData profileData = userProfile.getProfile();
         Integer cooldownDays = userProfile.calculateNtrpCooldownDays();
         Integer remainingMatches = userProfile.isUnderReview() ? profileData.getReviewRemainingMatches() : null;
 
@@ -129,7 +129,7 @@ public class MyProfileAppService {
     }
 
     /** 构建评分信息 DTO（评分明细权重从 SystemConfig 读取） */
-    private MyProfileScoreDTO buildScoreDTO(TourProfileData profileData) {
+    private MyProfileScoreDTO buildScoreDTO(TennisProfileData profileData) {
         String scoreLevel = ProfileLevelManager.calculate(profileData);
         return new MyProfileScoreDTO()
                 .setProfileLevel(scoreLevel)
@@ -137,7 +137,7 @@ public class MyProfileAppService {
     }
 
     /** 构建评分明细列表 */
-    private List<ScoreItemDTO> buildScoreItemList(TourProfileData profileData) {
+    private List<ScoreItemDTO> buildScoreItemList(TennisProfileData profileData) {
         List<ScoreItemDTO> items = new ArrayList<>();
         items.add(buildOneScoreItem("信誉分", "reputation", profileData.getReputationScore(), SystemConfigKey.SCORE_INFO_REPUTATION, 1));
         items.add(buildOneScoreItem("可信度", "credibility", profileData.getCredibilityScore(), SystemConfigKey.SCORE_INFO_CREDIBILITY, 2));
@@ -232,7 +232,7 @@ public class MyProfileAppService {
     }
 
     /** 构建视频信息 DTO */
-    private MyProfileVideoDTO buildVideoDTO(TourProfileData profileData) {
+    private MyProfileVideoDTO buildVideoDTO(TennisProfileData profileData) {
         MyProfileVideoDTO videoDTO = new MyProfileVideoDTO();
         List<VideoVO> videos = profileData.getVideos();
         videoDTO.setTotal(videos.size());

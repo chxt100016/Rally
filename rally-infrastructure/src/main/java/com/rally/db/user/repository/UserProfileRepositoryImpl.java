@@ -1,14 +1,14 @@
 package com.rally.db.user.repository;
 
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import com.rally.db.user.convert.TourProfileConvertMapper;
+import com.rally.db.user.convert.TennisProfileConvertMapper;
 import com.rally.db.user.convert.UserConvertMapper;
-import com.rally.db.user.entity.TourProfilePO;
+import com.rally.db.user.entity.TennisProfilePO;
 import com.rally.db.user.entity.UserPO;
-import com.rally.db.user.service.TourProfileService;
+import com.rally.db.user.service.TennisProfileService;
 import com.rally.db.user.service.UserService;
 import com.rally.domain.user.gateway.UserProfileRepository;
-import com.rally.domain.user.model.TourProfileData;
+import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.UserData;
 import com.rally.domain.user.model.UserProfile;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +25,12 @@ import java.util.stream.Collectors;
 public class UserProfileRepositoryImpl implements UserProfileRepository {
 
     private final UserService userService;
-    private final TourProfileService tourProfileService;
+    private final TennisProfileService tourProfileService;
 
     @Override
     public UserProfile findByUserId(String userId) {
         UserData userData = userService.findByUserId(userId).map(UserConvertMapper.INSTANCE::toData).orElse(null);
-        TourProfileData profileData = tourProfileService.findByUserId(userId).map(TourProfileConvertMapper.INSTANCE::toData).orElse(null);
+        TennisProfileData profileData = tourProfileService.findByUserId(userId).map(TennisProfileConvertMapper.INSTANCE::toData).orElse(null);
         return UserProfile.create(userData, profileData);
     }
 
@@ -42,8 +42,8 @@ public class UserProfileRepositoryImpl implements UserProfileRepository {
         // 批量查询用户和网球档案
         Map<String, UserPO> userMap = listUsers(userIds).stream()
                 .collect(Collectors.toMap(UserPO::getUserId, u -> u, (a, b) -> a));
-        Map<String, TourProfilePO> profileMap = listProfiles(userIds).stream()
-                .collect(Collectors.toMap(TourProfilePO::getUserId, p -> p, (a, b) -> a));
+        Map<String, TennisProfilePO> profileMap = listProfiles(userIds).stream()
+                .collect(Collectors.toMap(TennisProfilePO::getUserId, p -> p, (a, b) -> a));
         // 按 userIds 顺序组装 UserProfile
         List<UserProfile> result = new ArrayList<>(userIds.size());
         for (String uid : userIds) {
@@ -52,9 +52,9 @@ public class UserProfileRepositoryImpl implements UserProfileRepository {
                 result.add(null);
                 continue;
             }
-            TourProfilePO profilePO = profileMap.get(uid);
+            TennisProfilePO profilePO = profileMap.get(uid);
             UserData userData = UserConvertMapper.INSTANCE.toData(userPO);
-            TourProfileData profileData = profilePO != null ? TourProfileConvertMapper.INSTANCE.toData(profilePO) : null;
+            TennisProfileData profileData = profilePO != null ? TennisProfileConvertMapper.INSTANCE.toData(profilePO) : null;
             result.add(UserProfile.create(userData, profileData));
         }
         return result;
@@ -74,8 +74,8 @@ public class UserProfileRepositoryImpl implements UserProfileRepository {
         return userService.lambdaQuery().in(UserPO::getUserId, userIds).list();
     }
 
-    private List<TourProfilePO> listProfiles(List<String> userIds) {
-        return tourProfileService.lambdaQuery().in(TourProfilePO::getUserId, userIds).list();
+    private List<TennisProfilePO> listProfiles(List<String> userIds) {
+        return tourProfileService.lambdaQuery().in(TennisProfilePO::getUserId, userIds).list();
     }
 
     /**
@@ -98,17 +98,17 @@ public class UserProfileRepositoryImpl implements UserProfileRepository {
     /**
      * 保存网球档案，新建或更新
      */
-    private void saveProfile(TourProfileData profileData) {
+    private void saveProfile(TennisProfileData profileData) {
         if (profileData.getUserId() == null) {
             return;
         }
-        Optional<TourProfilePO> existing = tourProfileService.findByUserId(profileData.getUserId());
+        Optional<TennisProfilePO> existing = tourProfileService.findByUserId(profileData.getUserId());
         if (existing.isPresent()) {
-            TourProfilePO po = existing.get();
-            TourProfileConvertMapper.INSTANCE.updatePO(po, profileData);
+            TennisProfilePO po = existing.get();
+            TennisProfileConvertMapper.INSTANCE.updatePO(po, profileData);
             tourProfileService.updateById(po);
         } else {
-            TourProfilePO po = TourProfileConvertMapper.INSTANCE.toPO(profileData);
+            TennisProfilePO po = TennisProfileConvertMapper.INSTANCE.toPO(profileData);
             po.setBizId(IdWorker.getIdStr());
             tourProfileService.save(po);
         }

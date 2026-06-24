@@ -69,7 +69,7 @@ public class PlayerHomeAppService {
         UserContext.get();
         UserProfile userProfile = userProfileDomainService.get(targetUserId);
         UserData userData = userProfile.getUser();
-        TourProfileData profileData = userProfile.getProfile();
+        TennisProfileData profileData = userProfile.getProfile();
 
         return new PlayerHomeDTO()
                 .setUser(buildUserDTO(userData))
@@ -129,7 +129,7 @@ public class PlayerHomeAppService {
     }
 
     /** 构建等级信息 DTO */
-    private PlayerHomeLevelDTO buildLevelDTO(TourProfileData profileData) {
+    private PlayerHomeLevelDTO buildLevelDTO(TennisProfileData profileData) {
         if (profileData == null) {
             return new PlayerHomeLevelDTO();
         }
@@ -140,13 +140,13 @@ public class PlayerHomeAppService {
     }
 
     /** 构建评分信息 DTO */
-    private PlayerHomeScoreDTO buildScoreDTO(TourProfileData profileData) {
+    private PlayerHomeScoreDTO buildScoreDTO(TennisProfileData profileData) {
         String scoreLevel = ProfileLevelManager.calculate(profileData);
         return new PlayerHomeScoreDTO().setProfileLevel(scoreLevel);
     }
 
     /** 构建视频信息 DTO */
-    private MyProfileVideoDTO buildVideoDTO(TourProfileData profileData) {
+    private MyProfileVideoDTO buildVideoDTO(TennisProfileData profileData) {
         MyProfileVideoDTO videoDTO = new MyProfileVideoDTO();
         if (profileData != null && profileData.getVideos() != null) {
             List<VideoVO> videos = profileData.getVideos();

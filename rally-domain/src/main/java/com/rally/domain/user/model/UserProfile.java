@@ -10,20 +10,20 @@ import java.math.BigDecimal;
 
 /**
  * 用户档案聚合根
- * 组合 User + TourProfile，只负责跨实体编排和判空，单实体规则下沉到对应实体内
+ * 组合 User + TennisProfile，只负责跨实体编排和判空，单实体规则下沉到对应实体内
  */
 @Data
 public class UserProfile {
 
     private UserData user;
-    private TourProfileData profile;
+    private TennisProfileData profile;
 
     private UserProfile() {}
 
     /**
      * 静态工厂：组合 User + Profile
      */
-    public static UserProfile create(UserData user, TourProfileData profile) {
+    public static UserProfile create(UserData user, TennisProfileData profile) {
         UserProfile instance = new UserProfile();
         instance.user = user;
         instance.profile = profile;
@@ -98,7 +98,7 @@ public class UserProfile {
      */
     public void initializeTBC() {
         if (profile == null) {
-            profile = new TourProfileData();
+            profile = new TennisProfileData();
         }
         profile.initTBC(user.getUserId());
     }

@@ -11,7 +11,7 @@ import java.util.List;
  * 「我的档案」对外视图
  */
 @Data
-public class TourProfileVO {
+public class TennisProfileVO {
 
     private BigDecimal ntrpScore;
     private BigDecimal utrScore;

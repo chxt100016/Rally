@@ -1,5 +1,5 @@
 -- Rally 约球系统建表语句
--- 包含：配置域 sys_config、用户域 user_tour_profile / user_profile_change_log
+-- 包含：配置域 sys_config、用户域 user_tennis_profile / user_profile_change_log
 
 -- ============================================================
 -- 1. 配置域：全局配置表
@@ -28,8 +28,8 @@ CREATE TABLE `sys_config` (
 -- 2. 用户域：球员网球档案表
 -- ============================================================
 
-DROP TABLE IF EXISTS `user_tour_profile`;
-CREATE TABLE `user_tour_profile` (
+DROP TABLE IF EXISTS `user_tennis_profile`;
+CREATE TABLE `user_tennis_profile` (
   `id`                BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `biz_id`            VARCHAR(32)  NOT NULL COMMENT '雪花 ID（业务主键）',
   `user_id`           VARCHAR(32)  NOT NULL COMMENT '关联 users.user_id',

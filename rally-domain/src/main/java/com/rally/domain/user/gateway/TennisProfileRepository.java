@@ -1,6 +1,6 @@
 package com.rally.domain.user.gateway;
 
-import com.rally.domain.user.model.TourProfileData;
+import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.VideoVO;
 
 import java.util.List;
@@ -9,19 +9,19 @@ import java.util.Optional;
 /**
  * 球员档案表读写网关
  */
-public interface TourProfileRepository {
+public interface TennisProfileRepository {
 
 
 
     /**
      * 根据用户 ID 查询档案
      */
-    Optional<TourProfileData> findByUserId(String userId);
+    Optional<TennisProfileData> findByUserId(String userId);
 
     /**
      * 更新档案（非 null 字段）
      */
-    TourProfileData update(TourProfileData data);
+    TennisProfileData update(TennisProfileData data);
 
     /**
      * 更新视频列表

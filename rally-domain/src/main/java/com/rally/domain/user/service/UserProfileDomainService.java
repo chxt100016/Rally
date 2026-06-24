@@ -2,7 +2,7 @@ package com.rally.domain.user.service;
 
 import com.rally.domain.log.ProfileLogService;
 import com.rally.domain.user.enums.ProfileStatusEnum;
-import com.rally.domain.user.gateway.TourProfileRepository;
+import com.rally.domain.user.gateway.TennisProfileRepository;
 import com.rally.domain.user.gateway.UserProfileRepository;
 import com.rally.domain.user.model.UserProfile;
 import jakarta.annotation.Resource;
@@ -24,7 +24,7 @@ public class UserProfileDomainService {
     private UserProfileRepository userProfileRepository;
 
     @Resource
-    private TourProfileRepository tourProfileRepository;
+    private TennisProfileRepository tourProfileRepository;
 
     @Resource
     private ProfileLogService profileRecordService;

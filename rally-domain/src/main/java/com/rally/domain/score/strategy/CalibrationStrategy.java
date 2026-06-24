@@ -8,8 +8,8 @@ import com.rally.domain.score.enums.ScoreDimensionEnum;
 import com.rally.domain.score.model.ScoreChange;
 import com.rally.domain.score.model.ScoreContext;
 import com.rally.domain.user.enums.ChangeReasonEnum;
-import com.rally.domain.user.gateway.TourProfileRepository;
-import com.rally.domain.user.model.TourProfileData;
+import com.rally.domain.user.gateway.TennisProfileRepository;
+import com.rally.domain.user.model.TennisProfileData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ import java.util.Map;
 public class CalibrationStrategy implements ScoreStrategy {
 
     private final ReviewRepository reviewRepository;
-    private final TourProfileRepository profileRepository;
+    private final TennisProfileRepository profileRepository;
 
     @Override
     public ScoreDimensionEnum dimension() {
@@ -44,7 +44,7 @@ public class CalibrationStrategy implements ScoreStrategy {
 
         // 获取当前校准度
         Integer before = profileRepository.findByUserId(userId)
-                .map(TourProfileData::getCalibrationScore)
+                .map(TennisProfileData::getCalibrationScore)
                 .orElse(80);
         change.setBefore(before);
 
