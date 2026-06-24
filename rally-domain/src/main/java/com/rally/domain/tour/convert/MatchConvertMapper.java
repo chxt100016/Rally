@@ -17,7 +17,11 @@ public interface MatchConvertMapper {
     @Mapping(target = "number", source = "setNumber")
     @Mapping(target = "player1", source = "p1Games")
     @Mapping(target = "player2", source = "p2Games")
-    @Mapping(target = "tiebreak1", source = "p1Tiebreak")
-    @Mapping(target = "tiebreak2", source = "p2Tiebreak")
+    @Mapping(target = "tiebreak1", expression = "java(bothZero(data.getP1Tiebreak(), data.getP2Tiebreak()) ? null : data.getP1Tiebreak())")
+    @Mapping(target = "tiebreak2", expression = "java(bothZero(data.getP1Tiebreak(), data.getP2Tiebreak()) ? null : data.getP2Tiebreak())")
     SetScoreVO toSetScoreVO(SetScoreData data);
+
+    default boolean bothZero(Integer t1, Integer t2) {
+        return Integer.valueOf(0).equals(t1) && Integer.valueOf(0).equals(t2);
+    }
 }
