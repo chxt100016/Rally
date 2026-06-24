@@ -1,6 +1,7 @@
 package com.rally.tour.parser;
 
-import com.rally.client.tourtv.TourTvClient;
+
+import com.rally.client.tourtv.AtpTvClient;
 import com.rally.client.tourtv.model.AtpDrawsResponse;
 import com.rally.domain.tour.model.TourRoundEnum;
 import com.rally.tour.convert.DrawMatchAppConvertMapper;
@@ -22,11 +23,11 @@ import java.util.Map;
 public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsResponse.Draw> {
 
     @Resource
-    private TourTvClient tourTvClient;
+    private AtpTvClient atpTvClient;
 
     @Override
     protected AtpDrawsResponse request(DrawParams params) {
-        return tourTvClient.getDraws(params.getTournamentId(), params.getYear());
+        return atpTvClient.getDraws(params.getTournamentId(), params.getYear());
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.rally.tour;
 
-import com.rally.client.tourtv.TourTvClient;
+import com.rally.client.tourtv.AtpTvClient;
 import com.rally.client.tourtv.model.MatchesResponse;
 import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaTournamentsResponse;
@@ -26,7 +26,7 @@ import java.util.List;
 public class TournamentCollectService {
 
     @Resource
-    private TourTvClient tourTvClient;
+    private AtpTvClient atpTvClient;
 
     @Resource
     private WtaClient wtaClient;
@@ -66,7 +66,7 @@ public class TournamentCollectService {
     }
 
     public void atp(int year) {
-        List<MatchesResponse.TournamentInfo> infos = tourTvClient.getTournaments(year);
+        List<MatchesResponse.TournamentInfo> infos = atpTvClient.getTournaments(year);
         if (CollectionUtils.isEmpty(infos)) {
             log.warn("从API获取赛事列表为空, year={}", year);
         }

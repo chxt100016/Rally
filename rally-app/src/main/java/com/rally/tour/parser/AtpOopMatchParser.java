@@ -1,6 +1,6 @@
 package com.rally.tour.parser;
 
-import com.rally.client.tourtv.TourTvClient;
+import com.rally.client.tourtv.AtpTvClient;
 import com.rally.client.tourtv.model.AtpOopResponse;
 import com.rally.tour.convert.OopMatchAppConvertMapper;
 import com.rally.tour.model.Discipline;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopResponse> {
 
     @Resource
-    private TourTvClient tourTvClient;
+    private AtpTvClient atpTvClient;
 
     /** 一次获取全部赛事 OOP 数据，每个赛事产生一个 MS DrawResult */
     @Override
@@ -49,7 +49,7 @@ public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopR
 
     @Override
     protected List<AtpOopResponse> request(DrawParams params) {
-        return tourTvClient.getOop();
+        return atpTvClient.getOop();
     }
 
     @Override

@@ -11,9 +11,9 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class TourTvClient {
+public class AtpTvClient {
 
-    private static final String BASE_URI = "https://api.tennistv.com/tour/v1";
+    private static final String BASE_URI = "https://api.tennistv.com/tennis/v1";
 
     /**
      * 接口1: 查询最近比赛 (status=L 表示进行中)

@@ -1,6 +1,6 @@
 package com.rally.tour.parser;
 
-import com.rally.client.tourtv.TourTvClient;
+import com.rally.client.tourtv.AtpTvClient;
 import com.rally.client.tourtv.model.MatchesResponse;
 import com.rally.tour.model.Discipline;
 import com.rally.tour.model.Match;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class AtpLiveMatchParser extends MatchParser<MatchesResponse, List<MatchesResponse.MatchInfo>> {
 
     @Resource
-    private TourTvClient tourTvClient;
+    private AtpTvClient atpTvClient;
 
     /** 按赛事分组聚合，每组产生一个 MS DrawResult */
     @Override
@@ -47,7 +47,7 @@ public class AtpLiveMatchParser extends MatchParser<MatchesResponse, List<Matche
 
     @Override
     protected MatchesResponse request(DrawParams params) {
-        return tourTvClient.getMatchesByStatus("L");
+        return atpTvClient.getMatchesByStatus("L");
     }
 
     @Override
