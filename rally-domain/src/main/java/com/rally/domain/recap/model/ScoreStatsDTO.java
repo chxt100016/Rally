@@ -8,11 +8,9 @@ import lombok.experimental.Accessors;
 public class ScoreStatsDTO {
 
     private Long total;
-    private Long singleCount;
-    private Long doubleCount;
+    private Long wins;
+    private Long losses;
     private String winRate;
-    private String singleWinRate;
-    private String doubleWinRate;
     private String streakType;
     private Long streakCount;
 }

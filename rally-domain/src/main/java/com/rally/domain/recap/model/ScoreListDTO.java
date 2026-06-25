@@ -20,6 +20,7 @@ public class ScoreListDTO {
     @Accessors(chain = true)
     public static class Item {
         private String bizId;
+        private String meetupId;
         private ResultTypeEnum resultType;
         private String resultTypeShow;
         private MatchTypeEnum matchType;
@@ -29,6 +30,9 @@ public class ScoreListDTO {
         private String date;
         private String myScore;
         private String opponentScore;
+        private String teammateId;
+        private String teammateNickname;
+        private String teammateAvatarUrl;
         private String opponent1Id;
         private String opponent1Nickname;
         private String opponent1AvatarUrl;

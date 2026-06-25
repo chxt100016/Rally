@@ -52,25 +52,21 @@ public class ScoreAppService {
         scoreDomainService.deleteScoreItem(meetup, cmd.getBizId());
     }
 
-    public ScoreStatsDTO queryMyScoreStats() {
+    public ScoreStatsDTO queryMyScoreStats(MatchTypeEnum matchType) {
         String userId = UserContext.get();
         List<ScoreRecordData> all = scoreDomainService.listScoresByUserId(userId);
 
-        long singleCount = all.stream().filter(r -> r.getMatchType() == MatchTypeEnum.SINGLE).count();
-        long doubleCount = all.stream().filter(r -> r.getMatchType() == MatchTypeEnum.DOUBLE).count();
-        long wins = all.stream().filter(r -> isWin(r, userId)).count();
-        long singleWins = all.stream().filter(r -> r.getMatchType() == MatchTypeEnum.SINGLE && isWin(r, userId)).count();
-        long doubleWins = all.stream().filter(r -> r.getMatchType() == MatchTypeEnum.DOUBLE && isWin(r, userId)).count();
+        List<ScoreRecordData> filtered = matchType == null ? all : all.stream().filter(r -> r.getMatchType() == matchType).toList();
+        long wins = filtered.stream().filter(r -> isWin(r, userId)).count();
+        long losses = filtered.size() - wins;
 
         return new ScoreStatsDTO()
-                .setTotal((long) all.size())
-                .setSingleCount(singleCount)
-                .setDoubleCount(doubleCount)
-                .setWinRate(formatRate(wins, all.size()))
-                .setSingleWinRate(formatRate(singleWins, singleCount))
-                .setDoubleWinRate(formatRate(doubleWins, doubleCount))
-                .setStreakType(computeStreakType(all, userId))
-                .setStreakCount(computeStreakCount(all, userId));
+                .setTotal((long) filtered.size())
+                .setWins(wins)
+                .setLosses(losses)
+                .setWinRate(formatRate(wins, filtered.size()))
+                .setStreakType(computeStreakType(filtered, userId))
+                .setStreakCount(computeStreakCount(filtered, userId));
     }
 
     public ScoreListDTO queryMyScores(ScoreListQueryCmd cmd) {
@@ -80,7 +76,7 @@ public class ScoreAppService {
         List<ScoreRecordData> filtered = all.stream()
                 .filter(r -> matchTypeMatches(r, cmd.getMatchType()))
                 .filter(r -> meetupMatches(r, cmd.getMeetupId()))
-                .collect(Collectors.toList());
+                .toList();
 
         int size = cmd.getPageSize() != null ? cmd.getPageSize() : DEFAULT_PAGE_SIZE;
         int startIdx = 0;
@@ -123,6 +119,11 @@ public class ScoreAppService {
         ResultTypeEnum resultType = isWin(r, userId) ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
         String myScore = userInSideA ? String.valueOf(r.getSideAScore()) : String.valueOf(r.getSideBScore());
         String opponentScore = userInSideA ? String.valueOf(r.getSideBScore()) : String.valueOf(r.getSideAScore());
+        // 队友（同侧的另一个人，双打才有）
+        String mateId = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer2() : r.getSideAPlayer1()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer2() : r.getSideBPlayer1());
+        String mateNickname = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer2Nickname() : r.getSideAPlayer1Nickname()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer2Nickname() : r.getSideBPlayer1Nickname());
+        String mateAvatar = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer2Avatar() : r.getSideAPlayer1Avatar()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer2Avatar() : r.getSideBPlayer1Avatar());
+        // 对手
         String opp1Id = userInSideA ? r.getSideBPlayer1() : r.getSideAPlayer1();
         String opp1Nickname = userInSideA ? r.getSideBPlayer1Nickname() : r.getSideAPlayer1Nickname();
         String opp1Avatar = userInSideA ? r.getSideBPlayer1Avatar() : r.getSideAPlayer1Avatar();
@@ -132,6 +133,7 @@ public class ScoreAppService {
 
         return new ScoreListDTO.Item()
                 .setBizId(r.getBizId())
+                .setMeetupId(r.getRallyMeetupId())
                 .setResultType(resultType)
                 .setResultTypeShow(resultType.getShow())
                 .setMatchType(r.getMatchType())
@@ -141,6 +143,9 @@ public class ScoreAppService {
                 .setDate(r.getMeetupDate().format(DATE_FORMATTER))
                 .setMyScore(myScore)
                 .setOpponentScore(opponentScore)
+                .setTeammateId(mateId)
+                .setTeammateNickname(mateNickname)
+                .setTeammateAvatarUrl(QiniuConfiguration.buildSignedUrl(mateAvatar))
                 .setOpponent1Id(opp1Id)
                 .setOpponent1Nickname(opp1Nickname)
                 .setOpponent1AvatarUrl(QiniuConfiguration.buildSignedUrl(opp1Avatar))

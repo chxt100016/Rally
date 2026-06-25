@@ -36,10 +36,14 @@ public class MyProfileSetScoreDTO {
         private SetFormatEnum setFormat;
         private String setFormatShow;
         private String date;
+        private String sideAPlayer1UserId;
         private String sideAPlayer1AvatarUrl;
+        private String sideAPlayer2UserId;
         private String sideAPlayer2AvatarUrl;
         private String sideAScore;
+        private String sideBPlayer1UserId;
         private String sideBPlayer1AvatarUrl;
+        private String sideBPlayer2UserId;
         private String sideBPlayer2AvatarUrl;
         private String sideBScore;
     }

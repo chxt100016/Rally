@@ -1,5 +1,6 @@
 package com.rally.web.recap;
 
+import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.recap.model.ScoreAddCmd;
 import com.rally.domain.recap.model.ScoreDeleteCmd;
 import com.rally.domain.recap.model.ScoreListQueryCmd;
@@ -12,10 +13,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/wechat/recap/score")
+@RequestMapping("/recap/score")
 public class ScoreController {
 
     @Resource
@@ -39,13 +41,14 @@ public class ScoreController {
         return Result.ok();
     }
 
-    @GetMapping("/stats")
-    public Result<?> myStats() {
-        return Result.ok(scoreAppService.queryMyScoreStats());
+    @GetMapping("/stats/me")
+    public Result<?> myStats(@RequestParam(value = "matchType", required = false) MatchTypeEnum matchType) {
+        return Result.ok(scoreAppService.queryMyScoreStats(matchType));
     }
 
-    @PostMapping("/list")
+    @PostMapping("/list/me")
     public Result<?> listMyScores(@RequestBody ScoreListQueryCmd cmd) {
         return Result.ok(scoreAppService.queryMyScores(cmd));
     }
+
 }
