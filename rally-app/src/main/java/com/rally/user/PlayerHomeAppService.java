@@ -13,7 +13,7 @@ import com.rally.meetup.MeetupCardPackingService;
 import com.rally.domain.recap.UserReviewDomainService;
 import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
 import com.rally.domain.recap.model.ScoreRecordData;
-import com.rally.domain.recap.service.RecapDomainService;
+import com.rally.domain.recap.service.ScoreDomainService;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.user.model.*;
 import com.rally.domain.user.service.UserFollowDomainService;
@@ -56,7 +56,7 @@ public class PlayerHomeAppService {
     private UserReviewDomainService userReviewDomainService;
 
     @Resource
-    private RecapDomainService recapDomainService;
+    private ScoreDomainService scoreDomainService;
 
     @Resource
     private UserFollowDomainService userFollowDomainService;
@@ -167,7 +167,7 @@ public class PlayerHomeAppService {
 
     /** 构建最近10场比分 DTO（头像使用比分记录中的冗余数据） */
     private MyProfileSetScoreDTO buildSetScoreDTO(String userId) {
-        List<ScoreRecordData> records = recapDomainService.listScoresByUserId(userId);
+        List<ScoreRecordData> records = scoreDomainService.listScoresByUserId(userId);
         long singleCount = records.stream().filter(r -> r.getMatchType() == MatchTypeEnum.SINGLE).count();
         long doubleCount = records.stream().filter(r -> r.getMatchType() == MatchTypeEnum.DOUBLE).count();
         List<MyProfileSetScoreDTO.SetItem> setItems = records.stream()

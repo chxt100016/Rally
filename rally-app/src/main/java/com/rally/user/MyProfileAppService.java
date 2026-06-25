@@ -1,13 +1,7 @@
 package com.rally.user;
 
 import com.rally.config.property.QiniuConfiguration;
-import com.rally.domain.meetup.enums.MatchTypeEnum;
-import com.rally.domain.meetup.enums.ResultTypeEnum;
 import com.rally.domain.meetup.service.MeetupDomainService;
-import com.rally.domain.recap.UserReviewDomainService;
-import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
-import com.rally.domain.recap.model.ScoreRecordData;
-import com.rally.domain.recap.service.RecapDomainService;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.system.CityConfig;
 import com.rally.domain.system.SystemConfig;
@@ -22,11 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.RoundingMode;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -44,19 +35,7 @@ public class MyProfileAppService {
     private MeetupDomainService meetupDomainService;
 
     @Resource
-    private UserReviewDomainService userReviewDomainService;
-
-    @Resource
-    private RecapDomainService recapDomainService;
-
-    @Resource
     private UserFollowDomainService userFollowDomainService;
-
-    /** 战绩明细展示数量 */
-    private static final int SET_SCORE_ITEM_LIMIT = 5;
-
-    /** 战绩明细标题日期格式 */
-    private static final DateTimeFormatter SET_TITLE_DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd");
 
     /**
      * 我的档案
@@ -73,9 +52,7 @@ public class MyProfileAppService {
                 .setStats(hasProfile ? buildStats(userId) : null)
                 .setLevel(hasProfile ? buildLevelDTO(userProfile) : null)
                 .setScore(hasProfile ? buildScoreDTO(userProfile.getProfile()) : null)
-                .setReview(hasProfile ? buildReviewDTO(userId) : null)
-                .setVideo(hasProfile ? buildVideoDTO(userProfile.getProfile()) : null)
-                .setSetScore(hasProfile ? buildSetScoreDTO(userId) : null);
+                .setVideo(hasProfile ? buildVideoDTO(userProfile.getProfile()) : null);
 
     }
 
@@ -89,17 +66,6 @@ public class MyProfileAppService {
     }
 
 
-
-    /** 构建评价信息 DTO（一次查库聚合评价总数+标签） */
-    private MyProfileReviewDTO buildReviewDTO(String userId) {
-        ReviewSummaryDTO summary = userReviewDomainService.getReviewSummary(userId, 5);
-        return new MyProfileReviewDTO()
-                .setTotal(summary.total())
-                .setLevelVoteCount(summary.levelVoteCount())
-                .setAttendanceVoteCount(summary.attendanceVoteCount())
-                .setTagCount(summary.tagCount())
-                .setTags(summary.topTags());
-    }
 
     /** 构建等级信息 DTO */
     private MyProfileLevelDTO buildLevelDTO(UserProfile userProfile) {
@@ -170,65 +136,6 @@ public class MyProfileAppService {
                 .setCityCode(userData.getCityCode())
                 .setCityName(CityConfig.getCityName(userData.getCityCode()))
                 .setBio(userData.getBio());
-    }
-
-    /** 构建战绩信息 DTO（按比赛日期倒序，仅展示最近若干场明细） */
-    private MyProfileSetScoreDTO buildSetScoreDTO(String userId) {
-        List<ScoreRecordData> records = recapDomainService.listScoresByUserId(userId);
-        long singleCount = records.stream().filter(record -> record.getMatchType() == MatchTypeEnum.SINGLE).count();
-        long doubleCount = records.stream().filter(record -> record.getMatchType() == MatchTypeEnum.DOUBLE).count();
-        // 批量获取所有玩家头像（避免从 score 表冗余读取）
-        Map<String, UserProfile> profiles = batchFetchPlayerProfiles(records);
-        List<MyProfileSetScoreDTO.SetItem> setItems = records.stream()
-                .limit(SET_SCORE_ITEM_LIMIT)
-                .map(record -> buildSetItem(userId, record, profiles))
-                .collect(Collectors.toList());
-        return new MyProfileSetScoreDTO()
-                .setTotal((long) records.size())
-                .setSingleCount(singleCount)
-                .setDoubleCount(doubleCount)
-                .setSetItems(setItems);
-    }
-
-    /** 批量获取战绩中所有玩家的档案（用于取头像） */
-    private Map<String, UserProfile> batchFetchPlayerProfiles(List<ScoreRecordData> records) {
-        List<String> playerIds = records.stream()
-                .flatMap(r -> Arrays.asList(
-                        r.getSideAPlayer1(), r.getSideAPlayer2(),
-                        r.getSideBPlayer1(), r.getSideBPlayer2()).stream())
-                .filter(id -> id != null)
-                .distinct()
-                .collect(Collectors.toList());
-        return userProfileDomainService.listMap(playerIds);
-    }
-
-    /** 构建单条战绩明细：根据当前用户所在阵营与持久化的获胜边判断胜负 */
-    private MyProfileSetScoreDTO.SetItem buildSetItem(String userId, ScoreRecordData record, Map<String, UserProfile> profiles) {
-        boolean userInSideA = userId.equals(record.getSideAPlayer1()) || userId.equals(record.getSideAPlayer2());
-        boolean isWin = (userInSideA && "A".equals(record.getWinSide())) || (!userInSideA && "B".equals(record.getWinSide()));
-        ResultTypeEnum resultType = isWin ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
-        return new MyProfileSetScoreDTO.SetItem()
-                .setResultType(resultType)
-                .setResultTypeShow(resultType.getShow())
-                .setMatchType(record.getMatchType())
-                .setMatchTypeShow(record.getMatchType().getName())
-                .setSetFormat(record.getSetFormat())
-                .setSetFormatShow(record.getSetFormat().getShow())
-                .setDate(record.getMeetupDate().format(SET_TITLE_DATE_FORMATTER))
-                .setSideAPlayer1AvatarUrl(getAvatarUrl(profiles, record.getSideAPlayer1()))
-                .setSideAPlayer2AvatarUrl(getAvatarUrl(profiles, record.getSideAPlayer2()))
-                .setSideAScore(String.valueOf(record.getSideAScore()))
-                .setSideBPlayer1AvatarUrl(getAvatarUrl(profiles, record.getSideBPlayer1()))
-                .setSideBPlayer2AvatarUrl(getAvatarUrl(profiles, record.getSideBPlayer2()))
-                .setSideBScore(String.valueOf(record.getSideBScore()));
-    }
-
-    /** 从 profiles map 获取玩家头像（带签名URL） */
-    private String getAvatarUrl(Map<String, UserProfile> profiles, String playerId) {
-        if (playerId == null) return null;
-        UserProfile profile = profiles.get(playerId);
-        if (profile == null || profile.getUser() == null) return null;
-        return QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl());
     }
 
     /** 构建视频信息 DTO */

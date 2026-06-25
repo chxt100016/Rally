@@ -27,13 +27,7 @@ public class MyProfileDTO {
     /** 评分信息 */
     private MyProfileScoreDTO score;
 
-    /** 评价信息 */
-    private MyProfileReviewDTO review;
-
     /** 视频信息 */
     private MyProfileVideoDTO video;
-
-    /** 战绩 */
-    private MyProfileSetScoreDTO setScore;
 
 }

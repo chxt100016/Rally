@@ -218,8 +218,7 @@ public class RecapRepositoryImpl implements RecapRepository {
     public List<ScoreRecordData> listScoresByUserId(String userId) {
         List<ScoreRecordPO> poList = scoreRecordService.lambdaQuery()
                 .and(wrapper -> wrapper.eq(ScoreRecordPO::getSideAPlayer1, userId).or().eq(ScoreRecordPO::getSideAPlayer2, userId).or().eq(ScoreRecordPO::getSideBPlayer1, userId).or().eq(ScoreRecordPO::getSideBPlayer2, userId))
-                .orderByDesc(ScoreRecordPO::getMeetupDate)
-                .last("limit 10")
+                .orderByDesc(ScoreRecordPO::getBizId)
                 .list();
         return MAPPER.toScoreRecordDataList(poList);
     }

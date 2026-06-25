@@ -28,8 +28,11 @@ public class TourContentAppService {
 
 
     public String generateDailyContent(LocalDate date, TranslationLanguageEnum lang) {
+        return null;
     }
 
     public String generateSeedListContent(List<String> tournamentIds, TranslationLanguageEnum lang) {
+
+        return null;
     }
 }

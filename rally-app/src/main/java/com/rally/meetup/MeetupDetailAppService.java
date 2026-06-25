@@ -9,7 +9,8 @@ import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.recap.model.RecapDTO;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ScoreRecordData;
-import com.rally.domain.recap.service.RecapDomainService;
+import com.rally.domain.recap.service.ReviewDomainService;
+import com.rally.domain.recap.service.ScoreDomainService;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
@@ -40,7 +41,8 @@ public class MeetupDetailAppService {
     private final MeetupDomainService meetupDomainService;
     private final MeetupRepository meetupRepository;
     private final UserProfileDomainService userProfileDomainService;
-    private final RecapDomainService recapDomainService;
+    private final ReviewDomainService reviewDomainService;
+    private final ScoreDomainService scoreDomainService;
     private final ChatDomainService chatDomainService;
 
 
@@ -145,7 +147,7 @@ public class MeetupDetailAppService {
         String currentUserId = UserContext.get();
 
         // 1. 查询当前用户已提交的评价，按 toUserId 分组
-        List<ReviewData> myReviews = recapDomainService.listReviewsByMeetupAndFrom(meetup.getMeetupId(), currentUserId);
+        List<ReviewData> myReviews = reviewDomainService.listReviewsByMeetupAndFrom(meetup.getMeetupId(), currentUserId);
         Map<String, List<RecapDTO.ReviewItem>> reviewMap = myReviews.stream()
                 .collect(Collectors.groupingBy(
                         ReviewData::getToUserId,
@@ -153,7 +155,7 @@ public class MeetupDetailAppService {
                 ));
 
         // 2. 查询该活动的比分记录
-        List<ScoreRecordData> scoreRecords = recapDomainService.listScoresByMeetup(meetup.getMeetupId());
+        List<ScoreRecordData> scoreRecords = scoreDomainService.listScoresByMeetup(meetup.getMeetupId());
 
         // 3. 组装 RecapDTO
         RecapDTO recap = new RecapDTO();
