@@ -8,6 +8,7 @@ import com.rally.domain.tour.model.Result;
 import com.rally.recap.ScoreAppService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +37,11 @@ public class ScoreController {
     public Result<?> deleteScore(@Valid @RequestBody ScoreDeleteCmd cmd) {
         scoreAppService.deleteScore(cmd);
         return Result.ok();
+    }
+
+    @GetMapping("/stats")
+    public Result<?> myStats() {
+        return Result.ok(scoreAppService.queryMyScoreStats());
     }
 
     @PostMapping("/list")

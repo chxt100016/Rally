@@ -10,6 +10,7 @@ import com.rally.domain.recap.model.ScoreDeleteCmd;
 import com.rally.domain.recap.model.ScoreListDTO;
 import com.rally.domain.recap.model.ScoreListQueryCmd;
 import com.rally.domain.recap.model.ScoreRecordData;
+import com.rally.domain.recap.model.ScoreStatsDTO;
 import com.rally.domain.recap.model.ScoreUpdateCmd;
 import com.rally.domain.recap.service.ScoreDomainService;
 import com.rally.utils.UserContext;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class ScoreAppService {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM-dd");
+    private static final int DEFAULT_PAGE_SIZE = 20;
 
     private final ScoreDomainService scoreDomainService;
     private final MeetupDomainService meetupDomainService;
@@ -50,9 +52,7 @@ public class ScoreAppService {
         scoreDomainService.deleteScoreItem(meetup, cmd.getBizId());
     }
 
-    private static final int DEFAULT_PAGE_SIZE = 20;
-
-    public ScoreListDTO queryMyScores(ScoreListQueryCmd cmd) {
+    public ScoreStatsDTO queryMyScoreStats() {
         String userId = UserContext.get();
         List<ScoreRecordData> all = scoreDomainService.listScoresByUserId(userId);
 
@@ -62,9 +62,24 @@ public class ScoreAppService {
         long singleWins = all.stream().filter(r -> r.getMatchType() == MatchTypeEnum.SINGLE && isWin(r, userId)).count();
         long doubleWins = all.stream().filter(r -> r.getMatchType() == MatchTypeEnum.DOUBLE && isWin(r, userId)).count();
 
+        return new ScoreStatsDTO()
+                .setTotal((long) all.size())
+                .setSingleCount(singleCount)
+                .setDoubleCount(doubleCount)
+                .setWinRate(formatRate(wins, all.size()))
+                .setSingleWinRate(formatRate(singleWins, singleCount))
+                .setDoubleWinRate(formatRate(doubleWins, doubleCount))
+                .setStreakType(computeStreakType(all, userId))
+                .setStreakCount(computeStreakCount(all, userId));
+    }
+
+    public ScoreListDTO queryMyScores(ScoreListQueryCmd cmd) {
+        String userId = UserContext.get();
+        List<ScoreRecordData> all = scoreDomainService.listScoresByUserId(userId);
+
         List<ScoreRecordData> filtered = all.stream()
                 .filter(r -> matchTypeMatches(r, cmd.getMatchType()))
-                .filter(r -> resultMatches(r, userId, cmd.getResult()))
+                .filter(r -> meetupMatches(r, cmd.getMeetupId()))
                 .collect(Collectors.toList());
 
         int size = cmd.getPageSize() != null ? cmd.getPageSize() : DEFAULT_PAGE_SIZE;
@@ -82,14 +97,6 @@ public class ScoreAppService {
         boolean hasMore = endIdx < filtered.size();
 
         return new ScoreListDTO()
-                .setTotal((long) all.size())
-                .setSingleCount(singleCount)
-                .setDoubleCount(doubleCount)
-                .setWinRate(formatRate(wins, all.size()))
-                .setSingleWinRate(formatRate(singleWins, singleCount))
-                .setDoubleWinRate(formatRate(doubleWins, doubleCount))
-                .setStreakType(computeStreakType(all, userId))
-                .setStreakCount(computeStreakCount(all, userId))
                 .setList(page.stream().map(r -> toItem(userId, r)).collect(Collectors.toList()))
                 .setHasMore(hasMore)
                 .setNextCursor(hasMore ? page.get(page.size() - 1).getBizId() : null);
@@ -101,14 +108,45 @@ public class ScoreAppService {
         return r.getMatchType() == MatchTypeEnum.DOUBLE;
     }
 
-    private boolean resultMatches(ScoreRecordData r, String userId, ScoreListQueryCmd.Result result) {
-        if (result == null) return true;
-        return result == ScoreListQueryCmd.Result.WIN ? isWin(r, userId) : !isWin(r, userId);
+    private boolean meetupMatches(ScoreRecordData r, String meetupId) {
+        if (meetupId == null) return true;
+        return meetupId.equals(r.getRallyMeetupId());
     }
 
     private boolean isWin(ScoreRecordData r, String userId) {
         boolean userInSideA = userId.equals(r.getSideAPlayer1()) || userId.equals(r.getSideAPlayer2());
         return (userInSideA && "A".equals(r.getWinSide())) || (!userInSideA && "B".equals(r.getWinSide()));
+    }
+
+    private ScoreListDTO.Item toItem(String userId, ScoreRecordData r) {
+        boolean userInSideA = userId.equals(r.getSideAPlayer1()) || userId.equals(r.getSideAPlayer2());
+        ResultTypeEnum resultType = isWin(r, userId) ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
+        String myScore = userInSideA ? String.valueOf(r.getSideAScore()) : String.valueOf(r.getSideBScore());
+        String opponentScore = userInSideA ? String.valueOf(r.getSideBScore()) : String.valueOf(r.getSideAScore());
+        String opp1Id = userInSideA ? r.getSideBPlayer1() : r.getSideAPlayer1();
+        String opp1Nickname = userInSideA ? r.getSideBPlayer1Nickname() : r.getSideAPlayer1Nickname();
+        String opp1Avatar = userInSideA ? r.getSideBPlayer1Avatar() : r.getSideAPlayer1Avatar();
+        String opp2Id = userInSideA ? r.getSideBPlayer2() : r.getSideAPlayer2();
+        String opp2Nickname = userInSideA ? r.getSideBPlayer2Nickname() : r.getSideAPlayer2Nickname();
+        String opp2Avatar = userInSideA ? r.getSideBPlayer2Avatar() : r.getSideAPlayer2Avatar();
+
+        return new ScoreListDTO.Item()
+                .setBizId(r.getBizId())
+                .setResultType(resultType)
+                .setResultTypeShow(resultType.getShow())
+                .setMatchType(r.getMatchType())
+                .setMatchTypeShow(r.getMatchType().getName())
+                .setSetFormat(r.getSetFormat())
+                .setSetFormatShow(r.getSetFormat().getShow())
+                .setDate(r.getMeetupDate().format(DATE_FORMATTER))
+                .setMyScore(myScore)
+                .setOpponentScore(opponentScore)
+                .setOpponent1Id(opp1Id)
+                .setOpponent1Nickname(opp1Nickname)
+                .setOpponent1AvatarUrl(QiniuConfiguration.buildSignedUrl(opp1Avatar))
+                .setOpponent2Id(opp2Id)
+                .setOpponent2Nickname(opp2Nickname)
+                .setOpponent2AvatarUrl(QiniuConfiguration.buildSignedUrl(opp2Avatar));
     }
 
     private String computeStreakType(List<ScoreRecordData> all, String userId) {
@@ -130,32 +168,5 @@ public class ScoreAppService {
     private String formatRate(long wins, long total) {
         if (total == 0) return "--";
         return String.format("%.1f", wins * 100.0 / total);
-    }
-
-    private ScoreListDTO.Item toItem(String userId, ScoreRecordData r) {
-        ResultTypeEnum resultType = isWin(r, userId) ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
-        return new ScoreListDTO.Item()
-                .setBizId(r.getBizId())
-                .setResultType(resultType)
-                .setResultTypeShow(resultType.getShow())
-                .setMatchType(r.getMatchType())
-                .setMatchTypeShow(r.getMatchType().getName())
-                .setSetFormat(r.getSetFormat())
-                .setSetFormatShow(r.getSetFormat().getShow())
-                .setDate(r.getMeetupDate().format(DATE_FORMATTER))
-                .setSideAPlayer1Id(r.getSideAPlayer1())
-                .setSideAPlayer1Nickname(r.getSideAPlayer1Nickname())
-                .setSideAPlayer1AvatarUrl(QiniuConfiguration.buildSignedUrl(r.getSideAPlayer1Avatar()))
-                .setSideAPlayer2Id(r.getSideAPlayer2())
-                .setSideAPlayer2Nickname(r.getSideAPlayer2Nickname())
-                .setSideAPlayer2AvatarUrl(QiniuConfiguration.buildSignedUrl(r.getSideAPlayer2Avatar()))
-                .setSideAScore(String.valueOf(r.getSideAScore()))
-                .setSideBPlayer1Id(r.getSideBPlayer1())
-                .setSideBPlayer1Nickname(r.getSideBPlayer1Nickname())
-                .setSideBPlayer1AvatarUrl(QiniuConfiguration.buildSignedUrl(r.getSideBPlayer1Avatar()))
-                .setSideBPlayer2Id(r.getSideBPlayer2())
-                .setSideBPlayer2Nickname(r.getSideBPlayer2Nickname())
-                .setSideBPlayer2AvatarUrl(QiniuConfiguration.buildSignedUrl(r.getSideBPlayer2Avatar()))
-                .setSideBScore(String.valueOf(r.getSideBScore()));
     }
 }

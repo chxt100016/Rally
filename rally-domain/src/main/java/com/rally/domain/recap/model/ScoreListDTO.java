@@ -12,14 +12,6 @@ import java.util.List;
 @Accessors(chain = true)
 public class ScoreListDTO {
 
-    private Long total;
-    private Long singleCount;
-    private Long doubleCount;
-    private String winRate;
-    private String singleWinRate;
-    private String doubleWinRate;
-    private String streakType;
-    private Long streakCount;
     private List<Item> list;
     private Boolean hasMore;
     private String nextCursor;
@@ -35,19 +27,13 @@ public class ScoreListDTO {
         private SetFormatEnum setFormat;
         private String setFormatShow;
         private String date;
-        private String sideAPlayer1Id;
-        private String sideAPlayer1Nickname;
-        private String sideAPlayer1AvatarUrl;
-        private String sideAPlayer2Id;
-        private String sideAPlayer2Nickname;
-        private String sideAPlayer2AvatarUrl;
-        private String sideAScore;
-        private String sideBPlayer1Id;
-        private String sideBPlayer1Nickname;
-        private String sideBPlayer1AvatarUrl;
-        private String sideBPlayer2Id;
-        private String sideBPlayer2Nickname;
-        private String sideBPlayer2AvatarUrl;
-        private String sideBScore;
+        private String myScore;
+        private String opponentScore;
+        private String opponent1Id;
+        private String opponent1Nickname;
+        private String opponent1AvatarUrl;
+        private String opponent2Id;
+        private String opponent2Nickname;
+        private String opponent2AvatarUrl;
     }
 }
