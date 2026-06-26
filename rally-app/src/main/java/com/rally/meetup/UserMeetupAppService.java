@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +20,8 @@ public class UserMeetupAppService {
     public PageDTO<MeetupCardDTO> queryUserMeetupList(UserMeetupListCmd cmd) {
         String userId = UserContext.get();
         int limit = cmd.getSize() + 1;
-        Map<String, Object> cursor = PageDTO.decodeCursor(cmd.getLastId());
-        String lastId = cursor != null ? (String) cursor.get("bizId") : null;
+        List<Object> cursor = PageDTO.parseCursor(cmd.getLastId());
+        String lastId = cursor.isEmpty() ? null : (String) cursor.get(0);
         PageDTO<MeetupData> pageResult = switch (cmd.getTab()) {
             case PENDING -> meetupQueryDomainService.listPending(userId, lastId, limit);
             case IN_PROGRESS -> meetupQueryDomainService.listInProgress(userId, lastId, limit);
@@ -35,9 +34,7 @@ public class UserMeetupAppService {
                 .toList();
 
         PageDTO<MeetupCardDTO> page = new PageDTO<>(cardList, null, pageResult.getHasMore());
-        if (!cardList.isEmpty()) {
-            page.buildCursor(Map.of("bizId", cardList.get(cardList.size() - 1).getMeetupId()));
-        }
+        page.buildCursor(MeetupCardDTO::getMeetupId);
         return page;
     }
 }

@@ -11,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 约球查询应用服务
@@ -30,6 +30,9 @@ public class MeetupQueryAppService {
      * 约球列表查询（按时间/距离）
      */
     public PageDTO<MeetupCardDTO> queryMeetupList(MeetupListCmd query) {
+        List<Object> cursor = PageDTO.parseCursor(query.getLastId());
+        query.setLastBizId(cursor.isEmpty() ? null : (String) cursor.get(0));
+        query.setLastStartTime(cursor.size() > 1 ? LocalDateTime.parse(cursor.get(1).toString()) : null);
         List<MeetupData> dataList = switch (query.getSort()) {
             case DISTANCE -> meetupQueryDomainService.listByDistance(query);
             case TIME -> meetupQueryDomainService.listByTime(query);
@@ -39,11 +42,10 @@ public class MeetupQueryAppService {
         List<MeetupData> pageData = hasMore ? dataList.subList(0, query.getPageSize()) : dataList;
         List<MeetupCardDTO> res = pageData.stream().map(item -> packingService.packCard(item, query.getLng(), query.getLat())).toList();
         PageDTO<MeetupCardDTO> page = new PageDTO<>(res, null, hasMore);
-        if (!res.isEmpty()) {
-            MeetupCardDTO last = res.get(res.size() - 1);
-            page.buildCursor(query.getSort() == MeetupSortEnum.TIME
-                    ? Map.of("startTime", last.getStartTime().toString(), "bizId", last.getMeetupId())
-                    : Map.of("bizId", last.getMeetupId()));
+        if (query.getSort() == MeetupSortEnum.TIME) {
+            page.buildCursor(MeetupCardDTO::getMeetupId, c -> c.getStartTime().toString());
+        } else {
+            page.buildCursor(MeetupCardDTO::getMeetupId);
         }
         return page;
     }

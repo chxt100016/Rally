@@ -5,7 +5,6 @@ import com.rally.domain.meetup.gateway.NearbyRepository;
 import com.rally.domain.meetup.model.MeetupListCmd;
 import com.rally.domain.meetup.model.MeetupListQueryParam;
 import com.rally.domain.meetup.model.NearbyResult;
-import com.rally.domain.meetup.model.PageDTO;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -38,16 +37,10 @@ public class MeetupQueryPlanner {
                 .levelMode(query.getLevelMode())
                 .levelMin(query.getLevelMin())
                 .levelMax(query.getLevelMax())
-                .pageSize(query.getPageSize());
-
-        // 解码不透明游标：时间排序用 {startTime, bizId} 复合游标
-        java.util.Map<String, Object> cursor = PageDTO.decodeCursor(query.getLastId());
-        if (cursor != null) {
-            builder.lastBizId((String) cursor.get("bizId"));
-            if (cursor.containsKey("startTime")) {
-                builder.lastStartTime(java.time.LocalDateTime.parse((String) cursor.get("startTime")));
-            }
-        }
+                .pageSize(query.getPageSize())
+                // 游标已在 app 层解码（时间排序用 {startTime, bizId} 复合游标）
+                .lastBizId(query.getLastBizId())
+                .lastStartTime(query.getLastStartTime());
 
         // 如果有 radiusKm，通过 Redis 获取范围内的 meetupId 列表
         List<String> meetupIds = searchByRadius(query);

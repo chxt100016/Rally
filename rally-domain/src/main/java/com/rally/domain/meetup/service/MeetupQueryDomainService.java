@@ -11,7 +11,6 @@ import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -87,20 +86,8 @@ public class MeetupQueryDomainService {
                 .peek(data -> data.setDistanceMeters(distanceMap.get(data.getBizId())))
                 .toList();
 
-        // 5. searchAfter 游标：解码出 bizId，定位上一页最后一条记录，取其后 pageSize+1 条
-        java.util.Map<String, Object> cursor = PageDTO.decodeCursor(query.getLastId());
-        String lastBizId = cursor != null ? (String) cursor.get("bizId") : null;
-        int start = 0;
-        if (StringUtils.isNotBlank(lastBizId)) {
-            for (int i = 0; i < sortedData.size(); i++) {
-                if (sortedData.get(i).getBizId().equals(lastBizId)) {
-                    start = i + 1;
-                    break;
-                }
-            }
-        }
-        int end = Math.min(start + query.getPageSize() + 1, sortedData.size());
-        return start < sortedData.size() ? sortedData.subList(start, end) : List.of();
+        // 5. searchAfter 游标：用上一页最后一条 bizId（app 层已解码）定位，取其后 pageSize+1 条
+        return PageDTO.sliceAfter(sortedData, query.getLastBizId(), query.getPageSize() + 1, MeetupData::getBizId);
     }
 
     // ======================== 五个 Tab 分支 ========================

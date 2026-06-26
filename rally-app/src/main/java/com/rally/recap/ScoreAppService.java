@@ -4,10 +4,11 @@ import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.meetup.enums.ResultTypeEnum;
 import com.rally.domain.meetup.model.Meetup;
+import com.rally.domain.meetup.model.PageDTO;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.recap.model.ScoreAddCmd;
 import com.rally.domain.recap.model.ScoreDeleteCmd;
-import com.rally.domain.recap.model.ScoreListDTO;
+import com.rally.domain.recap.model.ScoreItemDTO;
 import com.rally.domain.recap.model.ScoreListQueryCmd;
 import com.rally.domain.recap.model.ScoreRecordData;
 import com.rally.domain.recap.model.ScoreStatsDTO;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -69,7 +69,7 @@ public class ScoreAppService {
                 .setStreakCount(computeStreakCount(filtered, userId));
     }
 
-    public ScoreListDTO queryMyScores(ScoreListQueryCmd cmd) {
+    public PageDTO<ScoreItemDTO> queryMyScores(ScoreListQueryCmd cmd) {
         String userId = UserContext.get();
         List<ScoreRecordData> all = scoreDomainService.listScoresByUserId(userId);
 
@@ -79,23 +79,16 @@ public class ScoreAppService {
                 .toList();
 
         int size = cmd.getPageSize() != null ? cmd.getPageSize() : DEFAULT_PAGE_SIZE;
-        int startIdx = 0;
-        if (cmd.getLastId() != null) {
-            for (int i = 0; i < filtered.size(); i++) {
-                if (filtered.get(i).getBizId().equals(cmd.getLastId())) {
-                    startIdx = i + 1;
-                    break;
-                }
-            }
-        }
-        int endIdx = Math.min(startIdx + size, filtered.size());
-        List<ScoreRecordData> page = filtered.subList(startIdx, endIdx);
-        boolean hasMore = endIdx < filtered.size();
+        List<Object> cursor = PageDTO.parseCursor(cmd.getLastId());
+        String lastId = cursor.isEmpty() ? null : (String) cursor.get(0);
+        List<ScoreRecordData> window = PageDTO.sliceAfter(filtered, lastId, size + 1, ScoreRecordData::getBizId);
+        boolean hasMore = window.size() > size;
+        List<ScoreRecordData> pageData = hasMore ? window.subList(0, size) : window;
 
-        return new ScoreListDTO()
-                .setList(page.stream().map(r -> toItem(userId, r)).collect(Collectors.toList()))
-                .setHasMore(hasMore)
-                .setNextCursor(hasMore ? page.get(page.size() - 1).getBizId() : null);
+        List<ScoreItemDTO> items = pageData.stream().map(r -> toItem(userId, r)).toList();
+        PageDTO<ScoreItemDTO> page = new PageDTO<>(items, null, hasMore);
+        page.buildCursor(ScoreItemDTO::getBizId);
+        return page;
     }
 
     private boolean matchTypeMatches(ScoreRecordData r, ScoreListQueryCmd.MatchType matchType) {
@@ -114,7 +107,7 @@ public class ScoreAppService {
         return (userInSideA && "A".equals(r.getWinSide())) || (!userInSideA && "B".equals(r.getWinSide()));
     }
 
-    private ScoreListDTO.Item toItem(String userId, ScoreRecordData r) {
+    private ScoreItemDTO toItem(String userId, ScoreRecordData r) {
         boolean userInSideA = userId.equals(r.getSideAPlayer1()) || userId.equals(r.getSideAPlayer2());
         ResultTypeEnum resultType = isWin(r, userId) ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
         String myScore = userInSideA ? String.valueOf(r.getSideAScore()) : String.valueOf(r.getSideBScore());
@@ -131,7 +124,7 @@ public class ScoreAppService {
         String opp2Nickname = userInSideA ? r.getSideBPlayer2Nickname() : r.getSideAPlayer2Nickname();
         String opp2Avatar = userInSideA ? r.getSideBPlayer2Avatar() : r.getSideAPlayer2Avatar();
 
-        return new ScoreListDTO.Item()
+        return new ScoreItemDTO()
                 .setBizId(r.getBizId())
                 .setMeetupId(r.getRallyMeetupId())
                 .setResultType(resultType)

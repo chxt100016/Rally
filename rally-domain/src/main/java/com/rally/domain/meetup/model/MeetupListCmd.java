@@ -33,6 +33,12 @@ public class MeetupListCmd {
     /** 上一页游标（searchAfter）：取上次响应的 nextCursor 原样回传，首页不传 */
     private String lastId;
 
+    /** 上一页最后一条的 bizId（由 lastId 在 app 层解码填充，领域层勿直接解码 lastId） */
+    private String lastBizId;
+
+    /** 上一页最后一条的开球时间（时间排序复合游标，由 lastId 在 app 层解码填充） */
+    private LocalDateTime lastStartTime;
+
     /** 经度（距离排序必传） */
     private Double lng;
 
