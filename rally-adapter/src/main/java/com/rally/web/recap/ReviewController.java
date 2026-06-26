@@ -31,7 +31,7 @@ public class ReviewController {
         return Result.ok();
     }
 
-    @GetMapping("/my")
+    @GetMapping("/me")
     public Result<?> myReview() {
         return Result.ok(reviewAppService.queryMyReview());
     }

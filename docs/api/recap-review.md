@@ -124,14 +124,14 @@ curl -X POST 'http://localhost:8080/api/rally/wechat/recap/review' \
 
 查询当前登录用户收到的所有评价汇总，含总数、各维度数量及 Top 标签。
 
-- **URL**：`GET /api/rally/wechat/recap/review/my`
+- **URL**：`GET /api/rally/wechat/recap/review/me`
 - **权限**：登录即可，无需约球参与资格
 - **入参**：无
 
 curl：
 
 ```bash
-curl -X GET 'http://localhost:8080/api/rally/wechat/recap/review/my'
+curl -X GET 'http://localhost:8080/api/rally/wechat/recap/review/me'
 ```
 
 ### 返回示例

@@ -44,12 +44,12 @@ public class Meetup {
 
     /**
      * 懒判定：计算真实状态
-     * - OPEN/FULL + endTime 已过 → FINISHED
-     * - OPEN/FULL + startTime 已过 + endTime 未过 → ONGOING
+     * - OPEN + endTime 已过 → FINISHED
+     * - OPEN + startTime 已过 + endTime 未过 → ONGOING
      */
     public MeetupStatusEnum getRealStatus() {
         MeetupStatusEnum status = data.getStatus();
-        if (status == MeetupStatusEnum.OPEN || status == MeetupStatusEnum.FULL) {
+        if (status == MeetupStatusEnum.OPEN) {
             LocalDateTime now = LocalDateTime.now();
             if (data.getEndTime().isBefore(now)) {
                 return MeetupStatusEnum.FINISHED;
@@ -212,8 +212,8 @@ public class Meetup {
         String userId = userProfile.getUser().getUserId();
         MeetupStatusEnum realStatus = getRealStatus();
 
-        // 1. 约球状态校验
-        if (realStatus == MeetupStatusEnum.FULL) {
+        // 1. 满员 / 约球状态校验
+        if (isFull()) {
             throw new BusinessException(BizErrorCode.MEETUP_FULL);
         }
         if (realStatus == MeetupStatusEnum.CLOSED) {
@@ -253,37 +253,8 @@ public class Meetup {
     }
 
     private void checkLevelLimit(UserProfile userProfile) {
-        if (data.getLevelMode() == null) {
-            return;
-        }
-        if (userProfile.getProfile() == null || userProfile.getProfile().getNtrpScore() == null) {
-            return;
-        }
-        BigDecimal userLevel = userProfile.getProfile().getNtrpScore();
-        switch (data.getLevelMode()) {
-            case RANGE:
-                if ((data.getLevelMin() != null && userLevel.compareTo(data.getLevelMin()) < 0)
-                        || (data.getLevelMax() != null && userLevel.compareTo(data.getLevelMax()) > 0)) {
-                    throw new BusinessException(BizErrorCode.LEVEL_NOT_MATCH);
-                }
-                break;
-            case EXACT:
-                if (data.getLevelMin() != null && userLevel.compareTo(data.getLevelMin()) != 0) {
-                    throw new BusinessException(BizErrorCode.LEVEL_NOT_MATCH);
-                }
-                break;
-            case ABOVE:
-                if (data.getLevelMin() != null && userLevel.compareTo(data.getLevelMin()) < 0) {
-                    throw new BusinessException(BizErrorCode.LEVEL_NOT_MATCH);
-                }
-                break;
-            case BELOW:
-                if (data.getLevelMax() != null && userLevel.compareTo(data.getLevelMax()) > 0) {
-                    throw new BusinessException(BizErrorCode.LEVEL_NOT_MATCH);
-                }
-                break;
-            default:
-                break;
+        if (!isLevelMatch(userProfile)) {
+            throw new BusinessException(BizErrorCode.LEVEL_NOT_MATCH);
         }
     }
 
@@ -292,14 +263,7 @@ public class Meetup {
      * @param userProfile 用户档案领域对象
      */
     public void checkGenderLimit(UserProfile userProfile) {
-        if (data.getGenderLimit() == GenderLimitEnum.ANY || userProfile.getUser().getGender() == null) {
-            return;
-        }
-        String userGender = userProfile.getUser().getGender().name();
-        if (data.getGenderLimit() == GenderLimitEnum.MALE && !"MALE".equals(userGender)) {
-            throw new BusinessException(BizErrorCode.GENDER_NOT_MATCH);
-        }
-        if (data.getGenderLimit() == GenderLimitEnum.FEMALE && !"FEMALE".equals(userGender)) {
+        if (!isGenderMatch(userProfile)) {
             throw new BusinessException(BizErrorCode.GENDER_NOT_MATCH);
         }
     }
@@ -309,14 +273,79 @@ public class Meetup {
      * @param userProfile 用户档案领域对象
      */
     public void checkReputationScore(UserProfile userProfile) {
-        if (userProfile.getProfile() == null || userProfile.getProfile().getReputationScore() == null) {
-            return;
-        }
-        Integer reputationScore = userProfile.getProfile().getReputationScore();
-        int threshold = SystemConfig.getInt(SystemConfigKey.MEETUP_JOIN_MIN_REPUTATION_SCORE.getKey());
-        if (reputationScore < threshold) {
+        if (!isReputationOk(userProfile)) {
             throw new BusinessException(BizErrorCode.LOW_REPUTATION_BANNED);
         }
+    }
+
+    /** 水平是否符合（无要求或无档案数据时视为符合） */
+    private boolean isLevelMatch(UserProfile userProfile) {
+        if (data.getLevelMode() == null) {
+            return true;
+        }
+        if (userProfile.getProfile() == null || userProfile.getProfile().getNtrpScore() == null) {
+            return true;
+        }
+        BigDecimal userLevel = userProfile.getProfile().getNtrpScore();
+        switch (data.getLevelMode()) {
+            case RANGE:
+                return !((data.getLevelMin() != null && userLevel.compareTo(data.getLevelMin()) < 0)
+                        || (data.getLevelMax() != null && userLevel.compareTo(data.getLevelMax()) > 0));
+            case EXACT:
+                return data.getLevelMin() == null || userLevel.compareTo(data.getLevelMin()) == 0;
+            case ABOVE:
+                return data.getLevelMin() == null || userLevel.compareTo(data.getLevelMin()) >= 0;
+            case BELOW:
+                return data.getLevelMax() == null || userLevel.compareTo(data.getLevelMax()) <= 0;
+            default:
+                return true;
+        }
+    }
+
+    /** 性别是否符合（不限或未知性别时视为符合） */
+    private boolean isGenderMatch(UserProfile userProfile) {
+        if (data.getGenderLimit() == GenderLimitEnum.ANY || userProfile.getUser().getGender() == null) {
+            return true;
+        }
+        String userGender = userProfile.getUser().getGender().name();
+        if (data.getGenderLimit() == GenderLimitEnum.MALE) {
+            return "MALE".equals(userGender);
+        }
+        if (data.getGenderLimit() == GenderLimitEnum.FEMALE) {
+            return "FEMALE".equals(userGender);
+        }
+        return true;
+    }
+
+    /** 信誉分是否达标（无档案数据时视为达标） */
+    private boolean isReputationOk(UserProfile userProfile) {
+        if (userProfile.getProfile() == null || userProfile.getProfile().getReputationScore() == null) {
+            return true;
+        }
+        int threshold = SystemConfig.getInt(SystemConfigKey.MEETUP_JOIN_MIN_REPUTATION_SCORE.getKey());
+        return userProfile.getProfile().getReputationScore() >= threshold;
+    }
+
+    /**
+     * 收集未报名场景下的准入限制原因（满员/性别/水平/信誉分，可叠加）。
+     * 仅当 actionState 为 JOIN_DIRECT/APPLY_APPROVAL 时由应用层调用；返回空列表表示可报名。
+     * @param userProfile 当前用户档案领域对象
+     */
+    public List<JoinRestrictionEnum> collectJoinRestrictions(UserProfile userProfile) {
+        List<JoinRestrictionEnum> restrictions = new ArrayList<>();
+        if (isFull()) {
+            restrictions.add(JoinRestrictionEnum.FULL);
+        }
+        if (!isGenderMatch(userProfile)) {
+            restrictions.add(JoinRestrictionEnum.GENDER_NOT_MATCH);
+        }
+        if (!isLevelMatch(userProfile)) {
+            restrictions.add(JoinRestrictionEnum.LEVEL_NOT_MATCH);
+        }
+        if (!isReputationOk(userProfile)) {
+            restrictions.add(JoinRestrictionEnum.LOW_REPUTATION);
+        }
+        return restrictions;
     }
 
     // ======================== 报名操作（需聚合根上下文） ========================
@@ -437,10 +466,7 @@ public class Meetup {
             }
         }
 
-        // 未报名根据满员和加入模式判断
-        if (realStatus == MeetupStatusEnum.FULL) {
-            return ActionStateEnum.FULL;
-        }
+        // 未报名根据加入模式判断（满员不再单列状态，由 collectJoinRestrictions 体现为 FULL 限制）
         if (realStatus == MeetupStatusEnum.ONGOING) {
             return ActionStateEnum.ONGOING;
         }

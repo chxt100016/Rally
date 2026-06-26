@@ -8,7 +8,9 @@ package com.rally.domain.meetup.enums;
  * - APPLY_APPROVAL: 招募中 + 未报名 + join_mode=APPROVAL → 「申请加入」
  * - PENDING_REVIEW: 我的报名 status=pending → 「待审核」+「撤销」
  * - JOINED: 我的报名 status=JOINED → 「退出」+「群聊」
- * - FULL: 已满员且我未加入 → 「已满员」(灰)
+ * <p>
+ * 未报名准入：JOIN_DIRECT / APPLY_APPROVAL 时，是否真正可点由 joinable + restrictions 表达
+ * （满员/性别/水平/信誉分，可叠加），见 {@link JoinRestrictionEnum}。
  * <p>
  * 创建人视角：
  * - OWNER_EDITABLE: 未到编辑锁定时间且非终态 → 「编辑信息」可用
@@ -24,7 +26,6 @@ public enum ActionStateEnum {
     APPLY_APPROVAL,
     PENDING_REVIEW,
     JOINED,
-    FULL,
     // 创建人视角
     OWNER_EDITABLE,
     OWNER_EDIT_LOCKED,

@@ -2,6 +2,7 @@ package com.rally.meetup;
 
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.enums.ActionStateEnum;
+import com.rally.domain.meetup.enums.JoinRestrictionEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.ChatDomainService;
@@ -67,7 +68,7 @@ public class MeetupDetailAppService {
         Map<String, UserProfile> profileMap = userProfileDomainService.listMap(allQueryUserIds);
 
         ActionStateEnum actionState = meetup.getActionState(currentUserId);
-        return new MeetupDetailDTO()
+        MeetupDetailDTO detail = new MeetupDetailDTO()
                 .setMeetup(MeetupAppConvertMapper.INSTANCE.toMeetupDTO(meetup.getData()))
                 .setActionState(actionState)
                 .setWeather(buildWeather(meetup))
@@ -75,6 +76,13 @@ public class MeetupDetailAppService {
                 .setParticipants(buildParticipantVOList(participants, profileMap))
                 .setRecap(meetup.canReview() ? buildRecap(meetup) : null)
                 .setUnreadCount(meetup.canChat(currentUserId) ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null);
+
+        // 仅未报名场景计算准入限制，决定报名按钮是否可点
+        if (actionState == ActionStateEnum.JOIN_DIRECT || actionState == ActionStateEnum.APPLY_APPROVAL) {
+            List<JoinRestrictionEnum> restrictions = meetup.collectJoinRestrictions(userProfileDomainService.get(currentUserId));
+            detail.setRestrictions(restrictions).setJoinable(restrictions.isEmpty());
+        }
+        return detail;
 
     }
 

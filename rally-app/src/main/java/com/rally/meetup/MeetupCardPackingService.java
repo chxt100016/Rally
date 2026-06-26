@@ -59,7 +59,7 @@ public class MeetupCardPackingService {
     }
 
     private String effectiveStatusLabel(MeetupData data) {
-        boolean expired = (data.getStatus() == MeetupStatusEnum.OPEN || data.getStatus() == MeetupStatusEnum.FULL)
+        boolean expired = data.getStatus() == MeetupStatusEnum.OPEN
                 && data.getEndTime() != null && data.getEndTime().isBefore(LocalDateTime.now());
         return expired ? MeetupStatusEnum.FINISHED.getLabel() : data.getStatus().getLabel();
     }

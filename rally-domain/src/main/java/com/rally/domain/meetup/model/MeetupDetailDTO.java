@@ -1,6 +1,7 @@
 package com.rally.domain.meetup.model;
 
 import com.rally.domain.meetup.enums.ActionStateEnum;
+import com.rally.domain.meetup.enums.JoinRestrictionEnum;
 import com.rally.domain.recap.model.RecapDTO;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -25,6 +26,10 @@ public class MeetupDetailDTO {
     private WeatherDTO weather;
     /** 操作状态 */
     private ActionStateEnum actionState;
+    /** 是否可报名（仅 actionState 为 JOIN_DIRECT/APPLY_APPROVAL 时返回，其余为 null） */
+    private Boolean joinable;
+    /** 不可报名的限制原因（可叠加；joinable=false 时非空，文案由前端拼装） */
+    private List<JoinRestrictionEnum> restrictions;
     /** im未读消息 */
     private Integer unreadCount;
 

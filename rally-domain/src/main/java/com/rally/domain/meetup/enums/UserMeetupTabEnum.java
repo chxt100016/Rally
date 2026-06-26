@@ -6,7 +6,7 @@ package com.rally.domain.meetup.enums;
 public enum UserMeetupTabEnum {
     /** 待处理：创建人待审批 + 参与者未评价/未录比分 */
     PENDING,
-    /** 进行中：status=OPEN/FULL 且未到结束时间 */
+    /** 进行中：status=OPEN 且未到结束时间 */
     IN_PROGRESS,
     /** 我发布：创建人是当前用户 */
     MY_PUBLISH,

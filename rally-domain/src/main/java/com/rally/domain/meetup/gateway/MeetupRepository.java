@@ -29,12 +29,12 @@ public interface MeetupRepository {
 
 
     /**
-     * 统计用户当日活跃发布数（status IN OPEN,FULL）
+     * 统计用户当日活跃发布数（status=OPEN）
      */
     long countTodayActive(String userId);
 
     /**
-     * 查询城市下活跃约球 ID 列表（status IN OPEN,FULL AND end_time > NOW()）
+     * 查询城市下活跃约球 ID 列表（status=OPEN AND end_time > NOW()）
      */
     List<String> listActiveIds(String cityCode);
 

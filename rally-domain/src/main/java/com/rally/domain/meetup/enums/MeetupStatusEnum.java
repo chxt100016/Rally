@@ -10,7 +10,6 @@ import lombok.Getter;
 @Getter
 public enum MeetupStatusEnum {
     OPEN("报名中"),
-    FULL("已满"),
     ONGOING("进行中"),
     CLOSED("关闭"),
     FINISHED("已结束");

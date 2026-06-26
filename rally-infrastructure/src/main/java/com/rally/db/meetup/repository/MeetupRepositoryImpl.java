@@ -152,7 +152,7 @@ public class MeetupRepositoryImpl implements MeetupRepository {
     private LambdaQueryWrapper<MeetupPO> baseFilterWrapper(MeetupListQueryParam param) {
         LambdaQueryWrapper<MeetupPO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(MeetupPO::getCityCode, param.getCityCode())
-                .in(MeetupPO::getStatus, "OPEN", "FULL")
+                .eq(MeetupPO::getStatus, "OPEN")
                 .gt(MeetupPO::getEndTime, LocalDateTime.now());
         if (!CollectionUtils.isEmpty(param.getMeetupIds())) {
             wrapper.in(MeetupPO::getBizId, param.getMeetupIds());
