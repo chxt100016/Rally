@@ -2,7 +2,6 @@ package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
-import com.rally.domain.meetup.enums.UserMeetupTabEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.gateway.NearbyRepository;
 import com.rally.domain.meetup.gateway.RegistrationRepository;
@@ -89,8 +88,8 @@ public class MeetupQueryDomainService {
                 .toList();
 
         // 5. searchAfter 游标：解码出 bizId，定位上一页最后一条记录，取其后 pageSize+1 条
-        PageCursor cursor = PageCursor.decode(query.getLastId());
-        String lastBizId = cursor != null ? cursor.getBizId() : null;
+        java.util.Map<String, Object> cursor = PageDTO.decodeCursor(query.getLastId());
+        String lastBizId = cursor != null ? (String) cursor.get("bizId") : null;
         int start = 0;
         if (StringUtils.isNotBlank(lastBizId)) {
             for (int i = 0; i < sortedData.size(); i++) {
@@ -104,32 +103,13 @@ public class MeetupQueryDomainService {
         return start < sortedData.size() ? sortedData.subList(start, end) : List.of();
     }
 
-    /**
-     * 用户约球列表查询（按 Tab 筛选，searchAfter 游标分页）
-     * 一个入口，五个分支各自独立
-     */
-    public PageDTO<MeetupData> listByUser(UserMeetupListCmd cmd, String userId) {
-        // searchAfter：多查1条用于判断 hasMore，limit = size + 1
-        int limit = cmd.getSize() + 1;
-        // 用户 Tab 为单字段游标，解码出 bizId 即可
-        PageCursor cursor = PageCursor.decode(cmd.getLastId());
-        String lastId = cursor != null ? cursor.getBizId() : null;
-        return switch (cmd.getTab()) {
-            case PENDING -> listPending(userId, lastId, limit);
-            case IN_PROGRESS -> listInProgress(userId, lastId, limit);
-            case MY_PUBLISH -> listMyPublish(userId, lastId, limit);
-            case COMPLETED -> listCompleted(userId, lastId, limit);
-            case RECENT -> listRecent(userId, lastId, limit);
-        };
-    }
-
     // ======================== 五个 Tab 分支 ========================
 
     /**
      * 待处理：创建人有 pending 报名待审批 + 参参与者已结束但未录比分 + 有未读消息
      * UNION SQL searchAfter 游标分页，review deadline 过滤在 SQL 中完成
      */
-    private PageDTO<MeetupData> listPending(String userId, String lastId, int limit) {
+    public PageDTO<MeetupData> listPending(String userId, String lastId, int limit) {
         int deadlineDays = SystemConfig.getInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getKey());
         return meetupRepository.listPendingMeetups(userId, deadlineDays, lastId, limit);
     }
@@ -137,7 +117,7 @@ public class MeetupQueryDomainService {
     /**
      * 进行中：我创建或我已批准参与 + status IN (OPEN,FULL) + 未到结束时间
      */
-    private PageDTO<MeetupData> listInProgress(String userId, String lastId, int limit) {
+    public PageDTO<MeetupData> listInProgress(String userId, String lastId, int limit) {
         MeetupListQueryParam param = MeetupListQueryParam.builder()
                 .userId(userId).statusList(List.of("OPEN", "FULL"))
                 .registrationStatuses(RegistrationStatusEnum.getParticipated())
@@ -148,7 +128,7 @@ public class MeetupQueryDomainService {
     /**
      * 我发布：创建人是当前用户，按创建时间倒序
      */
-    private PageDTO<MeetupData> listMyPublish(String userId, String lastId, int limit) {
+    public PageDTO<MeetupData> listMyPublish(String userId, String lastId, int limit) {
         MeetupListQueryParam param = MeetupListQueryParam.builder()
                 .creatorId(userId)
                 .lastId(lastId).limit(limit).build();
@@ -158,7 +138,7 @@ public class MeetupQueryDomainService {
     /**
      * 已完成： status=FINISHED/CLOSED 或懒判定已结束（OPEN/FULL 且 end_time < now）
      */
-    private PageDTO<MeetupData> listCompleted(String userId, String lastId, int limit) {
+    public PageDTO<MeetupData> listCompleted(String userId, String lastId, int limit) {
         MeetupListQueryParam param = MeetupListQueryParam.builder()
                 .userId(userId).statusList(List.of("FINISHED"))
                 .registrationStatuses(RegistrationStatusEnum.getParticipated())
@@ -169,7 +149,7 @@ public class MeetupQueryDomainService {
     /**
      * 最近：用户为创建人或已批准报名的约球，不限状态（球员主页用）
      */
-    private PageDTO<MeetupData> listRecent(String userId, String lastId, int limit) {
+    public PageDTO<MeetupData> listRecent(String userId, String lastId, int limit) {
         return meetupRepository.listRecentByUser(userId, lastId, limit);
     }
 

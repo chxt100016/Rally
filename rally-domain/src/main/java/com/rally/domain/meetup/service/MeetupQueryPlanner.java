@@ -5,7 +5,7 @@ import com.rally.domain.meetup.gateway.NearbyRepository;
 import com.rally.domain.meetup.model.MeetupListCmd;
 import com.rally.domain.meetup.model.MeetupListQueryParam;
 import com.rally.domain.meetup.model.NearbyResult;
-import com.rally.domain.meetup.model.PageCursor;
+import com.rally.domain.meetup.model.PageDTO;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -40,10 +40,13 @@ public class MeetupQueryPlanner {
                 .levelMax(query.getLevelMax())
                 .pageSize(query.getPageSize());
 
-        // 解码不透明游标：时间排序用 (startTime, bizId) 复合游标
-        PageCursor cursor = PageCursor.decode(query.getLastId());
+        // 解码不透明游标：时间排序用 {startTime, bizId} 复合游标
+        java.util.Map<String, Object> cursor = PageDTO.decodeCursor(query.getLastId());
         if (cursor != null) {
-            builder.lastStartTime(cursor.getStartTime()).lastBizId(cursor.getBizId());
+            builder.lastBizId((String) cursor.get("bizId"));
+            if (cursor.containsKey("startTime")) {
+                builder.lastStartTime(java.time.LocalDateTime.parse((String) cursor.get("startTime")));
+            }
         }
 
         // 如果有 radiusKm，通过 Redis 获取范围内的 meetupId 列表

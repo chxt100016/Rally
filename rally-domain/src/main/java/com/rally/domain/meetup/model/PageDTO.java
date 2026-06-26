@@ -1,28 +1,47 @@
 package com.rally.domain.meetup.model;
 
+import com.alibaba.fastjson2.JSON;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
-/**
- * 分页视图
- */
 @Data
 @NoArgsConstructor
 public class PageDTO<T> {
-    /** 数据列表 */
     private List<T> list;
-    /** 总数 */
     private Long total;
-    /** 是否有更多 */
     private Boolean hasMore;
-    /** 下一页游标（searchAfter）：hasMore 为 true 时返回，前端原样回传作为下一页 lastId；无更多时为 null */
     private String nextCursor;
 
     public PageDTO(List<T> list, Long total, Boolean hasMore) {
         this.list = list;
         this.total = total;
         this.hasMore = hasMore;
+    }
+
+    /** 将游标字段编码为 URL-safe Base64 JSON 对象，入参为 null/空返回 null */
+    public static String encodeCursor(Map<String, Object> fields) {
+        if (fields == null || fields.isEmpty()) return null;
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(JSON.toJSONBytes(fields));
+    }
+
+    /** 解码游标；空串或非法游标按首页处理返回 null */
+    public static Map<String, Object> decodeCursor(String encoded) {
+        if (StringUtils.isBlank(encoded)) return null;
+        try {
+            return JSON.parseObject(Base64.getUrlDecoder().decode(encoded));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** 将游标字段写入 nextCursor，hasMore 为 false 时不写 */
+    public void buildCursor(Map<String, Object> fields) {
+        if (!Boolean.TRUE.equals(hasMore)) return;
+        this.nextCursor = encodeCursor(fields);
     }
 }
