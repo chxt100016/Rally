@@ -79,7 +79,7 @@
         LIMIT #{param.limit}
     </select>
 
-    <!-- MY_PUBLISH 计数（与 listMyPublish 同条件，仅 count） -->
+    <!-- MY_PUBLISH 计数（与 listMyPublish 同条件，仅  count） -->
     <select id="countMyPublish" resultType="long">
         SELECT COUNT(*) FROM rally_meetup
         <where>
