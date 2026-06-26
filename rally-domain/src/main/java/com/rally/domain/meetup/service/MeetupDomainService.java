@@ -103,13 +103,6 @@ public class MeetupDomainService {
     }
 
     /**
-     * 统计用户已完成的约球次数
-     */
-    public long countFinishedMeetups(String userId) {
-        return meetupRepository.countFinishedByCreatorId(userId);
-    }
-
-    /**
      * 计算关闭约球的阶梯扣分
      */
     public int calculateCancelPenalty(LocalDateTime startTime, int penalty24h, int penalty12h, int penalty6h, int penaltyUnder6h) {

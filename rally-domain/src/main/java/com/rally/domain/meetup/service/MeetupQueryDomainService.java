@@ -1,13 +1,9 @@
 package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
-import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.gateway.NearbyRepository;
-import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.*;
-import com.rally.domain.system.SystemConfig;
-import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * 约球查询领域服务
- * 负责列表查询（按时间/距离）、详情查询等读操作的核心逻辑
+ * 负责广场列表查询（按时间/距离）等读操作的核心逻辑
  */
 @Slf4j
 @Service
@@ -88,63 +84,6 @@ public class MeetupQueryDomainService {
 
         // 5. searchAfter 游标：用上一页最后一条 bizId（app 层已解码）定位，取其后 pageSize+1 条
         return PageDTO.sliceAfter(sortedData, query.getLastBizId(), query.getPageSize() + 1, MeetupData::getBizId);
-    }
-
-    // ======================== 五个 Tab 分支 ========================
-
-    /**
-     * 待处理：创建人有 pending 报名待审批 + 参参与者已结束但未录比分 + 有未读消息
-     * UNION SQL searchAfter 游标分页，review deadline 过滤在 SQL 中完成
-     */
-    public PageDTO<MeetupData> listPending(String userId, String lastId, int limit) {
-        int deadlineDays = SystemConfig.getInt(SystemConfigKey.REVIEW_DEADLINE_DAYS.getKey());
-        return meetupRepository.listPendingMeetups(userId, deadlineDays, lastId, limit);
-    }
-
-    /**
-     * 进行中：我创建或我已批准参与 + status=OPEN + 未到结束时间
-     */
-    public PageDTO<MeetupData> listInProgress(String userId, String lastId, int limit) {
-        MeetupListQueryParam param = MeetupListQueryParam.builder()
-                .userId(userId).statusList(List.of("OPEN"))
-                .registrationStatuses(RegistrationStatusEnum.getParticipated())
-                .lastId(lastId).limit(limit).build();
-        return doList(param);
-    }
-
-    /**
-     * 我发布：创建人是当前用户，按创建时间倒序
-     */
-    public PageDTO<MeetupData> listMyPublish(String userId, String lastId, int limit) {
-        MeetupListQueryParam param = MeetupListQueryParam.builder()
-                .creatorId(userId)
-                .lastId(lastId).limit(limit).build();
-        return doList(param);
-    }
-
-    /**
-     * 已完成： status=FINISHED/CLOSED 或懒判定已结束（OPEN 且 end_time < now）
-     */
-    public PageDTO<MeetupData> listCompleted(String userId, String lastId, int limit) {
-        MeetupListQueryParam param = MeetupListQueryParam.builder()
-                .userId(userId).statusList(List.of("FINISHED"))
-                .registrationStatuses(RegistrationStatusEnum.getParticipated())
-                .lastId(lastId).limit(limit).build();
-        return doList(param);
-    }
-
-    /**
-     * 最近：用户为创建人或已批准报名的约球，不限状态（球员主页用）
-     */
-    public PageDTO<MeetupData> listRecent(String userId, String lastId, int limit) {
-        return meetupRepository.listRecentByUser(userId, lastId, limit);
-    }
-
-    // ======================== 内部工具方法 ========================
-
-    /** 执行用户维度分页查询（listByUser 各分支用） */
-    private PageDTO<MeetupData> doList(MeetupListQueryParam param) {
-        return meetupRepository.listByUserFilter(param);
     }
 
 }

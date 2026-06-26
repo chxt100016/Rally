@@ -1,9 +1,8 @@
 package com.rally.db.meetup.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rally.db.meetup.entity.MeetupPO;
+import com.rally.domain.meetup.model.MeetupListQueryParam;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -12,11 +11,20 @@ import java.util.List;
 @Mapper
 public interface MeetupMapper extends BaseMapper<MeetupPO> {
 
-    /** 用户维度约球列表（IN_PROGRESS / COMPLETED / MY_PUBLISH），searchAfter 游标分页 */
-    List<MeetupPO> listByUserFilter(@Param("param") com.rally.domain.meetup.model.MeetupListQueryParam param);
+    /** IN_PROGRESS：参与过 且 status=OPEN 且未结束，searchAfter 游标分页 */
+    List<MeetupPO> listInProgress(@Param("param") MeetupListQueryParam param);
 
-    /** 创建人有待审批报名的约球 */
-    IPage<MeetupPO> listCreatorPending(Page<MeetupPO> page, @Param("creatorId") String creatorId);
+    /** COMPLETED：参与过 且 (FINISHED 或懒判定已结束)，searchAfter 游标分页 */
+    List<MeetupPO> listCompleted(@Param("param") MeetupListQueryParam param);
+
+    /** COMPLETED 计数（与 listCompleted 同条件） */
+    long countCompleted(@Param("param") MeetupListQueryParam param);
+
+    /** MY_PUBLISH：创建人是当前用户，searchAfter 游标分页 */
+    List<MeetupPO> listMyPublish(@Param("param") MeetupListQueryParam param);
+
+    /** MY_PUBLISH 计数（与 listMyPublish 同条件） */
+    long countMyPublish(@Param("param") MeetupListQueryParam param);
 
     /** PENDING tab：创建人有待审批 + 参与者已结束未录比分，UNION searchAfter 游标分页 */
     List<MeetupPO> listPendingMeetups(@Param("userId") String userId, @Param("deadlineDays") int deadlineDays, @Param("lastId") String lastId, @Param("limit") int limit, @Param("participatedStatuses") List<String> participatedStatuses);

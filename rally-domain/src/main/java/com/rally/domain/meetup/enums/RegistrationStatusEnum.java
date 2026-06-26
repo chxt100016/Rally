@@ -16,8 +16,13 @@ public enum RegistrationStatusEnum {
 
     ;
 
-    /** 视为"已参与活动"的报名状态（用于用户维度查询） */
+    /** 参与态 */
     public static List<String> getParticipated() {
         return List.of(JOINED.name(), REVIEWED.name(), SKIPPED.name());
+    }
+
+    /** 完成态 */
+    public static List<String> getCompleted() {
+        return List.of(REVIEWED.name(), SKIPPED.name());
     }
 }

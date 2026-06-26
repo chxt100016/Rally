@@ -6,8 +6,7 @@ import com.rally.domain.meetup.enums.ResultTypeEnum;
 import com.rally.domain.meetup.enums.UserMeetupTabEnum;
 import com.rally.domain.meetup.model.MeetupCardDTO;
 import com.rally.domain.meetup.model.MeetupData;
-import com.rally.domain.meetup.service.MeetupDomainService;
-import com.rally.domain.meetup.service.MeetupQueryDomainService;
+import com.rally.domain.meetup.service.UserMeetupQueryDomainService;
 import com.rally.meetup.MeetupCardPackingService;
 import com.rally.domain.recap.UserReviewDomainService;
 import com.rally.domain.recap.UserReviewDomainService.ReviewSummaryDTO;
@@ -43,10 +42,7 @@ public class PlayerHomeAppService {
     private UserProfileDomainService userProfileDomainService;
 
     @Resource
-    private MeetupDomainService meetupDomainService;
-
-    @Resource
-    private MeetupQueryDomainService meetupQueryDomainService;
+    private UserMeetupQueryDomainService userMeetupQueryDomainService;
 
     @Resource
     private MeetupCardPackingService meetupCardPackingService;
@@ -108,8 +104,8 @@ public class PlayerHomeAppService {
 
     /** 构建约球信息 DTO */
     private PlayerHomeMeetupDTO buildMeetupDTO(String userId) {
-        long completedCount = meetupDomainService.countFinishedMeetups(userId);
-        List<MeetupData> recentDataList = meetupQueryDomainService.listRecent(userId, null, 4).getList();
+        long completedCount = userMeetupQueryDomainService.countCompleted(userId);
+        List<MeetupData> recentDataList = userMeetupQueryDomainService.listRecent(userId, null, 4).getList();
         List<MeetupCardDTO> recentMeetups = recentDataList.stream()
                 .map(data -> meetupCardPackingService.packCardForTab(data, UserMeetupTabEnum.RECENT))
                 .toList();

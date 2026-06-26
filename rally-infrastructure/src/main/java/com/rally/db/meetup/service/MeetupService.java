@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rally.db.meetup.entity.MeetupPO;
 import com.rally.db.meetup.mapper.MeetupMapper;
-import com.rally.domain.meetup.model.MeetupListQueryParam;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,11 +11,6 @@ import java.util.List;
 
 @Service
 public class MeetupService extends ServiceImpl<MeetupMapper, MeetupPO> {
-
-    /** 用户维度约球列表（IN_PROGRESS / COMPLETED / MY_PUBLISH），searchAfter 游标分页 */
-    public List<MeetupPO> listByUserFilter(MeetupListQueryParam param) {
-        return baseMapper.listByUserFilter(param);
-    }
 
     /** PENDING tab：UNION searchAfter 游标分页 */
     public List<MeetupPO> listPendingMeetups(String userId, int deadlineDays, String lastId, int limit, List<String> participatedStatuses) {

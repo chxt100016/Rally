@@ -70,24 +70,39 @@ public interface MeetupRepository {
     List<MeetupData> listByMeetupIdsWithFilter(MeetupListQueryParam param);
 
     /**
-     * 统计用户发布的比赛次数
-     * @param userId 用户 ID
-     * @return 发布次数
-     */
-    long countByCreatorId(String userId);
-
-    /**
-     * 统计用户已完成的约球次数（status=FINISHED）
-     */
-    long countFinishedByCreatorId(String userId);
-
-    /**
-     * 查询用户相关的约球列表（按状态+参与关系筛选，searchAfter 游标分页）
-     * 用于 IN_PROGRESS / COMPLETED / MY_PUBLISH tab
-     * @param param 查询参数（含 creatorId 或 userId + statusList + lastId + limit）
+     * IN_PROGRESS tab：参与过 且 status=OPEN 且未结束，searchAfter 游标分页
+     * @param param 查询参数（userId + statusList + registrationStatuses + lastId + limit）
      * @return 分页结果
      */
-    PageDTO<MeetupData> listByUserFilter(MeetupListQueryParam param);
+    PageDTO<MeetupData> listInProgress(MeetupListQueryParam param);
+
+    /**
+     * COMPLETED tab：参与过 且 (FINISHED 或懒判定已结束)，searchAfter 游标分页
+     * @param param 查询参数（userId + registrationStatuses + lastId + limit）
+     * @return 分页结果
+     */
+    PageDTO<MeetupData> listCompleted(MeetupListQueryParam param);
+
+    /**
+     * 统计用户已完成的约球数（与 listCompleted 同条件）
+     * @param param 查询参数（userId + registrationStatuses）
+     * @return 已完成数量
+     */
+    long countCompleted(MeetupListQueryParam param);
+
+    /**
+     * MY_PUBLISH tab：创建人是当前用户，searchAfter 游标分页
+     * @param param 查询参数（creatorId + lastId + limit）
+     * @return 分页结果
+     */
+    PageDTO<MeetupData> listMyPublish(MeetupListQueryParam param);
+
+    /**
+     * 统计用户发布的约球数（与 listMyPublish 同条件）
+     * @param param 查询参数（creatorId）
+     * @return 发布数量
+     */
+    long countMyPublish(MeetupListQueryParam param);
 
     /**
      * PENDING tab：创建人有待审批 + 参与者已结束未录比分，UNION searchAfter 游标分页

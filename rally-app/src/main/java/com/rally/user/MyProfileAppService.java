@@ -1,7 +1,7 @@
 package com.rally.user;
 
 import com.rally.config.property.QiniuConfiguration;
-import com.rally.domain.meetup.service.MeetupDomainService;
+import com.rally.domain.meetup.service.UserMeetupQueryDomainService;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.system.CityConfig;
 import com.rally.domain.system.SystemConfig;
@@ -32,7 +32,7 @@ public class MyProfileAppService {
     private UserProfileDomainService userProfileDomainService;
 
     @Resource
-    private MeetupDomainService meetupDomainService;
+    private UserMeetupQueryDomainService userMeetupQueryDomainService;
 
     @Resource
     private UserFollowDomainService userFollowDomainService;
@@ -58,7 +58,7 @@ public class MyProfileAppService {
 
 
     private MyProfileStatsDTO buildStats(String userId) {
-        long completedCount = meetupDomainService.countFinishedMeetups(userId);
+        long completedCount = userMeetupQueryDomainService.countCompleted(userId);
         return new MyProfileStatsDTO()
                 .setFollowerCount(userFollowDomainService.countFollowers(userId))
                 .setFollowingCount(userFollowDomainService.countFollowing(userId))

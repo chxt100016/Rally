@@ -3,50 +3,88 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rally.db.meetup.mapper.MeetupMapper">
 
-    <!-- 用户维度约球列表（IN_PROGRESS / COMPLETED / MY_PUBLISH），searchAfter 游标分页 -->
-    <select id="listByUserFilter" resultType="com.rally.db.meetup.entity.MeetupPO">
+    <!-- ============ 用户维度：进行中 / 已完成 / 我发布（list 与 count 共用条件片段） ============ -->
+
+    <!-- 参与过的约球：报名状态见 RegistrationStatusEnum.getParticipated() -->
+    <sql id="participatedFilter">
+        biz_id IN (
+            SELECT rally_meetup_id FROM rally_meetup_registration
+            WHERE user_id = #{param.userId} AND status IN
+            <foreach collection="param.registrationStatuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+        )
+    </sql>
+
+    <!-- searchAfter 游标 -->
+    <sql id="cursorCondition">
+        <if test="param.lastId != null and param.lastId != ''">
+            AND biz_id &lt; #{param.lastId}
+        </if>
+    </sql>
+
+    <!-- 进行中：参与过 且 status IN(statusList) 且未到结束时间 -->
+    <sql id="inProgressConditions">
+        <include refid="participatedFilter"/>
+        AND status IN <foreach collection="param.statusList" item="s" open="(" separator="," close=")">#{s}</foreach>
+        AND end_time &gt; NOW()
+    </sql>
+
+    <!-- 已完成：报名状态为完成态（REVIEWED/SKIPPED）即可，不判断 meetup 状态与时间 -->
+    <sql id="completedConditions">
+        <include refid="participatedFilter"/>
+    </sql>
+
+    <!-- 我发布：创建人是当前用户 -->
+    <sql id="myPublishConditions">
+        creator_id = #{param.creatorId}
+    </sql>
+
+    <!-- IN_PROGRESS 列表，searchAfter 游标分页 -->
+    <select id="listInProgress" resultType="com.rally.db.meetup.entity.MeetupPO">
         SELECT * FROM rally_meetup
         <where>
-            <if test="param.creatorId != null">
-                AND creator_id = #{param.creatorId}
-            </if>
-            <if test="param.userId != null">
-                AND biz_id IN (
-                    SELECT rally_meetup_id FROM rally_meetup_registration
-                    WHERE user_id = #{param.userId} AND status IN
-                    <foreach collection="param.registrationStatuses" item="s" open="(" separator="," close=")">#{s}</foreach>
-                )
-            </if>
-            <!-- IN_PROGRESS: 传入状态列表 且未到结束时间 -->
-            <if test="param.statusList != null and param.statusList.contains('OPEN')">
-                AND status IN <foreach collection="param.statusList" item="s" open="(" separator="," close=")">#{s}</foreach> AND end_time &gt; NOW()
-            </if>
-            <!-- COMPLETED: FINISHED 或懒判定已结束（不含 CLOSED） -->
-            <if test="param.statusList != null and param.statusList.contains('FINISHED')">
-                AND (
-                    status = 'FINISHED'
-                    OR (status IN ('OPEN','FULL') AND end_time &lt; NOW())
-                )
-            </if>
-            <!-- searchAfter 游标 -->
-            <if test="param.lastId != null and param.lastId != ''">
-                AND biz_id &lt; #{param.lastId}
-            </if>
+            <include refid="inProgressConditions"/>
+            <include refid="cursorCondition"/>
         </where>
         ORDER BY biz_id DESC
         LIMIT #{param.limit}
     </select>
 
-    <!-- 创建人有待审批报名的约球 -->
-    <select id="listCreatorPending" resultType="com.rally.db.meetup.entity.MeetupPO">
+    <!-- COMPLETED 列表，searchAfter 游标分页 -->
+    <select id="listCompleted" resultType="com.rally.db.meetup.entity.MeetupPO">
         SELECT * FROM rally_meetup
-        WHERE creator_id = #{creatorId}
-          AND status IN ('OPEN','FULL')
-          AND end_time &gt; NOW()
-          AND biz_id IN (
-              SELECT rally_meetup_id FROM rally_meetup_registration WHERE status = 'PENDING'
-          )
-        ORDER BY create_time DESC
+        <where>
+            <include refid="completedConditions"/>
+            <include refid="cursorCondition"/>
+        </where>
+        ORDER BY biz_id DESC
+        LIMIT #{param.limit}
+    </select>
+
+    <!-- COMPLETED 计数（与 listCompleted 同条件，仅 count） -->
+    <select id="countCompleted" resultType="long">
+        SELECT COUNT(*) FROM rally_meetup
+        <where>
+            <include refid="completedConditions"/>
+        </where>
+    </select>
+
+    <!-- MY_PUBLISH 列表，searchAfter 游标分页 -->
+    <select id="listMyPublish" resultType="com.rally.db.meetup.entity.MeetupPO">
+        SELECT * FROM rally_meetup
+        <where>
+            <include refid="myPublishConditions"/>
+            <include refid="cursorCondition"/>
+        </where>
+        ORDER BY biz_id DESC
+        LIMIT #{param.limit}
+    </select>
+
+    <!-- MY_PUBLISH 计数（与 listMyPublish 同条件，仅 count） -->
+    <select id="countMyPublish" resultType="long">
+        SELECT COUNT(*) FROM rally_meetup
+        <where>
+            <include refid="myPublishConditions"/>
+        </where>
     </select>
 
     <!-- PENDING tab：创建人有待审批 + 参与者已结束未录比分 + 有未读消息，UNION searchAfter 游标分页 -->

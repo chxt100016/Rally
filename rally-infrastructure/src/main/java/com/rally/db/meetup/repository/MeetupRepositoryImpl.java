@@ -117,23 +117,28 @@ public class MeetupRepositoryImpl implements MeetupRepository {
     }
 
     @Override
-    public long countByCreatorId(String userId) {
-        return meetupService.lambdaQuery()
-                .eq(MeetupPO::getCreatorId, userId)
-                .count();
+    public PageDTO<MeetupData> listInProgress(MeetupListQueryParam param) {
+        return toPage(meetupService.getBaseMapper().listInProgress(param), param.getLimit());
     }
 
     @Override
-    public long countFinishedByCreatorId(String userId) {
-        return meetupService.lambdaQuery()
-                .eq(MeetupPO::getCreatorId, userId)
-                .eq(MeetupPO::getStatus, "FINISHED")
-                .count();
+    public PageDTO<MeetupData> listCompleted(MeetupListQueryParam param) {
+        return toPage(meetupService.getBaseMapper().listCompleted(param), param.getLimit());
     }
 
     @Override
-    public PageDTO<MeetupData> listByUserFilter(MeetupListQueryParam param) {
-        return toPage(meetupService.listByUserFilter(param), param.getLimit());
+    public long countCompleted(MeetupListQueryParam param) {
+        return meetupService.getBaseMapper().countCompleted(param);
+    }
+
+    @Override
+    public PageDTO<MeetupData> listMyPublish(MeetupListQueryParam param) {
+        return toPage(meetupService.getBaseMapper().listMyPublish(param), param.getLimit());
+    }
+
+    @Override
+    public long countMyPublish(MeetupListQueryParam param) {
+        return meetupService.getBaseMapper().countMyPublish(param);
     }
 
     @Override
