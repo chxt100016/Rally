@@ -66,26 +66,27 @@ CREATE TABLE `payment_settlement` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分账单（收款成功后按笔向发起人分账）';
 
 -- ============================================================
--- 3. 支付域：渠道回调原始留痕（对账/排查用，非聚合根）
+-- 3. 支付域：支付全链路留痕（建单/下单/回调，对账与排查用，非聚合根）
 -- ============================================================
 
-DROP TABLE IF EXISTS `payment_notify_log`;
-CREATE TABLE `payment_notify_log` (
+DROP TABLE IF EXISTS `payment_log`;
+CREATE TABLE `payment_log` (
   `id`             BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `biz_id`         VARCHAR(32)  NOT NULL COMMENT '雪花ID',
   `channel`        VARCHAR(16)  NOT NULL DEFAULT 'WECHAT' COMMENT '支付渠道',
-  `notify_type`    VARCHAR(16)  NOT NULL COMMENT '回调类型：PAY 支付 / PROFIT_SHARE 分账',
-  `out_trade_no`   VARCHAR(64)  DEFAULT NULL COMMENT '回调中的商户订单号（payment_order/settlement biz_id）',
-  `raw_body`       TEXT         NOT NULL COMMENT '回调原始报文（解密后），对账留痕',
-  `process_status` VARCHAR(16)  NOT NULL DEFAULT 'RECEIVED' COMMENT '处理状态：RECEIVED/PROCESSED/FAILED',
+  `log_type`       VARCHAR(24)  NOT NULL COMMENT '日志类型：COLLECT 发起收款建单 / PREPAY 参与人发起支付下单 / CALLBACK 渠道回调',
+  `ref_type`       VARCHAR(16)  DEFAULT NULL COMMENT '关联单类型：ORDER 支付单 / SETTLEMENT 分账单（CALLBACK 区分支付/分账回调）',
+  `ref_id`         VARCHAR(64)  DEFAULT NULL COMMENT '关联单号（payment_order/payment_settlement biz_id，即渠道 out_trade_no/out_order_no）',
+  `raw_body`       TEXT         DEFAULT NULL COMMENT '原始报文：下单请求/响应、回调解密后报文，对账留痕',
+  `process_status` VARCHAR(16)  NOT NULL DEFAULT 'PROCESSED' COMMENT '处理状态：RECEIVED/PROCESSED/FAILED。COLLECT/PREPAY 纯留痕，落库即 PROCESSED；仅 CALLBACK 落 RECEIVED 待处理，供补偿扫描',
   `remark`         VARCHAR(255) DEFAULT NULL COMMENT '处理备注/失败原因',
   `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_biz_id` (`biz_id`),
-  KEY `idx_out_trade_no` (`out_trade_no`) COMMENT '按订单号排查',
-  KEY `idx_type_status` (`notify_type`, `process_status`) COMMENT '未处理回调补偿扫描'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='渠道回调原始留痕（对账/排查）';
+  KEY `idx_ref` (`ref_id`) COMMENT '按关联单号排查全链路',
+  KEY `idx_type_status` (`log_type`, `process_status`) COMMENT '回调未处理补偿扫描'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付全链路留痕（建单/下单/回调，对账与排查）';
 
 -- ============================================================
 -- 4. 支付域：分账接收方账本（我方维护，微信需先「添加接收方」才能分账，且有数量上限）
