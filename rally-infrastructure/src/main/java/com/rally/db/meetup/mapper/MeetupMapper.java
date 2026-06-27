@@ -11,6 +11,9 @@ import java.util.List;
 @Mapper
 public interface MeetupMapper extends BaseMapper<MeetupPO> {
 
+    /** 距离排序：SQL 用 ST_Distance_Sphere 计算距离、范围过滤并按距离升序，返回全量（量不大，不下推分页） */
+    List<MeetupPO> listByDistance(@Param("param") MeetupListQueryParam param);
+
     /** IN_PROGRESS：参与过 且 status=OPEN 且未结束，searchAfter 游标分页 */
     List<MeetupPO> listInProgress(@Param("param") MeetupListQueryParam param);
 

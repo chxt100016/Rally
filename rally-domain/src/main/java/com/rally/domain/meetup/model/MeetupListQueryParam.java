@@ -29,8 +29,12 @@ public class MeetupListQueryParam {
     private BigDecimal levelMin;
     /** 水平最大值 */
     private BigDecimal levelMax;
-    /** 约球ID列表（距离筛选时使用） */
-    private List<String> meetupIds;
+    /** 查询点经度（距离排序用） */
+    private Double lng;
+    /** 查询点纬度（距离排序用） */
+    private Double lat;
+    /** 范围半径（米），null 表示不限范围（距离排序用） */
+    private Double radiusMeters;
     /** 创建人 ID（我发布 tab 用） */
     private String creatorId;
     /** 状态列表筛选（进行中/已完成 tab 用） */

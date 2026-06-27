@@ -7,7 +7,6 @@ import com.rally.domain.meetup.enums.JoinModeEnum;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
-import com.rally.domain.meetup.gateway.NearbyRepository;
 import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.utils.Assert;
@@ -29,8 +28,6 @@ import java.util.List;
 public class MeetupDomainService {
 
     private final MeetupRepository meetupRepository;
-
-    private final NearbyRepository nearbyRepository;
 
     private final RegistrationRepository registrationRepository;
 
@@ -71,9 +68,6 @@ public class MeetupDomainService {
 
         // 2. 一次性持久化（约球主表 + 报名记录）
         meetupRepository.save(meetup);
-
-        // 3. GEO 写入
-        nearbyRepository.add(cmd.getCityCode(), meetup.getData().getBizId(), cmd.getCourtLng(), cmd.getCourtLat());
 
         return meetup.getMeetupId();
     }

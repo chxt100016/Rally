@@ -52,4 +52,7 @@ public class MeetupPO {
     /** 待处理原因（SQL 计算列，非表字段） */
     @TableField(exist = false)
     private String pendingReason;
+    /** 距离（米），距离排序 SQL 计算列，非表字段 */
+    @TableField(exist = false)
+    private Double distanceMeters;
 }

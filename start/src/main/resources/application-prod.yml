@@ -33,6 +33,4 @@ job:
     enabled: true
     status:
       cron: "0 0 2 * * ?"
-    geo:
-      cron: "0 0 */6 * * ?"
 

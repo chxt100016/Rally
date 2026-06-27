@@ -34,11 +34,6 @@ public interface MeetupRepository {
     long countTodayActive(String userId);
 
     /**
-     * 查询城市下活跃约球 ID 列表（status=OPEN AND end_time > NOW()）
-     */
-    List<String> listActiveIds(String cityCode);
-
-    /**
      * 批量更新状态为 FINISHED（兜底任务用）
      * @return 影响行数
      */
@@ -63,11 +58,12 @@ public interface MeetupRepository {
     List<MeetupData> listAvailable(MeetupListQueryParam param);
 
     /**
-     * 按 meetupId 列表 + 筛选条件查询（不分页，距离排序用）
-     * @param param 查询参数（meetupIds 用于 IN 查询）
-     * @return 符合筛选条件的结果列表
+     * 距离排序查询（不分页）：SQL 用 ST_Distance_Sphere 计算经纬度距离、范围过滤并按距离升序
+     * 返回按距离排好序的全量数据，距离（米）已写入 distanceMeters，由调用方做内存游标分页
+     * @param param 查询参数（需含 lng/lat，radiusMeters 可空表示不限范围）
+     * @return 按距离升序的结果列表
      */
-    List<MeetupData> listByMeetupIdsWithFilter(MeetupListQueryParam param);
+    List<MeetupData> listByDistance(MeetupListQueryParam param);
 
     /**
      * IN_PROGRESS tab：参与过 且 status=OPEN 且未结束，searchAfter 游标分页

@@ -3,7 +3,6 @@ package com.rally.meetup;
 import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.utils.UserContext;
 import com.rally.domain.court.service.CourtDomainService;
-import com.rally.domain.meetup.gateway.NearbyRepository;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.model.MeetupEditCmd;
 import com.rally.domain.meetup.service.MeetupPolicy;
@@ -27,8 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class MeetupAppService {
-
-    private final NearbyRepository nearbyRepository;
 
     private final MeetupDomainService meetupDomainService;
 
@@ -78,23 +75,10 @@ public class MeetupAppService {
         // 2. 编辑校验
         meetupPolicy.assertEdit(meetup, cmd);
 
-        // 3. 场地变更检测（更新前检测）
-        boolean locationChanged = meetup.isLocationChanged(cmd);
-
-        // 4. 更新字段 + 落库
+        // 3. 更新字段 + 落库
         meetupDomainService.edit(userId, meetup, cmd);
 
-        // 5. GEO 更新（如果场地变了）
-        if (locationChanged) {
-            try {
-                nearbyRepository.remove(data.getCityCode(), meetupId);
-                nearbyRepository.add(data.getCityCode(), meetupId, cmd.getCourtLng(), cmd.getCourtLat());
-            } catch (Exception e) {
-                log.warn("GEO 更新失败，不影响主流程: {}", e.getMessage());
-            }
-        }
-
-        // 6. 返回详情
+        // 4. 返回详情
         return MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
     }
 
@@ -126,14 +110,7 @@ public class MeetupAppService {
             }
         }
 
-        // 4. GEO 清理
-        try {
-            nearbyRepository.remove(data.getCityCode(), meetupId);
-        } catch (Exception e) {
-            log.warn("GEO 清理失败: {}", e.getMessage());
-        }
-
-        // 5. 发送取消通知给全体已加入参与人（创建人除外）
+        // 4. 发送取消通知给全体已加入参与人（创建人除外）
         notifySubscribeService.notify(NotifyBizType.MEETUP, meetupId, NoticeScene.MEETUP_CANCEL, meetup.getActiveParticipantIds(userId), MeetupNotifyAssembler.meetupCancelData(data), uid -> meetupDomainService.shouldNotice(meetupId, uid));
         log.info("约球已关闭: meetupId={}", meetupId);
     }

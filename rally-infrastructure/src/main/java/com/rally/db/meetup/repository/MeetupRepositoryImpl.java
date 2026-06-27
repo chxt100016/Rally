@@ -15,7 +15,6 @@ import com.rally.domain.meetup.model.PageDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -68,19 +67,6 @@ public class MeetupRepositoryImpl implements MeetupRepository {
     }
 
     @Override
-    public List<String> listActiveIds(String cityCode) {
-        return meetupService.lambdaQuery()
-                .select(MeetupPO::getBizId)
-                .eq(MeetupPO::getCityCode, cityCode)
-                .in(MeetupPO::getStatus, "OPEN", "full")
-                .gt(MeetupPO::getEndTime, LocalDateTime.now())
-                .list()
-                .stream()
-                .map(MeetupPO::getBizId)
-                .toList();
-    }
-
-    @Override
     public int batchUpdateToFinished() {
         return meetupService.batchUpdateToFinished();
     }
@@ -111,9 +97,9 @@ public class MeetupRepositoryImpl implements MeetupRepository {
     }
 
     @Override
-    public List<MeetupData> listByMeetupIdsWithFilter(MeetupListQueryParam param) {
-        // 不分页，返回所有符合筛选条件的结果
-        return MAPPER.toMeetupDataList(meetupService.list(baseFilterWrapper(param)));
+    public List<MeetupData> listByDistance(MeetupListQueryParam param) {
+        // SQL 用 ST_Distance_Sphere 计算距离、范围过滤并按距离升序，不分页（量不大）
+        return MAPPER.toMeetupDataList(meetupService.getBaseMapper().listByDistance(param));
     }
 
     @Override
@@ -159,8 +145,9 @@ public class MeetupRepositoryImpl implements MeetupRepository {
         wrapper.eq(MeetupPO::getCityCode, param.getCityCode())
                 .eq(MeetupPO::getStatus, "OPEN")
                 .gt(MeetupPO::getEndTime, LocalDateTime.now());
-        if (!CollectionUtils.isEmpty(param.getMeetupIds())) {
-            wrapper.in(MeetupPO::getBizId, param.getMeetupIds());
+        // 半径过滤：用 SQL ST_Distance_Sphere 函数计算经纬度距离（米），不再依赖 Redis GEO
+        if (param.getRadiusMeters() != null) {
+            wrapper.apply("ST_Distance_Sphere(POINT(court_lng, court_lat), POINT({0}, {1})) <= {2}", param.getLng(), param.getLat(), param.getRadiusMeters());
         }
         if (param.getMatchType() != null) {
             wrapper.eq(MeetupPO::getMatchType, param.getMatchType().name());

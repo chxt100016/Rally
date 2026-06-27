@@ -3,6 +3,39 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rally.db.meetup.mapper.MeetupMapper">
 
+    <!-- ============ 广场距离排序：SQL 用 ST_Distance_Sphere 计算经纬度距离 ============ -->
+    <!-- ST_Distance_Sphere(POINT(经度,纬度)...) 返回米；范围过滤 + 距离升序，按距离排好序的全量交由内存游标切窗口 -->
+    <select id="listByDistance" resultType="com.rally.db.meetup.entity.MeetupPO">
+        SELECT *,
+               ST_Distance_Sphere(POINT(court_lng, court_lat), POINT(#{param.lng}, #{param.lat})) AS distance_meters
+        FROM rally_meetup
+        <where>
+            city_code = #{param.cityCode}
+            AND status = 'OPEN'
+            AND end_time &gt; NOW()
+            AND court_lng IS NOT NULL AND court_lat IS NOT NULL
+            <if test="param.matchType != null">
+                AND match_type = #{param.matchType}
+            </if>
+            <if test="param.startTimeFrom != null">
+                AND start_time &gt;= #{param.startTimeFrom}
+            </if>
+            <if test="param.startTimeTo != null">
+                AND start_time &lt;= #{param.startTimeTo}
+            </if>
+            <!-- 水平区间交集：约球 [level_min, level_max] 与查询 [levelMin, levelMax] 重叠，null 边界表示无限制 -->
+            <if test="param.levelMin != null and param.levelMax != null">
+                AND (level_min IS NULL OR level_min &lt;= #{param.levelMax})
+                AND (level_max IS NULL OR level_max &gt;= #{param.levelMin})
+            </if>
+            <!-- 范围过滤：用 SQL 函数计算的距离做半径限制 -->
+            <if test="param.radiusMeters != null">
+                AND ST_Distance_Sphere(POINT(court_lng, court_lat), POINT(#{param.lng}, #{param.lat})) &lt;= #{param.radiusMeters}
+            </if>
+        </where>
+        ORDER BY distance_meters ASC, biz_id ASC
+    </select>
+
     <!-- ============ 用户维度：进行中 / 已完成 / 我发布（list 与 count 共用条件片段） ============ -->
 
     <!-- 参与过的约球：报名状态见 RegistrationStatusEnum.getParticipated() -->
