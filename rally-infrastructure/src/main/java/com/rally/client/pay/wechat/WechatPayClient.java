@@ -69,7 +69,7 @@ public class WechatPayClient implements PaymentChannelClient {
     private ProfitsharingService profitsharingService;
     private NotificationParser notificationParser;
 
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         if (StringUtils.isAnyBlank(properties.getMchId(), properties.getApiV3Key(), properties.getMerchantSerialNumber(), properties.getPrivateKeyPath())) {
             log.warn("[WechatPayClient] 微信支付配置不完整，SDK 未初始化（dev 本地无证书可忽略）");

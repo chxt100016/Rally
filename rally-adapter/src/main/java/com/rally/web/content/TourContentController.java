@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tour/content")
+@RequestMapping("/content/tour")
 public class TourContentController {
 
     @Resource
