@@ -72,6 +72,7 @@ public class TourContentAppService {
                 md.append("\n\n");
 
                 if (CollectionUtils.isNotEmpty(dateGroup.getChildren())) {
+                    tourTranslationService.matchGroups(dateGroup.getChildren(), lang);
                     for (MatchGroupDTO courtGroup : dateGroup.getChildren()) {
                         if (CollectionUtils.isNotEmpty(courtGroup.getData())) {
                             tourTranslationService.matches(courtGroup.getData(), lang);
