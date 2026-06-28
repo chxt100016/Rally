@@ -83,7 +83,7 @@ public class MeetupDetailAppService {
 //                .setPayment(buildPaymentView(meetup, currentUserId));
         ;
 
-        // 仅未报名场景计算准入限制，决定报名按钮是否可点
+        // 仅未报名场景计算准入限制，决定 报名按钮是否可点
         if (actionState == ActionStateEnum.JOIN_DIRECT || actionState == ActionStateEnum.APPLY_APPROVAL) {
             List<JoinRestrictionEnum> restrictions = meetup.collectJoinRestrictions(userProfileDomainService.get(currentUserId));
             detail.setRestrictions(restrictions).setJoinable(restrictions.isEmpty());
