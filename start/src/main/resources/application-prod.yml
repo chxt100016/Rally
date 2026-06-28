@@ -33,4 +33,16 @@ job:
     enabled: true
     status:
       cron: "0 0 2 * * ?"
+  # 支付超时关单：默认 0=不超时（payment.pay_timeout_minutes=0），仅当配置正整数才需开启
+  payment_timeout:
+    enabled: false
+    cron: "0 */5 * * * ?"
+  # 分账对账：分账无可靠回调，必须开启
+  settlement_reconcile:
+    enabled: true
+    cron: "0 */2 * * * ?"
+  # 回调漏处理补偿：扫 payment_log 中 RECEIVED 超时未处理的重放
+  payment_callback_recover:
+    enabled: true
+    cron: "0 */10 * * * ?"
 

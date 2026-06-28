@@ -103,5 +103,12 @@
             <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- 微信支付官方 SDK（V3 APIv3 全套：下单/分账/查单/回调验签解密） -->
+        <dependency>
+            <groupId>com.github.wechatpay-apiv3</groupId>
+            <artifactId>wechatpay-java</artifactId>
+            <version>0.2.14</version>
+        </dependency>
     </dependencies>
 </project>

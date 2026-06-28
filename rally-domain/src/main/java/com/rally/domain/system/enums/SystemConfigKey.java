@@ -150,6 +150,17 @@ public enum SystemConfigKey {
     USER_HINT_VIDEO("user.hint.video", "", "· 单个视频时长 ≤ 60 秒，大小 ≤ 20MB\n· 建议横屏拍摄，画面清晰稳定\n· 完整展示正手 / 反手 / 发球等技术动作\n· 每位用户最多上传 3 个视频"),
     USER_HINT_NTRP("user.hint.ntrp", "", ""),
 
+    // ==================== 支付（Payment） ====================
+
+    /** 微信支付手续费率（千 6） */
+    PAYMENT_WECHAT_FEE_RATE("payment.wechat.fee_rate", "微信支付手续费率（千6）", "0.006"),
+    /** 手续费展示文案 */
+    PAYMENT_WECHAT_FEE_DESC("payment.wechat.fee_desc", "手续费展示文案", "含微信支付手续费 0.6%"),
+    /** 待支付超时分钟数，0=不超时（默认） */
+    PAYMENT_PAY_TIMEOUT_MINUTES("payment.pay_timeout_minutes", "待支付超时分钟数，0=不超时（默认）", "0"),
+    /** 微信分账接收方数量上限，接近时触发 LRU 淘汰（后续） */
+    PAYMENT_WECHAT_SHARE_RECEIVER_MAX("payment.wechat.share_receiver_max", "微信分账接收方数量上限", "20000"),
+
     // ==================== 系统 ====================
 
     /** 群聊二维码（base64） */

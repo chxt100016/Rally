@@ -32,3 +32,13 @@ wechat:
         subscribe-send-url: https://api.weixin.qq.com/cgi-bin/message/subscribe/send
         # 订阅消息跳转版本: developer(开发版)/trial(体验版)/formal(正式版)。开发联调期请在 dev 配置改为 developer 或 trial
         subscribe-miniprogram-state: formal
+    # 微信支付（V3）：密钥/证书/回调地址均由环境变量注入（见 .env），证书文件落 ./cert/ 目录不入 git
+    pay:
+        mch-id: ${WECHAT_PAY_MCH_ID}
+        # 下单/接收方 add 都要带 appid；复用小程序 appId
+        app-id: ${WECHAT_APP_ID}
+        api-v3-key: ${WECHAT_PAY_API_V3_KEY}
+        merchant-serial-number: ${WECHAT_PAY_MERCHANT_SERIAL_NUMBER}
+        private-key-path: ${WECHAT_PAY_PRIVATE_KEY_PATH}
+        pay-notify-url: ${WECHAT_PAY_NOTIFY_URL}
+        share-notify-url: ${WECHAT_PAY_SHARE_NOTIFY_URL:}

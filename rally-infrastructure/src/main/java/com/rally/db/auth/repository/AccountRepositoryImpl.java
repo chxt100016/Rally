@@ -33,6 +33,12 @@ public class AccountRepositoryImpl implements AccountRepository {
         accountService.save(po);
     }
 
+    @Override
+    public String findIdentifierByUser(String userId, ChannelEnum channel) {
+        AccountPO po = accountService.lambdaQuery().eq(AccountPO::getUserId, userId).eq(AccountPO::getChannel, channel.name().toLowerCase()).last("LIMIT 1").one();
+        return po == null ? null : po.getIdentifier();
+    }
+
     private AccountData toData(AccountPO po) {
         AccountData data = new AccountData();
         data.setAccountId(po.getAccountId());

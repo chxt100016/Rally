@@ -3,10 +3,13 @@ package com.rally.meetup;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.enums.ActionStateEnum;
 import com.rally.domain.meetup.enums.JoinRestrictionEnum;
+import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.UserMeetupQueryDomainService;
+import com.rally.domain.payment.model.MeetupPaymentViewDTO;
+import com.rally.domain.payment.service.PaymentQueryDomainService;
 import com.rally.domain.recap.model.RecapDTO;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ScoreRecordData;
@@ -45,6 +48,7 @@ public class MeetupDetailAppService {
     private final ReviewDomainService reviewDomainService;
     private final ScoreDomainService scoreDomainService;
     private final ChatDomainService chatDomainService;
+    private final PaymentQueryDomainService paymentQueryDomainService;
 
 
     /**
@@ -75,7 +79,8 @@ public class MeetupDetailAppService {
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
                 .setParticipants(buildParticipantVOList(participants, profileMap))
                 .setRecap(meetup.canReview() ? buildRecap(meetup) : null)
-                .setUnreadCount(meetup.canChat(currentUserId) ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null);
+                .setUnreadCount(meetup.canChat(currentUserId) ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null)
+                .setPayment(buildPaymentView(meetup, currentUserId));
 
         // 仅未报名场景计算准入限制，决定报名按钮是否可点
         if (actionState == ActionStateEnum.JOIN_DIRECT || actionState == ActionStateEnum.APPLY_APPROVAL) {
@@ -84,6 +89,28 @@ public class MeetupDetailAppService {
         }
         return detail;
 
+    }
+
+    /**
+     * 组装支付视图子对象（设计 §5.5/§5.6）。仅活动已结束才有收款，未结束返回 null 避免无谓查询。
+     * 发起人维度：collectionState + 逐人收款进度 participantStatus；参与人维度：myPaymentStatus。
+     */
+    private MeetupPaymentViewDTO buildPaymentView(Meetup meetup, String currentUserId) {
+        if (meetup.getRealStatus() != MeetupStatusEnum.FINISHED) {
+            return null;
+        }
+        String meetupId = meetup.getMeetupId();
+        MeetupPaymentViewDTO view = new MeetupPaymentViewDTO();
+        // 逐人收款进度全员可见（前端用 participants[i].userId 查表，缺省 NONE）
+        view.setParticipantStatus(paymentQueryDomainService.statusByMeetup(meetupId));
+        if (meetup.isCreator(currentUserId)) {
+            // 发起人维度：收款入口态
+            view.setCollectionState(paymentQueryDomainService.collectionState(meetupId));
+        } else {
+            // 参与人维度：我的支付态
+            view.setMyPaymentStatus(paymentQueryDomainService.myPaymentStatus(meetupId, currentUserId));
+        }
+        return view;
     }
 
     private WeatherDTO buildWeather(Meetup meetup) {

@@ -17,6 +17,7 @@ CREATE TABLE `payment_order` (
   `meetup_id`              VARCHAR(32)  NOT NULL COMMENT '关联 rally_meetup.biz_id',
   `payer_user_id`          VARCHAR(32)  NOT NULL COMMENT '付款人 user_id（参与者）',
   `payee_user_id`          VARCHAR(32)  NOT NULL COMMENT '收款受益人 user_id（发起人），分账目标',
+  `payee_account`          VARCHAR(64)  DEFAULT NULL COMMENT '收款受益人渠道账号（微信 openid），冗余避免分账时再次反查',
   `base_amount`            INT          NOT NULL COMMENT '应收本金（分），分账基准',
   `fee_amount`             INT          NOT NULL DEFAULT 0 COMMENT '手续费（分）= ceil(base_amount * fee_rate)，用户承担',
   `pay_amount`             INT          NOT NULL COMMENT '实付金额（分）= base_amount + fee_amount',
@@ -98,9 +99,8 @@ CREATE TABLE `payment_share_receiver` (
   `biz_id`           VARCHAR(32)  NOT NULL COMMENT '雪花ID',
   `channel`          VARCHAR(16)  NOT NULL DEFAULT 'WECHAT' COMMENT '支付渠道',
   `user_id`          VARCHAR(32)  NOT NULL COMMENT '受益人 user_id（发起人）',
-  `account_type`     VARCHAR(24)  NOT NULL DEFAULT 'PERSONAL_OPENID' COMMENT '接收方类型：PERSONAL_OPENID 个人',
+  `account_type`     VARCHAR(24)  NOT NULL DEFAULT 'PERSONAL_OPENID' COMMENT '接收方类型（对齐微信 receiver.type）：PERSONAL_OPENID 个人',
   `account`          VARCHAR(64)  NOT NULL COMMENT '接收方标识（本小程序 appid 下的 openid）',
-  `relation_type`    VARCHAR(16)  NOT NULL DEFAULT 'USER' COMMENT '与商户关系类型（微信要求，个人一般 USER/PARTNER）',
   `bind_status`      VARCHAR(16)  NOT NULL DEFAULT 'BOUND' COMMENT '绑定状态：BOUND 已添加 / UNBOUND 已删除（淘汰）',
   `bound_time`       DATETIME     DEFAULT NULL COMMENT '添加为分账接收方时间',
   `last_share_time`  DATETIME     DEFAULT NULL COMMENT '最近活跃时间（取发起收款时间），LRU 淘汰依据',
@@ -114,12 +114,6 @@ CREATE TABLE `payment_share_receiver` (
   KEY `idx_lru` (`bind_status`, `last_share_time`) COMMENT '接近上限时按最久未用淘汰扫描'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分账接收方账本（绑定状态 + LRU 淘汰依据）';
 
--- ============================================================
--- 5. 支付域：追加系统配置项
--- ============================================================
-
-INSERT INTO `sys_config` (`biz_id`, `config_key`, `config_value`, `value_type`, `scope`, `description`, `enabled`, `version`) VALUES
-('cfg0000000000000080', 'payment.wechat.fee_rate', '0.006', 'string', 'global', '微信支付手续费率（千6）', 1, 0),
-('cfg0000000000000081', 'payment.wechat.fee_desc', '含微信支付手续费 0.6%', 'string', 'global', '手续费展示文案', 1, 0),
-('cfg0000000000000082', 'payment.pay_timeout_minutes', '0', 'int', 'global', '待支付超时分钟数，0=不超时（默认，后付费不主动关单）；>0 时到期关单并下单对齐微信 time_expire', 1, 0),
-('cfg0000000000000083', 'payment.wechat.share_receiver_max', '20000', 'int', 'global', '微信分账接收方数量上限，接近时触发 LRU 淘汰（后续）', 1, 0);
+-- 配置项默认值统一在 com.rally.domain.system.enums.SystemConfigKey 枚举维护，不落 sys_config 表：
+-- payment.wechat.fee_rate(0.006) / payment.wechat.fee_desc / payment.pay_timeout_minutes(0) / payment.wechat.share_receiver_max(20000)
+-- 仅当需覆盖默认值时才在 sys_config 落库对应 config_key。

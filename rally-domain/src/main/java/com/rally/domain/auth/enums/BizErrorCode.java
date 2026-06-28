@@ -91,7 +91,18 @@ public enum BizErrorCode {
     RECAP_REVIEW_INVALID_VALUE(43004, "评价值不合法"),
     SCORE_VERSION_MISMATCH(43005, "比分版本不一致，请刷新后重试"),
     RECAP_SCORE_NOT_FOUND(43006, "比分记录不存在"),
-    INVALID_WIN_SIDE(43007, "获胜边无效");
+    INVALID_WIN_SIDE(43007, "获胜边无效"),
+
+    // ========== 支付域 45001-45999 ==========
+    PAYMENT_ORDER_NOT_FOUND(45001, "支付单不存在"),
+    PAYMENT_ALREADY_PAID(45002, "支付单已支付"),
+    PAYMENT_STATUS_ILLEGAL(45003, "支付单状态不允许该操作"),
+    PAYMENT_NOT_PAYER(45004, "无权操作该支付单"),
+    PAYMENT_CHANNEL_NOT_SUPPORTED(45005, "暂不支持该支付渠道"),
+    PAYMENT_CREATE_FAILED(45006, "创建支付单失败"),
+    COLLECTION_NOT_ALLOWED(45007, "当前不可发起收款"),
+    SETTLEMENT_FAILED(45008, "分账失败"),
+    SHARE_RECEIVER_BIND_FAILED(45009, "分账接收方绑定失败");
 
     private final int code;
     private final String message;

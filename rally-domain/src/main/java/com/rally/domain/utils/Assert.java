@@ -14,6 +14,12 @@ public interface Assert {
         }
     }
 
+    static void notBlank(String str, BizErrorCode errorCode) {
+        if (str == null || str.trim().isEmpty()) {
+            throw new BusinessException(errorCode);
+        }
+    }
+
     static void isTrue(boolean condition, BizErrorCode errorCode) {
         if (!condition) {
             throw new BusinessException(errorCode);
