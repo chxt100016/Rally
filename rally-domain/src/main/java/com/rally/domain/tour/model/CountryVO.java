@@ -10,4 +10,5 @@ public class CountryVO {
 
     private String code;
     private String name;
+    private String flagCode;
 }

@@ -19,10 +19,8 @@ public class TourContentController {
     private TourContentAppService tourContentAppService;
 
     @GetMapping(value = "/daily", produces = "text/plain;charset=UTF-8")
-    public String getDailyContent(
-            @RequestParam("date") LocalDate date,
-            @RequestParam(value = "lang", defaultValue = "ZH_CN") TranslationLanguageEnum lang) {
-        return tourContentAppService.generateDailyContent(date, lang);
+    public String getDailyContent() {
+        return tourContentAppService.generateDailyContent();
     }
 
     @GetMapping(value = "/seeds", produces = "text/plain;charset=UTF-8")

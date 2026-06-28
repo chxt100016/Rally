@@ -157,6 +157,13 @@ public class TourMatchQueryDomainService {
         }
 
         courts.sort((a, b) -> {
+            Integer numA = extractCourtNumber(a.getKey());
+            Integer numB = extractCourtNumber(b.getKey());
+            if (numA != null && numB != null) {
+                return numA.compareTo(numB);
+            }
+            if (numA != null) return 1;
+            if (numB != null) return -1;
             Integer seedA = getMinSeed(a.getData());
             Integer seedB = getMinSeed(b.getData());
             if (!Objects.equals(seedA, seedB)) {
@@ -164,9 +171,7 @@ public class TourMatchQueryDomainService {
                 if (seedB == null) return -1;
                 return seedA - seedB;
             }
-            String keyA = a.getKey() != null ? a.getKey() : "";
-            String keyB = b.getKey() != null ? b.getKey() : "";
-            return courtTourOrderMap.getOrDefault(keyA, 2) - courtTourOrderMap.getOrDefault(keyB, 2);
+            return 0;
         });
 
         return courts;
@@ -326,6 +331,16 @@ public class TourMatchQueryDomainService {
             }
         }
         return min;
+    }
+
+    private Integer extractCourtNumber(String courtName) {
+        if (StringUtils.isBlank(courtName)) return null;
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(?i)court\\s*(\\d+)");
+        java.util.regex.Matcher matcher = pattern.matcher(courtName);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
+        }
+        return null;
     }
 
     private int roundOrder(String roundName) {
