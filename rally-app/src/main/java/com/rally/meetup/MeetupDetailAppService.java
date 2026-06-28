@@ -80,7 +80,8 @@ public class MeetupDetailAppService {
                 .setParticipants(buildParticipantVOList(participants, profileMap))
                 .setRecap(meetup.canReview() ? buildRecap(meetup) : null)
                 .setUnreadCount(meetup.canChat(currentUserId) ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null)
-                .setPayment(buildPaymentView(meetup, currentUserId));
+//                .setPayment(buildPaymentView(meetup, currentUserId));
+        ;
 
         // 仅未报名场景计算准入限制，决定报名按钮是否可点
         if (actionState == ActionStateEnum.JOIN_DIRECT || actionState == ActionStateEnum.APPLY_APPROVAL) {
