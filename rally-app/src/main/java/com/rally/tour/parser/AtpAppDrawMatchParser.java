@@ -90,8 +90,8 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
             playerMap.computeIfAbsent(entry.getPlayerId().toUpperCase(), id -> {
                 Player p = new Player();
                 p.setPlayerId(id);
-                p.setFirstName(entry.getPlayerFirstName());
-                p.setLastName(entry.getPlayerLastName());
+                p.setFirstName(entry.getPlayerFirstName() == null ? "unknown" : entry.getPlayerFirstName());
+                p.setLastName(entry.getPlayerLastName() == null ? "unknown" : entry.getPlayerLastName());
                 p.setNationality(entry.getPlayerNatlId());
                 return p;
             });

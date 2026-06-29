@@ -10,8 +10,12 @@ package com.rally.domain.meetup.enums;
 public enum JoinRestrictionEnum {
     /** 已满员 */
     FULL,
-    /** 性别不符（限男/限女） */
-    GENDER_NOT_MATCH,
+    /** 仅限男性参加 */
+    GENDER_MALE_ONLY,
+    /** 仅限女性参加 */
+    GENDER_FEMALE_ONLY,
+    /** 性别未知 */
+    GENDER_UNKNOWN,
     /** 水平不符（NTRP 不在要求范围） */
     LEVEL_NOT_MATCH,
     /** 信誉分低于门槛 */

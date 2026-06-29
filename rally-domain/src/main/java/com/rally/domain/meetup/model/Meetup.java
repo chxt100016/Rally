@@ -5,6 +5,7 @@ import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.meetup.enums.*;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
+import com.rally.domain.user.enums.GenderEnum;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.utils.Assert;
 import lombok.Getter;
@@ -337,7 +338,13 @@ public class Meetup {
             restrictions.add(JoinRestrictionEnum.FULL);
         }
         if (!isGenderMatch(userProfile)) {
-            restrictions.add(JoinRestrictionEnum.GENDER_NOT_MATCH);
+            if (userProfile.getUser().getGender() == GenderEnum.UNDISCLOSED) {
+                restrictions.add(JoinRestrictionEnum.GENDER_UNKNOWN);
+            } else if (data.getGenderLimit() == GenderLimitEnum.MALE) {
+                restrictions.add(JoinRestrictionEnum.GENDER_MALE_ONLY);
+            } else if (data.getGenderLimit() == GenderLimitEnum.FEMALE) {
+                restrictions.add(JoinRestrictionEnum.GENDER_FEMALE_ONLY);
+            }
         }
         if (!isLevelMatch(userProfile)) {
             restrictions.add(JoinRestrictionEnum.LEVEL_NOT_MATCH);
