@@ -334,6 +334,16 @@ public class Meetup {
      */
     public List<JoinRestrictionEnum> collectJoinRestrictions(UserProfile userProfile) {
         List<JoinRestrictionEnum> restrictions = new ArrayList<>();
+        // 检查用户信息完善状态
+        boolean basicDefault = userProfile.getUser().isBasicDefault();
+        boolean profileIncomplete = !userProfile.hasProfile();
+        if (basicDefault && profileIncomplete) {
+            restrictions.add(JoinRestrictionEnum.REGISTRATION_INCOMPLETE);
+        } else if (basicDefault) {
+            restrictions.add(JoinRestrictionEnum.PROFILE_INCOMPLETE);
+        } else if (profileIncomplete) {
+            restrictions.add(JoinRestrictionEnum.ONBOARDING_INCOMPLETE);
+        }
         if (isFull()) {
             restrictions.add(JoinRestrictionEnum.FULL);
         }

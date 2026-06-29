@@ -29,7 +29,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/wechat/tour/match/upcoming",
                         "/wechat/tour/match/finished",
                         "/wechat/tour/player/players",
-                        "/wechat/tour/player/tournament"
+                        "/wechat/tour/player/tournament",
+
+                        "/wechat/meetup/list"
 
                 );
         registry.addInterceptor(logInterceptor)

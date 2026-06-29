@@ -1,8 +1,8 @@
 package com.rally.domain.user.model;
 
 import com.rally.domain.auth.enums.BizErrorCode;
-import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.user.enums.GenderEnum;
+import com.rally.domain.user.enums.UserConst;
 import com.rally.domain.utils.Assert;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -24,9 +24,9 @@ public class UserData {
 
 
     /**
-     * 校验基础信息（头像、昵称）已完善
+     * 基础信息是否为默认值（头像、昵称）
      */
-    public void assertBasicComplete() {
-        Assert.isTrue(StringUtils.isNotBlank(avatarUrl) && StringUtils.isNotBlank(nickname), BizErrorCode.USER_INCOMPLETE);
+    public boolean isBasicDefault() {
+        return UserConst.DEFAULT_AVATAR_URL.equals(avatarUrl) || UserConst.DEFAULT_NICKNAME.equals(nickname);
     }
 }

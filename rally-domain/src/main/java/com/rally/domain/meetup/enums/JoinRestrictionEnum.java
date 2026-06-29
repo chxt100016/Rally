@@ -20,5 +20,11 @@ public enum JoinRestrictionEnum {
     LEVEL_NOT_MATCH,
     /** 信誉分低于门槛 */
     LOW_REPUTATION,
+    /** 个人信息未完善（头像、昵称为默认值） */
+    PROFILE_INCOMPLETE,
+    /** 球员档案未完善 */
+    ONBOARDING_INCOMPLETE,
+    /** 个人信息和球员档案均未完善 */
+    REGISTRATION_INCOMPLETE,
     ;
 }

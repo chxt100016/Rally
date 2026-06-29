@@ -43,7 +43,6 @@ public class RegistrationAppService {
         String shareUserId = cmd.getShareUserId();
 
         UserProfile userProfile = userProfileDomainService.get(userId);
-        // 不是通过分享进入需要校验信息是否完整
         userProfile.assertCompleted();
 
         if (shareUserId != null) {

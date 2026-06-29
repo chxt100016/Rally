@@ -131,13 +131,18 @@ public class UserProfile {
         profile.updateVideo(key, title);
     }
 
-    public void assertBasic() {
-        user.assertBasicComplete();
-    }
 
     public void assertCompleted() {
-//        assertBasic();
-        Assert.isTrue(hasProfile(), BizErrorCode.ONBOARDING_INCOMPLETE);
+        boolean basicDefault = user.isBasicDefault();
+        boolean profileIncomplete = !hasProfile();
+
+        if (basicDefault && profileIncomplete) {
+            throw new BusinessException(BizErrorCode.REGISTRATION_INCOMPLETE);
+        }
+        if (basicDefault) {
+            throw new BusinessException(BizErrorCode.USER_INCOMPLETE);
+        }
+        Assert.isTrue(!profileIncomplete, BizErrorCode.ONBOARDING_INCOMPLETE);
     }
 
     public String getUserId() {

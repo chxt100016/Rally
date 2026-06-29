@@ -11,6 +11,7 @@ import com.rally.domain.auth.model.LoginResultVO;
 import com.rally.domain.auth.model.WechatLoginCmd;
 import com.rally.domain.auth.model.WechatSession;
 import com.rally.domain.user.gateway.UserRepository;
+import com.rally.domain.user.enums.UserConst;
 import com.rally.domain.user.model.UserData;
 import com.rally.utils.TokenUtils;
 import com.rally.utils.UserContext;
@@ -49,8 +50,8 @@ public class AuthAppService {
             isNewUser = false;
         } else {
             UserData newUser = new UserData();
-            newUser.setAvatarUrl("default/avatar.jpeg");
-            newUser.setNickname("球员");
+            newUser.setAvatarUrl(UserConst.DEFAULT_AVATAR_URL);
+            newUser.setNickname(UserConst.DEFAULT_NICKNAME);
             UserData savedUser = userRepository.createUser(newUser);
             userId = savedUser.getUserId();
 
