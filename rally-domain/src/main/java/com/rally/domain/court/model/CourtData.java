@@ -1,5 +1,6 @@
 package com.rally.domain.court.model;
 
+import com.rally.domain.court.enums.CourtEnvironmentEnum;
 import com.rally.domain.court.enums.CourtSourceEnum;
 import com.rally.domain.court.enums.CourtStatusEnum;
 import lombok.Data;
@@ -21,6 +22,10 @@ public class CourtData {
     private String districtCode;
     private Integer total;
     private String remark;
+    private CourtEnvironmentEnum type;
+    private String tags;
+    private String cityName;
+    private String districtName;
     private CourtSourceEnum source;
     private CourtStatusEnum status;
     private LocalDateTime createTime;

@@ -3,6 +3,7 @@ package com.rally.db.court.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.rally.domain.court.enums.CourtEnvironmentEnum;
 import com.rally.domain.court.enums.CourtSourceEnum;
 import com.rally.domain.court.enums.CourtStatusEnum;
 import lombok.Data;
@@ -26,6 +27,10 @@ public class CourtPO {
     private String cityCode;
     private String districtCode;
     private String remark;
+    private CourtEnvironmentEnum type;
+    private String tags;
+    private String cityName;
+    private String districtName;
     private CourtSourceEnum source;
     private CourtStatusEnum status;
     private LocalDateTime createTime;

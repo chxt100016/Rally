@@ -1,5 +1,6 @@
 package com.rally.domain.court.model;
 
+import com.rally.domain.court.enums.CourtEnvironmentEnum;
 import lombok.Data;
 
 /**
@@ -16,4 +17,8 @@ public class CourtDTO {
     private String districtCode;
     private Integer total;
     private String remark;
+    private CourtEnvironmentEnum type;
+    private String tags;
+    private String cityName;
+    private String districtName;
 }
