@@ -31,6 +31,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/wechat/tour/player/players",
                         "/wechat/tour/player/tournament",
 
+
                         "/wechat/meetup/list"
 
                 );
