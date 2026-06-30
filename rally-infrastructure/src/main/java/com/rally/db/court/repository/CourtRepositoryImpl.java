@@ -3,6 +3,7 @@ package com.rally.db.court.repository;
 import com.rally.db.court.convert.CourtConvertMapper;
 import com.rally.db.court.entity.CourtPO;
 import com.rally.db.court.service.CourtService;
+import com.rally.domain.court.enums.CourtStatusEnum;
 import com.rally.domain.court.gateway.CourtRepository;
 import com.rally.domain.court.model.CourtData;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,7 @@ public class CourtRepositoryImpl implements CourtRepository {
     public List<CourtData> findByCityCode(String cityCode) {
         List<CourtPO> poList = courtService.lambdaQuery()
                 .eq(CourtPO::getCityCode, cityCode)
+                .eq(CourtPO::getStatus, CourtStatusEnum.ACTIVE)
                 .list();
         return MAPPER.toCourtDataList(poList);
     }
@@ -52,7 +54,9 @@ public class CourtRepositoryImpl implements CourtRepository {
     public List<CourtData> fuzzySearchByName(String cityCode, String keyword) {
         List<CourtPO> poList = courtService.lambdaQuery()
                 .eq(CourtPO::getCityCode, cityCode)
-                .like(keyword != null && !keyword.isBlank(), CourtPO::getName, keyword)
+                .eq(CourtPO::getStatus, CourtStatusEnum.ACTIVE)
+                .and(keyword != null && !keyword.isBlank(),
+                        w -> w.like(CourtPO::getName, keyword).or().like(CourtPO::getAlias, keyword))
                 .list();
         return MAPPER.toCourtDataList(poList);
     }
