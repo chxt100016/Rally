@@ -140,6 +140,7 @@ public class MeetupDetailAppService {
             creator.setNtrpScore(profile.getProfile().getNtrpScore());
         }
         creator.setPublishMeetupCount(userMeetupQueryDomainService.countMyPublish(creatorId));
+        creator.setGender(profile.getUser().getGender());
         return creator;
     }
 

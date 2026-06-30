@@ -2,11 +2,13 @@ package com.rally.domain.user.model;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
+import com.rally.domain.user.enums.GenderEnum;
 import com.rally.domain.user.enums.ProfileStatusEnum;
 import com.rally.domain.utils.Assert;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * 用户档案聚合根
@@ -129,6 +131,13 @@ public class UserProfile {
      */
     public void updateVideo(String key, String title) {
         profile.updateVideo(key, title);
+    }
+
+    public GenderEnum getGender() {
+        if (Objects.isNull(user)) {
+            return null;
+        }
+        return user.getGender();
     }
 
 
