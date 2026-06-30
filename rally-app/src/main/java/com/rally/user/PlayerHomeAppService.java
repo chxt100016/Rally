@@ -187,13 +187,17 @@ public class PlayerHomeAppService {
                 .setDate(record.getMeetupDate().format(DATE_FORMATTER))
                 .setSideAPlayer1UserId(record.getSideAPlayer1())
                 .setSideAPlayer1AvatarUrl(buildSignedUrl(record.getSideAPlayer1Avatar()))
+                .setSideAPlayer1Gender(record.getSideAPlayer1Gender())
                 .setSideAPlayer2UserId(record.getSideAPlayer2())
                 .setSideAPlayer2AvatarUrl(buildSignedUrl(record.getSideAPlayer2Avatar()))
+                .setSideAPlayer2Gender(record.getSideAPlayer2Gender())
                 .setSideAScore(String.valueOf(record.getSideAScore()))
                 .setSideBPlayer1UserId(record.getSideBPlayer1())
                 .setSideBPlayer1AvatarUrl(buildSignedUrl(record.getSideBPlayer1Avatar()))
+                .setSideBPlayer1Gender(record.getSideBPlayer1Gender())
                 .setSideBPlayer2UserId(record.getSideBPlayer2())
                 .setSideBPlayer2AvatarUrl(buildSignedUrl(record.getSideBPlayer2Avatar()))
+                .setSideBPlayer2Gender(record.getSideBPlayer2Gender())
                 .setSideBScore(String.valueOf(record.getSideBScore()));
     }
 

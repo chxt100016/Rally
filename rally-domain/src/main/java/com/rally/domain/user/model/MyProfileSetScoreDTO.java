@@ -3,6 +3,7 @@ package com.rally.domain.user.model;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.meetup.enums.ResultTypeEnum;
 import com.rally.domain.recap.enums.SetFormatEnum;
+import com.rally.domain.user.enums.GenderEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,13 +39,17 @@ public class MyProfileSetScoreDTO {
         private String date;
         private String sideAPlayer1UserId;
         private String sideAPlayer1AvatarUrl;
+        private GenderEnum sideAPlayer1Gender;
         private String sideAPlayer2UserId;
         private String sideAPlayer2AvatarUrl;
+        private GenderEnum sideAPlayer2Gender;
         private String sideAScore;
         private String sideBPlayer1UserId;
         private String sideBPlayer1AvatarUrl;
+        private GenderEnum sideBPlayer1Gender;
         private String sideBPlayer2UserId;
         private String sideBPlayer2AvatarUrl;
+        private GenderEnum sideBPlayer2Gender;
         private String sideBScore;
     }
 
