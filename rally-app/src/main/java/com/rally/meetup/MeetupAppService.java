@@ -1,6 +1,8 @@
 package com.rally.meetup;
 
 import com.rally.domain.meetup.service.ChatDomainService;
+import com.rally.domain.user.model.UserProfile;
+import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.utils.UserContext;
 import com.rally.domain.court.service.CourtDomainService;
 import com.rally.domain.meetup.model.*;
@@ -37,12 +39,16 @@ public class MeetupAppService {
 
     private final NotifySubscribeService notifySubscribeService;
 
+    private final UserProfileDomainService userProfileDomainService;
+
     /**
      * 发布约球
      */
     @Transactional
     public void publish(MeetupPublishCmd cmd) {
         String userId = UserContext.get();
+        UserProfile userProfile = this.userProfileDomainService.get(userId);
+        userProfile.assertCompleted();
 
         // 1. 校验
         meetupPolicy.assertPublish(userId, cmd);

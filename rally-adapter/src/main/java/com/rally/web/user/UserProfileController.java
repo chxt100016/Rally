@@ -52,6 +52,14 @@ public class UserProfileController {
     }
 
     /**
+     * 修改性别
+     */
+    @PutMapping("/gender")
+    public Result<MyProfileDTO> updateGender(@RequestBody @Valid UpdateGenderCmd cmd) {
+        return Result.ok(profileAppService.updateGender(cmd));
+    }
+
+    /**
      * 自评修改
      */
     @PutMapping("/ntrp")

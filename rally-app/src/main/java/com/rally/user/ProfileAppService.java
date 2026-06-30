@@ -116,6 +116,20 @@ public class ProfileAppService {
     }
 
     /**
+     * 修改性别
+     */
+    @Transactional
+    public MyProfileDTO updateGender(UpdateGenderCmd cmd) {
+        String userId = UserContext.get();
+        UserData userData = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BusinessException(BizErrorCode.DATA_NOT_FOUND, "用户不存在"));
+        userData.setGender(cmd.getGender());
+        userRepository.updateUser(userData);
+
+        return myProfileAppService.getMyProfile();
+    }
+
+    /**
      * 自评修改
      */
     @Transactional
