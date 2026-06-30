@@ -112,6 +112,8 @@ public class ScoreAppService {
         ResultTypeEnum resultType = isWin(r, userId) ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
         String myScore = userInSideA ? String.valueOf(r.getSideAScore()) : String.valueOf(r.getSideBScore());
         String opponentScore = userInSideA ? String.valueOf(r.getSideBScore()) : String.valueOf(r.getSideAScore());
+        // 当前用户性别
+        com.rally.domain.user.enums.GenderEnum myGender = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer1Gender() : r.getSideAPlayer2Gender()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer1Gender() : r.getSideBPlayer2Gender());
         // 队友（同侧的另一个人，双打才有）
         String mateId = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer2() : r.getSideAPlayer1()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer2() : r.getSideBPlayer1());
         String mateNickname = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer2Nickname() : r.getSideAPlayer1Nickname()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer2Nickname() : r.getSideBPlayer1Nickname());
@@ -139,6 +141,7 @@ public class ScoreAppService {
                 .setDate(r.getMeetupDate().format(DATE_FORMATTER))
                 .setMyScore(myScore)
                 .setOpponentScore(opponentScore)
+                .setMyGender(myGender)
                 .setTeammateId(mateId)
                 .setTeammateNickname(mateNickname)
                 .setTeammateAvatarUrl(QiniuConfiguration.buildSignedUrl(mateAvatar))
