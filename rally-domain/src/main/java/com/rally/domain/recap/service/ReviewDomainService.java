@@ -2,7 +2,7 @@ package com.rally.domain.recap.service;
 
 import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.Meetup;
-import com.rally.domain.recap.gateway.RecapRepository;
+import com.rally.domain.recap.gateway.ReviewRepository;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ReviewSubmitCmd;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewDomainService {
 
-    private final RecapRepository recapRepository;
+    private final ReviewRepository recapRepository;
     private final RegistrationRepository registrationRepository;
 
     @Transactional
