@@ -10,7 +10,7 @@ import lombok.Data;
  * 修改比分命令（一次修改一盘，bizId 定位 + version 乐观锁）
  */
 @Data
-public class ScoreUpdateCmd {
+public class ScoreUpdateCmd implements ScoreCmd {
 
     /** 约球 biz_id */
     @NotBlank(message = "约球ID不能为空")

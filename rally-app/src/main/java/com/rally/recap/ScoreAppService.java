@@ -35,14 +35,14 @@ public class ScoreAppService {
         String userId = UserContext.get();
         Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
         meetup.assertReviewAvailable(userId);
-        scoreDomainService.addScoreItem(meetup, userId, cmd, meetup.getData().getStartTime(), meetup.getData().getCourtName());
+        scoreDomainService.addScoreItem(meetup, userId, cmd);
     }
 
     public void updateScore(ScoreUpdateCmd cmd) {
         String userId = UserContext.get();
         Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
         meetup.assertReviewAvailable(userId);
-        scoreDomainService.updateScoreItem(meetup, userId, cmd, meetup.getData().getStartTime(), meetup.getData().getCourtName());
+        scoreDomainService.updateScoreItem(meetup, userId, cmd);
     }
 
     public void deleteScore(ScoreDeleteCmd cmd) {
@@ -116,13 +116,16 @@ public class ScoreAppService {
         String mateId = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer2() : r.getSideAPlayer1()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer2() : r.getSideBPlayer1());
         String mateNickname = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer2Nickname() : r.getSideAPlayer1Nickname()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer2Nickname() : r.getSideBPlayer1Nickname());
         String mateAvatar = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer2Avatar() : r.getSideAPlayer1Avatar()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer2Avatar() : r.getSideBPlayer1Avatar());
+        com.rally.domain.user.enums.GenderEnum mateGender = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer2Gender() : r.getSideAPlayer1Gender()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer2Gender() : r.getSideBPlayer1Gender());
         // 对手
         String opp1Id = userInSideA ? r.getSideBPlayer1() : r.getSideAPlayer1();
         String opp1Nickname = userInSideA ? r.getSideBPlayer1Nickname() : r.getSideAPlayer1Nickname();
         String opp1Avatar = userInSideA ? r.getSideBPlayer1Avatar() : r.getSideAPlayer1Avatar();
+        com.rally.domain.user.enums.GenderEnum opp1Gender = userInSideA ? r.getSideBPlayer1Gender() : r.getSideAPlayer1Gender();
         String opp2Id = userInSideA ? r.getSideBPlayer2() : r.getSideAPlayer2();
         String opp2Nickname = userInSideA ? r.getSideBPlayer2Nickname() : r.getSideAPlayer2Nickname();
         String opp2Avatar = userInSideA ? r.getSideBPlayer2Avatar() : r.getSideAPlayer2Avatar();
+        com.rally.domain.user.enums.GenderEnum opp2Gender = userInSideA ? r.getSideBPlayer2Gender() : r.getSideAPlayer2Gender();
 
         return new ScoreItemDTO()
                 .setBizId(r.getBizId())
@@ -139,12 +142,15 @@ public class ScoreAppService {
                 .setTeammateId(mateId)
                 .setTeammateNickname(mateNickname)
                 .setTeammateAvatarUrl(QiniuConfiguration.buildSignedUrl(mateAvatar))
+                .setTeammateGender(mateGender)
                 .setOpponent1Id(opp1Id)
                 .setOpponent1Nickname(opp1Nickname)
                 .setOpponent1AvatarUrl(QiniuConfiguration.buildSignedUrl(opp1Avatar))
+                .setOpponent1Gender(opp1Gender)
                 .setOpponent2Id(opp2Id)
                 .setOpponent2Nickname(opp2Nickname)
-                .setOpponent2AvatarUrl(QiniuConfiguration.buildSignedUrl(opp2Avatar));
+                .setOpponent2AvatarUrl(QiniuConfiguration.buildSignedUrl(opp2Avatar))
+                .setOpponent2Gender(opp2Gender);
     }
 
     private String computeStreakType(List<ScoreRecordData> all, String userId) {

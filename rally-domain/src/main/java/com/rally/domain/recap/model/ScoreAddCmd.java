@@ -10,7 +10,7 @@ import lombok.Data;
  * 新增比分命令（一次新增一盘）
  */
 @Data
-public class ScoreAddCmd {
+public class ScoreAddCmd implements ScoreCmd {
 
     /** 约球 biz_id */
     @NotBlank(message = "约球ID不能为空")

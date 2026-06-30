@@ -1,6 +1,7 @@
 package com.rally.domain.recap.model;
 
 import com.rally.domain.recap.enums.SetFormatEnum;
+import com.rally.domain.user.enums.GenderEnum;
 import lombok.Data;
 
 import java.util.List;
@@ -53,15 +54,19 @@ public class RecapDTO {
         private String sideAPlayer1;
         private String sideAPlayer1Nickname;
         private String sideAPlayer1Avatar;
+        private GenderEnum sideAPlayer1Gender;
         private String sideAPlayer2;
         private String sideAPlayer2Nickname;
         private String sideAPlayer2Avatar;
+        private GenderEnum sideAPlayer2Gender;
         private String sideBPlayer1;
         private String sideBPlayer1Nickname;
         private String sideBPlayer1Avatar;
+        private GenderEnum sideBPlayer1Gender;
         private String sideBPlayer2;
         private String sideBPlayer2Nickname;
         private String sideBPlayer2Avatar;
+        private GenderEnum sideBPlayer2Gender;
         private Integer sideAScore;
         private Integer sideBScore;
         /** 获胜边: A / B */

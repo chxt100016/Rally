@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.recap.enums.SetFormatEnum;
+import com.rally.domain.user.enums.GenderEnum;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -29,32 +30,38 @@ public class ScoreRecordPO {
     private MatchTypeEnum matchType;
     /** 比赛日期（冗余自 rally_meetup.start_time） */
     private LocalDateTime meetupDate;
-    /** 比赛场地名称（冗余自 rally_meetup.court_name） */
-    private String venueName;
     /** A 侧选手1 user_id */
     private String sideAPlayer1;
     /** A 侧选手1昵称（冗余存储） */
     private String sideAPlayer1Nickname;
     /** A 侧选手1头像URL（冗余存储） */
     private String sideAPlayer1Avatar;
+    /** A 侧选手1性别（冗余存储） */
+    private GenderEnum sideAPlayer1Gender;
     /** A 侧选手2 user_id，单打为 NULL */
     private String sideAPlayer2;
     /** A 侧选手2昵称（冗余存储） */
     private String sideAPlayer2Nickname;
     /** A 侧选手2头像URL（冗余存储） */
     private String sideAPlayer2Avatar;
+    /** A 侧选手2性别（冗余存储） */
+    private GenderEnum sideAPlayer2Gender;
     /** B 侧选手1 user_id */
     private String sideBPlayer1;
     /** B 侧选手1昵称（冗余存储） */
     private String sideBPlayer1Nickname;
     /** B 侧选手1头像URL（冗余存储） */
     private String sideBPlayer1Avatar;
+    /** B 侧选手1性别（冗余存储） */
+    private GenderEnum sideBPlayer1Gender;
     /** B 侧选手2 user_id，单打为 NULL */
     private String sideBPlayer2;
     /** B 侧选手2昵称（冗余存储） */
     private String sideBPlayer2Nickname;
     /** B 侧选手2头像URL（冗余存储） */
     private String sideBPlayer2Avatar;
+    /** B 侧选手2性别（冗余存储） */
+    private GenderEnum sideBPlayer2Gender;
     /** A 侧本盘比分 */
     private Integer sideAScore;
     /** B 侧本盘比分 */

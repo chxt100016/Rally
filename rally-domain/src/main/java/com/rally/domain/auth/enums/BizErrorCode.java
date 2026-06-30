@@ -38,7 +38,7 @@ public enum BizErrorCode {
     PROFILE_NOT_FOUND(40007, "档案不存在"),
     VIDEO_CALLBACK_INVALID(40008, "视频回调校验失败"),
     VIDEO_AT_LEAST_ONE(40009, "至少需要保留一个视频"),
-    USER_INCOMPLETE(40010, "请先完善用户信息"),
+    USER_INCOMPLETE(40010, "请先完善用户信息, 设置头像和昵称"),
     FOLLOW_SELF_NOT_ALLOWED(40010, "不能关注自己"),
     REGISTRATION_INCOMPLETE(40011, "请先完善个人信息和网球档案"),
     USER_NOT_EXIST(40012, "用户不存在"),
