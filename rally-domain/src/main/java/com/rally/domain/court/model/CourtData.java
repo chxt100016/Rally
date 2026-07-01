@@ -26,6 +26,7 @@ public class CourtData {
     private String tags;
     private String cityName;
     private String districtName;
+    private String extData;
     private CourtSourceEnum source;
     private CourtStatusEnum status;
     private LocalDateTime createTime;

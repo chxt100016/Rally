@@ -237,6 +237,7 @@ CREATE TABLE `rally_court` (
   `tags`           VARCHAR(512) DEFAULT NULL COMMENT '标签，逗号分隔，如：硬地,有遮蔽',
   `city_name`      VARCHAR(64)  DEFAULT NULL COMMENT '城市名称',
   `district_name`  VARCHAR(64)  DEFAULT NULL COMMENT '区域名称',
+  `ext_data`       TEXT         DEFAULT NULL COMMENT '扩展数据，JSON格式，存储拼音等信息',
   `source`         VARCHAR(32)  NOT NULL DEFAULT 'SYSTEM' COMMENT '来源：USER_PUBLISH 用户发布 / SYSTEM 系统录入',
   `status`         VARCHAR(32)  NOT NULL DEFAULT 'COLLECTED' COMMENT '状态：COLLECTED 已收录待审核 / ACTIVE 可用 / DISABLED 已停用',
   `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

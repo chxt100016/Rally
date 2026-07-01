@@ -3,6 +3,8 @@ package com.rally.domain.court.model;
 import com.rally.domain.court.enums.CourtEnvironmentEnum;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 球场对外返回 DTO
  */
@@ -18,7 +20,10 @@ public class CourtDTO {
     private Integer total;
     private String remark;
     private CourtEnvironmentEnum type;
-    private String tags;
+    private List<String> tags;
+    private List<String> alias;
+    private String pinyin;
+    private String pinyinInitial;
     private String cityName;
     private String districtName;
 }
