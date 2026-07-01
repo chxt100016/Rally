@@ -45,6 +45,12 @@ public class MeetupPublishCmd {
     @Size(max = 256, message = "场地地址不超过256字符")
     private String courtAddress;
 
+    /** 球场选择模式：TEXT(文本搜索) / MAP(地图选择) / FREE(自由输入) */
+    private String courtSelectMode;
+
+    /** 球场库ID，TEXT/MAP模式下从球场库选中时传入 */
+    private String courtId;
+
     /** 城市编码 */
     @NotBlank(message = "请选择城市")
     private String cityCode;

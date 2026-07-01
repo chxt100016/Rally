@@ -50,6 +50,9 @@ public class MeetupAppService {
         UserProfile userProfile = this.userProfileDomainService.get(userId);
         userProfile.assertCompleted();
 
+        // 0. TEXT/MAP 模式下，通过 courtId 查询球场数据覆盖前端数据
+        overrideCourtDataIfNeeded(cmd);
+
         // 1. 校验
         meetupPolicy.assertPublish(userId, cmd);
 
@@ -74,6 +77,9 @@ public class MeetupAppService {
         String meetupId = cmd.getMeetupId();
         String userId = UserContext.get();
 
+        // 0. TEXT/MAP 模式下，通过 courtId 查询球场数据覆盖前端数据
+        overrideCourtDataIfNeeded(cmd);
+
         // 1. 获取聚合根
         Meetup meetup = meetupDomainService.get(meetupId);
         MeetupData data = meetup.getData();
@@ -86,6 +92,34 @@ public class MeetupAppService {
 
         // 4. 返回详情
         return MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
+    }
+
+    /**
+     * TEXT/MAP 模式下，通过 courtId 查询球场库数据覆盖前端传来的地址数据
+     */
+    private void overrideCourtDataIfNeeded(MeetupPublishCmd cmd) {
+        String mode = cmd.getCourtSelectMode();
+        String courtId = cmd.getCourtId();
+
+        // 只有 TEXT 或 MAP 模式且有 courtId 时才覆盖
+        if (("TEXT".equals(mode) || "MAP".equals(mode)) && courtId != null && !courtId.trim().isEmpty()) {
+            CourtData court = courtDomainService.getByBizId(courtId);
+            if (court != null) {
+                // 用球场库的数据覆盖前端传来的数据
+                cmd.setCourtName(court.getName());
+                cmd.setCourtAddress(court.getAddress());
+                cmd.setCourtLng(court.getLng());
+                cmd.setCourtLat(court.getLat());
+                // 如果球场库有区县信息，也覆盖
+                if (court.getDistrictCode() != null && !court.getDistrictCode().trim().isEmpty()) {
+                    cmd.setDistrictCode(court.getDistrictCode());
+                }
+                log.info("TEXT/MAP模式，使用球场库数据覆盖：courtId={}, name={}, address={}",
+                    courtId, court.getName(), court.getAddress());
+            } else {
+                log.warn("TEXT/MAP模式但未找到球场库数据：courtId={}", courtId);
+            }
+        }
     }
 
     /**
