@@ -46,7 +46,7 @@ public class MeetupPublishCmd {
     private String courtAddress;
 
     /** 球场选择模式：TEXT(文本搜索) / MAP(地图选择) / FREE(自由输入) */
-    private String courtSelectMode;
+    private CourtSelectModeEnum courtSelectMode;
 
     /** 球场库ID，TEXT/MAP模式下从球场库选中时传入 */
     private String courtId;

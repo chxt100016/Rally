@@ -1,13 +1,13 @@
 package com.rally.domain.meetup.model;
 
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.rally.domain.court.model.CourtData;
 import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.enums.GenderLimitEnum;
 import com.rally.domain.meetup.enums.JoinModeEnum;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.system.CityConfig;
-import com.rally.domain.utils.AddressUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.DayOfWeek;
@@ -22,16 +22,16 @@ public class MeetupFactory {
     /**
      * 创建新约球（含创建者自动报名）
      *
-     * @param cmd    发布命令（含 cityCode）
-     * @param userId 创建者 ID
+     * @param cmd       发布命令（含 cityCode）
+     * @param userId    创建者 ID
+     * @param courtData TEXT/MAP 模式下从球场库查得的球场数据，FREE 模式为 null
      * @return 完整的 Meetup 聚合根（含创建者报名记录）
      */
-    public static Meetup create(MeetupPublishCmd cmd, String userId) {
+    public static Meetup create(MeetupPublishCmd cmd, String userId, CourtData courtData) {
         // 1. 映射 MeetupPublishCmd -> MeetupData（currentPlayers 已在 MapStruct 中设为 1）
-        MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId);
+        MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId, courtData);
         data.setCityName(CityConfig.getCityName(data.getCityCode()));
         data.setBizId(IdWorker.getIdStr());
-        data.setDistrictName(AddressUtils.getDistrict(data.getCourtAddress()));
 
         // 2. 创建者自动加入报名表，状态为 JOINED
         RegistrationData creatorRegistration = new RegistrationData();

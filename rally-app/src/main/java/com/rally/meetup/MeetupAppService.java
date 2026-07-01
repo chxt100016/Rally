@@ -1,5 +1,6 @@
 package com.rally.meetup;
 
+import com.rally.domain.court.model.CourtData;
 import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
@@ -50,14 +51,13 @@ public class MeetupAppService {
         UserProfile userProfile = this.userProfileDomainService.get(userId);
         userProfile.assertCompleted();
 
-        // 0. TEXT/MAP 模式下，通过 courtId 查询球场数据覆盖前端数据
-        overrideCourtDataIfNeeded(cmd);
-
         // 1. 校验
         meetupPolicy.assertPublish(userId, cmd);
 
         // 2. 构建 MeetupData 并持久化（含创建者自动报名）
-        String meetupId = meetupDomainService.save(userId, cmd);
+        Meetup meetup = meetupDomainService.save(userId, cmd);
+        MeetupData data = meetup.getData();
+        String meetupId = meetup.getMeetupId();
 
         // 加入群聊
         chatDomainService.join(meetupId, userId);
@@ -65,8 +65,8 @@ public class MeetupAppService {
         // 创建人订阅授权建额度（需审批活动前端可含 PENDING_APPROVAL）
         notifySubscribeService.grant(userId, NotifyBizType.MEETUP, meetupId, MeetupNotifyAssembler.parseScenes(cmd.getAcceptedNoticeScenes()));
 
-        // 3. 球场查找或创建（200m 范围内合并）
-        courtDomainService.findOrCreate(cmd.getCourtName(), cmd.getCourtAddress(), cmd.getCourtLng(), cmd.getCourtLat(), cmd.getCityCode(), cmd.getDistrictCode(), null);
+        // 3. 球场查找或创建（200m 范围内合并，使用聚合根中已校正的球场数据）
+        courtDomainService.findOrCreate(data.getCourtName(), data.getCourtAddress(), data.getCourtLng(), data.getCourtLat(), cmd.getCityCode(), cmd.getDistrictCode(), null);
     }
 
     /**
@@ -76,9 +76,6 @@ public class MeetupAppService {
     public MeetupVO edit(MeetupEditCmd cmd) {
         String meetupId = cmd.getMeetupId();
         String userId = UserContext.get();
-
-        // 0. TEXT/MAP 模式下，通过 courtId 查询球场数据覆盖前端数据
-        overrideCourtDataIfNeeded(cmd);
 
         // 1. 获取聚合根
         Meetup meetup = meetupDomainService.get(meetupId);
@@ -92,34 +89,6 @@ public class MeetupAppService {
 
         // 4. 返回详情
         return MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
-    }
-
-    /**
-     * TEXT/MAP 模式下，通过 courtId 查询球场库数据覆盖前端传来的地址数据
-     */
-    private void overrideCourtDataIfNeeded(MeetupPublishCmd cmd) {
-        String mode = cmd.getCourtSelectMode();
-        String courtId = cmd.getCourtId();
-
-        // 只有 TEXT 或 MAP 模式且有 courtId 时才覆盖
-        if (("TEXT".equals(mode) || "MAP".equals(mode)) && courtId != null && !courtId.trim().isEmpty()) {
-            CourtData court = courtDomainService.getByBizId(courtId);
-            if (court != null) {
-                // 用球场库的数据覆盖前端传来的数据
-                cmd.setCourtName(court.getName());
-                cmd.setCourtAddress(court.getAddress());
-                cmd.setCourtLng(court.getLng());
-                cmd.setCourtLat(court.getLat());
-                // 如果球场库有区县信息，也覆盖
-                if (court.getDistrictCode() != null && !court.getDistrictCode().trim().isEmpty()) {
-                    cmd.setDistrictCode(court.getDistrictCode());
-                }
-                log.info("TEXT/MAP模式，使用球场库数据覆盖：courtId={}, name={}, address={}",
-                    courtId, court.getName(), court.getAddress());
-            } else {
-                log.warn("TEXT/MAP模式但未找到球场库数据：courtId={}", courtId);
-            }
-        }
     }
 
     /**

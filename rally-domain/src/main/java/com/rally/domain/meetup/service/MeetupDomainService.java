@@ -1,11 +1,11 @@
 package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.court.model.CourtData;
+import com.rally.domain.court.service.CourtDomainService;
 import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
-import com.rally.domain.meetup.enums.ActionStateEnum;
-import com.rally.domain.meetup.enums.JoinModeEnum;
+import com.rally.domain.meetup.enums.CourtSelectModeEnum;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
-import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.*;
@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +31,8 @@ public class MeetupDomainService {
     private final RegistrationRepository registrationRepository;
 
     private final MeetupPolicy meetupPolicy;
+
+    private final CourtDomainService courtDomainService;
 
     /**
      * 获取约球聚合根（含全部报名记录，适用于报名/审批等场景）
@@ -52,8 +53,11 @@ public class MeetupDomainService {
     public void edit(String userId, Meetup meetup, MeetupEditCmd cmd) {
         meetup.assertOwner(userId);
 
-        // 1. 更新字段（MapStruct）
-        MeetupDomainConvertMapper.INSTANCE.updateMeetupData(meetup.getData(), cmd);
+        // 0. TEXT/MAP 模式下，通过 courtId 查询球场库数据
+        CourtData courtData = resolveCourtData(cmd);
+
+        // 1. 更新字段（MapStruct，球场信息以 courtData 为准）
+        MeetupDomainConvertMapper.INSTANCE.updateMeetupData(meetup.getData(), cmd, courtData);
 
         // 2. 保存
         meetupRepository.save(meetup.getData());
@@ -61,15 +65,20 @@ public class MeetupDomainService {
 
     /**
      * 构建约球聚合根（含创建者报名）并一次性持久化
+     * @return 已持久化的聚合根（courtName/courtAddress/courtLng/courtLat 已按 courtData 校正）
      */
-    public String save(String userId, MeetupPublishCmd cmd) {
-        // 1. 通过聚合根工厂创建（自动将创建者加入报名表）
-        Meetup meetup = MeetupFactory.create(cmd, userId);
+    public Meetup save(String userId, MeetupPublishCmd cmd) {
+
+        // 0. TEXT/MAP 模式下，通过 courtId 查询球场库数据
+        CourtData courtData = resolveCourtData(cmd);
+
+        // 1. 通过聚合根工厂创建（自动将创建者加入报名表，球场信息以 courtData 为准）
+        Meetup meetup = MeetupFactory.create(cmd, userId, courtData);
 
         // 2. 一次性持久化（约球主表 + 报名记录）
         meetupRepository.save(meetup);
 
-        return meetup.getMeetupId();
+        return meetup;
     }
 
     /**
@@ -111,6 +120,27 @@ public class MeetupDomainService {
         } else {
             return penaltyUnder6h;
         }
+    }
+
+    /**
+     * TEXT/MAP 模式下，通过 courtId 查询球场库数据，供 MapStruct 转换时使用
+     * @return 球场库数据，非 TEXT/MAP 模式或未查到时返回 null
+     */
+    private CourtData resolveCourtData(MeetupPublishCmd cmd) {
+        CourtSelectModeEnum mode = cmd.getCourtSelectMode();
+        String courtId = cmd.getCourtId();
+
+        // 只有 TEXT 或 MAP 模式且有 courtId 时才查询
+        if ((mode == CourtSelectModeEnum.TEXT || mode == CourtSelectModeEnum.MAP) && courtId != null && !courtId.trim().isEmpty()) {
+            CourtData court = courtDomainService.getByBizId(courtId);
+            if (court != null) {
+                log.info("TEXT/MAP模式，使用球场库数据：courtId={}, name={}, address={}",
+                        courtId, court.getName(), court.getAddress());
+                return court;
+            }
+            log.warn("TEXT/MAP模式但未找到球场库数据：courtId={}", courtId);
+        }
+        return null;
     }
 
 }
