@@ -1,5 +1,6 @@
 package com.rally.db.meetup.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rally.db.meetup.entity.MeetupPO;
@@ -31,5 +32,18 @@ public class MeetupService extends ServiceImpl<MeetupMapper, MeetupPO> {
                 .in(MeetupPO::getStatus, "OPEN", "full")
                 .lt(MeetupPO::getEndTime, LocalDateTime.now())
                 .set(MeetupPO::getStatus, "FINISHED"));
+    }
+
+    /**
+     * 查询指定时间范围内结束的约球（状态为 FINISHED）
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 约球 PO 列表
+     */
+    public List<MeetupPO> listFinishedByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        return baseMapper.selectList(new LambdaQueryWrapper<MeetupPO>()
+                .eq(MeetupPO::getStatus, "FINISHED")
+                .ge(MeetupPO::getEndTime, startTime)
+                .lt(MeetupPO::getEndTime, endTime));
     }
 }

@@ -72,6 +72,12 @@ public class MeetupRepositoryImpl implements MeetupRepository {
     }
 
     @Override
+    public List<MeetupData> listFinishedByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        List<MeetupPO> poList = meetupService.listFinishedByTimeRange(startTime, endTime);
+        return MAPPER.toMeetupDataList(poList);
+    }
+
+    @Override
     public long countFinishedMatches(String userId, int days) {
         LocalDateTime since = LocalDateTime.now().minusDays(days);
         // 统计用户作为发布者的已完成约球

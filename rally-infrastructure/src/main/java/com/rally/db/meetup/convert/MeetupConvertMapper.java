@@ -27,6 +27,7 @@ public interface MeetupConvertMapper {
     @Mapping(target = "genderLimit", source = "genderLimit", qualifiedByName = "strToGenderLimit")
     @Mapping(target = "joinMode", source = "joinMode", qualifiedByName = "strToJoinMode")
     @Mapping(target = "status", source = "status", qualifiedByName = "strToMeetupStatus")
+    @Mapping(target = "courtSelectMode", source = "courtSelectMode", qualifiedByName = "strToCourtSelectMode")
     @Mapping(target = "costItems", source = "costItems", qualifiedByName = "jsonToCostItems")
     @Mapping(target = "pendingReason", source = "pendingReason", qualifiedByName = "strToPendingReason")
     MeetupData toMeetupData(MeetupPO po);
@@ -39,6 +40,7 @@ public interface MeetupConvertMapper {
     @Mapping(target = "genderLimit", source = "genderLimit", qualifiedByName = "genderLimitToStr")
     @Mapping(target = "joinMode", source = "joinMode", qualifiedByName = "joinModeToStr")
     @Mapping(target = "status", source = "status", qualifiedByName = "meetupStatusToStr")
+    @Mapping(target = "courtSelectMode", source = "courtSelectMode", qualifiedByName = "courtSelectModeToStr")
     @Mapping(target = "costItems", source = "costItems", qualifiedByName = "costItemsToJson")
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
@@ -100,6 +102,16 @@ public interface MeetupConvertMapper {
     @Named("strToPendingReason")
     static PendingReasonEnum strToPendingReason(String value) {
         return value == null ? null : PendingReasonEnum.valueOf(value);
+    }
+
+    @Named("strToCourtSelectMode")
+    static CourtSelectModeEnum strToCourtSelectMode(String value) {
+        return value == null ? null : CourtSelectModeEnum.valueOf(value);
+    }
+
+    @Named("courtSelectModeToStr")
+    static String courtSelectModeToStr(CourtSelectModeEnum value) {
+        return value == null ? null : value.name();
     }
 
     @Named("strToWaitlistStatus")

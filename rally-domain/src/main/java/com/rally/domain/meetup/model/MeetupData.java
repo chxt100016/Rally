@@ -28,6 +28,8 @@ public class MeetupData {
     private String courtAddress;
     private Double courtLng;
     private Double courtLat;
+    private CourtSelectModeEnum courtSelectMode;
+    private String courtId;
 
     private LevelModeEnum levelMode;
     private BigDecimal levelMin;

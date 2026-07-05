@@ -27,6 +27,11 @@ public interface CourtConvertMapper {
     @Mapping(target = "alias", expression = "java(splitToList(data.getAlias()))")
     @Mapping(target = "pinyin", expression = "java(extractPinyin(data.getExtData()))")
     @Mapping(target = "pinyinInitial", expression = "java(extractPinyinInitial(data.getExtData()))")
+    @Mapping(target = "rating", expression = "java(extractRating(data.getExtData()))")
+    @Mapping(target = "cost", expression = "java(extractCost(data.getExtData()))")
+    @Mapping(target = "opentime", expression = "java(extractOpentime(data.getExtData()))")
+    @Mapping(target = "tel", expression = "java(extractTel(data.getExtData()))")
+    @Mapping(target = "typeShow", expression = "java(convertTypeShow(data.getType()))")
     CourtDTO toDTO(CourtData data);
 
     List<CourtDTO> toDTOList(List<CourtData> dataList);
@@ -63,5 +68,65 @@ public interface CourtConvertMapper {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Named("extractRating")
+    default String extractRating(String extData) {
+        if (StringUtils.isBlank(extData)) {
+            return null;
+        }
+        try {
+            JSONObject json = JSON.parseObject(extData);
+            return json.getString("rating");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Named("extractCost")
+    default String extractCost(String extData) {
+        if (StringUtils.isBlank(extData)) {
+            return null;
+        }
+        try {
+            JSONObject json = JSON.parseObject(extData);
+            return json.getString("cost");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Named("extractOpentime")
+    default String extractOpentime(String extData) {
+        if (StringUtils.isBlank(extData)) {
+            return null;
+        }
+        try {
+            JSONObject json = JSON.parseObject(extData);
+            return json.getString("opentime");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Named("extractTel")
+    default String extractTel(String extData) {
+        if (StringUtils.isBlank(extData)) {
+            return null;
+        }
+        try {
+            JSONObject json = JSON.parseObject(extData);
+            return json.getString("tel");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Named("convertTypeShow")
+    default String convertTypeShow(com.rally.domain.court.enums.CourtEnvironmentEnum type) {
+        if (type == null) {
+            return null;
+        }
+        return type.getLabel();
     }
 }

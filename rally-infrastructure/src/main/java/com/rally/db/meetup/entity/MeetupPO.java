@@ -36,6 +36,10 @@ public class MeetupPO {
     private Double courtLng;
     /** 纬度（从 POINT 解构） */
     private Double courtLat;
+    /** 球场选择模式：TEXT/MAP/FREE */
+    private String courtSelectMode;
+    /** 球场库ID */
+    private String courtId;
 
     private String levelMode;
     private BigDecimal levelMin;

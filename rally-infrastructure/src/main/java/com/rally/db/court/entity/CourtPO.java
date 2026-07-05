@@ -33,7 +33,9 @@ public class CourtPO {
     private String districtName;
     private String extData;
     private CourtSourceEnum source;
+    private String sourceId;
     private CourtStatusEnum status;
+    private Integer meetupCount;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

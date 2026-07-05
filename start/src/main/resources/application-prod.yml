@@ -33,6 +33,8 @@ job:
     enabled: true
     status:
       cron: "0 0 2 * * ?"
+    court-statistics:
+      cron: "0 0 3 * * ?"
   # 支付超时关单：默认 0=不超时（payment.pay_timeout_minutes=0），仅当配置正整数才需开启
   payment_timeout:
     enabled: false

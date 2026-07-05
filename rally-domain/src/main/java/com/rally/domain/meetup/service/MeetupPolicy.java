@@ -139,7 +139,7 @@ public class MeetupPolicy {
         MeetupData data = meetup.getData();
         int lockMinutes = SystemConfig.getInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START.getKey());
 
-        // 1. 权限和状态校验
+        // 1. 权限和状态校验˚k
         if (!meetup.canEdit(data.getCreatorId(), lockMinutes)) {
             throw new BusinessException(BizErrorCode.MEETUP_STATUS_ILLEGAL);
         }

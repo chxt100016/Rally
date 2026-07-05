@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 球场 Repository 实现
@@ -59,6 +60,11 @@ public class CourtRepositoryImpl implements CourtRepository {
                         w -> w.like(CourtPO::getName, keyword).or().like(CourtPO::getAlias, keyword))
                 .list();
         return MAPPER.toCourtDataList(poList);
+    }
+
+    @Override
+    public void batchIncrementMeetupCount(Map<String, Integer> courtIdCountMap) {
+        courtService.batchIncrementMeetupCount(courtIdCountMap);
     }
 
     private CourtPO findPoByBizId(String bizId) {

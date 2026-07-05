@@ -20,10 +20,15 @@ public class CourtDTO {
     private Integer total;
     private String remark;
     private CourtEnvironmentEnum type;
+    private String typeShow;
     private List<String> tags;
     private List<String> alias;
     private String pinyin;
     private String pinyinInitial;
+    private String rating;
+    private String cost;
+    private String opentime;
+    private String tel;
     private String cityName;
     private String districtName;
 }

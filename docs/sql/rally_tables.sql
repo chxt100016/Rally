@@ -100,6 +100,8 @@ CREATE TABLE `rally_meetup` (
   `court_address`   VARCHAR(256) NOT NULL COMMENT '场地详细地址，手填或地图点选',
   `court_lng`       DOUBLE       NOT NULL COMMENT '场地经度',
   `court_lat`       DOUBLE       NOT NULL COMMENT '场地纬度',
+  `court_select_mode` VARCHAR(8) DEFAULT NULL COMMENT '球场选择模式：TEXT/MAP/FREE',
+  `court_id`        VARCHAR(32)  DEFAULT NULL COMMENT '球场库ID，TEXT/MAP模式下从球场库选中时传入',
 
   `level_mode`      varchar(8) DEFAULT 'exact' COMMENT '水平要求模式',
   `level_min`       DECIMAL(3,1) DEFAULT NULL COMMENT '水平最小值，RANGE/EXACT/ABOVE 必填',
@@ -239,11 +241,14 @@ CREATE TABLE `rally_court` (
   `district_name`  VARCHAR(64)  DEFAULT NULL COMMENT '区域名称',
   `ext_data`       TEXT         DEFAULT NULL COMMENT '扩展数据，JSON格式，存储拼音等信息',
   `source`         VARCHAR(32)  NOT NULL DEFAULT 'SYSTEM' COMMENT '来源：USER_PUBLISH 用户发布 / SYSTEM 系统录入',
+  `source_id`      VARCHAR(128) DEFAULT NULL COMMENT '三方来源ID，用于标识球场在第三方系统中的唯一ID',
   `status`         VARCHAR(32)  NOT NULL DEFAULT 'COLLECTED' COMMENT '状态：COLLECTED 已收录待审核 / ACTIVE 可用 / DISABLED 已停用',
+  `meetup_count`   INT          DEFAULT 0 COMMENT '约球次数统计',
   `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_biz_id` (`biz_id`),
+  UNIQUE KEY `uk_source_id` (`source_id`),
   KEY `idx_city_district` (`city_code`, `district_code`) COMMENT '按城市/区域查询球场'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='球场信息表';
 

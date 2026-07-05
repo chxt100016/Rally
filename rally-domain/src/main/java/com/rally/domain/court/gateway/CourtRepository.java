@@ -3,6 +3,7 @@ package com.rally.domain.court.gateway;
 import com.rally.domain.court.model.CourtData;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 球场网关接口
@@ -28,4 +29,10 @@ public interface CourtRepository {
      * 模糊搜索球场名称
      */
     List<CourtData> fuzzySearchByName(String cityCode, String keyword);
+
+    /**
+     * 批量增加球场约球次数
+     * @param courtIdCountMap 球场 bizId -> 增加次数
+     */
+    void batchIncrementMeetupCount(Map<String, Integer> courtIdCountMap);
 }

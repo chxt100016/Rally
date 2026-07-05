@@ -29,6 +29,7 @@ public class CourtData {
     private String extData;
     private CourtSourceEnum source;
     private CourtStatusEnum status;
+    private Integer meetupCount;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

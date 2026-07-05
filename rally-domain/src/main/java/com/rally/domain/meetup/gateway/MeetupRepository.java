@@ -5,6 +5,7 @@ import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupListQueryParam;
 import com.rally.domain.meetup.model.PageDTO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -39,7 +40,13 @@ public interface MeetupRepository {
      */
     int batchUpdateToFinished();
 
-
+    /**
+     * 查询指定时间范围内结束的约球（状态为 FINISHED）
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 约球数据列表
+     */
+    List<MeetupData> listFinishedByTimeRange(LocalDateTime startTime, LocalDateTime endTime);
 
     /**
      * 统计用户近 N 天内完成的约球场数（可信度计算用）
