@@ -132,9 +132,65 @@ public class PlayerTournamentQueryService {
 
         // 12. 构建前方对手（未出局时推算后续轮次）
         List<MatchProgressVO> upcomingOpponents = new ArrayList<>();
+        MatchProgressVO next = null;
         if (!eliminated) {
             MatchData currentMatch = findCurrentMatch(playerMatches, playerId);
             if (currentMatch != null && currentMatch.getMatchIndex() != null) {
+                // 构建 next 对手
+                if (!"FINISHED".equals(currentMatch.getStatus())) {
+                    // 当前比赛未完成，next 是当前对手
+                    String opponentId = getOpponentId(currentMatch, playerId);
+                    if (opponentId != null) {
+                        String opponentName = playerNameMap.getOrDefault(opponentId, opponentId);
+                        Integer opponentSeed = playerSeedMap.get(opponentId);
+                        CountryVO opponentCountry = CountryEnum.getCountry(playerNationalityMap.get(opponentId));
+                        String round = currentMatch.getRoundName() != null
+                                ? currentMatch.getRoundName()
+                                : roundNameFromMatchIndex(currentMatch.getMatchIndex());
+                        next = new MatchProgressVO();
+                        next.setRound(round);
+                        next.setRoundLabel(TourRoundEnum.labelOf(round));
+                        next.setOpponentId(opponentId);
+                        next.setOpponentName(opponentName);
+                        next.setOpponentCountry(opponentCountry);
+                        next.setOpponentSeed(opponentSeed);
+                        next.setResult("PENDING");
+                        next.setScore(formatScheduleInfo(currentMatch));
+                        next.setCourt(currentMatch.getCourt());
+                    }
+                } else {
+                    // 当前比赛已完成，next 是下一轮预测对手
+                    int nextMatchIndex = currentMatch.getMatchIndex() / 2;
+                    if (nextMatchIndex >= 1) {
+                        int opponentSubtreeRoot = (currentMatch.getMatchIndex() % 2 == 0)
+                                ? currentMatch.getMatchIndex() + 1
+                                : currentMatch.getMatchIndex() - 1;
+                        String opponentId = findTopSeedInSubtree(opponentSubtreeRoot, indexToMatch, playerSeedMap, eliminatedPlayers);
+                        if (opponentId != null) {
+                            String opponentName = playerNameMap.getOrDefault(opponentId, opponentId);
+                            Integer opponentSeed = playerSeedMap.get(opponentId);
+                            CountryVO opponentCountry = CountryEnum.getCountry(playerNationalityMap.get(opponentId));
+                            MatchData nextMatch = indexToMatch.get(nextMatchIndex);
+                            String round = (nextMatch != null && nextMatch.getRoundName() != null)
+                                    ? nextMatch.getRoundName()
+                                    : roundNameFromMatchIndex(nextMatchIndex);
+                            next = new MatchProgressVO();
+                            next.setRound(round);
+                            next.setRoundLabel(TourRoundEnum.labelOf(round));
+                            next.setOpponentId(opponentId);
+                            next.setOpponentName(opponentName);
+                            next.setOpponentCountry(opponentCountry);
+                            next.setOpponentSeed(opponentSeed);
+                            next.setResult("PENDING");
+                            if (nextMatch != null) {
+                                next.setScore(formatScheduleInfo(nextMatch));
+                                next.setCourt(nextMatch.getCourt());
+                            }
+                        }
+                    }
+                }
+
+                // 构建 upcomingOpponents（从 next 的下一轮开始）
                 upcomingOpponents = buildUpcomingOpponents(currentMatch, playerId, indexToMatch, playerNameMap, playerNationalityMap, playerSeedMap, eliminatedPlayers);
             }
         }
@@ -145,6 +201,7 @@ public class PlayerTournamentQueryService {
         result.setProgressPath(progressPath);
         result.setUpcomingOpponents(upcomingOpponents);
         result.setEliminationInfo(eliminationInfo);
+        result.setNext(next);
 
         // 13. 翻译球员姓名（主球员 + 所有对手）
         tourTranslationService.playerTournament(result, TranslationLanguageEnum.ZH_CN);
@@ -173,7 +230,7 @@ public class PlayerTournamentQueryService {
     }
 
     /**
-     * 根据 matchIndex 二叉树推算后续每轮对手
+     * 根据 matchIndex 二叉树推算后续每轮对手（从 next 的下一轮开始）
      * 对每轮找对手子树中种子号最小（最高种子）且未被淘汰的球员；找不到则跳过该轮
      */
     private List<MatchProgressVO> buildUpcomingOpponents(
@@ -187,27 +244,8 @@ public class PlayerTournamentQueryService {
         List<MatchProgressVO> result = new ArrayList<>();
         int playerPathIdx = currentMatch.getMatchIndex();
 
-        // 当前比赛未完成且对手已确定，先加入
-        if (!"FINISHED".equals(currentMatch.getStatus())) {
-            String opponentId = getOpponentId(currentMatch, playerId);
-            if (opponentId != null) {
-                String opponentName = playerNameMap.getOrDefault(opponentId, opponentId);
-                Integer opponentSeed = playerSeedMap.get(opponentId);
-                CountryVO opponentCountry = CountryEnum.getCountry(playerNationalityMap.get(opponentId));
-                String round = currentMatch.getRoundName() != null
-                        ? currentMatch.getRoundName()
-                        : roundNameFromMatchIndex(playerPathIdx);
-                MatchProgressVO vo = new MatchProgressVO();
-                vo.setRound(round);
-                vo.setRoundLabel(TourRoundEnum.labelOf(round));
-                vo.setOpponentId(opponentId);
-                vo.setOpponentName(opponentName);
-                vo.setOpponentCountry(opponentCountry);
-                vo.setOpponentSeed(opponentSeed);
-                vo.setResult("PENDING");
-                result.add(vo);
-            }
-        }
+        // 始终跳过下一轮（next 已经处理），从再下一轮开始
+        playerPathIdx = playerPathIdx / 2;
 
         while (playerPathIdx / 2 >= 1) {
             int parentIdx = playerPathIdx / 2;
@@ -233,7 +271,6 @@ public class PlayerTournamentQueryService {
                 vo.setOpponentName(opponentName);
                 vo.setOpponentCountry(opponentCountry);
                 vo.setOpponentSeed(opponentSeed);
-//                vo.setScore("待定");
                 vo.setResult("PENDING");
                 result.add(vo);
             }
@@ -288,7 +325,7 @@ public class PlayerTournamentQueryService {
     }
 
     /**
-     * 格式化比分字符串，如 "6-3 6-4 7-6(5)"
+     * 格式化比分字符串，如 "6-3 6-4 7-6"
      * player1 视角：若 playerId 是 player1，直接用 p1Games-p2Games；否则反转
      */
     private String formatScore(MatchData match, String playerId, Map<Long, List<SetScoreData>> setScoreMap) {
@@ -306,13 +343,6 @@ public class PlayerTournamentQueryService {
             int myGames = isPlayer1 ? s.getP1Games() : s.getP2Games();
             int oppGames = isPlayer1 ? s.getP2Games() : s.getP1Games();
             sb.append(myGames).append("-").append(oppGames);
-            // 抢七：显示失分方的抢七分数
-            Integer myTb = isPlayer1 ? s.getP1Tiebreak() : s.getP2Tiebreak();
-            Integer oppTb = isPlayer1 ? s.getP2Tiebreak() : s.getP1Tiebreak();
-            if (myTb != null || oppTb != null) {
-                int loserTb = (myGames > oppGames) ? (oppTb != null ? oppTb : 0) : (myTb != null ? myTb : 0);
-                sb.append("(").append(loserTb).append(")");
-            }
         }
         return sb.toString();
     }
@@ -360,5 +390,41 @@ public class PlayerTournamentQueryService {
         String first = firstName != null ? firstName : "";
         String last = lastName != null ? lastName : "";
         return (first + " " + last).trim();
+    }
+
+    /**
+     * 格式化比赛日程信息：日期时间 + 球场
+     */
+    private String formatScheduleInfo(MatchData match) {
+        StringBuilder sb = new StringBuilder();
+
+        // 添加日期时间（只显示月日）
+        if (match.getScheduledAt() != null) {
+            sb.append(match.getScheduledAt().getMonthValue())
+              .append("月")
+              .append(match.getScheduledAt().getDayOfMonth())
+              .append("日 ")
+              .append(match.getScheduledAt().toLocalTime());
+        } else if (match.getMatchDate() != null) {
+            sb.append(match.getMatchDate().getMonthValue())
+              .append("月")
+              .append(match.getMatchDate().getDayOfMonth())
+              .append("日");
+        } else if (match.getScheduledAtText() != null) {
+            sb.append(match.getScheduledAtText());
+        }
+
+        // 添加球场信息
+        if (match.getCourt() != null) {
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            sb.append(match.getCourt());
+            if (match.getCourtSeq() != null) {
+                sb.append(match.getCourtSeq());
+            }
+        }
+
+        return sb.length() > 0 ? sb.toString() : "待定";
     }
 }

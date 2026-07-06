@@ -20,4 +20,6 @@ public class MatchProgressVO {
     private String score;
     /** WIN / LOSS / PENDING */
     private String result;
+    /** 球场名称（用于翻译） */
+    private String court;
 }

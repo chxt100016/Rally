@@ -147,16 +147,17 @@ public class TourTranslationService {
     }
 
     /**
-     * 翻译球员弹窗 VO：主球员姓名 + 所有对手姓名（晋级路线、前方对手、出局信息）
+     * 翻译球员弹窗 VO：主球员姓名 + 所有对手姓名（晋级路线、前方对手、出局信息、next）+ next 对手球场名
      */
     public void playerTournament(PlayerTournamentVO vo, TranslationLanguageEnum language) {
         if (vo == null) return;
 
-        // 收集所有 MatchProgressVO（晋级路线 + 前方对手 + 出局信息）
+        // 收集所有 MatchProgressVO（晋级路线 + 前方对手 + 出局信息 + next）
         List<MatchProgressVO> allProgress = new ArrayList<>();
         if (vo.getProgressPath() != null) allProgress.addAll(vo.getProgressPath());
         if (vo.getUpcomingOpponents() != null) allProgress.addAll(vo.getUpcomingOpponents());
         if (vo.getEliminationInfo() != null) allProgress.add(vo.getEliminationInfo());
+        if (vo.getNext() != null) allProgress.add(vo.getNext());
 
         // key → MatchProgressVO 列表（同名对手可能出现在多条记录中）
         Map<TranslationKey, List<MatchProgressVO>> progressMap = new HashMap<>();
@@ -169,8 +170,16 @@ public class TourTranslationService {
             }
         }
 
+        // 收集 next 对手的球场翻译 key
+        Map<TranslationKey, MatchProgressVO> courtMap = new HashMap<>();
+        if (vo.getNext() != null && vo.getNext().getCourt() != null) {
+            TranslationKey courtKey = new TranslationKey(TranslationEntityTypeEnum.COURT, vo.getNext().getCourt(), language);
+            courtMap.put(courtKey, vo.getNext());
+        }
+
         // 合并主球员 key，一次批量查询
         Set<TranslationKey> allKeys = new HashSet<>(progressMap.keySet());
+        allKeys.addAll(courtMap.keySet());
         PlayerTournamentDetailVO player = vo.getPlayer();
         TranslationKey playerKey = null;
         if (player != null && player.getName() != null) {
@@ -192,6 +201,17 @@ public class TourTranslationService {
             List<MatchProgressVO> matches = progressMap.get(entry.getKey());
             if (matches != null) {
                 matches.forEach(m -> m.setOpponentName(entry.getValue()));
+            }
+        }
+
+        // 回写 next 对手的球场翻译到 score 字段
+        for (Map.Entry<TranslationKey, String> entry : translationMap.entrySet()) {
+            MatchProgressVO match = courtMap.get(entry.getKey());
+            if (match != null && match.getScore() != null) {
+                // 替换 score 中的原始球场名为翻译后的球场名
+                String originalCourt = match.getCourt();
+                String translatedCourt = entry.getValue();
+                match.setScore(match.getScore().replace(originalCourt, translatedCourt));
             }
         }
     }

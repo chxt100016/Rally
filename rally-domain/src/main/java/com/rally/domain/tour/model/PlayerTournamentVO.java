@@ -17,4 +17,6 @@ public class PlayerTournamentVO {
     private List<MatchProgressVO> upcomingOpponents;
     /** 出局信息，仅已淘汰球员不为 null */
     private MatchProgressVO eliminationInfo;
+    /** 下一场比赛对手，score 字段显示比赛日期时间和球场 */
+    private MatchProgressVO next;
 }
