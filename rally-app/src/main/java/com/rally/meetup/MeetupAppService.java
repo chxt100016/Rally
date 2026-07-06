@@ -1,11 +1,9 @@
 package com.rally.meetup;
 
-import com.rally.domain.court.model.CourtData;
 import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.utils.UserContext;
-import com.rally.domain.court.service.CourtDomainService;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.model.MeetupEditCmd;
 import com.rally.domain.meetup.service.MeetupPolicy;
@@ -34,8 +32,6 @@ public class MeetupAppService {
 
     private final MeetupPolicy meetupPolicy;
 
-    private final CourtDomainService courtDomainService;
-
     private final ChatDomainService chatDomainService;
 
     private final NotifySubscribeService notifySubscribeService;
@@ -56,7 +52,6 @@ public class MeetupAppService {
 
         // 2. 构建 MeetupData 并持久化（含创建者自动报名）
         Meetup meetup = meetupDomainService.save(userId, cmd);
-        MeetupData data = meetup.getData();
         String meetupId = meetup.getMeetupId();
 
         // 加入群聊
@@ -64,9 +59,6 @@ public class MeetupAppService {
 
         // 创建人订阅授权建额度（需审批活动前端可含 PENDING_APPROVAL）
         notifySubscribeService.grant(userId, NotifyBizType.MEETUP, meetupId, MeetupNotifyAssembler.parseScenes(cmd.getAcceptedNoticeScenes()));
-
-        // 3. 球场查找或创建（200m 范围内合并，使用聚合根中已校正的球场数据）
-        courtDomainService.findOrCreate(data.getCourtName(), data.getCourtAddress(), data.getCourtLng(), data.getCourtLat(), cmd.getCityCode(), cmd.getDistrictCode(), null);
     }
 
     /**
