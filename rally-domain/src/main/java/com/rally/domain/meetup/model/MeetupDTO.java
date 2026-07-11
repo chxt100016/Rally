@@ -34,7 +34,6 @@ public class MeetupDTO {
     private BigDecimal levelMax;
     private GenderLimitEnum genderLimit;
     private JoinModeEnum joinMode;
-    private List<CostItem> costItems;
     private MeetupStatusEnum status;
     /** 场地索引，前端透传存储 */
     private String courtIndex;

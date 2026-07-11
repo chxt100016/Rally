@@ -125,6 +125,14 @@ public class MeetupPolicy {
             throw new BusinessException(BizErrorCode.NOT_CREATOR);
         }
         MeetupStatusEnum realStatus = meetup.getRealStatus();
+        // 如果没有其他参与者，随时可以 close（即使 FINISHED）
+        if (!meetup.hasOtherParticipants()) {
+            if (realStatus == MeetupStatusEnum.CLOSED) {
+                throw new BusinessException(BizErrorCode.MEETUP_STATUS_ILLEGAL);
+            }
+            return;
+        }
+        // 有其他参与者时，不能在 FINISHED 或 CLOSED 状态下 close
         if (realStatus == MeetupStatusEnum.FINISHED || realStatus == MeetupStatusEnum.CLOSED) {
             throw new BusinessException(BizErrorCode.MEETUP_STATUS_ILLEGAL);
         }
@@ -164,7 +172,13 @@ public class MeetupPolicy {
         }
     }
 
-
-
+    /**
+     * 断言可以修改价格（仅校验创建人权限）
+     * @param userId 当前用户
+     * @param meetup 聚合根
+     */
+    public void assertEditPrice(String userId, Meetup meetup) {
+        meetup.assertOwner(userId);
+    }
 
 }

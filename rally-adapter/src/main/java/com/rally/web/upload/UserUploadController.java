@@ -51,4 +51,13 @@ public class UserUploadController {
         }
     }
 
+    @GetMapping("/upload-token/user")
+    public Result<VideoTokenVO> getUserFileUploadToken(@RequestParam("type") String type) {
+        try {
+            return Result.ok(videoAppService.getUserFileUploadToken(type));
+        } catch (BusinessException e) {
+            return Result.fail(e.getErrorCode().getCode(), e.getMessage());
+        }
+    }
+
 }

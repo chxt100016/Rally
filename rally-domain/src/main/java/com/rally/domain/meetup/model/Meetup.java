@@ -448,18 +448,20 @@ public class Meetup {
         MeetupStatusEnum realStatus = getRealStatus();
         boolean isCreator = isCreator(currentUserId);
 
-        // 终态优先：无论是否为创建人
-        if (realStatus == MeetupStatusEnum.FINISHED) {
-            if (!isParticipant(currentUserId)) return ActionStateEnum.FINISHED;
-            return hasReview(currentUserId) ? ActionStateEnum.FINISHED_REVIEWED : ActionStateEnum.FINISHED_JOINED;
-        }
+        // CLOSED 状态优先（无论是否有其他参与者）
         if (realStatus == MeetupStatusEnum.CLOSED) {
             return isParticipant(currentUserId) ? ActionStateEnum.CLOSED_JOINED : ActionStateEnum.CLOSED;
         }
 
-        // 创建人 + 无其他参与者 + 非终态：可编辑
+        // 创建人 + 无其他参与者：可编辑（即使 FINISHED 也可编辑）
         if (isCreator && !hasOtherParticipants()) {
             return ActionStateEnum.OWNER_EDITABLE;
+        }
+
+        // FINISHED 状态（此时必有其他参与者）
+        if (realStatus == MeetupStatusEnum.FINISHED) {
+            if (!isParticipant(currentUserId)) return ActionStateEnum.FINISHED;
+            return hasReview(currentUserId) ? ActionStateEnum.FINISHED_REVIEWED : ActionStateEnum.FINISHED_JOINED;
         }
 
         // 创建人视角（此时必有其他参与者）

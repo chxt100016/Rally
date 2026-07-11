@@ -115,4 +115,19 @@ public class MeetupAppService {
         notifySubscribeService.notify(NotifyBizType.MEETUP, meetupId, NoticeScene.MEETUP_CANCEL, meetup.getActiveParticipantIds(userId), MeetupNotifyAssembler.meetupCancelData(data), uid -> meetupDomainService.shouldNotice(meetupId, uid));
         log.info("约球已关闭: meetupId={}", meetupId);
     }
+
+    /**
+     * 修改约球价格
+     */
+    @Transactional
+    public void editPrice(MeetupEditPriceCmd cmd) {
+        String userId = UserContext.get();
+        String meetupId = cmd.getMeetupId();
+
+        // 1. 获取聚合根
+        Meetup meetup = meetupDomainService.get(meetupId);
+
+        // 2. 权限校验 + 更新价格
+        meetupDomainService.editPrice(userId, meetup, cmd);
+    }
 }

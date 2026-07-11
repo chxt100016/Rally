@@ -2,7 +2,6 @@ package com.rally.domain.meetup.model;
 
 import com.rally.domain.meetup.enums.ActionStateEnum;
 import com.rally.domain.meetup.enums.JoinRestrictionEnum;
-import com.rally.domain.payment.model.MeetupPaymentViewDTO;
 import com.rally.domain.recap.model.RecapDTO;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -33,7 +32,7 @@ public class MeetupDetailDTO {
     private List<JoinRestrictionEnum> restrictions;
     /** im未读消息 */
     private Integer unreadCount;
-    /** 支付视图（活动结束后非 null；由 app 层详情编排组装，约球域零改动，见设计 §5.5/§5.6） */
-    private MeetupPaymentViewDTO payment;
+    /** 支付视图（有费用明细时返回；由 app 层详情编排组装） */
+    private PaymentDTO payment;
 
 }

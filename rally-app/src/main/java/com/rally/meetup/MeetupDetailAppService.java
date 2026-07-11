@@ -8,8 +8,6 @@ import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.UserMeetupQueryDomainService;
-import com.rally.domain.payment.model.MeetupPaymentViewDTO;
-import com.rally.domain.payment.service.PaymentQueryDomainService;
 import com.rally.domain.recap.model.RecapDTO;
 import com.rally.domain.recap.model.ReviewData;
 import com.rally.domain.recap.model.ScoreRecordData;
@@ -18,7 +16,10 @@ import com.rally.domain.recap.service.ScoreDomainService;
 import com.rally.domain.score.ProfileLevelManager;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
+import com.rally.domain.user.enums.UserExtKeyEnum;
+import com.rally.domain.user.model.UserExtData;
 import com.rally.domain.user.model.UserProfile;
+import com.rally.domain.user.service.UserExtDomainService;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import com.rally.utils.SunUtils;
@@ -48,7 +49,7 @@ public class MeetupDetailAppService {
     private final ReviewDomainService reviewDomainService;
     private final ScoreDomainService scoreDomainService;
     private final ChatDomainService chatDomainService;
-    private final PaymentQueryDomainService paymentQueryDomainService;
+    private final UserExtDomainService userExtDomainService;
 
 
     /**
@@ -80,8 +81,7 @@ public class MeetupDetailAppService {
                 .setParticipants(buildParticipantVOList(participants, profileMap))
                 .setRecap(meetup.canReview() ? buildRecap(meetup) : null)
                 .setUnreadCount(meetup.canChat(currentUserId) ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null)
-//                .setPayment(buildPaymentView(meetup, currentUserId));
-        ;
+                .setPayment(buildPaymentView(meetup, currentUserId));
 
         // 仅未报名场景计算准入限制，决定 报名按钮是否可点
         if (actionState == ActionStateEnum.JOIN_DIRECT || actionState == ActionStateEnum.APPLY_APPROVAL) {
@@ -93,25 +93,43 @@ public class MeetupDetailAppService {
     }
 
     /**
-     * 组装支付视图子对象（设计 §5.5/§5.6）。仅活动已结束才有收款，未结束返回 null 避免无谓查询。
-     * 发起人维度：collectionState + 逐人收款进度 participantStatus；参与人维度：myPaymentStatus。
+     * 组装支付视图子对象。从 costItems 构建支付信息。
+     * 收款人视角：返回收款码 URL；付款人视角：返回需支付金额；陌生人：未加入活动的用户。
+     * 根据活动状态决定计算人数：未开始用最大人数，已开始/结束用当前人数。
      */
-    private MeetupPaymentViewDTO buildPaymentView(Meetup meetup, String currentUserId) {
-        if (meetup.getRealStatus() != MeetupStatusEnum.FINISHED) {
+    private PaymentDTO buildPaymentView(Meetup meetup, String currentUserId) {
+        MeetupData data = meetup.getData();
+        if (data.getCostItems() == null || data.getCostItems().isEmpty()) {
             return null;
         }
-        String meetupId = meetup.getMeetupId();
-        MeetupPaymentViewDTO view = new MeetupPaymentViewDTO();
-        // 逐人收款进度全员可见（前端用 participants[i].userId 查表，缺省 NONE）
-        view.setParticipantStatus(paymentQueryDomainService.statusByMeetup(meetupId));
-        if (meetup.isCreator(currentUserId)) {
-            // 发起人维度：收款入口态
-            view.setCollectionState(paymentQueryDomainService.collectionState(meetupId));
+        PaymentDTO payment = new PaymentDTO();
+        payment.setCostItems(data.getCostItems());
+        boolean isCreator = meetup.isCreator(currentUserId);
+        boolean isParticipant = meetup.isParticipant(currentUserId);
+        if (isCreator) {
+            payment.setUserRole(PaymentDTO.UserRoleEnum.COLLECTOR);
+        } else if (isParticipant) {
+            payment.setUserRole(PaymentDTO.UserRoleEnum.PAYER);
         } else {
-            // 参与人维度：我的支付态
-            view.setMyPaymentStatus(paymentQueryDomainService.myPaymentStatus(meetupId, currentUserId));
+            payment.setUserRole(PaymentDTO.UserRoleEnum.STRANGER);
         }
-        return view;
+        MeetupStatusEnum realStatus = meetup.getRealStatus();
+        int calculatedPlayerCount;
+        if (realStatus == MeetupStatusEnum.OPEN) {
+            calculatedPlayerCount = data.getMaxPlayers();
+        } else {
+            calculatedPlayerCount = meetup.countApprovedPlayers();
+        }
+        payment.setCalculatedPlayerCount(calculatedPlayerCount);
+        int totalAmount = data.getCostItems().stream().mapToInt(CostItem::getTotalAmount).sum();
+        int amountPerPerson = calculatedPlayerCount > 0 ? totalAmount / calculatedPlayerCount : 0;
+        payment.setAmountPerPerson(amountPerPerson);
+        String creatorId = meetup.getCreatorId();
+        UserExtData paymentCodeData = userExtDomainService.get(creatorId, UserExtKeyEnum.WECHAT_PAYMENT_CODE.getKey());
+        if (paymentCodeData != null) {
+            payment.setPaymentCodeUrl(QiniuConfiguration.buildSignedUrl(paymentCodeData.getExtValue()));
+        }
+        return payment;
     }
 
     private WeatherDTO buildWeather(Meetup meetup) {

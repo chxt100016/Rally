@@ -42,6 +42,9 @@ public enum BizErrorCode {
     FOLLOW_SELF_NOT_ALLOWED(40010, "不能关注自己"),
     REGISTRATION_INCOMPLETE(40011, "请先完善个人信息和网球档案"),
     USER_NOT_EXIST(40012, "用户不存在"),
+    USER_EXT_NOT_FOUND(40013, "用户扩展信息不存在"),
+    USER_EXT_KEY_INVALID(40014, "扩展字段类型无效"),
+    WECHAT_PAYMENT_CODE_EMPTY(40015, "微信付款码不能为空"),
 
     // ========== 约球域 41001-41999 ==========
     MEETUP_NOT_FOUND(41001, "约球不存在"),

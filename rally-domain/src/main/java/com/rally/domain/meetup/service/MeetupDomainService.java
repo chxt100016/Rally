@@ -95,7 +95,20 @@ public class MeetupDomainService {
         meetupRepository.save(meetup.getData());
     }
 
+    /**
+     * 修改约球价格（权限校验 + 更新价格）
+     * @param userId 当前用户
+     * @param meetup 聚合根
+     * @param cmd 修改价格命令
+     */
+    public void editPrice(String userId, Meetup meetup, MeetupEditPriceCmd cmd) {
+        // 1. 权限校验（仅创建人可修改）
+        meetupPolicy.assertEditPrice(userId, meetup);
 
+        // 2. 更新价格
+        meetup.getData().setCostItems(cmd.getCostItems());
+        meetupRepository.save(meetup.getData());
+    }
 
     /**
      * 校验用户当前是否仍在活动中（通知发送前的成员校验，避免给已退出用户发通知）
