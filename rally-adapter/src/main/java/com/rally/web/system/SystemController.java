@@ -2,6 +2,7 @@ package com.rally.web.system;
 
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.tour.model.Result;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,6 +48,18 @@ public class SystemController {
     }
 
     /**
+     * 获取启动页封面图 URL
+     *
+     * @return 启动页封面图的签名 URL
+     */
+    @GetMapping("/splash-cover")
+    public Result<String> getSplashCover() {
+        String key = SystemConfig.getString(SystemConfigKey.SYSTEM_SPLASH_COVER_KEY.getKey());
+        String url = QiniuConfiguration.buildSignedUrl(key);
+        return Result.ok(url);
+    }
+
+    /**
      * 批量查询配置值
      *
      * @param keys 配置项 key 列表
@@ -63,4 +76,6 @@ public class SystemController {
         }
         return Result.ok(result);
     }
+
+
 }

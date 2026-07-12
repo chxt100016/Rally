@@ -164,7 +164,9 @@ public enum SystemConfigKey {
     // ==================== 系统 ====================
 
     /** 群聊二维码（base64） */
-    SYSTEM_GROUP_QRCODE("system.group.qrcode", "群聊二维码 base64", "")
+    SYSTEM_GROUP_QRCODE("system.group.qrcode", "群聊二维码 base64", ""),
+    /** 启动页封面图存储 key */
+    SYSTEM_SPLASH_COVER_KEY("system.splash.cover.key", "启动页封面图存储 key", "default/splash-cover.jpg")
 
     ;
 
