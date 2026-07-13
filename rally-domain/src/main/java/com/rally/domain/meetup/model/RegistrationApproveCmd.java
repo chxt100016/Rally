@@ -19,6 +19,6 @@ public class RegistrationApproveCmd {
     @NotBlank(message = "报名ID不能为空")
     private String registrationId;
 
-    /** 创建人本次重新订阅授权成功的通知场景（用于补充 PENDING_APPROVAL 额度） */
+    /** 创建人本次重新订阅授权成功的通知场景（用于补充 PENDING_APPROVAL、MEMBER_QUIT 额度） */
     private List<String> acceptedNoticeScenes;
 }

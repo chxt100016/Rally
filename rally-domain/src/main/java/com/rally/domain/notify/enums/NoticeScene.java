@@ -19,7 +19,10 @@ public enum NoticeScene {
     MEETUP_CANCEL("活动取消通知", "u60MifrcIQZNihgroNt3dCVn2tAt7B5kDDlnZ5s_Zz4", "pages/meetup/detail/detail", NotifyChannel.WECHAT_SUBSCRIBE),
 
     /** 组团成功提醒 —— 收件人：全体已加入参与人 */
-    TEAM_SUCCESS("组团成功提醒", "GV_XfB27iGPWoXJsaPbV-xJjGz59KmRcJYuJWgFgmLk", "pages/meetup/detail/detail", NotifyChannel.WECHAT_SUBSCRIBE);
+    TEAM_SUCCESS("组团成功提醒", "GV_XfB27iGPWoXJsaPbV-xJjGz59KmRcJYuJWgFgmLk", "pages/meetup/detail/detail", NotifyChannel.WECHAT_SUBSCRIBE),
+
+    /** 成员退出通知 —— 收件人：创建人/全体已加入参与人 */
+    MEMBER_QUIT("成员退出通知", "vRTf8GAOXTTeewdS8ivCEifKTf42uIAH4eIrdERtycc", "pages/meetup/detail/detail", NotifyChannel.WECHAT_SUBSCRIBE);
 
     private final String desc;
     private final String templateId;

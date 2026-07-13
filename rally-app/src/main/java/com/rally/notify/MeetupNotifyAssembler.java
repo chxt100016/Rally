@@ -3,6 +3,7 @@ package com.rally.notify;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.notify.enums.NoticeScene;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +67,16 @@ public final class MeetupNotifyAssembler {
         map.put("date3", data.getStartTime().format(TIME_FMT));
         map.put("thing4", data.getCourtName());
         map.put("thing12", courtNoRemark(data));
+        return map;
+    }
+
+    /** 成员退出通知：thing1 活动名称 / time2 活动开始时间 / thing3 退出成员 / time4 退出时间 */
+    public static Map<String, Object> memberQuitData(MeetupData data, String quitNickname) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("thing1", data.getTitle());
+        map.put("time2", data.getStartTime().format(TIME_FMT));
+        map.put("thing3", quitNickname);
+        map.put("time4", LocalDateTime.now().format(TIME_FMT));
         return map;
     }
 

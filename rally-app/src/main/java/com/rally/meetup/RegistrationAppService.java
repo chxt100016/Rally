@@ -119,10 +119,11 @@ public class RegistrationAppService {
         // 3. 扣分
         // TODO: 调用评分域扣分
 
-        // 4. 通知
-        // 通知
+        // 4. 通知：通知创建人有成员退出
+        UserProfile quitUserProfile = userProfileDomainService.get(userId);
+        notifySubscribeService.notify(NotifyBizType.MEETUP, meetupId, NoticeScene.MEMBER_QUIT, List.of(meetup.getCreatorId()), MeetupNotifyAssembler.memberQuitData(meetup.getData(), quitUserProfile.getUser().getNickname()));
 
-        // 4. 日志
+        // 5. 日志
         log.info("退出成功: userId={}, meetupId={}", userId, meetupId);
     }
 

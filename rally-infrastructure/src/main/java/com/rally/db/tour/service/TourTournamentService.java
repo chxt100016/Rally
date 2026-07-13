@@ -78,9 +78,11 @@ public class TourTournamentService extends ServiceImpl<TourTournamentMapper, Tou
     }
 
     public List<TourTournamentPO> findCurrentTournaments(LocalDate date) {
+        LocalDate dateWithBuffer = date.plusDays(1);
+        LocalDate dateWithBufferStart = date.minusDays(1);
         return this.lambdaQuery()
-                .le(TourTournamentPO::getStartDate, date)
-                .ge(TourTournamentPO::getEndDate, date)
+                .le(TourTournamentPO::getStartDate, dateWithBuffer)
+                .ge(TourTournamentPO::getEndDate, dateWithBufferStart)
                 .list();
     }
 
