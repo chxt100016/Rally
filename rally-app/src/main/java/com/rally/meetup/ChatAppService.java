@@ -58,16 +58,16 @@ public class ChatAppService {
 
         ChatPullDTO result = new ChatPullDTO(messageDTOs, null);
         if (Boolean.TRUE.equals(withUnreadUsers)) {
-            result.setUnreadUsers(buildUnreadUsers(meetup));
+            result.setUnreadUsers(buildUnreadUsers(meetup, userId));
         }
         return result;
     }
 
     /**
-     * 构建未读用户列表（补充昵称、头像）
+     * 构建未读用户列表（排除当前登录用户，补充昵称、头像）
      */
-    private List<ChatUnreadUserDTO> buildUnreadUsers(Meetup meetup) {
-        List<String> participantIds = meetup.getActiveParticipantIds(null);
+    private List<ChatUnreadUserDTO> buildUnreadUsers(Meetup meetup, String currentUserId) {
+        List<String> participantIds = meetup.getActiveParticipantIds(currentUserId);
         List<ChatUnreadUserData> unreadUsers = chatDomainService.getUnreadUsers(meetup.getMeetupId(), participantIds);
         if (unreadUsers.isEmpty()) {
             return List.of();
