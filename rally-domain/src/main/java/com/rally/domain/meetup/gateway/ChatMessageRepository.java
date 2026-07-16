@@ -34,4 +34,10 @@ public interface ChatMessageRepository {
      * @return 第 recentCount+1 新的消息bizId；总数不超过 recentCount 时返回 null
      */
     String findCursorBeforeRecent(String meetupId, int recentCount);
+
+    /**
+     * 查询活动最新一条消息的bizId
+     * @return 无消息返回 null
+     */
+    String findLatestMessageId(String meetupId);
 }

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 聊天应用服务
@@ -44,9 +45,10 @@ public class ChatAppService {
     /**
      * 拉取消息
      */
-    public ChatPullDTO pull(String meetupId, String lastMessageId, Integer limit) {
+    public ChatPullDTO pull(String meetupId, String lastMessageId, Integer limit, Boolean withUnreadUsers) {
         String userId = UserContext.get();
-        assertIn(meetupId, userId);
+        Meetup meetup = meetupDomainService.get(meetupId);
+        meetup.assertIn(userId);
 
         // 拉取消息
         List<ChatMessageData> messages = chatDomainService.pull(meetupId, userId, lastMessageId, limit);
@@ -54,7 +56,29 @@ public class ChatAppService {
         // 转换消息列表
         List<ChatMessageDTO> messageDTOs = ChatAppConvertMapper.INSTANCE.toChatMessageDTO(messages);
 
-        return new ChatPullDTO(messageDTOs);
+        ChatPullDTO result = new ChatPullDTO(messageDTOs, null);
+        if (Boolean.TRUE.equals(withUnreadUsers)) {
+            result.setUnreadUsers(buildUnreadUsers(meetup));
+        }
+        return result;
+    }
+
+    /**
+     * 构建未读用户列表（补充昵称、头像）
+     */
+    private List<ChatUnreadUserDTO> buildUnreadUsers(Meetup meetup) {
+        List<String> participantIds = meetup.getActiveParticipantIds(null);
+        List<ChatUnreadUserData> unreadUsers = chatDomainService.getUnreadUsers(meetup.getMeetupId(), participantIds);
+        if (unreadUsers.isEmpty()) {
+            return List.of();
+        }
+
+        List<String> unreadUserIds = unreadUsers.stream().map(ChatUnreadUserData::getUserId).toList();
+        Map<String, UserProfile> profileMap = userProfileDomainService.listMap(unreadUserIds);
+
+        return unreadUsers.stream()
+                .map(u -> ChatAppConvertMapper.INSTANCE.toChatUnreadUserDTO(u, profileMap.get(u.getUserId())))
+                .toList();
     }
 
     /**

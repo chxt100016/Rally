@@ -20,6 +20,7 @@ public class ChatUserPO {
     private String meetupId;
     private String userId;
     private String lastReadMessageId;
+    private LocalDateTime lastReadTime;
     private Integer unreadCount;
     private LocalDateTime joinedAt;
     private LocalDateTime createTime;

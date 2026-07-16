@@ -60,4 +60,15 @@ public class ChatMessageRepository implements com.rally.domain.meetup.gateway.Ch
                 .gt(StringUtils.isNotBlank(afterMessageId), ChatMessagePO::getBizId, afterMessageId);
         return Math.toIntExact(chatMessageService.count(wrapper));
     }
+
+    @Override
+    public String findLatestMessageId(String meetupId) {
+        LambdaQueryWrapper<ChatMessagePO> wrapper = new LambdaQueryWrapper<ChatMessagePO>()
+                .select(ChatMessagePO::getBizId)
+                .eq(ChatMessagePO::getMeetupId, meetupId)
+                .orderByDesc(ChatMessagePO::getBizId)
+                .last("LIMIT 1");
+        ChatMessagePO po = chatMessageService.getOne(wrapper);
+        return po != null ? po.getBizId() : null;
+    }
 }

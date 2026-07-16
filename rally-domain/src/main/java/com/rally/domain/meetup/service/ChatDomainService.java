@@ -5,6 +5,7 @@ import com.rally.domain.meetup.gateway.ChatMessageRepository;
 import com.rally.domain.meetup.gateway.ChatUserRepository;
 import com.rally.domain.meetup.model.ChatMessageData;
 import com.rally.domain.meetup.model.ChatSendCmd;
+import com.rally.domain.meetup.model.ChatUnreadUserData;
 import com.rally.domain.meetup.model.ChatUserData;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.utils.Assert;
@@ -14,7 +15,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 聊天领域服务
@@ -114,6 +117,7 @@ public class ChatDomainService {
             chatUser.setMeetupId(meetupId);
             chatUser.setUserId(userId);
             chatUser.setLastReadMessageId(latestMessageId);
+            chatUser.setLastReadTime(LocalDateTime.now());
             chatUser.setUnreadCount(0);
             chatUser.setJoinedAt(LocalDateTime.now());
             chatUserRepository.save(chatUser);
@@ -122,7 +126,7 @@ public class ChatDomainService {
 
         // 已读位置只前进不后退（雪花ID等长，字符串比较即数值比较）
         if (isAfter(latestMessageId, chatUser.getLastReadMessageId())) {
-            chatUserRepository.updateLastReadMessageId(meetupId, userId, latestMessageId);
+            chatUserRepository.updateLastReadMessageId(meetupId, userId, latestMessageId, LocalDateTime.now());
         }
         chatUserRepository.updateUnreadCount(meetupId, userId, 0);
     }
@@ -135,6 +139,34 @@ public class ChatDomainService {
             return true;
         }
         return messageId.compareTo(baseline) > 0;
+    }
+
+    /**
+     * 获取未读最新消息的用户列表（以活动参与者列表为基准，含从未打开过聊天/已退出聊天的人）
+     * @param participantIds 活动全部参与者userId
+     */
+    public List<ChatUnreadUserData> getUnreadUsers(String meetupId, List<String> participantIds) {
+        String latestMessageId = chatMessageRepository.findLatestMessageId(meetupId);
+        // 无消息时人人都算已读
+        if (latestMessageId == null) {
+            return List.of();
+        }
+
+        Map<String, ChatUserData> chatUserMap = chatUserRepository.findMapByMeetupId(meetupId);
+
+        List<ChatUnreadUserData> unreadUsers = new ArrayList<>();
+        for (String userId : participantIds) {
+            ChatUserData chatUser = chatUserMap.get(userId);
+            // 未加入过聊天/已退出聊天，视为未读
+            if (chatUser == null) {
+                unreadUsers.add(new ChatUnreadUserData(userId, null));
+                continue;
+            }
+            if (isAfter(latestMessageId, chatUser.getLastReadMessageId())) {
+                unreadUsers.add(new ChatUnreadUserData(userId, chatUser.getLastReadTime()));
+            }
+        }
+        return unreadUsers;
     }
 
     /**

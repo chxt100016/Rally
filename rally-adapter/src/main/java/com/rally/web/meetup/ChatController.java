@@ -31,8 +31,8 @@ public class ChatController {
      * 拉取消息
      */
     @GetMapping("/pull")
-    public Result<ChatPullDTO> pull(@RequestParam("meetupId") String meetupId, @RequestParam(value = "lastMessageId", required = false) String lastMessageId, @RequestParam(value = "limit", defaultValue = "20") Integer limit) {
-        return Result.ok(chatAppService.pull(meetupId, lastMessageId, limit));
+    public Result<ChatPullDTO> pull(@RequestParam("meetupId") String meetupId, @RequestParam(value = "lastMessageId", required = false) String lastMessageId, @RequestParam(value = "limit", defaultValue = "20") Integer limit, @RequestParam(value = "withUnreadUsers", required = false, defaultValue = "false") Boolean withUnreadUsers) {
+        return Result.ok(chatAppService.pull(meetupId, lastMessageId, limit, withUnreadUsers));
     }
 
 }

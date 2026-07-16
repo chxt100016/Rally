@@ -284,6 +284,7 @@ CREATE TABLE `rally_meetup_chat_user` (
   `meetup_id`           VARCHAR(32) NOT NULL COMMENT '关联 rally_meetup.biz_id',
   `user_id`             VARCHAR(32) NOT NULL COMMENT '用户 user_id',
   `last_read_message_id` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '已读最新消息bizId（仅用于未读数计算）',
+  `last_read_time`      DATETIME    NULL COMMENT '最后一次已读时间（仅真实拉取触发已读时更新）',
   `unread_count`        INT         NOT NULL DEFAULT 0 COMMENT '未读消息数（冗余存储）',
   `joined_at`           DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '加入聊天时间',
   `create_time`         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

@@ -16,4 +16,7 @@ public class ChatPullDTO {
 
     private List<ChatMessageDTO> messages;
 
+    /** 未读最新消息的用户列表，仅 withUnreadUsers=true 时返回 */
+    private List<ChatUnreadUserDTO> unreadUsers;
+
 }

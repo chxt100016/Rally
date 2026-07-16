@@ -2,7 +2,9 @@ package com.rally.domain.meetup.gateway;
 
 import com.rally.domain.meetup.model.ChatUserData;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 聊天用户网关接口
@@ -27,9 +29,14 @@ public interface ChatUserRepository {
 
 
     /**
-     * 更新用户的已读位置
+     * 更新用户的已读位置和已读时间
      */
-    void updateLastReadMessageId(String meetupId, String userId, String lastReadMessageId);
+    void updateLastReadMessageId(String meetupId, String userId, String lastReadMessageId, LocalDateTime lastReadTime);
+
+    /**
+     * 批量查询活动下的聊天用户记录（key = userId）
+     */
+    Map<String, ChatUserData> findMapByMeetupId(String meetupId);
 
     /**
      * 更新用户的未读数
