@@ -108,7 +108,7 @@ public enum SystemConfigKey {
     // ==================== 约球（Meetup） ====================
 
     /** 已开通城市编码列表 */
-    MEETUP_CITY_OPENED_CODES("meetup.city.opened_codes", "已开通城市编码列表", "330100"),
+    MEETUP_CITY_OPENED_CODES("meetup.city.opened_codes", "已开通城市编码列表", "330100,330200"),
     /** 报名加入约球所需的最低信誉分 */
     MEETUP_JOIN_MIN_REPUTATION_SCORE("meetup.join.min_reputation_score", "报名加入约球所需的最低信誉分", "30"),
     /** 退出约球产生惩罚的距开始时间阈值（小时） */
