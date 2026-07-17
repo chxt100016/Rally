@@ -77,6 +77,9 @@ public class ChatDomainService {
 
         // 增加其他用户的未读数
         chatUserRepository.incrementUnreadCountForAllExceptSender(cmd.getMeetupId(), sender.getUserId());
+
+        // 发送者视为已读到自己发的这条消息
+        advanceReadPosition(cmd.getMeetupId(), sender.getUserId(), message.getBizId());
         return message;
     }
 
@@ -107,16 +110,22 @@ public class ChatDomainService {
         if (messages.isEmpty()) {
             return;
         }
-
         String latestMessageId = messages.get(messages.size() - 1).getBizId();
+        advanceReadPosition(meetupId, userId, latestMessageId);
+    }
+
+    /**
+     * 将用户的已读位置推进到 messageId（只前进不后退，同时清零未读数）
+     */
+    private void advanceReadPosition(String meetupId, String userId, String messageId) {
         ChatUserData chatUser = chatUserRepository.findByMeetupIdAndUserId(meetupId, userId);
         if (chatUser == null) {
-            // 首次拉取，创建聊天用户记录
+            // 首次产生已读记录，创建聊天用户记录
             chatUser = new ChatUserData();
             chatUser.setBizId(IdWorker.getIdStr());
             chatUser.setMeetupId(meetupId);
             chatUser.setUserId(userId);
-            chatUser.setLastReadMessageId(latestMessageId);
+            chatUser.setLastReadMessageId(messageId);
             chatUser.setLastReadTime(LocalDateTime.now());
             chatUser.setUnreadCount(0);
             chatUser.setJoinedAt(LocalDateTime.now());
@@ -125,8 +134,8 @@ public class ChatDomainService {
         }
 
         // 已读位置只前进不后退（雪花ID等长，字符串比较即数值比较）
-        if (isAfter(latestMessageId, chatUser.getLastReadMessageId())) {
-            chatUserRepository.updateLastReadMessageId(meetupId, userId, latestMessageId, LocalDateTime.now());
+        if (isAfter(messageId, chatUser.getLastReadMessageId())) {
+            chatUserRepository.updateLastReadMessageId(meetupId, userId, messageId, LocalDateTime.now());
         }
         chatUserRepository.updateUnreadCount(meetupId, userId, 0);
     }
