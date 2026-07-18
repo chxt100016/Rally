@@ -36,6 +36,11 @@ public class TournamentQueryService {
             LocalDate today = LocalDate.now();
             dateFrom = today.minusMonths(1);
             dateTo = today.plusMonths(1);
+        } else if ("live".equalsIgnoreCase(range)) {
+            LocalDate today = LocalDate.now();
+            dbStatus = "active";
+            dateFrom = today;
+            dateTo = today;
         }
 
         List<TournamentData> list = tourTournamentRepository.listByCondition(dbStatus, type, dateFrom, dateTo);

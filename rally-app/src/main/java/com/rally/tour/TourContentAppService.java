@@ -43,6 +43,7 @@ public class TourContentAppService {
         TranslationLanguageEnum lang = TranslationLanguageEnum.ZH_CN;
 
         List<TournamentData> tournaments = tourTournamentRepository.findCurrentTournaments(date);
+        tournaments = tournaments.stream().filter(data -> isCategoryKept(data.getCategory())).toList();
         if (CollectionUtils.isEmpty(tournaments)) {
             return "# 比赛日程\n\n暂无比赛";
         }
@@ -150,6 +151,15 @@ public class TourContentAppService {
         }
 
         return md.toString();
+    }
+
+    private boolean isCategoryKept(String category) {
+        if (category == null || category.isBlank()) return true;
+        try {
+            return Integer.parseInt(category.trim()) >= 250;
+        } catch (NumberFormatException e) {
+            return true;
+        }
     }
 
     /** 将赛事按"日期重叠 + 同城（忽略大小写）"分组，用 union-find 保证传递性合并 */
