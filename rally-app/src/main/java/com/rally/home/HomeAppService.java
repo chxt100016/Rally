@@ -16,8 +16,13 @@ import com.rally.domain.tour.TourTournamentQueryDomainService;
 import com.rally.domain.tour.model.MatchGroupDTO;
 import com.rally.domain.tour.model.MatchQueryVO;
 import com.rally.domain.tour.model.TournamentData;
+import com.rally.domain.translation.TranslationQueryService;
+import com.rally.domain.translation.model.TranslationEntityTypeEnum;
+import com.rally.domain.translation.model.TranslationKey;
+import com.rally.domain.translation.model.TranslationLanguageEnum;
 import com.rally.home.model.*;
 import com.rally.meetup.UserMeetupAppService;
+import com.rally.translation.TourTranslationService;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +31,11 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,6 +46,8 @@ public class HomeAppService {
     private final TourTournamentQueryDomainService tourTournamentQueryDomainService;
     private final TourMatchQueryDomainService tourMatchQueryDomainService;
     private final UserMeetupAppService userMeetupAppService;
+    private final TourTranslationService tourTranslationService;
+    private final TranslationQueryService translationQueryService;
 
     public HomePageDTO getHomePage(String cityCode) {
         HomePageDTO homePageDTO = new HomePageDTO();
@@ -98,6 +108,7 @@ public class HomeAppService {
         if (tournamentDisplays.isEmpty()) {
             return null;
         }
+        translateTournamentDisplays(tournamentDisplays);
 
         HomeDisplayItemDTO item = new HomeDisplayItemDTO();
         item.setDisplayType(DisplayType.TOUR_MATCH);
@@ -136,6 +147,32 @@ public class HomeAppService {
         dto.setMatches(firstCourtGroup.getData());
 
         return dto;
+    }
+
+    private void translateTournamentDisplays(List<TournamentDisplayDTO> tournamentDisplays) {
+        TranslationLanguageEnum language = TranslationLanguageEnum.ZH_CN;
+
+        Map<TranslationKey, List<TournamentDisplayDTO>> nameMap = new HashMap<>();
+        Map<TranslationKey, List<TournamentDisplayDTO>> courtMap = new HashMap<>();
+        for (TournamentDisplayDTO dto : tournamentDisplays) {
+            nameMap.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.TOURNAMENT, dto.getTournamentName(), language), k -> new ArrayList<>()).add(dto);
+            courtMap.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.COURT, dto.getCourtName(), language), k -> new ArrayList<>()).add(dto);
+        }
+
+        Set<TranslationKey> allKeys = new HashSet<>(nameMap.keySet());
+        allKeys.addAll(courtMap.keySet());
+        Map<TranslationKey, String> translationMap = translationQueryService.query(allKeys);
+        for (Map.Entry<TranslationKey, String> entry : translationMap.entrySet()) {
+            switch (entry.getKey().getEntityType()) {
+                case TOURNAMENT -> nameMap.getOrDefault(entry.getKey(), List.of()).forEach(dto -> dto.setTournamentName(entry.getValue()));
+                case COURT -> courtMap.getOrDefault(entry.getKey(), List.of()).forEach(dto -> dto.setCourtName(entry.getValue()));
+                default -> {}
+            }
+        }
+
+        for (TournamentDisplayDTO dto : tournamentDisplays) {
+            tourTranslationService.matches(dto.getMatches(), language);
+        }
     }
 
     private String buildTourSubtitle(List<TournamentData> tournaments) {
