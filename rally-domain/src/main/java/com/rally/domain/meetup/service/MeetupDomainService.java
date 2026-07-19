@@ -1,6 +1,7 @@
 package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.court.model.CourtData;
 import com.rally.domain.court.service.CourtDomainService;
 import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -105,8 +107,32 @@ public class MeetupDomainService {
         // 1. 权限校验（仅创建人可修改）
         meetupPolicy.assertEditPrice(userId, meetup);
 
-        // 2. 更新价格
-        meetup.getData().setCostItems(cmd.getCostItems());
+        // 2. 校验按人时分摊数据
+        if (cmd.getHourlyAllocations() != null && !cmd.getHourlyAllocations().isEmpty()) {
+            BigDecimal totalDuration = cmd.getHourlyAllocations().stream().map(HourlyAllocation::getDuration).reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (totalDuration.compareTo(meetup.getData().getDuration()) != 0) {
+                throw new BusinessException(BizErrorCode.PARAM_ERROR);
+            }
+            for (HourlyAllocation allocation : cmd.getHourlyAllocations()) {
+                if (allocation.getDuration() == null || allocation.getDuration().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new BusinessException(BizErrorCode.PARAM_ERROR);
+                }
+                if (allocation.getUserIds() == null || allocation.getUserIds().isEmpty()) {
+                    throw new BusinessException(BizErrorCode.PARAM_ERROR);
+                }
+                for (String allocationUserId : allocation.getUserIds()) {
+                    if (!meetup.isParticipant(allocationUserId)) {
+                        throw new BusinessException(BizErrorCode.PARAM_ERROR);
+                    }
+                }
+            }
+        }
+
+        // 3. 更新价格
+        CostData costData = new CostData();
+        costData.setCostItems(cmd.getCostItems());
+        costData.setHourlyAllocations(cmd.getHourlyAllocations());
+        meetup.getData().setCostData(costData);
         meetupRepository.save(meetup.getData());
     }
 

@@ -18,8 +18,8 @@ public class MeetupDetailDTO {
     private MeetupDTO meetup;
     /** 创建人信息 */
     private CreatorDTO creator;
-    /** 参与人列表（创建人视角包含待审批） */
-    private List<ParticipantDTO> participants;
+    /** 参与人视图（含当前用户角色，创建人视角包含待审批） */
+    private ParticipantsViewDTO participants;
     /** 赛后收集（活动结束时返回） */
     private RecapDTO recap;
     /** 天气信息 */

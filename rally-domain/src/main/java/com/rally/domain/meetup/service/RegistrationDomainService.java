@@ -105,4 +105,18 @@ public class RegistrationDomainService {
         meetupRepository.save(meetup);
     }
 
+    /**
+     * 邀请用户加入（创建人邀请，直接加入无需审批）
+     * @param meetup 约球聚合根（含报名记录）
+     * @param inviteeUserId 被邀请人用户ID
+     * @param currentUserId 当前用户ID（邀请人）
+     */
+    public void invite(Meetup meetup, String inviteeUserId, String currentUserId) {
+        // 1. 调用聚合根 invite（校验 + 创建报名记录）
+        meetup.invite(inviteeUserId, currentUserId);
+
+        // 2. 持久化（自动计算 currentPlayers）
+        meetupRepository.save(meetup);
+    }
+
 }

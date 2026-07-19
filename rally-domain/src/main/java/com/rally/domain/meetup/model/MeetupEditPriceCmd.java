@@ -17,4 +17,7 @@ public class MeetupEditPriceCmd {
 
     /** 费用明细 */
     private List<CostItem> costItems;
+
+    /** 按人时分摊数据（可选） */
+    private List<HourlyAllocation> hourlyAllocations;
 }

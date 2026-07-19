@@ -3,7 +3,7 @@ package com.rally.db.meetup.convert;
 import com.rally.db.meetup.entity.MeetupPO;
 import com.rally.db.meetup.entity.RegistrationPO;
 import com.rally.domain.meetup.enums.*;
-import com.rally.domain.meetup.model.CostItem;
+import com.rally.domain.meetup.model.CostData;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.RegistrationData;
 import com.alibaba.fastjson2.JSON;
@@ -28,7 +28,7 @@ public interface MeetupConvertMapper {
     @Mapping(target = "joinMode", source = "joinMode", qualifiedByName = "strToJoinMode")
     @Mapping(target = "status", source = "status", qualifiedByName = "strToMeetupStatus")
     @Mapping(target = "courtSelectMode", source = "courtSelectMode", qualifiedByName = "strToCourtSelectMode")
-    @Mapping(target = "costItems", source = "costItems", qualifiedByName = "jsonToCostItems")
+    @Mapping(target = "costData", source = "costData", qualifiedByName = "jsonToCostData")
     @Mapping(target = "pendingReason", source = "pendingReason", qualifiedByName = "strToPendingReason")
     MeetupData toMeetupData(MeetupPO po);
 
@@ -41,7 +41,7 @@ public interface MeetupConvertMapper {
     @Mapping(target = "joinMode", source = "joinMode", qualifiedByName = "joinModeToStr")
     @Mapping(target = "status", source = "status", qualifiedByName = "meetupStatusToStr")
     @Mapping(target = "courtSelectMode", source = "courtSelectMode", qualifiedByName = "courtSelectModeToStr")
-    @Mapping(target = "costItems", source = "costItems", qualifiedByName = "costItemsToJson")
+    @Mapping(target = "costData", source = "costData", qualifiedByName = "costDataToJson")
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "pendingReason", ignore = true)
@@ -126,20 +126,20 @@ public interface MeetupConvertMapper {
 
     // ==================== JSON 转换 ====================
 
-    @Named("jsonToCostItems")
-    static List<CostItem> jsonToCostItems(String json) {
+    @Named("jsonToCostData")
+    static CostData jsonToCostData(String json) {
         if (json == null || json.isEmpty()) {
             return null;
         }
-        return JSON.parseObject(json, new TypeReference<List<CostItem>>() {});
+        return JSON.parseObject(json, CostData.class);
     }
 
-    @Named("costItemsToJson")
-    static String costItemsToJson(List<CostItem> items) {
-        if (items == null || items.isEmpty()) {
+    @Named("costDataToJson")
+    static String costDataToJson(CostData costData) {
+        if (costData == null) {
             return null;
         }
-        return JSON.toJSONString(items);
+        return JSON.toJSONString(costData);
     }
 
     // ==================== RegistrationPO ↔ RegistrationData ====================

@@ -430,6 +430,33 @@ public class Meetup {
         registration.setStatus(RegistrationStatusEnum.REJECTED);
     }
 
+    /**
+     * 邀请用户加入（创建人邀请，直接加入无需审批）
+     * @param inviteeUserId 被邀请人用户ID
+     * @param currentUserId 当前用户ID（邀请人）
+     */
+    public void invite(String inviteeUserId, String currentUserId) {
+        // 1. 权限校验：必须是创建人
+        assertOwner(currentUserId);
+
+        // 2. 满员校验
+        if (isFull()) {
+            throw new BusinessException(BizErrorCode.MEETUP_FULL);
+        }
+
+        // 3. 重复报名校验
+        if (findActiveRegistration(inviteeUserId) != null) {
+            throw new BusinessException(BizErrorCode.ALREADY_JOINED);
+        }
+
+        // 4. 创建报名记录，直接设置为 JOINED
+        RegistrationData registration = new RegistrationData();
+        registration.setRallyMeetupId(data.getBizId());
+        registration.setUserId(inviteeUserId);
+        registration.setStatus(RegistrationStatusEnum.JOINED);
+        this.registrations.add(registration);
+    }
+
     /** 按 registrationId 在聚合根内查找报名记录 */
     private RegistrationData findRegistrationById(String registrationId) {
         return registrations.stream()

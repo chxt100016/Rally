@@ -108,7 +108,7 @@ CREATE TABLE `rally_meetup` (
   `level_max`       DECIMAL(3,1) DEFAULT NULL COMMENT '水平最大值，RANGE/EXACT/BELOW 必填',
   `gender_limit`    varchar(8) NOT NULL DEFAULT 'any' COMMENT '性别限制',
   `join_mode`       varchar(8) NOT NULL DEFAULT 'direct' COMMENT '加入模式：直接/审批',
-  `cost_items`      JSON         DEFAULT NULL COMMENT '费用明细 [{name,totalAmount(分)}]，纯展示',
+  `cost_data`       JSON         DEFAULT NULL COMMENT '费用数据 {costItems:[{name,totalAmount(分)}], hourlyAllocations:[{duration,userIds}]}',
   `status`          varchar(16) NOT NULL DEFAULT 'open' COMMENT '状态机',
   `court_index`     VARCHAR(64)  DEFAULT NULL COMMENT '场地索引，前端透传存储',
   `create_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

@@ -172,4 +172,30 @@ public class RegistrationAppService {
         notifySubscribeService.grant(currentUserId, NotifyBizType.MEETUP, cmd.getMeetupId(), MeetupNotifyAssembler.parseScenes(cmd.getAcceptedNoticeScenes()));
         log.info("审批拒绝: registrationId={}", cmd.getRegistrationId());
     }
+
+    /**
+     * 邀请用户加入（仅创建人）
+     */
+    @Transactional
+    public void invite(MeetupInviteCmd cmd) {
+        String currentUserId = UserContext.get();
+        String inviteeUserId = cmd.getUserId();
+
+        // 1. 加载约球聚合根
+        Meetup meetup = meetupDomainService.get(cmd.getMeetupId());
+
+        // 2. 邀请加入（聚合根校验 + 创建报名记录 + 持久化）
+        registrationDomainService.invite(meetup, inviteeUserId, currentUserId);
+
+        // 3. 加入群聊
+        chatDomainService.join(cmd.getMeetupId(), inviteeUserId);
+
+        // 4. 发送通知：邀请成功通知被邀请人。若本次邀请直接组团成功，只发组团成功、不再发报名成功
+        String meetupId = cmd.getMeetupId();
+        if (meetup.isFull()) {
+            notifySubscribeService.notify(NotifyBizType.MEETUP, meetupId, NoticeScene.TEAM_SUCCESS, meetup.getActiveParticipantIds(null), MeetupNotifyAssembler.teamSuccessData(meetup.getData()), uid -> meetupDomainService.shouldNotice(meetupId, uid));
+        }
+
+        log.info("邀请成功: meetupId={}, inviteeUserId={}, inviterUserId={}", cmd.getMeetupId(), inviteeUserId, currentUserId);
+    }
 }

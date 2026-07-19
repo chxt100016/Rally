@@ -1,5 +1,6 @@
 package com.rally.web.meetup;
 
+import com.rally.domain.meetup.model.MeetupInviteCmd;
 import com.rally.domain.meetup.model.MeetupJoinCmd;
 import com.rally.domain.meetup.model.MeetupQuitCmd;
 import com.rally.domain.meetup.model.MeetupWithdrawCmd;
@@ -67,6 +68,15 @@ public class RegistrationController {
     @PostMapping("/reject")
     public Result<Void> reject(@RequestBody @Valid RegistrationRejectCmd cmd) {
         registrationAppService.reject(cmd);
+        return Result.ok();
+    }
+
+    /**
+     * 邀请用户加入（仅创建人）
+     */
+    @PostMapping("/invite")
+    public Result<Void> invite(@RequestBody @Valid MeetupInviteCmd cmd) {
+        registrationAppService.invite(cmd);
         return Result.ok();
     }
 }

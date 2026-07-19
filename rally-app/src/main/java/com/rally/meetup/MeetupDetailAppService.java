@@ -3,6 +3,7 @@ package com.rally.meetup;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.enums.ActionStateEnum;
 import com.rally.domain.meetup.enums.JoinRestrictionEnum;
+import com.rally.domain.meetup.enums.MeetupRoleEnum;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.service.ChatDomainService;
@@ -29,7 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,7 +81,7 @@ public class MeetupDetailAppService {
                 .setActionState(actionState)
                 .setWeather(buildWeather(meetup))
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
-                .setParticipants(buildParticipantVOList(participants, profileMap))
+                .setParticipants(buildParticipantsView(meetup, currentUserId, participants, profileMap))
                 .setRecap(meetup.canReview() ? buildRecap(meetup) : null)
                 .setUnreadCount(meetup.canChat(currentUserId) ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null)
                 .setPayment(buildPaymentView(meetup, currentUserId));
@@ -122,14 +125,56 @@ public class MeetupDetailAppService {
         }
         payment.setCalculatedPlayerCount(calculatedPlayerCount);
         int totalAmount = data.getCostItems().stream().mapToInt(CostItem::getTotalAmount).sum();
-        int amountPerPerson = calculatedPlayerCount > 0 ? totalAmount / calculatedPlayerCount : 0;
-        payment.setAmountPerPerson(amountPerPerson);
+        payment.setTotalAmount(totalAmount);
+        if (data.getCostData() != null && data.getCostData().getHourlyAllocations() != null && !data.getCostData().getHourlyAllocations().isEmpty()) {
+            List<HourlyAllocation> hourlyAllocations = data.getCostData().getHourlyAllocations();
+            payment.setAllocationMode(PaymentDTO.AllocationModeEnum.HOURLY);
+            payment.setHourlyAllocations(hourlyAllocations);
+            int currentUserAmount = calculateUserAmountByHourly(totalAmount, data.getDuration(), hourlyAllocations, currentUserId);
+            payment.setCurrentUserAmount(currentUserAmount);
+            payment.setAllocationDesc(buildAllocationDesc(hourlyAllocations, currentUserId));
+        } else {
+            payment.setAllocationMode(PaymentDTO.AllocationModeEnum.AVERAGE);
+            int amountPerPerson = calculatedPlayerCount > 0 ? totalAmount / calculatedPlayerCount : 0;
+            payment.setCurrentUserAmount(amountPerPerson);
+        }
         String creatorId = meetup.getCreatorId();
         UserExtData paymentCodeData = userExtDomainService.get(creatorId, UserExtKeyEnum.WECHAT_PAYMENT_CODE.getKey());
         if (paymentCodeData != null) {
             payment.setPaymentCodeUrl(QiniuConfiguration.buildSignedUrl(paymentCodeData.getExtValue()));
         }
         return payment;
+    }
+
+    private int calculateUserAmountByHourly(int totalAmount, BigDecimal duration, List<HourlyAllocation> hourlyAllocations, String userId) {
+        BigDecimal hourlyRate = new BigDecimal(totalAmount).divide(duration, 2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal userAmount = BigDecimal.ZERO;
+        for (HourlyAllocation allocation : hourlyAllocations) {
+            if (allocation.getUserIds() != null && allocation.getUserIds().contains(userId)) {
+                BigDecimal periodAmount = hourlyRate.multiply(allocation.getDuration());
+                BigDecimal userCount = new BigDecimal(allocation.getUserIds().size());
+                BigDecimal userShare = periodAmount.divide(userCount, 2, BigDecimal.ROUND_HALF_UP);
+                userAmount = userAmount.add(userShare);
+            }
+        }
+        return userAmount.intValue();
+    }
+
+    /**
+     * 构建当前用户的人时分摊详情文案，如"4人2小时、3人1小时"。
+     * 按参与人数分组，累加相同人数下的时长。
+     */
+    private String buildAllocationDesc(List<HourlyAllocation> hourlyAllocations, String userId) {
+        Map<Integer, BigDecimal> durationByPlayerCount = new LinkedHashMap<>();
+        for (HourlyAllocation allocation : hourlyAllocations) {
+            if (allocation.getUserIds() != null && allocation.getUserIds().contains(userId)) {
+                int playerCount = allocation.getUserIds().size();
+                durationByPlayerCount.merge(playerCount, allocation.getDuration(), BigDecimal::add);
+            }
+        }
+        return durationByPlayerCount.entrySet().stream()
+                .map(entry -> entry.getKey() + "人" + entry.getValue().stripTrailingZeros().toPlainString() + "小时")
+                .collect(Collectors.joining("、"));
     }
 
     private WeatherDTO buildWeather(Meetup meetup) {
@@ -163,13 +208,15 @@ public class MeetupDetailAppService {
     }
 
     /**
-     * 构建参与者列表（统一方法，展示报名状态）
+     * 构建参与者视图（含当前用户角色，统一方法，展示报名状态）
      * @param participants 领域层按视角返回的参与者报名记录
      */
-    private List<ParticipantDTO> buildParticipantVOList(List<RegistrationData> participants, Map<String, UserProfile> profileMap) {
-        return participants.stream()
+    private ParticipantsViewDTO buildParticipantsView(Meetup meetup, String currentUserId, List<RegistrationData> participants, Map<String, UserProfile> profileMap) {
+        List<ParticipantDTO> list = participants.stream()
                 .map(registration -> toParticipantVO(registration, profileMap))
                 .toList();
+        MeetupRoleEnum userRole = meetup.isCreator(currentUserId) ? MeetupRoleEnum.CREATOR : MeetupRoleEnum.NOT_CREATOR;
+        return new ParticipantsViewDTO().setUserRole(userRole).setList(list);
     }
 
     /**

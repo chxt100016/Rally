@@ -46,8 +46,9 @@ public class MeetupPO {
     private BigDecimal levelMax;
     private String genderLimit;
     private String joinMode;
-    /** 费用明细 JSON */
-    private String costItems;
+    /** 费用数据 JSON */
+    @TableField("cost_data")
+    private String costData;
     private String status;
     /** 场地索引，前端透传存储 */
     private String courtIndex;

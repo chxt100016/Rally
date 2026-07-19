@@ -36,7 +36,7 @@ public class MeetupData {
     private BigDecimal levelMax;
     private GenderLimitEnum genderLimit;
     private JoinModeEnum joinMode;
-    private List<CostItem> costItems;
+    private CostData costData;
     private MeetupStatusEnum status;
     /** 场地索引，前端透传存储 */
     private String courtIndex;
@@ -46,4 +46,17 @@ public class MeetupData {
     private Double distanceMeters;
     /** 待处理原因，PENDING tab 时设置 */
     private PendingReasonEnum pendingReason;
+
+    /** 兼容方法：获取费用明细列表 */
+    public List<CostItem> getCostItems() {
+        return costData != null ? costData.getCostItems() : null;
+    }
+
+    /** 兼容方法：设置费用明细列表 */
+    public void setCostItems(List<CostItem> costItems) {
+        if (this.costData == null) {
+            this.costData = new CostData();
+        }
+        this.costData.setCostItems(costItems);
+    }
 }
