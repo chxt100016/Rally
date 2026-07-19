@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.io.IOException;
@@ -22,8 +23,14 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+        boolean optionalAuth = handler instanceof HandlerMethod
+                && ((HandlerMethod) handler).getMethodAnnotation(OptionalAuth.class) != null;
+
         String authHeader = request.getHeader("Authorization");
         if (StringUtils.isBlank(authHeader) || !authHeader.startsWith("Bearer ")) {
+            if (optionalAuth) {
+                return true;
+            }
             writeError(response, BizErrorCode.TOKEN_EXPIRED);
             return false;
         }
@@ -31,6 +38,9 @@ public class AuthInterceptor implements HandlerInterceptor {
         String token = authHeader.substring(7);
         Optional<TokenPayload> payload = TokenUtils.verify(token);
         if (payload.isEmpty()) {
+            if (optionalAuth) {
+                return true;
+            }
             writeError(response, BizErrorCode.TOKEN_INVALID);
             return false;
         }

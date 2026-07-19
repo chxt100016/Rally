@@ -166,7 +166,12 @@ public enum SystemConfigKey {
     /** 群聊二维码（base64） */
     SYSTEM_GROUP_QRCODE("system.group.qrcode", "群聊二维码 base64", ""),
     /** 启动页封面图存储 key */
-    SYSTEM_SPLASH_COVER_KEY("system.splash.cover.key", "启动页封面图存储 key", "default/splash-cover.jpg")
+    SYSTEM_SPLASH_COVER_KEY("system.splash.cover.key", "启动页封面图存储 key", "default/splash-cover.jpg"),
+
+    // ==================== 首页海报 ====================
+
+    /** 首页海报配置 JSON，格式：[{type,image,title,subtitle,wechatUrl,appUrl,webUrl}] */
+    HOME_POSTER_CONFIG("home.poster.config", "首页海报配置 JSON", "[{\"type\":\"NAVIGATE\",\"image\":\"default/court-map.jpg\",\"title\":\"球场地图\",\"subtitle\":\"查看本市所有球场\",\"wechatUrl\":\"/pages/court-map/court-map\"},{\"type\":\"NAVIGATE\",\"image\":\"default/court-search.jpg\",\"title\":\"找球场\",\"subtitle\":\"搜索你想去的球场\",\"wechatUrl\":\"/pages/court-search/court-search\"}]")
 
     ;
 
