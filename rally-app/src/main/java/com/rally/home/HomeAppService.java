@@ -114,7 +114,7 @@ public class HomeAppService {
         item.setDisplayType(DisplayType.TOUR_MATCH);
         MatchDisplayData data = new MatchDisplayData();
         data.setTitle("网球赛事");
-        data.setSubtitle(buildTourSubtitle(tournaments));
+        data.setSubtitle(buildTourSubtitle(tournamentDisplays));
         data.setTournaments(tournamentDisplays);
         item.setData(data);
         return item;
@@ -175,10 +175,10 @@ public class HomeAppService {
         }
     }
 
-    private String buildTourSubtitle(List<TournamentData> tournaments) {
-        Map<String, Long> tourCountMap = tournaments.stream()
+    private String buildTourSubtitle(List<TournamentDisplayDTO> tournamentDisplays) {
+        Map<String, Long> tourCountMap = tournamentDisplays.stream()
                 .filter(t -> t.getTour() != null)
-                .collect(Collectors.groupingBy(TournamentData::getTour, Collectors.counting()));
+                .collect(Collectors.groupingBy(TournamentDisplayDTO::getTour, Collectors.counting()));
         long atpCount = tourCountMap.getOrDefault("ATP", 0L);
         long wtaCount = tourCountMap.getOrDefault("WTA", 0L);
         return atpCount + "场ATP、" + wtaCount + "场WTA";
