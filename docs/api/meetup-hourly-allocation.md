@@ -196,7 +196,7 @@ curl -X POST 'http://localhost:8080/api/rally/meetup/editPrice' \
 }
 ```
 
-### 前端回显与展示建议
+### 前端回显与展示建 议
 
 1. **判断分摊模式**：优先读取 `allocationMode`，而不是靠 `hourlyAllocations` 是否为空来推断（`HOURLY` 模式必然非空，判断更直接）。
 2. **金额展示**：
