@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 public class MeetupData {
     private String bizId;
+    private String meetupType;
     private String creatorId;
     private String title;
     private MatchTypeEnum matchType;

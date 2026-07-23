@@ -2,6 +2,7 @@ package com.rally.domain.payment.service;
 
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.payment.enums.BizTypeEnum;
 import com.rally.domain.payment.enums.PayChannelEnum;
 import com.rally.domain.payment.gateway.PaymentChannelClient;
 import com.rally.domain.payment.gateway.PaymentLogRepository;
@@ -51,11 +52,24 @@ public class PaymentDomainService {
 
         List<PaymentOrder> orders = new ArrayList<>(payerUserIds.size());
         for (int i = 0; i < payerUserIds.size(); i++) {
-            orders.add(PaymentOrder.create(channel, batchId, meetupId, payerUserIds.get(i), payeeUserId, payeeAccount, amounts[i], feeRate, timeoutMinutes));
+            orders.add(PaymentOrder.create(channel, BizTypeEnum.MEETUP_COLLECT, batchId, meetupId, payerUserIds.get(i), payeeUserId, payeeAccount, amounts[i], feeRate, timeoutMinutes));
         }
         paymentOrderRepository.saveBatch(orders);
         orders.forEach(o -> paymentLogRepository.save(PaymentLog.collect(channel, o.getBizId(), "batch=" + batchId + ",base=" + o.getData().getBaseAmount())));
         return orders;
+    }
+
+    /**
+     * 单人建单（赛事报名费等非分账场景）：无批次概念，一单一付款人。bizRefId 复用 meetup_id 列存放业务关联 ID（如 tournamentId）。
+     */
+    public PaymentOrder createSingle(BizTypeEnum bizType, String bizRefId, String payerUserId, String payeeUserId, String payeeAccount, int baseAmount, PayChannelEnum channel) {
+        BigDecimal feeRate = SystemConfig.getBigDecimal(SystemConfigKey.PAYMENT_WECHAT_FEE_RATE.getKey());
+        int timeoutMinutes = SystemConfig.getInt(SystemConfigKey.PAYMENT_PAY_TIMEOUT_MINUTES.getKey());
+        String batchId = IdWorker.getIdStr();
+        PaymentOrder order = PaymentOrder.create(channel, bizType, batchId, bizRefId, payerUserId, payeeUserId, payeeAccount, baseAmount, feeRate, timeoutMinutes);
+        paymentOrderRepository.saveBatch(List.of(order));
+        paymentLogRepository.save(PaymentLog.collect(channel, order.getBizId(), "bizType=" + bizType + ",bizRefId=" + bizRefId + ",base=" + baseAmount));
+        return order;
     }
 
     /**

@@ -19,6 +19,7 @@ public class MeetupPO {
     private Long id;
 
     private String bizId;
+    private String meetupType;
     private String creatorId;
     private String title;
     private String matchType;

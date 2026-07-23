@@ -47,4 +47,12 @@ job:
   payment_callback_recover:
     enabled: false
     cron: "0 */10 * * * ?"
+  # 赛事每日凌晨批量匹配（资格赛+正赛逐轮）
+  tournamentMatch:
+    enabled: true
+    cron: "0 0 2 * * ?"
+  # 赛事比赛超时处理（每2小时扫描）
+  tournamentMatchTimeout:
+    enabled: true
+    cron: "0 0 */2 * * ?"
 

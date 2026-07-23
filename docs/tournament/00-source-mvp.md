@@ -79,7 +79,8 @@ CREATE TABLE `rally_tournament_entry` (
     `preferred_districts` VARCHAR(512) DEFAULT NULL COMMENT '活动区域，JSON数组',
     `court_ability` VARCHAR(16) NOT NULL COMMENT '场地能力：CAN_BOOK/CANNOT_BOOK',
     `available_times` VARCHAR(512) DEFAULT NULL COMMENT '可比赛时间，JSON数组',
-    `status` VARCHAR(24) NOT NULL DEFAULT 'QUALIFIER_WAITING_MATCH' COMMENT '状态：QUALIFIER_WAITING_MATCH/QUALIFIER_IN_MATCH/AWAIT_PAYMENT/MAIN_DRAW_WAITING_MATCH/MAIN_DRAW_IN_MATCH/ELIMINATED',
+    `stage` VARCHAR(8) NOT NULL DEFAULT 'QUALIFY' COMMENT '阶段：QUALIFY(资格赛)/MAIN(正赛)',
+    `status` VARCHAR(16) NOT NULL DEFAULT 'WAITING' COMMENT '状态：WAITING(排队匹配)/IN_MATCH(比赛中)/PAYING(待支付，仅QUALIFY阶段)/ELIMINATED(淘汰)/WITHDRAWN(主动退出)',
     `current_round` VARCHAR(16) NOT NULL DEFAULT 'QUALIFIER' COMMENT '当前轮次：QUALIFIER/ROUND_32/ROUND_16/ROUND_8/ROUND_4/FINAL',
     `qualifier_reject_count` INT NOT NULL DEFAULT 0 COMMENT '资格赛阶段已拒绝次数',
     `main_draw_reject_count` INT NOT NULL DEFAULT 0 COMMENT '正赛阶段已拒绝次数',
@@ -93,7 +94,19 @@ CREATE TABLE `rally_tournament_entry` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='赛事报名表';
 ```
 
-昵称、NTRP等级、性别等用户基础信息不冗余存储，需要时通过 `user_id` 查用户域。状态拆分为资格赛/正赛两条线：`QUALIFIER_WAITING_MATCH`（资格赛排队匹配）、`QUALIFIER_IN_MATCH`（资格赛比赛中）、`AWAIT_PAYMENT`（资格赛获胜，待支付锁定正赛席位）、`MAIN_DRAW_WAITING_MATCH`（支付成功，正赛排队匹配）、`MAIN_DRAW_IN_MATCH`（正赛比赛中）、`ELIMINATED`（淘汰）。拒绝次数按阶段分别计数，对应赛事配置的 `qualifierRejectLimit` 和 `mainDrawRejectLimit` 分别判断上限。
+昵称、NTRP等级、性别等用户基础信息不冗余存储，需要时通过 `user_id` 查用户域。状态用 `stage`+`status` 两个字段组合表达，比单一长枚举更短更好维护：
+
+| stage | status | 含义 |
+|-------|--------|------|
+| QUALIFY | WAITING | 资格赛排队匹配 |
+| QUALIFY | IN_MATCH | 资格赛比赛中 |
+| QUALIFY | PAYING | 资格赛获胜，待支付锁定正赛席位 |
+| MAIN | WAITING | 支付成功，正赛排队匹配 |
+| MAIN | IN_MATCH | 正赛比赛中 |
+| QUALIFY/MAIN | ELIMINATED | 淘汰 |
+| QUALIFY/MAIN | WITHDRAWN | 主动退出（区分于被淘汰，便于时间线展示） |
+
+拒绝次数按阶段分别计数，对应赛事配置的 `qualifierRejectLimit` 和 `mainDrawRejectLimit` 分别判断上限。
 
 ### 3. rally_tournament_match（比赛表）
 
@@ -103,14 +116,16 @@ CREATE TABLE `rally_tournament_match` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `biz_id` VARCHAR(32) NOT NULL COMMENT '雪花ID',
     `tournament_id` VARCHAR(32) NOT NULL COMMENT '赛事bizId',
+    `match_no` INT NOT NULL COMMENT '赛事内展示编号，同一赛事内从1开始递增，前端展示补零为3位（如001/002），不跨赛事全局唯一',
     `round` VARCHAR(16) NOT NULL COMMENT '轮次：QUALIFIER/ROUND_32/...',
     `group_size` INT NOT NULL DEFAULT 2 COMMENT '本场人数（2或3）',
     `court_booker_id` VARCHAR(32) DEFAULT NULL COMMENT '订场人用户ID',
     `court_booker_selected_time` DATETIME DEFAULT NULL COMMENT '订场人确定时间',
     `court_name` VARCHAR(128) DEFAULT NULL COMMENT '球场名称',
     `court_address` VARCHAR(256) DEFAULT NULL COMMENT '球场地址',
-    `scheduled_start_time` DATETIME DEFAULT NULL COMMENT '约定开始时间',
-    `scheduled_end_time` DATETIME DEFAULT NULL COMMENT '约定结束时间',
+    `scheduled_start_time` DATETIME DEFAULT NULL COMMENT '约定的线下比赛开始时间',
+    `scheduled_duration` DECIMAL(4,1) DEFAULT NULL COMMENT '约定时长，单位：小时，支持小数（如1.5）',
+    `schedule_submitted_time` DATETIME DEFAULT NULL COMMENT '订场人提交赛约、进入SCHEDULED状态的时间，用于超时判定，每次退回BOOKING重新提交会更新',
     `meetup_id` VARCHAR(32) DEFAULT NULL COMMENT '关联约球活动bizId',
     `winner_id` VARCHAR(32) DEFAULT NULL COMMENT '晋级者用户ID',
     `submitted_by` VARCHAR(32) DEFAULT NULL COMMENT '结果提交人用户ID',
@@ -132,9 +147,12 @@ CREATE TABLE `rally_tournament_match` (
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_biz_id` (`biz_id`),
+    UNIQUE KEY `uk_tournament_match_no` (`tournament_id`, `match_no`),
     KEY `idx_tournament_round` (`tournament_id`, `round`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='赛事比赛表';
 ```
+
+`match_no` 在生成比赛时按赛事维度递增分配（取当前赛事已有最大 `match_no` + 1，或用 Redis 计数器/`SELECT ... FOR UPDATE` 保证并发安全），用于对外展示（如"第003场"），内部关联仍使用 `biz_id`。
 
 去掉了 `PLAYING` 状态：约球是否进行中直接看关联 `meetupId` 的约球状态，Match 停留在 `SCHEDULED` 直到有人回落地页提交结果。
 
@@ -161,6 +179,7 @@ CREATE TABLE `rally_tournament_match` (
 
 拒绝结果（RESULT_REJECT）：
 - 不服，我要申诉重来
+- 对手水平明显超出本赛事等级
 - 提交的结果不属实
 - 其他（需填自由文本）
 ```
@@ -214,11 +233,10 @@ CREATE TABLE `rally_tournament_match_participant` (
 
 ```sql
 ALTER TABLE `rally_meetup`
-    ADD COLUMN `match_id` VARCHAR(32) DEFAULT NULL COMMENT '关联的比赛bizId，普通约球为空' AFTER `biz_id`,
-    ADD COLUMN `meetup_type` VARCHAR(16) NOT NULL DEFAULT 'NORMAL' COMMENT '约球类型：NORMAL/TOURNAMENT' AFTER `match_id`;
+    ADD COLUMN `meetup_type` VARCHAR(16) NOT NULL DEFAULT 'NORMAL' COMMENT '约球类型：NORMAL/TOURNAMENT' AFTER `biz_id`;
 ```
 
-约球其他功能保持不变，不与比赛耦合——约球详情页只负责场地、时间、约球本身的流程；输赢判定和比分记录都在比赛落地页完成，因为一次约球可能包含热身赛，约球本身的比分不能代表比赛胜负。
+约球侧只需要标记类型，不需要反向记录关联的比赛ID——`rally_tournament_match.meetup_id` 已经单向持有关联关系，查询"这场比赛对应哪个约球"从 match 表查即可，不需要 meetup 表反查比赛。约球其他功能保持不变，不与比赛耦合——约球详情页只负责场地、时间、约球本身的流程；输赢判定和比分记录都在比赛落地页完成，因为一次约球可能包含热身赛，约球本身的比分不能代表比赛胜负。
 
 ### 6. ScoreRecordPO（比分表，已有）
 
@@ -254,46 +272,65 @@ Domain Service（TournamentMatchingService）职责：
 ## 四、比赛状态机
 
 ```text
-[MATCHED]
-    ↓ 订场人确定（先到先得，完美情况默认指定，可放弃）
-[BOOKING]
-    ↓ 订场人提交场地和时间
-[SCHEDULED]
+匹配生成时：
+  - 完美情况（恰好一人 CAN_BOOK，其余 CANNOT_BOOK）→ 直接进入 [BOOKING]，该人即订场人
+  - 非完美情况（都能订场或都不能订场）→ 进入 [MATCHED]，等待先到先得选出订场人
+
+[MATCHED]（限时24小时）
+    ↓ 任意人点击"我来订场"（乐观锁防止双方同时抢占）
+[BOOKING]（限时48小时）
+    ├─ 订场人提交场地和时间 → [SCHEDULED]
+    └─ 订场人"放弃订场权" → 退回 [MATCHED]，重新开始24小时计时
+[SCHEDULED]（限时48小时，非订场人操作）
     ├─ 全部人接受（confirmStatus 全部 CONFIRMED）→ 创建 Meetup → 待比赛
-    ├─ 任意人"打回重订" → 退回 [BOOKING]（不终止）
+    ├─ 任意人"打回重订" → 退回 [BOOKING]（不终止，重新开始48小时计时）
     └─ 任意人"拒绝比赛" → [REJECTED]（终止，全员回匹配池）
-待比赛（约球线下进行，用户回落地页操作）
+待比赛（约球线下进行，用户回落地页操作，无固定时限）
     ↓
-[PENDING_CONFIRM]（任意一人提交"谁赢了"）
+[PENDING_CONFIRM]（任意一人提交"谁赢了"，限时48小时）
     ├─ 其余人逐个确认（resultConfirmStatus 全部 CONFIRMED）→ [COMPLETED]
     └─ 任意人"拒绝结果" → [REJECTED]（终止，全员回匹配池）
 ```
 
 所有以下操作均在比赛落地页的当前待办区完成，由 `actionState` 决定当前展示哪一步。
 
-### 1. MATCHED：订场人选择
+### 1. MATCHED：订场人选择（仅非完美情况会经过此状态）
 - 所有参与者都能看到"我来订场"按钮
-- 完美情况（一人 CAN_BOOK，其余 CANNOT_BOOK）默认指定该人为订场人，但可以主动"放弃订场权"
-- 都能订场或都不能订场时，先点击的人获得订场身份（乐观锁防止双方同时抢占）
+- 先点击的人获得订场身份（乐观锁防止双方同时抢占），流转到 `BOOKING`
+- 24小时内无人选择 → 视为"拒绝比赛"终止，双方都记未响应次数
 
 ### 2. BOOKING：订场
-- 订场人视角：用已有的球场选择组件，选场地+时间，**不需要**在此确定比赛形式（线下自行协商）
+- 订场人视角：用已有的球场选择组件，选场地+时间，**不需要**在此确定比赛形式（线下自行协商）；同时展示"放弃订场权"按钮
 - 非订场人视角：只看到"对方正在订场"的等待态；若之前被打回过，展示上一次打回理由供参考
-- 超时48小时未提交 → 视为"拒绝比赛"终止，订场人记未响应次数
+- 订场人点击"放弃订场权" → 退回 `MATCHED`，重新开始24小时倒计时，双方都可以重新选择
+- 48小时内订场人未提交 → 视为"拒绝比赛"终止，订场人记未响应次数
 
 ### 3. SCHEDULED：确认赛约
 - 非订场人（组内其他人）看到赛约信息，三个操作：[接受] / [打回重订，选理由] / [拒绝比赛，选理由]
 - 全部接受 → 创建 Meetup（`matchId` 关联，`meetupType=TOURNAMENT`），流转到"待比赛"
-- 打回重订 → 不终止，退回 `BOOKING`，所有人 `confirmStatus` 重置，不计入拒绝次数，不设次数上限
+- 打回重订 → 不终止，退回 `BOOKING`（重新开始48小时计时），所有人 `confirmStatus` 重置，不计入拒绝次数，不设次数上限
 - 拒绝比赛 → 终止，`REJECTED`，拒绝方记拒绝次数（若已达上限，则该人下次只能点"接受"，没有"拒绝比赛"选项，仍可"打回重订"）
-- 48小时未操作 → 默认接受
+- 48小时内未全部确认 → 未操作方默认接受
 
 ### 4. 待比赛 → PENDING_CONFIRM：提交结果
-- 任意一人先操作："谁赢了？" 单选参与者/队伍列表（2人、3人或双打按队选）→ [提交]，不填比分
+- 任意一人先操作："谁赢了？" 单选参与者/队伍列表（2人、3人或双打按队选）→ [提交]，不填比分，按 `match.version` 乐观锁提交（防止双方同时提交产生冲突结果，后到的一方提交失败，提示"对方已提交结果，请查看"）
 - 其余人逐个操作：[确认] / [拒绝结果，选理由]（达到拒绝上限则只有确认）
 - 全部确认 → COMPLETED，`winnerId` 写入，胜者晋级；败者 ELIMINATED
 - 拒绝结果 → 终止，`REJECTED`，全员回匹配池，重新等待下次凌晨匹配，拒绝方记拒绝次数
-- 48小时未操作 → 默认同意
+- 48小时内未全部确认 → 未操作方默认同意
+
+### 5. 超时判定任务
+
+不使用延时队列，改为**定时轮询**：新增一个每2小时执行一次的 Job，按状态分别用对应的时间戳字段判断是否超时：
+
+| status | 判定字段 | 时限 |
+|--------|---------|------|
+| MATCHED | `matched_time` | 24小时 |
+| BOOKING | `court_booker_selected_time`（若曾被打回重订，则用最近一次退回时间，即 `last_rebook_time`） | 48小时 |
+| SCHEDULED | `schedule_submitted_time` | 48小时 |
+| PENDING_CONFIRM | `submitted_time` | 48小时 |
+
+命中超时后按各状态描述的规则统一处理（终止转 `REJECTED`，或默认同意/接受）。因轮询粒度是2小时，实际超时判定会比名义时限晚最多2小时触发，此误差可接受。
 
 ---
 
@@ -308,16 +345,22 @@ Domain Service（TournamentMatchingService）职责：
 
 ### 支付流程（小程序侧）
 
+**手续费计算**：报名费的手续费复用现有全局配置 `SystemConfigKey.PAYMENT_WECHAT_FEE_RATE`（千6），不单独给赛事加费率配置。下单时按 `entryFee * feeRate` 计算手续费，具体是由用户承担（支付金额 = 报名费 + 手续费）还是平台承担（支付金额 = 报名费，手续费从中扣除），沿用现有 `MEETUP_COLLECT` 业务的处理方式，保持一致。
+
 1. 用户在落地页点击"立即支付"，调用 `POST /tournament/entry/pay`
 2. 后端创建支付订单，调用 `PaymentDomainService` 下单，返回 `PrepayResult`（`prepayId`/`timeStamp`/`nonceStr`/`packageVal`/`signType`/`paySign`），字段对齐 `wx.requestPayment` 入参
 3. 前端拿到 `PrepayResult` 直接调用小程序 `wx.requestPayment` 拉起支付面板，无需再单独处理金额，金额已在下单时与订单绑定
-4. 支付结果由微信异步回调通知后端（复用现有支付回调链路），回调成功后置 `TournamentEntryPO.status = MAIN_DRAW_WAITING_MATCH`，`paidTime` 写入，`currentFilledSlots + 1`
-5. 前端不依赖支付成功的同步返回值判断结果，落地页轮询或依赖下次进入时的 `detail` 接口刷新状态
+4. 支付结果由微信异步回调通知后端（复用现有支付回调链路），回调成功后置 `TournamentEntryPO.status` 从 `PAYING` 推进为 `WAITING`（`stage` 同步置为 `MAIN`），`paidTime` 写入，`currentFilledSlots + 1`
+
+**支付结果确认（不新增中间状态）**：`TournamentEntryPO.status` 不需要为"支付确认中"单独加一个状态，支付单本身的 `PaymentStatusEnum.PENDING` 已经表达了这层含义。前端侧处理：
+- `wx.requestPayment` 的 `success` 回调只作为"引导用户主动刷新"的时机，不直接把前端状态改成已支付
+- 回调后主动调用一次 `detail` 接口；若 `myEntry.status` 仍是 `PAYING`（说明支付回调还没到），展示"支付确认中，请稍候"过渡提示（纯前端本地态），并在几秒后再次刷新
+- 若多次刷新仍未变化，调用兜底的主动查单接口（复用 `WechatPayClient.queryTrade`），后端主动向微信查询订单状态并据此推进，不完全依赖异步回调，避免用户长时间卡在"确认中"
 
 ### 退出赛事
 
-- 资格赛阶段（`status` 为 `QUALIFIER_WAITING_MATCH`/`QUALIFIER_IN_MATCH`）：直接退出，无费用，`status` 置为已退出，不进入 `ELIMINATED`（区分主动退出与被淘汰，便于时间线展示）
-- 正赛阶段（已支付，`status` 为 `AWAIT_PAYMENT` 之后）：退出需先触发退款，退款成功后释放席位（`currentFilledSlots -1`），再置退出状态
+- 资格赛阶段（`status` 为 `WAITING`/`IN_MATCH`，`stage=QUALIFY`）：直接退出，无费用，`status` 置为 `WITHDRAWN`，与 `ELIMINATED` 区分（主动退出 vs 被淘汰，便于时间线展示）
+- 正赛阶段（`stage=MAIN`，已支付锁定席位后）：退出需先触发退款，退款成功后释放席位（`currentFilledSlots -1`），再置 `status=WITHDRAWN`
 - **退款需新增能力**：现有支付体系（`WechatPayClient`）仅支持下单、查单、关单、分账，没有退款接口，需要新增微信支付退款 API 封装 + 领域层退款流程，MVP 阶段需要评估是否纳入首版范围
 
 ---
@@ -453,7 +496,7 @@ Domain Service（TournamentMatchingService）职责：
   myCurrentMatch: {                    // 当前用户进行中的比赛，无则为 null
     matchId, round, opponents: [...],
     courtBookerId, courtName, courtAddress,
-    scheduledStartTime, scheduledEndTime,
+    scheduledStartTime, scheduledDuration,
     meetupId, status, participants: [...]
   } | null,
 
@@ -467,6 +510,7 @@ Domain Service（TournamentMatchingService）职责：
                                         // | AWAIT_RESULT_CONFIRM（待我确认结果/拒绝结果）
                                         // | WAITING_MATCH（排队等待下次匹配）
                                         // | ELIMINATED
+                                        // | WITHDRAWN（已主动退出）
                                         // | QUALIFIED_MAIN_DRAW（正赛进行中，无待办）
 
   myTimeline: [...],                   // 仅个人视角事件流，不含其他人操作

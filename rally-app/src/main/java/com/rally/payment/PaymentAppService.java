@@ -6,6 +6,7 @@ import com.rally.domain.auth.gateway.AccountRepository;
 import com.rally.domain.payment.enums.PayChannelEnum;
 import com.rally.domain.payment.gateway.PaymentChannelClient;
 import com.rally.domain.payment.gateway.PaymentLogRepository;
+import com.rally.domain.payment.enums.BizTypeEnum;
 import com.rally.domain.payment.model.CallbackResult;
 import com.rally.domain.payment.model.PaymentLog;
 import com.rally.domain.payment.model.PaymentOrder;
@@ -13,6 +14,7 @@ import com.rally.domain.payment.model.PrepayCmd;
 import com.rally.domain.payment.model.PrepayResult;
 import com.rally.domain.payment.service.PaymentChannelRouter;
 import com.rally.domain.payment.service.PaymentDomainService;
+import com.rally.domain.tournament.service.TournamentPaymentService;
 import com.rally.domain.utils.Assert;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class PaymentAppService {
     private final PaymentLogRepository paymentLogRepository;
     private final SettlementAppService settlementAppService;
     private final AccountRepository accountRepository;
+    private final TournamentPaymentService tournamentPaymentService;
 
     /**
      * 取拉起参数：参与人点支付时调用。openid 由登录态 user→openid 反查。
@@ -71,9 +74,13 @@ public class PaymentAppService {
 
         try {
             if ("TRANSACTION".equals(callback.getCallbackType()) && callback.isSuccess() && StringUtils.isNotBlank(callback.getOutTradeNo())) {
-                // 支付成功 → 推进支付单 → 触发分账（失败兜底由 SettlementReconcileJob）
+                // 支付成功 → 推进支付单 → 按业务类型分流（活动收款触发分账 / 赛事报名费推进 entry+席位）
                 PaymentOrder paid = paymentDomainService.markPaid(callback.getOutTradeNo(), callback.getChannelTransactionId());
-                settlementAppService.share(paid);
+                if (paid.getData().getBizType() == BizTypeEnum.TOURNAMENT_ENTRY_FEE) {
+                    tournamentPaymentService.advanceOnPaid(paid);
+                } else {
+                    settlementAppService.share(paid);
+                }
             } else if ("PROFIT_SHARE".equals(callback.getCallbackType())) {
                 // 分账动账通知：业务上不依赖此回调推进（最终态以查询为权威，§5.3），仅留痕
                 log.info("收到分账动账通知 outOrderNo={}", callback.getOutTradeNo());

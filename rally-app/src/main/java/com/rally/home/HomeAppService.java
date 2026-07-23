@@ -55,6 +55,8 @@ public class HomeAppService {
 
         displayItems.add(buildMeetupDisplay());
 
+        displayItems.add(buildTournamentPosterDisplay());
+
         HomeDisplayItemDTO matchDisplay = buildMatchDisplay();
         if (matchDisplay != null) {
             displayItems.add(matchDisplay);
@@ -90,6 +92,25 @@ public class HomeAppService {
         cmd.setTab(UserMeetupTabEnum.IN_PROGRESS);
         PageDTO<MeetupCardDTO> page = userMeetupAppService.queryUserMeetupList(cmd);
         return page.getList();
+    }
+
+    private HomeDisplayItemDTO buildTournamentPosterDisplay() {
+        HomeDisplayItemDTO item = new HomeDisplayItemDTO();
+        item.setDisplayType(DisplayType.POSTER_CARD);
+        PosterCardDisplayData data = new PosterCardDisplayData();
+        data.setTitle("杭州线上赛");
+        data.setSubtitle("火热报名中");
+
+        PosterCardDisplayData.PosterCardItem poster = new PosterCardDisplayData.PosterCardItem();
+        poster.setType(PosterCardDisplayData.PosterType.NAVIGATE);
+        poster.setImageUrl(QiniuConfiguration.buildSignedUrl("rally-tournament/2079439290926018562.jpg"));
+        poster.setTitle("");
+        poster.setSubtitle("");
+        poster.setWechatUrl("/pages/tournament-detail/tournament-detail?id=2079439290926018562");
+        data.setPosters(List.of(poster));
+
+        item.setData(data);
+        return item;
     }
 
     private HomeDisplayItemDTO buildMatchDisplay() {

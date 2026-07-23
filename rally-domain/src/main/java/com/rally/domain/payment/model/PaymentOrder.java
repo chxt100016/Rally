@@ -36,12 +36,12 @@ public class PaymentOrder {
      * @param timeoutMinutes 超时分钟数，<=0 则不超时（expireTime=null）
      * @param payeeAccount 收款受益人渠道账号（微信 openid），冗余进单方便分账直接取
      */
-    public static PaymentOrder create(PayChannelEnum channel, String batchId, String meetupId, String payerUserId, String payeeUserId, String payeeAccount, int baseAmount, BigDecimal feeRate, int timeoutMinutes) {
+    public static PaymentOrder create(PayChannelEnum channel, BizTypeEnum bizType, String batchId, String meetupId, String payerUserId, String payeeUserId, String payeeAccount, int baseAmount, BigDecimal feeRate, int timeoutMinutes) {
         int feeAmount = calcFee(baseAmount, feeRate);
         PaymentOrderData data = new PaymentOrderData();
         data.setBizId(IdWorker.getIdStr());
         data.setChannel(channel);
-        data.setBizType(BizTypeEnum.MEETUP_COLLECT);
+        data.setBizType(bizType);
         data.setCollectionBatchId(batchId);
         data.setMeetupId(meetupId);
         data.setPayerUserId(payerUserId);

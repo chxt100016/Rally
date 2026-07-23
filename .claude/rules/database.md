@@ -1,6 +1,6 @@
 ## 数据库与 ORM
 - 使用**MyBatis-Plus** 操作数据
-- 调用路径 xxRepository(domain层gateway接口) -> xxRepositoryImpl(infrastructure层实现类) ->  XXService(继承自mybatis-plus ServiceImpl) -> XXMapper(继承 `BaseMapper<PO>)
+- 调用路径 xxRepository(domain层gateway接口) -> xxRepositoryImpl(infrastructure层实现类) ->  XXDbService(继承自mybatis-plus ServiceImpl) -> XXMapper(继承 `BaseMapper<PO>)
 - 放在 `rally-infrastructure/src/main/java/com/rally/db/{驼峰表名}`
 - PO 实体用 `@TableName` 注解
 - 无自定义 XML Mapper，查询总是用 `LambdaQueryWrapper` 链式调用方法内判断, 例子如下

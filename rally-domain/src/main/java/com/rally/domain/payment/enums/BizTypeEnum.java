@@ -9,7 +9,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum BizTypeEnum {
-    MEETUP_COLLECT("活动收款");
+    MEETUP_COLLECT("活动收款"),
+    TOURNAMENT_ENTRY_FEE("赛事报名费");
 
     private final String label;
 }

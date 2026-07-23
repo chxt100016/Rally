@@ -85,6 +85,7 @@ DROP TABLE IF EXISTS `rally_meetup`;
 CREATE TABLE `rally_meetup` (
   `id`              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `biz_id`          VARCHAR(32)  NOT NULL COMMENT '业务主键（雪花算法字符串）',
+  `meetup_type`     VARCHAR(16)  NOT NULL DEFAULT 'NORMAL' COMMENT '约球类型：NORMAL/TOURNAMENT',
   `creator_id`      VARCHAR(32)  NOT NULL COMMENT '发布者，关联 users.user_id',
   `title`           VARCHAR(128) DEFAULT NULL COMMENT '标题，选填；不填后端按模板生成',
   `match_type`      varchar(8) NOT NULL DEFAULT 'single' COMMENT '类型：单打/双打/拉球',
