@@ -1,6 +1,7 @@
 package com.rally.db.tournament.convert;
 
 import com.rally.db.tournament.entity.TournamentPO;
+import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.tournament.enums.TournamentGenderLimitEnum;
 import com.rally.domain.tournament.enums.TournamentStatusEnum;
 import com.rally.domain.tournament.model.TournamentData;
@@ -21,6 +22,7 @@ public interface TournamentConvertMapper {
 
     @Mapping(target = "genderLimit", source = "genderLimit", qualifiedByName = "strToGenderLimit")
     @Mapping(target = "status", source = "status", qualifiedByName = "strToStatus")
+    @Mapping(target = "matchType", source = "matchType", qualifiedByName = "strToMatchType")
     TournamentData toTournamentData(TournamentPO po);
 
     List<TournamentData> toTournamentDataList(List<TournamentPO> poList);
@@ -28,6 +30,7 @@ public interface TournamentConvertMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "genderLimit", source = "genderLimit", qualifiedByName = "genderLimitToStr")
     @Mapping(target = "status", source = "status", qualifiedByName = "statusToStr")
+    @Mapping(target = "matchType", source = "matchType", qualifiedByName = "matchTypeToStr")
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     TournamentPO toTournamentPO(TournamentData data);
@@ -39,6 +42,16 @@ public interface TournamentConvertMapper {
 
     @Named("genderLimitToStr")
     static String genderLimitToStr(TournamentGenderLimitEnum value) {
+        return value == null ? null : value.name();
+    }
+
+    @Named("strToMatchType")
+    static MatchTypeEnum strToMatchType(String value) {
+        return value == null ? null : MatchTypeEnum.valueOf(value);
+    }
+
+    @Named("matchTypeToStr")
+    static String matchTypeToStr(MatchTypeEnum value) {
         return value == null ? null : value.name();
     }
 

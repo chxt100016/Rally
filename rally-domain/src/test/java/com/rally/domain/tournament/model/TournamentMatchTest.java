@@ -88,11 +88,9 @@ public class TournamentMatchTest {
         List<MatchParticipantData> participants = Arrays.asList(new MatchParticipantData(), new MatchParticipantData());
 
         TournamentMatch match = new TournamentMatch(data, participants);
-        match.submitBooking("user1", "Court A", "Address A", com.rally.domain.meetup.enums.CourtSelectModeEnum.FREE, null, null, null, null, null, LocalDateTime.now(), 2);
+        match.submitBooking("user1");
 
         Assert.assertEquals(TournamentMatchStatusEnum.SCHEDULED, match.getData().getStatus());
-        Assert.assertEquals("Court A", match.getData().getCourtName());
-        Assert.assertEquals("Address A", match.getData().getCourtAddress());
         Assert.assertNotNull(match.getData().getScheduleSubmittedTime());
     }
 

@@ -6,7 +6,7 @@ import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.enums.*;
 import com.rally.domain.system.CityConfig;
 import com.rally.domain.tournament.model.MatchParticipantData;
-import com.rally.domain.tournament.model.TournamentMatchData;
+import com.rally.domain.tournament.model.SubmitBookingCmd;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.DayOfWeek;
@@ -52,44 +52,47 @@ public class MeetupFactory {
     }
 
     /**
-     * 从赛事比赛创建约球（全部参与者自动JOINED）
-     * 场地信息（courtName/courtAddress/courtLng/courtLat/城市）已在比赛 submitBooking 时按球场库数据校正并落库，直接取用，不再反查
+     * 赛事订场时创建草稿约球（status=DRAFT，全部参与者自动JOINED）。
+     * 数据结构与普通发布一致，matchType/maxPlayers/currentPlayers 按参赛人数强制。
+     * courtData 非空（TEXT/MAP 模式）时球场信息以球场库数据为准。
+     *
+     * @param cmd          订场命令（含约球全量字段）
+     * @param bookerId     订场人ID（作为草稿创建者）
+     * @param courtData    球场库数据，FREE 模式为 null
+     * @param participants 比赛参与者
      */
-    public static Meetup createFromTournamentMatch(TournamentMatchData matchData, List<MatchParticipantData> participants) {
-        MeetupData data = new MeetupData();
+    public static Meetup createTournamentDraft(SubmitBookingCmd cmd, String bookerId, CourtData courtData, List<MatchParticipantData> participants) {
+        MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, bookerId, courtData);
         data.setBizId(IdWorker.getIdStr());
-        data.setMeetupType(MeetupTypeEnum.TOURNAMENT.getCode());
-        data.setCreatorId(participants.isEmpty() ? null : participants.get(0).getUserId());
-        data.setTitle("赛事约球");
-        data.setMatchType(participants.size() == 2 ? MatchTypeEnum.SINGLE : MatchTypeEnum.DOUBLE);
-        data.setMaxPlayers(participants.size());
-        data.setCurrentPlayers(participants.size());
-        data.setStartTime(matchData.getScheduledStartTime());
-        data.setEndTime(matchData.getScheduledStartTime().plusHours(matchData.getScheduledDuration().longValue()));
-        data.setDuration(new java.math.BigDecimal(matchData.getScheduledDuration()));
-        data.setCourtName(matchData.getCourtName());
-        data.setCourtAddress(matchData.getCourtAddress());
-        data.setCourtLng(matchData.getCourtLng());
-        data.setCourtLat(matchData.getCourtLat());
-        data.setCourtSelectMode(matchData.getCourtSelectMode());
-        data.setCourtId(matchData.getCourtId());
-        data.setCityCode(matchData.getCourtCityCode());
-        data.setCityName(matchData.getCourtCityName());
-        data.setStatus(MeetupStatusEnum.OPEN);
-        data.setJoinMode(JoinModeEnum.DIRECT);
-        data.setGenderLimit(GenderLimitEnum.ANY);
+        data.setCityName(CityConfig.getCityName(data.getCityCode()));
+        applyTournamentParticipants(data, cmd, participants);
 
         List<RegistrationData> registrations = new ArrayList<>();
         for (MatchParticipantData participant : participants) {
-            RegistrationData registration = new RegistrationData();
-            registration.setBizId(IdWorker.getIdStr());
-            registration.setRallyMeetupId(data.getBizId());
-            registration.setUserId(participant.getUserId());
-            registration.setStatus(RegistrationStatusEnum.JOINED);
-            registrations.add(registration);
+            registrations.add(buildJoinedRegistration(data.getBizId(), participant.getUserId()));
         }
-
         return new Meetup(data, registrations);
+    }
+
+    /**
+     * 赛事约球人数/类型按参赛者强制，标题空则给默认值
+     */
+    private static void applyTournamentParticipants(MeetupData data, SubmitBookingCmd cmd, List<MatchParticipantData> participants) {
+        data.setMatchType(participants.size() == 2 ? MatchTypeEnum.SINGLE : MatchTypeEnum.DOUBLE);
+        data.setMaxPlayers(participants.size());
+        data.setCurrentPlayers(participants.size());
+        if (StringUtils.isBlank(data.getTitle())) {
+            data.setTitle("赛事约球");
+        }
+    }
+
+    private static RegistrationData buildJoinedRegistration(String meetupId, String userId) {
+        RegistrationData registration = new RegistrationData();
+        registration.setBizId(IdWorker.getIdStr());
+        registration.setRallyMeetupId(meetupId);
+        registration.setUserId(userId);
+        registration.setStatus(RegistrationStatusEnum.JOINED);
+        return registration;
     }
 
     private static String generateTitle(MeetupPublishCmd cmd) {

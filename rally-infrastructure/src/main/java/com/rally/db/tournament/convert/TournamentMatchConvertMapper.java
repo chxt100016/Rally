@@ -1,7 +1,6 @@
 package com.rally.db.tournament.convert;
 
 import com.rally.db.tournament.entity.TournamentMatchPO;
-import com.rally.domain.meetup.enums.CourtSelectModeEnum;
 import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.model.TournamentMatchData;
@@ -20,13 +19,11 @@ public interface TournamentMatchConvertMapper {
 
     @Mapping(target = "round", source = "round", qualifiedByName = "strToRound")
     @Mapping(target = "status", source = "status", qualifiedByName = "strToMatchStatus")
-    @Mapping(target = "courtSelectMode", source = "courtSelectMode", qualifiedByName = "strToCourtSelectMode")
     TournamentMatchData toTournamentMatchData(TournamentMatchPO po);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "round", source = "round", qualifiedByName = "roundToStr")
     @Mapping(target = "status", source = "status", qualifiedByName = "matchStatusToStr")
-    @Mapping(target = "courtSelectMode", source = "courtSelectMode", qualifiedByName = "courtSelectModeToStr")
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     TournamentMatchPO toTournamentMatchPO(TournamentMatchData data);
@@ -48,16 +45,6 @@ public interface TournamentMatchConvertMapper {
 
     @Named("matchStatusToStr")
     static String matchStatusToStr(TournamentMatchStatusEnum value) {
-        return value == null ? null : value.name();
-    }
-
-    @Named("strToCourtSelectMode")
-    static CourtSelectModeEnum strToCourtSelectMode(String value) {
-        return value == null ? null : CourtSelectModeEnum.valueOf(value);
-    }
-
-    @Named("courtSelectModeToStr")
-    static String courtSelectModeToStr(CourtSelectModeEnum value) {
         return value == null ? null : value.name();
     }
 }

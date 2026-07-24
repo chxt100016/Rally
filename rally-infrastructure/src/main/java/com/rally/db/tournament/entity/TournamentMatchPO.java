@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -25,19 +24,8 @@ public class TournamentMatchPO {
     private Integer groupSize;
     private String courtBookerId;
     private LocalDateTime courtBookerSelectedTime;
-    private String courtName;
-    private String courtAddress;
-    private Double courtLng;
-    private Double courtLat;
-    private String courtCityCode;
-    private String courtCityName;
-    /** 球场选择模式：TEXT/MAP/FREE */
-    private String courtSelectMode;
-    /** 球场库ID */
-    private String courtId;
-    private LocalDateTime scheduledStartTime;
-    private BigDecimal scheduledDuration;
     private LocalDateTime scheduleSubmittedTime;
+    /** 关联的约球ID（订场创建的草稿约球） */
     private String meetupId;
     private String winnerId;
     private String submittedBy;

@@ -61,14 +61,16 @@
         AND end_time &gt; NOW()
     </sql>
 
-    <!-- 已完成：报名状态为完成态（REVIEWED/SKIPPED）即可，不判断 meetup 状态与时间 -->
+    <!-- 已完成：报名状态为完成态（REVIEWED/SKIPPED）即可，不判断 meetup 状态与时间；排除草稿 -->
     <sql id="completedConditions">
         <include refid="participatedFilter"/>
+        AND status != 'DRAFT'
     </sql>
 
-    <!-- 我发布：创建人是当前用户 -->
+    <!-- 我发布：创建人是当前用户；排除草稿 -->
     <sql id="myPublishConditions">
         creator_id = #{param.creatorId}
+        AND status != 'DRAFT'
     </sql>
 
     <!-- IN_PROGRESS 列表，searchAfter 游标分页 -->
@@ -142,7 +144,8 @@
             UNION
             <!-- 参与状态见 RegistrationStatusEnum.getParticipated() -->
             (SELECT m.*, 'UNREAD_MESSAGES' AS _pending_reason FROM rally_meetup m
-             WHERE EXISTS (
+             WHERE m.status != 'DRAFT'
+             AND EXISTS (
                  SELECT 1 FROM rally_meetup_chat_user cu
                  WHERE cu.meetup_id = m.biz_id AND cu.user_id = #{userId} AND cu.unread_count > 0
              )
@@ -163,10 +166,11 @@
         LIMIT #{limit}
     </select>
 
-    <!-- RECENT tab：用户为创建人或已批准报名的约球，不限状态，searchAfter 游标分页 -->
+    <!-- RECENT tab：用户为创建人或已批准报名的约球，不限状态（草稿除外），searchAfter 游标分页 -->
     <select id="listRecentByUser" resultType="com.rally.db.meetup.entity.MeetupPO">
         SELECT * FROM rally_meetup m
-        WHERE (m.creator_id = #{userId}
+        WHERE m.status != 'DRAFT'
+          AND (m.creator_id = #{userId}
            OR EXISTS (
                SELECT 1 FROM rally_meetup_registration r
                WHERE r.rally_meetup_id = m.biz_id AND r.user_id = #{userId} AND r.status IN <foreach collection="participatedStatuses" item="s" open="(" separator="," close=")">#{s}</foreach>

@@ -1,6 +1,9 @@
 package com.rally.tournament;
 
 import com.rally.config.property.QiniuConfiguration;
+import com.rally.domain.meetup.model.Meetup;
+import com.rally.domain.meetup.service.MeetupDomainService;
+import com.rally.meetup.MeetupCardPackingService;
 import com.rally.domain.tournament.model.MatchOpponentDTO;
 import com.rally.domain.tournament.model.MyCurrentMatchDTO;
 import com.rally.domain.tournament.model.TournamentBracketMatchDTO;
@@ -28,6 +31,10 @@ public class TournamentDetailAppService {
 
     private final UserProfileDomainService userProfileDomainService;
 
+    private final MeetupDomainService meetupDomainService;
+
+    private final MeetupCardPackingService meetupCardPackingService;
+
     /**
      * 赛事落地页详情，userId 从 UserContext 取，可匿名（未登录只返回公开区块）
      */
@@ -43,7 +50,21 @@ public class TournamentDetailAppService {
             Map<String, UserProfile> profiles = userProfileDomainService.listMap(userIds);
             fillNicknames(detail, profiles);
         }
+
+        fillMeetupCard(detail);
         return detail;
+    }
+
+    /**
+     * 装配当前比赛的约球卡片：订场后生成草稿约球，供对方确认赛约前查看
+     */
+    private void fillMeetupCard(TournamentDetailDTO detail) {
+        MyCurrentMatchDTO myCurrentMatch = detail.getMyCurrentMatch();
+        if (myCurrentMatch == null || myCurrentMatch.getMeetupId() == null) {
+            return;
+        }
+        Meetup meetup = meetupDomainService.get(myCurrentMatch.getMeetupId());
+        myCurrentMatch.setMeetupCard(meetupCardPackingService.packCard(meetup.getData(), null, null));
     }
 
     private List<String> collectUserIds(TournamentDetailDTO detail) {

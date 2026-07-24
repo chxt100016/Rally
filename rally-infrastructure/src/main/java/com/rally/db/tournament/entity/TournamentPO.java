@@ -19,6 +19,7 @@ public class TournamentPO {
     private String bizId;
     private String tournamentName;
     private String posterKey;
+    private String matchType;
     private String cityCode;
     private String cityName;
     private String ntrpLevel;

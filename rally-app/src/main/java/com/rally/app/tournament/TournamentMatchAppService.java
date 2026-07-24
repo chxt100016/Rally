@@ -27,10 +27,10 @@ public class TournamentMatchAppService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> submitBooking(SubmitBookingCmd cmd) {
+    public Result<String> submitBooking(SubmitBookingCmd cmd) {
         String userId = UserContext.get();
-        matchFlowService.submitBooking(cmd.getMatchId(), userId, cmd.getCourtName(), cmd.getCourtAddress(), cmd.getCourtSelectMode(), cmd.getCourtId(), cmd.getCourtLng(), cmd.getCourtLat(), cmd.getCityCode(), cmd.getScheduledStartTime(), cmd.getScheduledDuration());
-        return Result.ok();
+        String meetupId = matchFlowService.submitBooking(cmd, userId);
+        return Result.ok(meetupId);
     }
 
     @Transactional(rollbackFor = Exception.class)

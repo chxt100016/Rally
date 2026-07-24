@@ -3,6 +3,7 @@ package com.rally.domain.meetup.convert;
 import com.rally.domain.court.model.CourtData;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupPublishCmd;
+import com.rally.domain.tournament.model.SubmitBookingCmd;
 import com.rally.domain.utils.AddressUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.*;
@@ -48,6 +49,34 @@ public interface MeetupDomainConvertMapper {
     @Mapping(target = "courtLat", expression = "java(courtData != null ? courtData.getLat() : cmd.getCourtLat())")
     @Mapping(target = "districtName", expression = "java(resolveDistrictName(cmd, courtData))")
     void updateMeetupData(@MappingTarget MeetupData data, MeetupPublishCmd cmd, CourtData courtData);
+
+    /**
+     * SubmitBookingCmd -> MeetupData（赛事订场草稿）
+     * status 置 DRAFT；creatorId 为订场人；courtData 非空时球场信息以球场库数据为准。
+     * matchType/maxPlayers/currentPlayers 由调用方按参赛人数覆盖。
+     */
+    @Mapping(target = "creatorId", source = "userId")
+    @Mapping(target = "cityCode", source = "cmd.cityCode")
+    @Mapping(target = "endTime", expression = "java(calculateEndTime(cmd.getStartTime(), cmd.getDuration()))")
+    @Mapping(target = "meetupType", expression = "java(com.rally.domain.meetup.enums.MeetupTypeEnum.TOURNAMENT.getCode())")
+    @Mapping(target = "status", expression = "java(com.rally.domain.meetup.enums.MeetupStatusEnum.DRAFT)")
+    @Mapping(target = "courtName", expression = "java(courtData != null ? courtData.getName() : cmd.getCourtName())")
+    @Mapping(target = "courtAddress", expression = "java(courtData != null ? courtData.getAddress() : cmd.getCourtAddress())")
+    @Mapping(target = "courtLng", expression = "java(courtData != null ? courtData.getLng() : cmd.getCourtLng())")
+    @Mapping(target = "courtLat", expression = "java(courtData != null ? courtData.getLat() : cmd.getCourtLat())")
+    @Mapping(target = "districtName", expression = "java(resolveBookingDistrictName(cmd, courtData))")
+    MeetupData toMeetupData(SubmitBookingCmd cmd, String userId, CourtData courtData);
+
+    /**
+     * 订场草稿区县名解析：courtData 有区县名取库数据，否则从地址解析
+     */
+    default String resolveBookingDistrictName(SubmitBookingCmd cmd, CourtData courtData) {
+        if (courtData != null && StringUtils.isNotBlank(courtData.getDistrictName())) {
+            return courtData.getDistrictName();
+        }
+        String address = courtData != null ? courtData.getAddress() : cmd.getCourtAddress();
+        return AddressUtils.getDistrict(address);
+    }
 
     /**
      * 计算结束时间

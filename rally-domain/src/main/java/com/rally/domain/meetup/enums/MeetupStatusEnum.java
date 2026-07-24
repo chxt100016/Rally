@@ -9,6 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum MeetupStatusEnum {
+    DRAFT("草稿"),
     OPEN("报名中"),
     ONGOING("进行中"),
     CLOSED("关闭"),

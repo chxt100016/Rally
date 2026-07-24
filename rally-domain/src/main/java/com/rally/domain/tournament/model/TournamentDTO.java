@@ -1,5 +1,6 @@
 package com.rally.domain.tournament.model;
 
+import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.tournament.enums.TournamentDisplayStatusEnum;
 import com.rally.domain.tournament.enums.TournamentGenderLimitEnum;
 import lombok.Data;
@@ -14,6 +15,7 @@ public class TournamentDTO {
     private String tournamentId;
     private String tournamentName;
     private String posterUrl;
+    private MatchTypeEnum matchType;
     private String cityName;
     private String ntrpLevel;
     private TournamentGenderLimitEnum genderLimit;

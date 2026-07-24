@@ -104,30 +104,26 @@ public class TournamentMatch {
         data.setStatus(TournamentMatchStatusEnum.MATCHED);
     }
 
-    public void submitBooking(String userId, String courtName, String courtAddress, CourtSelectModeEnum courtSelectMode, String courtId, Double courtLng, Double courtLat, String courtCityCode, String courtCityName, LocalDateTime scheduledStartTime, Integer scheduledDuration) {
+    /**
+     * 提交赛约（订场）：BOOKING -> SCHEDULED，记录提交时间。
+     * 场地/时间等约球数据不再落在比赛上，统一存于关联的草稿约球（meetupId），此处仅做状态流转。
+     */
+    public void submitBooking(String userId) {
         Assert.eq(data.getStatus(), TournamentMatchStatusEnum.BOOKING, BizErrorCode.TOURNAMENT_INVALID_SCHEDULE_CONFIRM);
         Assert.eq(data.getCourtBookerId(), userId, BizErrorCode.TOURNAMENT_NOT_COURT_BOOKER);
-        Assert.notBlank(courtAddress, BizErrorCode.PARAM_ERROR);
-        Assert.notNull(scheduledStartTime, BizErrorCode.TOURNAMENT_SCHEDULE_TIME_REQUIRED);
-        Assert.notNull(scheduledDuration, BizErrorCode.PARAM_ERROR);
 
         LocalDateTime now = LocalDateTime.now();
-        data.setCourtName(courtName);
-        data.setCourtAddress(courtAddress);
-        data.setCourtSelectMode(courtSelectMode);
-        data.setCourtId(courtId);
-        data.setCourtLng(courtLng);
-        data.setCourtLat(courtLat);
-        data.setCourtCityCode(courtCityCode);
-        data.setCourtCityName(courtCityName);
-        data.setScheduledStartTime(scheduledStartTime);
-        data.setScheduledDuration(scheduledDuration);
         data.setScheduleSubmittedTime(now);
         data.setStatus(TournamentMatchStatusEnum.SCHEDULED);
 
         participants.forEach(p -> {
-            p.setConfirmStatus(ConfirmStatusEnum.PENDING);
-            p.setConfirmTime(null);
+            if (p.getUserId().equals(userId)) {
+                p.setConfirmStatus(ConfirmStatusEnum.CONFIRMED);
+                p.setConfirmTime(now);
+            } else {
+                p.setConfirmStatus(ConfirmStatusEnum.PENDING);
+                p.setConfirmTime(null);
+            }
         });
     }
 

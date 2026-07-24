@@ -31,7 +31,7 @@ public class TournamentMatchController {
     }
 
     @PostMapping("/book")
-    public Result<Void> submitBooking(@Valid @RequestBody SubmitBookingCmd cmd) {
+    public Result<String> submitBooking(@Valid @RequestBody SubmitBookingCmd cmd) {
         return tournamentMatchAppService.submitBooking(cmd);
     }
 

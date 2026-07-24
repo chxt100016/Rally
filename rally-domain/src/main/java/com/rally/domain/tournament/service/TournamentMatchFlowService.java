@@ -5,10 +5,11 @@ import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.court.gateway.CourtRepository;
 import com.rally.domain.court.model.CourtData;
 import com.rally.domain.meetup.enums.CourtSelectModeEnum;
+import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.model.Meetup;
+import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupFactory;
-import com.rally.domain.system.CityConfig;
 import com.rally.domain.tournament.enums.*;
 import com.rally.domain.tournament.gateway.TournamentEntryRepository;
 import com.rally.domain.tournament.gateway.TournamentMatchRepository;
@@ -20,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,27 +61,29 @@ public class TournamentMatchFlowService {
         }
     }
 
+    /**
+     * 提交赛约（订场）：比赛进入 SCHEDULED，并按约球全量数据创建草稿约球（DRAFT），返回草稿 meetupId。
+     * 场地/时间等数据只落在约球上，比赛仅通过 meetupId 关联。后续修改由订场人跳转约球活动页编辑。
+     */
     @Transactional(rollbackFor = Exception.class)
-    public void submitBooking(String matchId, String userId, String courtName, String courtAddress, CourtSelectModeEnum courtSelectMode, String courtId, Double courtLng, Double courtLat, String cityCode, LocalDateTime scheduledStartTime, Integer scheduledDuration) {
-        TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
+    public String submitBooking(SubmitBookingCmd cmd, String userId) {
+        TournamentMatch match = matchRepository.findByBizIdWithParticipants(cmd.getMatchId());
         Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
 
-        // TEXT/MAP 模式下，通过 courtId 查询球场库数据，球场信息以库数据为准（与约球域 MeetupDomainService.resolveCourtData 保持一致）
-        CourtData courtData = resolveCourtData(courtSelectMode, courtId);
-        String resolvedCourtName = courtData != null ? courtData.getName() : courtName;
-        String resolvedCourtAddress = courtData != null ? courtData.getAddress() : courtAddress;
-        Double resolvedLng = courtData != null ? courtData.getLng() : courtLng;
-        Double resolvedLat = courtData != null ? courtData.getLat() : courtLat;
-        String resolvedCityCode = courtData != null ? courtData.getCityCode() : cityCode;
-        String resolvedCityName = resolvedCityCode != null ? CityConfig.getCityName(resolvedCityCode) : null;
+        match.submitBooking(userId);
 
-        match.submitBooking(userId, resolvedCourtName, resolvedCourtAddress, courtSelectMode, courtId, resolvedLng, resolvedLat, resolvedCityCode, resolvedCityName, scheduledStartTime, scheduledDuration);
+        // TEXT/MAP 模式下，通过 courtId 查询球场库数据，球场信息以库数据为准
+        CourtData courtData = resolveCourtData(cmd.getCourtSelectMode(), cmd.getCourtId());
+        Meetup draft = MeetupFactory.createTournamentDraft(cmd, userId, courtData, match.getParticipants());
+        meetupRepository.save(draft);
+        match.getData().setMeetupId(draft.getMeetupId());
 
         boolean success = matchRepository.updateWithVersion(match.getData());
         if (!success) {
             throw new BusinessException(BizErrorCode.TOURNAMENT_MATCH_VERSION_CONFLICT);
         }
         matchRepository.saveParticipants(match.getParticipants());
+        return draft.getMeetupId();
     }
 
     /**
@@ -112,16 +114,45 @@ public class TournamentMatchFlowService {
         }
         matchRepository.saveParticipants(match.getParticipants());
 
-        if (match.getData().getStatus() == TournamentMatchStatusEnum.REJECTED && rejectReason != null) {
-            incrementRejectCount(userEntry);
+        if (match.getData().getStatus() == TournamentMatchStatusEnum.REJECTED) {
+            if (rejectReason != null) {
+                incrementRejectCount(userEntry);
+            }
+            // 比赛终止，关闭草稿约球
+            closeDraftMeetup(match.getData().getMeetupId());
         }
 
         if (match.getData().getStatus() == TournamentMatchStatusEnum.PENDING_PLAY) {
-            // 场地信息（courtName/courtAddress/courtLng/courtLat）已在 submitBooking 时落库校正，直接使用，不再反查
-            Meetup meetup = MeetupFactory.createFromTournamentMatch(match.getData(), match.getParticipants());
+            // 全员确认赛约，草稿约球转为正常报名状态（DRAFT -> OPEN）
+            activateDraftMeetup(match.getData().getMeetupId());
+        }
+    }
+
+    /**
+     * 激活草稿约球：DRAFT -> OPEN
+     */
+    private void activateDraftMeetup(String meetupId) {
+        if (meetupId == null) {
+            return;
+        }
+        MeetupData meetup = meetupRepository.findByBizId(meetupId);
+        if (meetup != null && meetup.getStatus() == MeetupStatusEnum.DRAFT) {
+            meetup.setStatus(MeetupStatusEnum.OPEN);
             meetupRepository.save(meetup);
-            match.getData().setMeetupId(meetup.getMeetupId());
-            matchRepository.save(match.getData());
+        }
+    }
+
+    /**
+     * 关闭草稿约球：DRAFT -> CLOSED
+     */
+    private void closeDraftMeetup(String meetupId) {
+        if (meetupId == null) {
+            return;
+        }
+        MeetupData meetup = meetupRepository.findByBizId(meetupId);
+        if (meetup != null && meetup.getStatus() == MeetupStatusEnum.DRAFT) {
+            meetup.setStatus(MeetupStatusEnum.CLOSED);
+            meetupRepository.save(meetup);
         }
     }
 

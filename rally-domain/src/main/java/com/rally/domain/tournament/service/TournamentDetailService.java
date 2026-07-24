@@ -93,7 +93,7 @@ public class TournamentDetailService {
         TournamentMatch activeMatch = null;
         if (myEntryData.getStatus() == TournamentEntryStatusEnum.IN_MATCH) {
             activeMatch = tournamentMatchRepository.findActiveMatchByTournamentAndUser(tournamentId, userId);
-            detail.setMyCurrentMatch(toMyCurrentMatchDTO(activeMatch, userId));
+            detail.setMyCurrentMatch(toMyCurrentMatchDTO(activeMatch, userId, tournamentId, tournamentData));
         }
 
         detail.setActionState(calculateActionState(myEntryData, activeMatch, userId));
@@ -199,7 +199,7 @@ public class TournamentDetailService {
         return dto;
     }
 
-    private MyCurrentMatchDTO toMyCurrentMatchDTO(TournamentMatch match, String userId) {
+    private MyCurrentMatchDTO toMyCurrentMatchDTO(TournamentMatch match, String userId, String tournamentId, TournamentData tournamentData) {
         if (match == null) {
             return null;
         }
@@ -208,17 +208,23 @@ public class TournamentDetailService {
         dto.setMatchId(data.getBizId());
         dto.setRound(data.getRound());
         dto.setCourtBookerId(data.getCourtBookerId());
-        dto.setCourtName(data.getCourtName());
-        dto.setCourtAddress(data.getCourtAddress());
-        dto.setScheduledStartTime(data.getScheduledStartTime());
-        dto.setScheduledDuration(data.getScheduledDuration());
         dto.setMeetupId(data.getMeetupId());
         dto.setStatus(data.getStatus());
+        dto.setGroupSize(data.getRound() == TournamentRoundEnum.QUALIFIER ? tournamentData.getQualifierGroupSize() : 2);
 
-        dto.setOpponents(match.getParticipants().stream()
+        List<MatchParticipantData> opponentParticipants = match.getParticipants().stream()
                 .filter(p -> !p.getUserId().equals(userId))
-                .map(this::toOpponentDTO)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+
+        dto.setOpponents(opponentParticipants.stream().map(this::toOpponentDTO).collect(Collectors.toList()));
+
+        if (data.getStatus() == TournamentMatchStatusEnum.BOOKING) {
+            dto.setOpponentEntries(opponentParticipants.stream()
+                    .map(p -> tournamentEntryRepository.findByTournamentAndUser(tournamentId, p.getUserId()))
+                    .filter(java.util.Objects::nonNull)
+                    .map(TournamentDomainConvertMapper.INSTANCE::toTournamentEntryDTO)
+                    .collect(Collectors.toList()));
+        }
 
         dto.setParticipants(match.getParticipants().stream().map(p -> {
             MatchParticipantDTO participantDTO = new MatchParticipantDTO();
@@ -258,7 +264,10 @@ public class TournamentDetailService {
             case BOOKING:
                 return userId.equals(matchData.getCourtBookerId()) ? TournamentActionStateEnum.AWAIT_BOOKING : TournamentActionStateEnum.AWAIT_BOOKING_OPPONENT;
             case SCHEDULED:
-                return isPending(activeMatch, userId, false) ? TournamentActionStateEnum.AWAIT_SCHEDULE_CONFIRM : TournamentActionStateEnum.WAITING_MATCH;
+                if (isPending(activeMatch, userId, false)) {
+                    return TournamentActionStateEnum.AWAIT_SCHEDULE_CONFIRM;
+                }
+                return userId.equals(matchData.getCourtBookerId()) ? TournamentActionStateEnum.AWAIT_OPPONENT_SCHEDULE_CONFIRM : TournamentActionStateEnum.WAITING_MATCH;
             case PENDING_PLAY:
                 return TournamentActionStateEnum.AWAIT_RESULT_SUBMIT;
             case PENDING_CONFIRM:
