@@ -3,6 +3,7 @@ package com.rally.db.tournament.convert;
 import com.rally.db.tournament.entity.TournamentPO;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.tournament.enums.TournamentGenderLimitEnum;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.enums.TournamentStatusEnum;
 import com.rally.domain.tournament.model.TournamentData;
 import org.mapstruct.Mapper;
@@ -23,6 +24,8 @@ public interface TournamentConvertMapper {
     @Mapping(target = "genderLimit", source = "genderLimit", qualifiedByName = "strToGenderLimit")
     @Mapping(target = "status", source = "status", qualifiedByName = "strToStatus")
     @Mapping(target = "matchType", source = "matchType", qualifiedByName = "strToMatchType")
+    @Mapping(target = "currentRound", source = "currentRound", qualifiedByName = "strToRound")
+    @Mapping(target = "offlineFromRound", source = "offlineFromRound", qualifiedByName = "strToRound")
     TournamentData toTournamentData(TournamentPO po);
 
     List<TournamentData> toTournamentDataList(List<TournamentPO> poList);
@@ -31,9 +34,21 @@ public interface TournamentConvertMapper {
     @Mapping(target = "genderLimit", source = "genderLimit", qualifiedByName = "genderLimitToStr")
     @Mapping(target = "status", source = "status", qualifiedByName = "statusToStr")
     @Mapping(target = "matchType", source = "matchType", qualifiedByName = "matchTypeToStr")
+    @Mapping(target = "currentRound", source = "currentRound", qualifiedByName = "roundToStr")
+    @Mapping(target = "offlineFromRound", source = "offlineFromRound", qualifiedByName = "roundToStr")
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     TournamentPO toTournamentPO(TournamentData data);
+
+    @Named("strToRound")
+    static TournamentRoundEnum strToRound(String value) {
+        return value == null ? null : TournamentRoundEnum.valueOf(value);
+    }
+
+    @Named("roundToStr")
+    static String roundToStr(TournamentRoundEnum value) {
+        return value == null ? null : value.name();
+    }
 
     @Named("strToGenderLimit")
     static TournamentGenderLimitEnum strToGenderLimit(String value) {

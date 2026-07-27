@@ -3,6 +3,7 @@ package com.rally.domain.meetup.service;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
+import com.rally.domain.meetup.enums.MeetupTypeEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.Meetup;
@@ -11,6 +12,9 @@ import com.rally.domain.meetup.model.MeetupPublishCmd;
 import com.rally.domain.system.CityConfig;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
+import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
+import com.rally.domain.tournament.gateway.TournamentMatchRepository;
+import com.rally.domain.tournament.model.TournamentMatchData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +31,8 @@ public class MeetupPolicy {
     private final MeetupRepository meetupRepository;
 
     private final RegistrationRepository registrationRepository;
+
+    private final TournamentMatchRepository tournamentMatchRepository;
 
     /**
      * 发布前校验：发布上限 + 城市开通 + 字段校验
@@ -124,6 +130,10 @@ public class MeetupPolicy {
         if (!meetup.isCreator(userId)) {
             throw new BusinessException(BizErrorCode.NOT_CREATOR);
         }
+        // 赛事约球不允许在约球页面关闭，需回到比赛页面操作
+        if (MeetupTypeEnum.TOURNAMENT.getCode().equals(meetup.getData().getMeetupType())) {
+            throw new BusinessException(BizErrorCode.MEETUP_TOURNAMENT_CLOSE_FORBIDDEN);
+        }
         MeetupStatusEnum realStatus = meetup.getRealStatus();
         // 如果没有其他参与者，随时可以 close（即使 FINISHED）
         if (!meetup.hasOtherParticipants()) {
@@ -146,6 +156,14 @@ public class MeetupPolicy {
     public void assertEdit(Meetup meetup, MeetupPublishCmd cmd) {
         MeetupData data = meetup.getData();
         int lockMinutes = SystemConfig.getInt(SystemConfigKey.MEETUP_EDIT_LOCK_MINUTES_BEFORE_START.getKey());
+
+        // 0. 赛事约球：仅当关联比赛处于 BOOKING / SCHEDULED 时可编辑，否则双方已确认赛约不可修改
+        if (MeetupTypeEnum.TOURNAMENT.getCode().equals(data.getMeetupType())) {
+            TournamentMatchData match = tournamentMatchRepository.findByMeetupId(data.getBizId());
+            if (match == null || (match.getStatus() != TournamentMatchStatusEnum.BOOKING && match.getStatus() != TournamentMatchStatusEnum.SCHEDULED)) {
+                throw new BusinessException(BizErrorCode.MEETUP_TOURNAMENT_EDIT_FORBIDDEN);
+            }
+        }
 
         // 1. 权限和状态校验˚k
         if (!meetup.canEdit(data.getCreatorId(), lockMinutes)) {

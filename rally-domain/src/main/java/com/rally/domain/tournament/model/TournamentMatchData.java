@@ -21,7 +21,7 @@ public class TournamentMatchData {
     private LocalDateTime scheduleSubmittedTime;
     /** 关联的约球ID（订场时创建的草稿约球，场地/时间/费用等均以约球为准） */
     private String meetupId;
-    private String winnerId;
+    private Integer winnerEntryNo;
     private String submitterUserId;
     private LocalDateTime submittedTime;
     private String rejectReason;

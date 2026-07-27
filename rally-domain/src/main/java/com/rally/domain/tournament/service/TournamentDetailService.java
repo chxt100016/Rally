@@ -5,7 +5,6 @@ import com.rally.domain.tournament.convert.TournamentDomainConvertMapper;
 import com.rally.domain.tournament.enums.ConfirmStatusEnum;
 import com.rally.domain.tournament.enums.TournamentActionStateEnum;
 import com.rally.domain.tournament.enums.TournamentDisplayStatusEnum;
-import com.rally.domain.tournament.enums.TournamentEntryStageEnum;
 import com.rally.domain.tournament.enums.TournamentEntryStatusEnum;
 import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
@@ -25,6 +24,7 @@ import com.rally.domain.tournament.model.TournamentRejectRecordDTO;
 import com.rally.domain.tournament.model.TournamentData;
 import com.rally.domain.tournament.model.TournamentDetailDTO;
 import com.rally.domain.tournament.model.TournamentDTO;
+import com.rally.domain.tournament.model.TournamentEntrantDTO;
 import com.rally.domain.tournament.model.TournamentEntryData;
 import com.rally.domain.tournament.model.TournamentEntryDTO;
 import com.rally.domain.tournament.model.TournamentMatch;
@@ -35,6 +35,8 @@ import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -58,6 +60,8 @@ public class TournamentDetailService {
 
     private final TournamentMatchRepository tournamentMatchRepository;
 
+    private final TournamentEntryService tournamentEntryService;
+
     /**
      * 聚合装配赛事详情，userId 为空时只返回公开区块（tournament + progress + bracket）
      */
@@ -73,8 +77,9 @@ public class TournamentDetailService {
         calculateStatus(tournamentDTO, tournamentData);
         detail.setTournament(tournamentDTO);
         detail.setProgress(assembleProgress(tournamentData, allMatches, allEntries.size()));
-        detail.setBracket(assembleBracket(allMatches));
+        detail.setBracket(assembleBracket(tournamentData, allMatches));
         detail.setRejectRecords(assembleRejectRecords(allEntries));
+        detail.setEntrants(assembleEntrants(allEntries));
 
         if (userId == null) {
             detail.setActionState(TournamentActionStateEnum.NOT_REGISTERED);
@@ -96,12 +101,15 @@ public class TournamentDetailService {
             detail.setMyCurrentMatch(toMyCurrentMatchDTO(activeMatch, userId, tournamentId, tournamentData));
         }
 
-        detail.setActionState(calculateActionState(myEntryData, activeMatch, userId));
+        detail.setActionState(calculateActionState(tournamentData, myEntryData, activeMatch, userId));
         detail.setMyTimeline(assembleTimeline(tournamentId, userId, myEntryData));
         return detail;
     }
 
     private void calculateStatus(TournamentDTO tournamentDTO, TournamentData tournamentData) {
+        tournamentDTO.setMatchTypeShow(tournamentData.getMatchType().getName());
+        tournamentDTO.setGenderLimitShow(tournamentData.getGenderLimit().getLabel());
+        tournamentDTO.setOfflineFromRoundShow(tournamentData.getOfflineFromRound() == null ? null : tournamentData.getOfflineFromRound().getLabel());
         if (tournamentData.getStatus() == TournamentStatusEnum.ABANDONED) {
             tournamentDTO.setDisplayStatus(TournamentDisplayStatusEnum.ABANDONED);
             tournamentDTO.setDisplayStatusShow(TournamentDisplayStatusEnum.ABANDONED.getLabel());
@@ -131,46 +139,56 @@ public class TournamentDetailService {
     private TournamentProgressDTO assembleProgress(TournamentData tournamentData, List<TournamentMatchData> allMatches, int entryCount) {
         TournamentProgressDTO progress = new TournamentProgressDTO();
         progress.setEntryCount(entryCount);
-        progress.setCurrentFilledSlots(tournamentData.getCurrentFilledSlots());
         progress.setTotalSlots(tournamentData.getTotalSlots());
         progress.setTotalMatchCount(allMatches.size());
         progress.setRegistrationEndTime(tournamentData.getRegistrationEndTime());
         progress.setQualifierEndTime(tournamentData.getQualifierEndTime());
 
-        TournamentRoundEnum currentRound = allMatches.stream()
-                .map(TournamentMatchData::getRound)
-                .max(Comparator.comparingInt(this::roundOrder))
-                .orElse(null);
+        TournamentRoundEnum currentRound = tournamentData.getCurrentRound();
         progress.setCurrentRound(currentRound);
+        progress.setCurrentRoundShow(currentRound == null ? null : currentRound.getLabel());
 
         if (currentRound != null) {
             List<TournamentMatchData> currentRoundMatches = allMatches.stream().filter(m -> m.getRound() == currentRound).collect(Collectors.toList());
             progress.setCurrentRoundTotalMatches(currentRoundMatches.size());
             progress.setCurrentRoundCompletedMatches((int) currentRoundMatches.stream().filter(m -> m.getStatus() == TournamentMatchStatusEnum.COMPLETED).count());
+            progress.setCurrentRoundAdvanceableSlots(currentRound == TournamentRoundEnum.QUALIFIER ? tournamentData.getTotalSlots() : currentRound.getSlotCount());
+            progress.setCurrentRoundAdvancedCount(tournamentEntryService.countRoundEntry(tournamentData.getBizId(), currentRound));
         } else {
             progress.setCurrentRoundTotalMatches(0);
             progress.setCurrentRoundCompletedMatches(0);
         }
+        progress.setProgressRate(calculateProgressRate(tournamentData, allMatches));
         return progress;
     }
 
-    private int roundOrder(TournamentRoundEnum round) {
-        return round.ordinal();
+    /** 应打总场次 = 资格赛 totalSlots 场 + 正赛 totalSlots-1 场；进度 = 已完成场次 / 应打总场次，满值为 1 */
+    private BigDecimal calculateProgressRate(TournamentData tournamentData, List<TournamentMatchData> allMatches) {
+        int totalSlots = tournamentData.getTotalSlots();
+        int totalRequiredMatches = totalSlots + (totalSlots - 1);
+        if (totalRequiredMatches <= 0) {
+            return BigDecimal.ZERO;
+        }
+        long completedCount = allMatches.stream().filter(m -> m.getStatus() == TournamentMatchStatusEnum.COMPLETED).count();
+        return BigDecimal.valueOf(completedCount)
+                .divide(BigDecimal.valueOf(totalRequiredMatches), 4, RoundingMode.HALF_UP)
+                .min(BigDecimal.ONE);
     }
 
-    private TournamentBracketDTO assembleBracket(List<TournamentMatchData> allMatches) {
+
+    private TournamentBracketDTO assembleBracket(TournamentData tournamentData, List<TournamentMatchData> allMatches) {
         Map<TournamentRoundEnum, List<TournamentMatchData>> byRound = allMatches.stream().collect(Collectors.groupingBy(TournamentMatchData::getRound));
 
         List<String> matchIds = allMatches.stream().map(TournamentMatchData::getBizId).collect(Collectors.toList());
         Map<String, List<MatchParticipantData>> participantsByMatch = tournamentMatchRepository.findParticipantsByMatchIds(matchIds).stream()
                 .collect(Collectors.groupingBy(MatchParticipantData::getMatchId));
 
-        List<TournamentBracketRoundDTO> rounds = byRound.entrySet().stream()
-                .sorted(Comparator.comparingInt(e -> roundOrder(e.getKey())))
-                .map(entry -> {
+        List<TournamentBracketRoundDTO> rounds = allRounds(tournamentData.getTotalSlots()).stream()
+                .map(round -> {
                     TournamentBracketRoundDTO roundDTO = new TournamentBracketRoundDTO();
-                    roundDTO.setRound(entry.getKey());
-                    List<TournamentBracketMatchDTO> matches = entry.getValue().stream()
+                    roundDTO.setRound(round);
+                    roundDTO.setRoundShow(round.getLabel());
+                    List<TournamentBracketMatchDTO> matches = byRound.getOrDefault(round, List.of()).stream()
                             .sorted(Comparator.comparingInt(TournamentMatchData::getMatchNo))
                             .map(m -> toBracketMatchDTO(m, participantsByMatch.getOrDefault(m.getBizId(), List.of())))
                             .collect(Collectors.toList());
@@ -183,11 +201,28 @@ public class TournamentDetailService {
         return bracket;
     }
 
+    /** 赛事完整轮次序列：资格赛 + 正赛首轮（由 totalSlots 决定）到决赛 */
+    private List<TournamentRoundEnum> allRounds(int totalSlots) {
+        List<TournamentRoundEnum> rounds = new ArrayList<>();
+        rounds.add(TournamentRoundEnum.QUALIFIER);
+        TournamentRoundEnum firstMainRound = TournamentRoundEnum.firstMainRound(totalSlots);
+        boolean collecting = false;
+        for (TournamentRoundEnum round : TournamentRoundEnum.values()) {
+            if (round == firstMainRound) {
+                collecting = true;
+            }
+            if (collecting && round != TournamentRoundEnum.QUALIFIER) {
+                rounds.add(round);
+            }
+        }
+        return rounds;
+    }
+
     private TournamentBracketMatchDTO toBracketMatchDTO(TournamentMatchData matchData, List<MatchParticipantData> participants) {
         TournamentBracketMatchDTO dto = new TournamentBracketMatchDTO();
         dto.setMatchId(matchData.getBizId());
         dto.setMatchNo(matchData.getMatchNo());
-        dto.setWinnerId(matchData.getWinnerId());
+        dto.setWinnerEntryNo(matchData.getWinnerEntryNo());
         dto.setStatus(matchData.getStatus());
         dto.setParticipants(participants.stream().map(this::toOpponentDTO).collect(Collectors.toList()));
         return dto;
@@ -229,7 +264,7 @@ public class TournamentDetailService {
         dto.setParticipants(match.getParticipants().stream().map(p -> {
             MatchParticipantDTO participantDTO = new MatchParticipantDTO();
             participantDTO.setUserId(p.getUserId());
-            participantDTO.setTeamId(p.getTeamId());
+            participantDTO.setEntryNo(p.getEntryNo());
             participantDTO.setConfirmStatus(p.getConfirmStatus());
             participantDTO.setResultConfirmStatus(p.getResultConfirmStatus());
             participantDTO.setIsWinner(p.getIsWinner());
@@ -239,19 +274,28 @@ public class TournamentDetailService {
         return dto;
     }
 
-    private TournamentActionStateEnum calculateActionState(TournamentEntryData entry, TournamentMatch activeMatch, String userId) {
+    private TournamentActionStateEnum calculateActionState(TournamentData tournamentData, TournamentEntryData entry, TournamentMatch activeMatch, String userId) {
         TournamentEntryStatusEnum status = entry.getStatus();
+        if (tournamentData.getEndTime() != null && LocalDateTime.now().isAfter(tournamentData.getEndTime())) {
+            return TournamentActionStateEnum.END;
+        }
         if (status == TournamentEntryStatusEnum.WITHDRAWN) {
             return TournamentActionStateEnum.WITHDRAWN;
         }
         if (status == TournamentEntryStatusEnum.ELIMINATED) {
             return TournamentActionStateEnum.ELIMINATED;
         }
+        if (tournamentData.getCurrentRound() == tournamentData.getOfflineFromRound()) {
+            return TournamentActionStateEnum.IN_OFFLINE_STAGE;
+        }
         if (status == TournamentEntryStatusEnum.PAYING) {
             return TournamentActionStateEnum.AWAIT_PAYMENT;
         }
         if (status == TournamentEntryStatusEnum.WAITING) {
-            return entry.getStage() == TournamentEntryStageEnum.MAIN ? TournamentActionStateEnum.QUALIFIED_MAIN_DRAW : TournamentActionStateEnum.WAITING_MATCH;
+            if (LocalDateTime.now().isBefore(tournamentData.getQualifierStartTime())) {
+                return TournamentActionStateEnum.AWAIT_QUALIFIER_START;
+            }
+            return TournamentActionStateEnum.WAITING_MATCH;
         }
         // IN_MATCH
         if (activeMatch == null) {
@@ -271,7 +315,10 @@ public class TournamentDetailService {
             case PENDING_PLAY:
                 return TournamentActionStateEnum.AWAIT_RESULT_SUBMIT;
             case PENDING_CONFIRM:
-                return isPending(activeMatch, userId, true) ? TournamentActionStateEnum.AWAIT_RESULT_CONFIRM : TournamentActionStateEnum.WAITING_MATCH;
+                if (isPending(activeMatch, userId, true)) {
+                    return TournamentActionStateEnum.AWAIT_RESULT_CONFIRM;
+                }
+                return userId.equals(matchData.getSubmitterUserId()) ? TournamentActionStateEnum.AWAIT_OPPONENT_RESULT_CONFIRM : TournamentActionStateEnum.WAITING_MATCH;
             default:
                 return TournamentActionStateEnum.WAITING_MATCH;
         }
@@ -342,5 +389,19 @@ public class TournamentDetailService {
         record.setUserId(userId);
         record.setRejectCount(rejectCount);
         return record;
+    }
+
+    private List<TournamentEntrantDTO> assembleEntrants(List<TournamentEntryData> entries) {
+        List<TournamentEntrantDTO> entrants = new ArrayList<>();
+        for (TournamentEntryData entry : entries) {
+            TournamentEntrantDTO dto = new TournamentEntrantDTO();
+            dto.setUserId(entry.getUserId());
+            dto.setEntryNo(entry.getEntryNo());
+            dto.setEntryNoShow(String.format("%03d", entry.getEntryNo()));
+            dto.setStatus(entry.getStatus());
+            dto.setStatusShow(entry.getStatus().getLabel());
+            entrants.add(dto);
+        }
+        return entrants;
     }
 }

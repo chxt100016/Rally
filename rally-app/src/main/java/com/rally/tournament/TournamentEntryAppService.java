@@ -1,9 +1,9 @@
 package com.rally.tournament;
 
-import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.payment.model.PaymentOrder;
-import com.rally.domain.payment.model.PrepayCmd;
+import com.rally.domain.payment.model.PrepayDTO;
 import com.rally.domain.payment.model.PrepayResult;
+import com.rally.domain.payment.service.PaymentDomainService;
 import com.rally.domain.tournament.model.Tournament;
 import com.rally.domain.tournament.model.TournamentEntry;
 import com.rally.domain.tournament.model.TournamentEntryDTO;
@@ -14,11 +14,11 @@ import com.rally.domain.tournament.model.TournamentWithdrawCmd;
 import com.rally.domain.tournament.model.TournamentWithdrawResultDTO;
 import com.rally.domain.tournament.service.TournamentAdminService;
 import com.rally.domain.tournament.service.TournamentEntryService;
+import com.rally.domain.tournament.service.TournamentMatchFlowService;
 import com.rally.domain.tournament.service.TournamentPaymentService;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
-import com.rally.domain.utils.Assert;
-import com.rally.payment.PaymentAppService;
+import com.rally.payment.convert.PaymentAppConvertMapper;
 import com.rally.tournament.convert.TournamentEntryAppConvertMapper;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,8 @@ public class TournamentEntryAppService {
     private final TournamentEntryService tournamentEntryService;
     private final UserProfileDomainService userProfileDomainService;
     private final TournamentPaymentService tournamentPaymentService;
-    private final PaymentAppService paymentAppService;
+    private final PaymentDomainService paymentDomainService;
+    private final TournamentMatchFlowService tournamentMatchFlowService;
 
     /**
      * 报名
@@ -52,7 +53,7 @@ public class TournamentEntryAppService {
     }
 
     /**
-     * 修改报名偏好，仅本人、仅排队态可改
+     * 修改报名偏好，仅本人、仅排队态或待支付态可改
      */
     @Transactional
     public void update(TournamentEntryUpdateCmd cmd) {
@@ -65,31 +66,26 @@ public class TournamentEntryAppService {
      * 支付报名费：校验 entry 为 PAYING 且赛事未满 → 建单 → 取拉起参数
      */
     @Transactional
-    public PrepayResult pay(TournamentEntryPayCmd cmd) {
+    public PrepayDTO pay(TournamentEntryPayCmd cmd) {
         String userId = UserContext.get();
         Tournament tournament = tournamentAdminService.get(cmd.getTournamentId());
         TournamentEntry entry = tournamentEntryService.getByTournamentAndUser(cmd.getTournamentId(), userId);
 
         PaymentOrder order = tournamentPaymentService.createEntryOrder(entry, tournament);
-        PrepayCmd prepayCmd = new PrepayCmd();
-        prepayCmd.setPaymentId(order.getBizId());
-        return paymentAppService.prepay(prepayCmd);
+        PrepayResult result = paymentDomainService.prepay(order.getBizId(), userId);
+        return PaymentAppConvertMapper.INSTANCE.toPrepayDTO(result, order.getBizId());
     }
 
     /**
-     * 退出赛事：资格赛阶段直接退出，正赛阶段（已支付）需先退款（暂未开放）
+     * 退出赛事：置 WITHDRAWN（资格赛/正赛通用）；若正在比赛中，关闭比赛并让对手回匹配池
      */
     @Transactional
     public TournamentWithdrawResultDTO withdraw(TournamentWithdrawCmd cmd) {
         String userId = UserContext.get();
         TournamentEntry entry = tournamentEntryService.getByTournamentAndUser(cmd.getTournamentId(), userId);
 
-        if (entry.isMainStage()) {
-            // 正赛阶段退款流程属模块 5（支付与晋级），MVP 首版暂未开放
-            Assert.isTrue(false, BizErrorCode.TOURNAMENT_REFUND_NOT_SUPPORTED);
-        }
-
-        tournamentEntryService.withdrawQualify(entry);
+        tournamentEntryService.withdraw(entry);
+        tournamentMatchFlowService.closeActiveMatchOnWithdraw(cmd.getTournamentId(), userId);
         return new TournamentWithdrawResultDTO(false);
     }
 }

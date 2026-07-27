@@ -2,6 +2,8 @@ package com.rally.payment.convert;
 
 import com.rally.domain.payment.model.PaymentOrder;
 import com.rally.domain.payment.model.PaymentOrderSummaryDTO;
+import com.rally.domain.payment.model.PrepayDTO;
+import com.rally.domain.payment.model.PrepayResult;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -17,7 +19,7 @@ public interface PaymentAppConvertMapper {
     PaymentAppConvertMapper INSTANCE = Mappers.getMapper(PaymentAppConvertMapper.class);
 
     @Mapping(target = "paymentId", source = "data.bizId")
-    @Mapping(target = "meetupId", source = "data.meetupId")
+    @Mapping(target = "refBizId", source = "data.refBizId")
     @Mapping(target = "payerUserId", source = "data.payerUserId")
     @Mapping(target = "baseAmount", source = "data.baseAmount")
     @Mapping(target = "feeAmount", source = "data.feeAmount")
@@ -26,4 +28,7 @@ public interface PaymentAppConvertMapper {
     PaymentOrderSummaryDTO toSummary(PaymentOrder order);
 
     List<PaymentOrderSummaryDTO> toSummaryList(List<PaymentOrder> orders);
+
+    @Mapping(target = "paymentId", source = "paymentId")
+    PrepayDTO toPrepayDTO(PrepayResult result, String paymentId);
 }

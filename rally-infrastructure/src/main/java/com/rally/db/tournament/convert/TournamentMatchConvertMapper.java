@@ -19,11 +19,13 @@ public interface TournamentMatchConvertMapper {
 
     @Mapping(target = "round", source = "round", qualifiedByName = "strToRound")
     @Mapping(target = "status", source = "status", qualifiedByName = "strToMatchStatus")
+    @Mapping(target = "submitterUserId", source = "submittedBy")
     TournamentMatchData toTournamentMatchData(TournamentMatchPO po);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "round", source = "round", qualifiedByName = "roundToStr")
     @Mapping(target = "status", source = "status", qualifiedByName = "matchStatusToStr")
+    @Mapping(target = "submittedBy", source = "submitterUserId")
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     TournamentMatchPO toTournamentMatchPO(TournamentMatchData data);

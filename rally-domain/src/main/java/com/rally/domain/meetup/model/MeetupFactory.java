@@ -56,16 +56,17 @@ public class MeetupFactory {
      * 数据结构与普通发布一致，matchType/maxPlayers/currentPlayers 按参赛人数强制。
      * courtData 非空（TEXT/MAP 模式）时球场信息以球场库数据为准。
      *
-     * @param cmd          订场命令（含约球全量字段）
-     * @param bookerId     订场人ID（作为草稿创建者）
-     * @param courtData    球场库数据，FREE 模式为 null
-     * @param participants 比赛参与者
+     * @param cmd            订场命令（含约球全量字段）
+     * @param bookerId       订场人ID（作为草稿创建者）
+     * @param courtData      球场库数据，FREE 模式为 null
+     * @param participants   比赛参与者
+     * @param tournamentName 赛事名称，标题为空时作为默认值
      */
-    public static Meetup createTournamentDraft(SubmitBookingCmd cmd, String bookerId, CourtData courtData, List<MatchParticipantData> participants) {
+    public static Meetup createTournamentDraft(SubmitBookingCmd cmd, String bookerId, CourtData courtData, List<MatchParticipantData> participants, String tournamentName) {
         MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, bookerId, courtData);
         data.setBizId(IdWorker.getIdStr());
         data.setCityName(CityConfig.getCityName(data.getCityCode()));
-        applyTournamentParticipants(data, cmd, participants);
+        applyTournamentParticipants(data, participants, tournamentName);
 
         List<RegistrationData> registrations = new ArrayList<>();
         for (MatchParticipantData participant : participants) {
@@ -77,12 +78,12 @@ public class MeetupFactory {
     /**
      * 赛事约球人数/类型按参赛者强制，标题空则给默认值
      */
-    private static void applyTournamentParticipants(MeetupData data, SubmitBookingCmd cmd, List<MatchParticipantData> participants) {
+    private static void applyTournamentParticipants(MeetupData data, List<MatchParticipantData> participants, String tournamentName) {
         data.setMatchType(participants.size() == 2 ? MatchTypeEnum.SINGLE : MatchTypeEnum.DOUBLE);
         data.setMaxPlayers(participants.size());
         data.setCurrentPlayers(participants.size());
         if (StringUtils.isBlank(data.getTitle())) {
-            data.setTitle("赛事约球");
+            data.setTitle(tournamentName);
         }
     }
 

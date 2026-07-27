@@ -5,6 +5,7 @@ package com.rally.domain.tournament.enums;
  */
 public enum TournamentActionStateEnum {
     NOT_REGISTERED,
+    AWAIT_QUALIFIER_START,
     AWAIT_PAYMENT,
     AWAIT_COURT_BOOKER_SELECT,
     AWAIT_BOOKING,
@@ -13,8 +14,10 @@ public enum TournamentActionStateEnum {
     AWAIT_OPPONENT_SCHEDULE_CONFIRM,
     AWAIT_RESULT_SUBMIT,
     AWAIT_RESULT_CONFIRM,
+    AWAIT_OPPONENT_RESULT_CONFIRM,
     WAITING_MATCH,
+    IN_OFFLINE_STAGE,
     ELIMINATED,
     WITHDRAWN,
-    QUALIFIED_MAIN_DRAW
+    END
 }

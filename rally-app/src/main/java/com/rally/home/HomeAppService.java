@@ -43,11 +43,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HomeAppService {
 
+    private static final String DEFAULT_CITY_CODE = "330100";
+
+    private static final Set<String> TOURNAMENT_POSTER_WHITELIST_USER_IDS = Set.of("2072996725997641729", "2067608260724289538", "2073445906881101825");
+
     private final TourTournamentQueryDomainService tourTournamentQueryDomainService;
     private final TourMatchQueryDomainService tourMatchQueryDomainService;
     private final UserMeetupAppService userMeetupAppService;
     private final TourTranslationService tourTranslationService;
     private final TranslationQueryService translationQueryService;
+    private final QiniuConfiguration qiniuConfiguration;
 
     public HomePageDTO getHomePage(String cityCode) {
         HomePageDTO homePageDTO = new HomePageDTO();
@@ -55,16 +60,17 @@ public class HomeAppService {
 
         displayItems.add(buildMeetupDisplay());
 
-        displayItems.add(buildTournamentPosterDisplay());
+        if (isTournamentPosterVisible()) {
+            displayItems.add(buildTournamentPosterDisplay());
+        }
 
         HomeDisplayItemDTO matchDisplay = buildMatchDisplay();
         if (matchDisplay != null) {
             displayItems.add(matchDisplay);
         }
 
-        if (cityCode != null && !cityCode.trim().isEmpty()) {
-            displayItems.add(buildPosterDisplay(cityCode));
-        }
+        String effectiveCityCode = (cityCode == null || cityCode.trim().isEmpty()) ? DEFAULT_CITY_CODE : cityCode;
+        displayItems.add(buildPosterDisplay(effectiveCityCode));
 
 
         displayItems.add(buildNewsDisplay());
@@ -92,6 +98,11 @@ public class HomeAppService {
         cmd.setTab(UserMeetupTabEnum.IN_PROGRESS);
         PageDTO<MeetupCardDTO> page = userMeetupAppService.queryUserMeetupList(cmd);
         return page.getList();
+    }
+
+    private boolean isTournamentPosterVisible() {
+        String userId = UserContext.getIfPresent();
+        return userId != null && TOURNAMENT_POSTER_WHITELIST_USER_IDS.contains(userId);
     }
 
     private HomeDisplayItemDTO buildTournamentPosterDisplay() {
@@ -134,7 +145,7 @@ public class HomeAppService {
         HomeDisplayItemDTO item = new HomeDisplayItemDTO();
         item.setDisplayType(DisplayType.TOUR_MATCH);
         MatchDisplayData data = new MatchDisplayData();
-        data.setTitle("网球赛事");
+        data.setTitle("巡回赛");
         data.setSubtitle(buildTourSubtitle(tournamentDisplays));
         data.setTournaments(tournamentDisplays);
         item.setData(data);
@@ -165,6 +176,7 @@ public class HomeAppService {
         dto.setTour(tournament.getTour());
         dto.setCourtName(firstCourtGroup.getName());
         dto.setMatchDate(LocalDate.parse(firstDateGroup.getKey()));
+        dto.setImagePath(QiniuConfiguration.buildSignedUrl(tournament.getImagePath()));
         dto.setMatches(firstCourtGroup.getData());
 
         return dto;
@@ -202,7 +214,19 @@ public class HomeAppService {
                 .collect(Collectors.groupingBy(TournamentDisplayDTO::getTour, Collectors.counting()));
         long atpCount = tourCountMap.getOrDefault("ATP", 0L);
         long wtaCount = tourCountMap.getOrDefault("WTA", 0L);
-        return atpCount + "场ATP、" + wtaCount + "场WTA";
+
+        StringBuilder subtitle = new StringBuilder();
+        if (atpCount > 0) {
+            subtitle.append(atpCount).append("场ATP、");
+        }
+        if (wtaCount > 0) {
+            subtitle.append(wtaCount).append("场WTA、");
+        }
+        if (subtitle.length() > 0) {
+            subtitle.setLength(subtitle.length() - 1);
+        }
+        subtitle.append("进行中");
+        return subtitle.toString();
     }
 
     private HomeDisplayItemDTO buildPosterDisplay(String cityCode) {
@@ -210,7 +234,7 @@ public class HomeAppService {
         item.setDisplayType(DisplayType.POSTER_CARD);
         PosterCardDisplayData data = new PosterCardDisplayData();
         data.setTitle("附近球场");
-        data.setSubtitle("寻找当前城市的球场");
+        data.setSubtitle("寻找「" + CityConfig.getCityName(cityCode) + "」的球场");
 
         List<PosterCardDisplayData.PosterCardItem> posters = new ArrayList<>();
         String configJson = SystemConfig.getString(SystemConfigKey.HOME_POSTER_CONFIG.getKey());

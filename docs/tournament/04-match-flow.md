@@ -25,7 +25,7 @@ MATCHED(24h) → BOOKING(48h) → SCHEDULED(48h) → 待比赛 → PENDING_CONFI
   - 拒绝比赛：REJECTED，写 reject_phase=SCHEDULE_REJECT，全员回池，拒绝方 +1 拒绝次数（按 stage 判上限），草稿约球关闭（DRAFT → CLOSED）。
 - `submitResult(matchId, userId, winnerTeamId)`：待比赛→PENDING_CONFIRM，乐观锁防并发，提交人自动 resultConfirmStatus=CONFIRMED，不填比分。
 - `handleResultConfirm(matchId, userId, action, reasonCode?, text?)`：
-  - 确认：本人 CONFIRMED；全员 CONFIRMED → COMPLETED，写 winnerId，按 teamId 置 isWinner，胜者晋级（QUALIFY 胜者进 PAYING 待支付 / MAIN 胜者进下一轮 WAITING，交模块 5/晋级逻辑），败者 ELIMINATED。
+  - 确认：本人 CONFIRMED；全员 CONFIRMED → COMPLETED，写 winnerEntryNo，按 teamId 置 isWinner，胜者晋级（QUALIFY 胜者进 PAYING 待支付 / MAIN 胜者进下一轮 WAITING，交模块 5/晋级逻辑），败者 ELIMINATED。
   - 拒绝结果：REJECTED，reject_phase=RESULT_REJECT，全员回池，拒绝方 +1。
 - 拒绝上限控制：达上限的用户在对应阶段隐藏"拒绝"选项，仅保留"确认/打回重订"。
 

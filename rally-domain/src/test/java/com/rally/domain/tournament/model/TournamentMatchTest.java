@@ -187,7 +187,8 @@ public class TournamentMatchTest {
     public void testConfirmResult_AnyReject() {
         TournamentMatchData data = new TournamentMatchData();
         data.setStatus(TournamentMatchStatusEnum.PENDING_CONFIRM);
-        data.setSubmittedTime(LocalDateTime.now());
+        LocalDateTime submittedTime = LocalDateTime.now();
+        data.setSubmittedTime(submittedTime);
         MatchParticipantData p1 = new MatchParticipantData();
         p1.setUserId("user1");
         p1.setResultConfirmStatus(ConfirmStatusEnum.PENDING);
@@ -197,8 +198,10 @@ public class TournamentMatchTest {
         TournamentMatch match = new TournamentMatch(data, participants);
         match.confirmResult("user1", false, ResultRejectReasonEnum.DISPUTE_APPEAL, null, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
 
-        Assert.assertEquals(TournamentMatchStatusEnum.PENDING_PLAY, match.getData().getStatus());
-        Assert.assertNull(match.getData().getSubmittedTime());
-        Assert.assertNull(p1.getIsWinner());
+        // 拒绝结果即拒赛：比赛终止（REJECTED），已提交的比分/胜负等记录保留供追溯
+        Assert.assertEquals(TournamentMatchStatusEnum.REJECTED, match.getData().getStatus());
+        Assert.assertEquals(submittedTime, match.getData().getSubmittedTime());
+        Assert.assertEquals(ConfirmStatusEnum.REJECTED, p1.getResultConfirmStatus());
+        Assert.assertTrue(p1.getIsWinner());
     }
 }

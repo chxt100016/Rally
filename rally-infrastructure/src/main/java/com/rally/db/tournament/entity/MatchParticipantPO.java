@@ -20,7 +20,7 @@ public class MatchParticipantPO {
     private String matchId;
     private String tournamentId;
     private String userId;
-    private String teamId;
+    private Integer entryNo;
     private String confirmStatus;
     private LocalDateTime confirmTime;
     private String resultConfirmStatus;

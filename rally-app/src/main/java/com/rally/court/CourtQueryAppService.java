@@ -1,5 +1,6 @@
 package com.rally.court;
 
+import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.court.model.CourtDTO;
 import com.rally.domain.court.model.CourtListCmd;
 import com.rally.domain.court.model.CourtSearchCmd;
@@ -16,10 +17,18 @@ public class CourtQueryAppService {
     private final CourtQueryDomainService courtQueryDomainService;
 
     public List<CourtDTO> getAll(CourtListCmd cmd) {
-        return courtQueryDomainService.getAllByCityCode(cmd);
+        List<CourtDTO> list = courtQueryDomainService.getAllByCityCode(cmd);
+        list.forEach(this::fillBackgroundImageUrl);
+        return list;
     }
 
     public List<CourtDTO> search(CourtSearchCmd cmd) {
-        return courtQueryDomainService.searchByName(cmd);
+        List<CourtDTO> list = courtQueryDomainService.searchByName(cmd);
+        list.forEach(this::fillBackgroundImageUrl);
+        return list;
+    }
+
+    private void fillBackgroundImageUrl(CourtDTO dto) {
+        dto.setBackgroundImage(QiniuConfiguration.buildSignedUrl(dto.getBackgroundImage()));
     }
 }

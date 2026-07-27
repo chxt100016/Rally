@@ -11,5 +11,6 @@ import java.util.List;
 @Data
 public class TournamentBracketRoundDTO {
     private TournamentRoundEnum round;
+    private String roundShow;
     private List<TournamentBracketMatchDTO> matches;
 }

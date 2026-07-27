@@ -6,6 +6,7 @@ import com.rally.db.tournament.convert.TournamentConvertMapper;
 import com.rally.db.tournament.entity.TournamentPO;
 import com.rally.db.tournament.service.TournamentService;
 import com.rally.domain.meetup.model.PageDTO;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.enums.TournamentStatusEnum;
 import com.rally.domain.tournament.gateway.TournamentRepository;
 import com.rally.domain.tournament.model.TournamentAdminListCmd;
@@ -15,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,6 +73,18 @@ public class TournamentRepositoryImpl implements TournamentRepository {
                 .eq(TournamentPO::getBizId, tournamentId)
                 .apply("current_filled_slots < total_slots")
                 .setSql("current_filled_slots = current_filled_slots + 1")
+                .update();
+    }
+
+    @Override
+    public void advanceCurrentRoundIfLater(String tournamentId, TournamentRoundEnum round) {
+        String orderedNames = Arrays.stream(TournamentRoundEnum.values())
+                .map(r -> "'" + r.name() + "'")
+                .collect(Collectors.joining(","));
+        tournamentService.lambdaUpdate()
+                .eq(TournamentPO::getBizId, tournamentId)
+                .apply("current_round is null or FIELD(current_round, " + orderedNames + ") < FIELD('" + round.name() + "', " + orderedNames + ")")
+                .set(TournamentPO::getCurrentRound, round.name())
                 .update();
     }
 }

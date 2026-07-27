@@ -13,6 +13,6 @@ public class SubmitResultCmd {
     private String matchId;
 
     @NotEmpty(message = "获胜方不能为空")
-    private List<String> winnerUserIds;
+    private List<Integer> winnerEntryNos;
 
 }

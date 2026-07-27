@@ -1,6 +1,7 @@
 package com.rally.domain.tournament.model;
 
 import com.rally.domain.tournament.enums.TournamentGenderLimitEnum;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.enums.TournamentStatusEnum;
 import lombok.Data;
 
@@ -14,12 +15,13 @@ public class TournamentAdminItemDTO {
     private String tournamentId;
     private String tournamentName;
     private String posterUrl;
+    private String wechatGroupQrCodeUrl;
     private String cityCode;
     private String cityName;
     private String ntrpLevel;
     private TournamentGenderLimitEnum genderLimit;
     private Integer totalSlots;
-    private Integer offlineFromRound;
+    private TournamentRoundEnum offlineFromRound;
     private Integer qualifierGroupSize;
     private Long entryFee;
     private LocalDateTime registrationStartTime;

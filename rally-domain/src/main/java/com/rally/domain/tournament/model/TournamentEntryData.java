@@ -18,6 +18,7 @@ public class TournamentEntryData {
     private String tournamentId;
     private String userId;
     private String partnerId;
+    private Integer entryNo;
     private List<String> preferredDistricts;
     private CourtAbilityEnum courtAbility;
     private List<String> availableTimes;

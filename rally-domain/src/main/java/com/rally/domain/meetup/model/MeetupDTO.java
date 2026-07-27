@@ -14,6 +14,8 @@ import java.util.List;
 @Data
 public class MeetupDTO {
     private String meetupId;
+    /** 约球类型：NORMAL 普通约球 / TOURNAMENT 赛事约球 */
+    private String meetupType;
     private String title;
     private MatchTypeEnum matchType;
     private String matchTypeLabel;
@@ -37,5 +39,6 @@ public class MeetupDTO {
     private MeetupStatusEnum status;
     /** 场地索引，前端透传存储 */
     private String courtIndex;
+    private String backgroundImage;
     private LocalDateTime createTime;
 }

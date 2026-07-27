@@ -103,7 +103,7 @@ CREATE TABLE `rally_meetup` (
   `court_lat`       DOUBLE       NOT NULL COMMENT '场地纬度',
   `court_select_mode` VARCHAR(8) DEFAULT NULL COMMENT '球场选择模式：TEXT/MAP/FREE',
   `court_id`        VARCHAR(32)  DEFAULT NULL COMMENT '球场库ID，TEXT/MAP模式下从球场库选中时传入',
-
+  `background_image` VARCHAR(256) DEFAULT NULL COMMENT '背景图（七牛云 key），TEXT/MAP模式下取自球场库',
   `level_mode`      varchar(8) DEFAULT 'exact' COMMENT '水平要求模式',
   `level_min`       DECIMAL(3,1) DEFAULT NULL COMMENT '水平最小值，RANGE/EXACT/ABOVE 必填',
   `level_max`       DECIMAL(3,1) DEFAULT NULL COMMENT '水平最大值，RANGE/EXACT/BELOW 必填',
@@ -245,6 +245,7 @@ CREATE TABLE `rally_court` (
   `source_id`      VARCHAR(128) DEFAULT NULL COMMENT '三方来源ID，用于标识球场在第三方系统中的唯一ID',
   `status`         VARCHAR(32)  NOT NULL DEFAULT 'COLLECTED' COMMENT '状态：COLLECTED 已收录待审核 / ACTIVE 可用 / DISABLED 已停用',
   `meetup_count`   INT          DEFAULT 0 COMMENT '约球次数统计',
+  `background_image` VARCHAR(256) DEFAULT NULL COMMENT '背景图（七牛云 key）',
   `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),

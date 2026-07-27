@@ -18,7 +18,7 @@
 | `ntrpLevel` | `string` | 是 | NTRP等级：3.0/3.5/4.0... |
 | `genderLimit` | `string` | 是 | 性别限制：`ALL`/`MALE`/`FEMALE` |
 | `totalSlots` | `number` | 是 | 正赛签位：16/32/64 |
-| `offlineFromRound` | `number` | 是 | 几强后转线下：4/8/16 |
+| `offlineFromRound` | `string` | 是 | 几强后转线下，枚举值：`ROUND_4`/`ROUND_8`/`ROUND_16` |
 | `qualifierGroupSize` | `number` | 是 | 资格赛每组人数，最小2 |
 | `entryFee` | `number` | 是 | 报名费，单位：分，不能为负 |
 | `registrationStartTime` | `string` | 是 | 报名开始时间，格式 `yyyy-MM-dd'T'HH:mm:ss` |
@@ -45,7 +45,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/admin/create' \
     "ntrpLevel": "3.5",
     "genderLimit": "ALL",
     "totalSlots": 32,
-    "offlineFromRound": 8,
+    "offlineFromRound": "ROUND_8",
     "qualifierGroupSize": 2,
     "entryFee": 5000,
     "registrationStartTime": "2026-08-01T00:00:00",
@@ -82,7 +82,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/admin/update' \
     "ntrpLevel": "3.5",
     "genderLimit": "ALL",
     "totalSlots": 32,
-    "offlineFromRound": 8,
+    "offlineFromRound": "ROUND_8",
     "qualifierGroupSize": 2,
     "entryFee": 5000,
     "registrationStartTime": "2026-08-01T00:00:00",
@@ -175,7 +175,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/admin/abandon' \
 | `ntrpLevel` | `string` | NTRP等级 |
 | `genderLimit` | `string` | 性别限制 |
 | `totalSlots` | `number` | 正赛签位 |
-| `offlineFromRound` | `number` | 转线下轮次 |
+| `offlineFromRound` | `string` | 转线下轮次 |
 | `qualifierGroupSize` | `number` | 资格赛每组人数 |
 | `entryFee` | `number` | 报名费（分） |
 | `registrationStartTime` | `string` | 报名开始时间 |

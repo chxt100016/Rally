@@ -19,15 +19,17 @@ public class TournamentPO {
     private String bizId;
     private String tournamentName;
     private String posterKey;
+    private String wechatGroupQrCodeKey;
     private String matchType;
     private String cityCode;
     private String cityName;
     private String ntrpLevel;
     private String genderLimit;
     private Integer totalSlots;
-    private Integer offlineFromRound;
+    private String offlineFromRound;
     private Integer qualifierGroupSize;
     private Long entryFee;
+    private String prizeMoney;
     private LocalDateTime registrationStartTime;
     private LocalDateTime registrationEndTime;
     private LocalDateTime qualifierStartTime;
@@ -38,6 +40,7 @@ public class TournamentPO {
     private String matchRuleDescription;
     private String status;
     private Integer currentFilledSlots;
+    private String currentRound;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

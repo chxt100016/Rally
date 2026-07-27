@@ -3,6 +3,7 @@ package com.rally.db.payment.repository;
 import com.rally.db.payment.convert.PaymentConvertMapper;
 import com.rally.db.payment.entity.PaymentOrderPO;
 import com.rally.db.payment.service.PaymentOrderService;
+import com.rally.domain.payment.enums.BizTypeEnum;
 import com.rally.domain.payment.enums.PaymentStatusEnum;
 import com.rally.domain.payment.gateway.PaymentOrderRepository;
 import com.rally.domain.payment.model.PaymentOrder;
@@ -35,21 +36,15 @@ public class PaymentOrderRepositoryImpl implements PaymentOrderRepository {
     }
 
     @Override
-    public List<PaymentOrder> listByMeetup(String meetupId) {
-        return paymentOrderService.lambdaQuery().eq(PaymentOrderPO::getMeetupId, meetupId).list().stream().map(this::toOrder).toList();
+    public PaymentOrder findActiveByRef(BizTypeEnum bizType, String refBizId, String payerUserId) {
+        String activeRefKey = PaymentOrder.buildActiveRefKey(bizType, refBizId, payerUserId);
+        PaymentOrderPO po = paymentOrderService.lambdaQuery().eq(PaymentOrderPO::getActiveRefKey, activeRefKey).one();
+        return toOrder(po);
     }
 
     @Override
-    public List<PaymentOrder> listByMeetups(List<String> meetupIds) {
-        if (meetupIds == null || meetupIds.isEmpty()) {
-            return List.of();
-        }
-        return paymentOrderService.lambdaQuery().in(PaymentOrderPO::getMeetupId, meetupIds).list().stream().map(this::toOrder).toList();
-    }
-
-    @Override
-    public List<PaymentOrder> listPendingByMeetup(String meetupId) {
-        return paymentOrderService.lambdaQuery().eq(PaymentOrderPO::getMeetupId, meetupId).eq(PaymentOrderPO::getStatus, PaymentStatusEnum.PENDING.name()).list().stream().map(this::toOrder).toList();
+    public void updatePrepay(String bizId, String prepayId, LocalDateTime prepayExpireTime) {
+        paymentOrderService.lambdaUpdate().eq(PaymentOrderPO::getBizId, bizId).set(PaymentOrderPO::getPrepayId, prepayId).set(PaymentOrderPO::getPrepayExpireTime, prepayExpireTime).update();
     }
 
     @Override
@@ -63,23 +58,18 @@ public class PaymentOrderRepositoryImpl implements PaymentOrderRepository {
     }
 
     @Override
-    public boolean existsByMeetup(String meetupId) {
-        return paymentOrderService.lambdaQuery().eq(PaymentOrderPO::getMeetupId, meetupId).count() > 0;
-    }
-
-    @Override
     public boolean markPaid(String bizId, String transactionId, LocalDateTime payTime) {
         return paymentOrderService.lambdaUpdate().eq(PaymentOrderPO::getBizId, bizId).eq(PaymentOrderPO::getStatus, PaymentStatusEnum.PENDING.name()).set(PaymentOrderPO::getStatus, PaymentStatusEnum.PAID.name()).set(PaymentOrderPO::getChannelTransactionId, transactionId).set(PaymentOrderPO::getPayTime, payTime).update();
     }
 
     @Override
     public boolean close(String bizId) {
-        return paymentOrderService.lambdaUpdate().eq(PaymentOrderPO::getBizId, bizId).eq(PaymentOrderPO::getStatus, PaymentStatusEnum.PENDING.name()).set(PaymentOrderPO::getStatus, PaymentStatusEnum.CLOSED.name()).update();
+        return paymentOrderService.lambdaUpdate().eq(PaymentOrderPO::getBizId, bizId).eq(PaymentOrderPO::getStatus, PaymentStatusEnum.PENDING.name()).set(PaymentOrderPO::getStatus, PaymentStatusEnum.CLOSED.name()).set(PaymentOrderPO::getActiveRefKey, null).update();
     }
 
     @Override
     public boolean markFailed(String bizId, String reason) {
-        return paymentOrderService.lambdaUpdate().eq(PaymentOrderPO::getBizId, bizId).eq(PaymentOrderPO::getStatus, PaymentStatusEnum.PENDING.name()).set(PaymentOrderPO::getStatus, PaymentStatusEnum.FAILED.name()).set(PaymentOrderPO::getDescription, reason).update();
+        return paymentOrderService.lambdaUpdate().eq(PaymentOrderPO::getBizId, bizId).eq(PaymentOrderPO::getStatus, PaymentStatusEnum.PENDING.name()).set(PaymentOrderPO::getStatus, PaymentStatusEnum.FAILED.name()).set(PaymentOrderPO::getActiveRefKey, null).set(PaymentOrderPO::getDescription, reason).update();
     }
 
     private PaymentOrder toOrder(PaymentOrderPO po) {

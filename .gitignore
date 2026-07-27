@@ -28,6 +28,7 @@ doc/
 .vscode/
 .env
 *.env
+.env.*
 
 
 start/docker/**

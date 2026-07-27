@@ -1,5 +1,7 @@
 # 支付域设计方案（MVP：活动后收款 + 分账 + 对账）
 
+> **注意（后续变更未同步）**：活动收款（`MEETUP_COLLECT`）+ 分账（Settlement/ShareReceiver）整条链路已从代码中删除，当前仅保留赛事报名费（`TOURNAMENT_ENTRY_FEE`）场景；`meetup_id` 列已改名为 `ref_biz_id`（报名费场景存 `tournament_entry.biz_id`），`collection_batch_id` 已删除。以下正文仍是活动收款的旧版方案，与当前实现不一致，仅供历史参考。
+
 目标读者：后端。前端为微信小程序。遵循 COLA 5.0 分层与 DDD 约定。支付域为独立限界上下文，不反向依赖约球域，便于后续扩展退款 / 预收 / 多渠道 / 其它业务。
 
 ---
@@ -600,7 +602,7 @@ boolean hasPending(String meetupId);    // 有 PENDING→「关闭收款」；�
 
 ## 16. 待人工提供的资质与配置（联调前填写）
 
-以下为外部资质与密钥，需人工从微信商户平台/小程序后台获取。**全 V3 方案**：JSAPI 下单 / 关单 / 查单 / 回调 / 添加接收方 / 删除接收方 / 发起分账 / 查询分账 全部走 APIv3，统一用 `apiV3Key + merchantSerialNumber + apiclient_key.pem`，不再需要 V2 双向证书 / V2 API 密钥 / p12。
+以下为外部资质与密钥，需人工从微信商户平台/小程序后台获取。**全 V3 方案**：JSAPI 下单 / 关单 / 查单 / 回调 / 添加接收方 / 删除接收方 / 发起分账 / 查询分账 全部走 APIv3，签名统一用 `apiV3Key + merchantSerialNumber + apiclient_key.pem`，不再需要 V2 双向证书 / V2 API 密钥 / p12。**本商户号为「微信支付公钥」模式**（非平台证书模式）：验签走 `publicKeyId + pub_key.pem`（`RSAPublicKeyConfig`），而非自动下载平台证书（`RSAAutoCertificateConfig`）。
 
 配置默认值（`fee_rate` 等 4 项）统一在 `SystemConfigKey` 枚举维护、不落 `sys_config`。**密钥与回调地址不落 yml 明文，统一通过环境变量注入到 `.env`**（`application.yml` 用 `${VAR}` 引用），证书/私钥文件不入库、不进 git，建议落 `./cert/`（已在 `.gitignore`）。
 
@@ -611,6 +613,8 @@ boolean hasPending(String meetupId);    // 有 PENDING→「关闭收款」；�
 | 3 | APIv3 密钥（32 位） | `wechat.pay.api-v3-key` / `WECHAT_PAY_API_V3_KEY` | 商户平台 → API 安全 → 设置 APIv3 密钥（**唯一密钥，下单签名 + 回调 AEAD 解密 + 分账签名**） | bK9mQ2vXpL7nR4wTzC8aF3hJ6dY5sN1e           |
 | 4 | 商户证书序列号 | `wechat.pay.merchant-serial-number` / `WECHAT_PAY_MERCHANT_SERIAL_NUMBER` | 商户平台 → API 安全 查看，或 `openssl x509 -in apiclient_cert.pem -noout -serial` | 2EF8A78B1AF4C276327D6D315706C6C2DCF0768C   |
 | 5 | 商户 API 私钥（apiclient_key.pem） | `wechat.pay.private-key-path` / `WECHAT_PAY_PRIVATE_KEY_PATH` | 申请 API 证书时下载，**V3 签名唯一私钥** | ./cert/apiclient_key.pem                   |
+| 5.1 | 微信支付公钥（pub_key.pem） | `wechat.pay.public-key-path` / `WECHAT_PAY_PUBLIC_KEY_PATH` | 商户平台 → API 安全 → 微信支付公钥下载（本商户号为公钥模式，非平台证书模式，验签唯一来源） | ./cert/pub_key.pem |
+| 5.2 | 微信支付公钥 ID | `wechat.pay.public-key-id` / `WECHAT_PAY_PUBLIC_KEY_ID` | 商户平台 → API 安全，下载公钥同页展示（`PUB_KEY_ID_xxx`） | 待填 |
 | 6 | 支付回调地址 | `wechat.pay.pay-notify-url` / `WECHAT_PAY_NOTIFY_URL` | 我方域名 + `/api/rally/wechat/pay/notify`（HTTPS 公网可达） | https://api.fantasticmonkey.top/api/rally/wechat/pay/notify |
 | 7 | 分账回调地址（可选） | `wechat.pay.share-notify-url` / `WECHAT_PAY_SHARE_NOTIFY_URL` | 我方域名 + `/api/rally/wechat/pay/share-notify`；不配则纯靠 `SettlementReconcileJob` 主动查询 | https://api.fantasticmonkey.top/api/rally/wechat/pay/share-notify |
 | 8 | 分账接收方上限 | `payment.wechat.share_receiver_max`（`SystemConfigKey` 枚举默认 20000） | 微信文档 | 20000                                      |

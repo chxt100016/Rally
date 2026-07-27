@@ -30,6 +30,8 @@ public class CourtData {
     private CourtSourceEnum source;
     private CourtStatusEnum status;
     private Integer meetupCount;
+    /** 背景图（七牛云 key） */
+    private String backgroundImage;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

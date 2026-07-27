@@ -41,6 +41,8 @@ public class MeetupPO {
     private String courtSelectMode;
     /** 球场库ID */
     private String courtId;
+    /** 背景图（七牛云 key，取自球场库） */
+    private String backgroundImage;
 
     private String levelMode;
     private BigDecimal levelMin;

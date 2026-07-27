@@ -22,6 +22,8 @@ deepseek:
 upload:
     tournament:
         compress-kb: 10
+    court:
+        compress-kb: 20
 
 wechat:
     mini:
@@ -40,5 +42,6 @@ wechat:
         api-v3-key: ${WECHAT_PAY_API_V3_KEY}
         merchant-serial-number: ${WECHAT_PAY_MERCHANT_SERIAL_NUMBER}
         private-key-path: ${WECHAT_PAY_PRIVATE_KEY_PATH}
+        public-key-path: ${WECHAT_PAY_PUBLIC_KEY_PATH}
+        public-key-id: ${WECHAT_PAY_PUBLIC_KEY_ID}
         pay-notify-url: ${WECHAT_PAY_NOTIFY_URL}
-        share-notify-url: ${WECHAT_PAY_SHARE_NOTIFY_URL:}

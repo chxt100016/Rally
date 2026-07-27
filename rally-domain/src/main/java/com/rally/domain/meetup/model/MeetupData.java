@@ -31,6 +31,8 @@ public class MeetupData {
     private Double courtLat;
     private CourtSelectModeEnum courtSelectMode;
     private String courtId;
+    /** 背景图（七牛云 key，取自球场库） */
+    private String backgroundImage;
 
     private LevelModeEnum levelMode;
     private BigDecimal levelMin;

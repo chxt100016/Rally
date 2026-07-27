@@ -10,8 +10,8 @@ import lombok.Data;
 public class PaymentOrderSummaryDTO {
     /** 支付单号（out_trade_no） */
     private String paymentId;
-    /** 约球ID */
-    private String meetupId;
+    /** 关联业务ID（如 tournament_entry.biz_id） */
+    private String refBizId;
     /** 应付人 userId */
     private String payerUserId;
     /** 本金（分） */

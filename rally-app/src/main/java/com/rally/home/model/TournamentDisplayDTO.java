@@ -16,5 +16,6 @@ public class TournamentDisplayDTO {
     private String courtName;
     @JSONField(format = "yyyy-MM-dd")
     private LocalDate matchDate;
+    private String imagePath;
     private List<MatchQueryVO> matches;
 }

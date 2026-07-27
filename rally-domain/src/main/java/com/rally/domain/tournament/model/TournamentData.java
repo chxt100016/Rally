@@ -2,6 +2,7 @@ package com.rally.domain.tournament.model;
 
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.tournament.enums.TournamentGenderLimitEnum;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.enums.TournamentStatusEnum;
 import lombok.Data;
 
@@ -15,15 +16,17 @@ public class TournamentData {
     private String bizId;
     private String tournamentName;
     private String posterKey;
+    private String wechatGroupQrCodeKey;
     private MatchTypeEnum matchType;
     private String cityCode;
     private String cityName;
     private String ntrpLevel;
     private TournamentGenderLimitEnum genderLimit;
     private Integer totalSlots;
-    private Integer offlineFromRound;
+    private TournamentRoundEnum offlineFromRound;
     private Integer qualifierGroupSize;
     private Long entryFee;
+    private String prizeMoney;
     private LocalDateTime registrationStartTime;
     private LocalDateTime registrationEndTime;
     private LocalDateTime qualifierStartTime;
@@ -34,6 +37,7 @@ public class TournamentData {
     private String matchRuleDescription;
     private TournamentStatusEnum status;
     private Integer currentFilledSlots;
+    private TournamentRoundEnum currentRound;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

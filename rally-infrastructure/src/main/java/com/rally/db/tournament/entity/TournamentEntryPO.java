@@ -20,6 +20,7 @@ public class TournamentEntryPO {
     private String tournamentId;
     private String userId;
     private String partnerId;
+    private Integer entryNo;
     private String preferredDistricts;
     private String courtAbility;
     private String availableTimes;

@@ -15,18 +15,16 @@ public class PaymentOrderData {
     private String bizId;
     private PayChannelEnum channel;
     private BizTypeEnum bizType;
-    private String collectionBatchId;
-    private String meetupId;
+    private String refBizId;
     private String payerUserId;
-    private String payeeUserId;
-    /** 收款受益人渠道账号（微信 openid），冗余进单避免分账时再次反查 */
-    private String payeeAccount;
     private Integer baseAmount;
     private Integer feeAmount;
     private Integer payAmount;
     private PaymentStatusEnum status;
     private String channelTransactionId;
     private String prepayId;
+    private LocalDateTime prepayExpireTime;
+    private String activeRefKey;
     private String description;
     private LocalDateTime payTime;
     private LocalDateTime expireTime;

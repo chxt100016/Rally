@@ -33,6 +33,7 @@ public interface MeetupDomainConvertMapper {
     @Mapping(target = "courtLng", expression = "java(courtData != null ? courtData.getLng() : cmd.getCourtLng())")
     @Mapping(target = "courtLat", expression = "java(courtData != null ? courtData.getLat() : cmd.getCourtLat())")
     @Mapping(target = "districtName", expression = "java(resolveDistrictName(cmd, courtData))")
+    @Mapping(target = "backgroundImage", expression = "java(courtData != null ? courtData.getBackgroundImage() : null)")
     MeetupData toMeetupData(MeetupPublishCmd cmd, String userId, CourtData courtData);
 
     /**
@@ -48,6 +49,7 @@ public interface MeetupDomainConvertMapper {
     @Mapping(target = "courtLng", expression = "java(courtData != null ? courtData.getLng() : cmd.getCourtLng())")
     @Mapping(target = "courtLat", expression = "java(courtData != null ? courtData.getLat() : cmd.getCourtLat())")
     @Mapping(target = "districtName", expression = "java(resolveDistrictName(cmd, courtData))")
+    @Mapping(target = "backgroundImage", expression = "java(courtData != null ? courtData.getBackgroundImage() : data.getBackgroundImage())")
     void updateMeetupData(@MappingTarget MeetupData data, MeetupPublishCmd cmd, CourtData courtData);
 
     /**

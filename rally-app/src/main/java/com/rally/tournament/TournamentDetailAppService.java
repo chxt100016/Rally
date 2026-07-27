@@ -9,6 +9,7 @@ import com.rally.domain.tournament.model.MyCurrentMatchDTO;
 import com.rally.domain.tournament.model.TournamentBracketMatchDTO;
 import com.rally.domain.tournament.model.TournamentRejectRecordDTO;
 import com.rally.domain.tournament.model.TournamentDetailDTO;
+import com.rally.domain.tournament.model.TournamentEntrantDTO;
 import com.rally.domain.tournament.service.TournamentDetailService;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
@@ -43,6 +44,7 @@ public class TournamentDetailAppService {
         TournamentDetailDTO detail = tournamentDetailService.assembleDetail(tournamentId, userId);
         if (detail.getTournament() != null) {
             detail.getTournament().setPosterUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getPosterUrl()));
+            detail.getTournament().setWechatGroupQrCodeUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getWechatGroupQrCodeUrl()));
         }
 
         List<String> userIds = collectUserIds(detail);
@@ -79,6 +81,9 @@ public class TournamentDetailAppService {
         if (detail.getRejectRecords() != null) {
             detail.getRejectRecords().forEach(r -> userIds.add(r.getUserId()));
         }
+        if (detail.getEntrants() != null) {
+            detail.getEntrants().forEach(e -> userIds.add(e.getUserId()));
+        }
         return userIds;
     }
 
@@ -99,9 +104,24 @@ public class TournamentDetailAppService {
                 UserProfile profile = profiles.get(record.getUserId());
                 if (profile != null && profile.getUser() != null) {
                     record.setNickname(profile.getUser().getNickname());
+                    record.setAvatarUrl(QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl()));
+                    record.setGender(profile.getUser().getGender());
                 }
             }
         }
+        if (detail.getEntrants() != null) {
+            detail.getEntrants().forEach(e -> fillEntrantInfo(e, profiles));
+        }
+    }
+
+    private void fillEntrantInfo(TournamentEntrantDTO entrant, Map<String, UserProfile> profiles) {
+        UserProfile profile = profiles.get(entrant.getUserId());
+        if (profile == null || profile.getUser() == null) {
+            return;
+        }
+        entrant.setNickname(profile.getUser().getNickname());
+        entrant.setAvatarUrl(QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl()));
+        entrant.setGender(profile.getUser().getGender());
     }
 
     private void fillOpponentInfo(MatchOpponentDTO opponent, Map<String, UserProfile> profiles) {
@@ -111,6 +131,7 @@ public class TournamentDetailAppService {
         }
         opponent.setNickname(profile.getUser().getNickname());
         opponent.setAvatarUrl(QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl()));
+        opponent.setGender(profile.getUser().getGender());
         if (profile.getProfile() != null) {
             opponent.setNtrpScore(profile.getProfile().getNtrpScore());
         }

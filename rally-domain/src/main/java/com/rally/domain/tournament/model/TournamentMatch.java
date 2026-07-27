@@ -70,18 +70,10 @@ public class TournamentMatch {
         participant.setMatchId(matchId);
         participant.setTournamentId(tournamentId);
         participant.setUserId(candidate.getUserId());
-        participant.setTeamId(teamIdOf(candidate));
+        participant.setEntryNo(candidate.getEntryNo());
         participant.setConfirmStatus(ConfirmStatusEnum.PENDING);
         participant.setResultConfirmStatus(ConfirmStatusEnum.PENDING);
         return participant;
-    }
-
-    /** 双打同队两人共用同一个 teamId（取两人 userId 中较小的一个，保证同队双方算出一致的值） */
-    private static String teamIdOf(TournamentEntryData candidate) {
-        if (candidate.getPartnerId() == null) {
-            return null;
-        }
-        return candidate.getUserId().compareTo(candidate.getPartnerId()) <= 0 ? candidate.getUserId() : candidate.getPartnerId();
     }
 
     public void selectCourtBooker(String userId) {
@@ -190,8 +182,13 @@ public class TournamentMatch {
         participants.forEach(p -> {
             boolean isWinner = winnerUserIds.contains(p.getUserId());
             p.setIsWinner(isWinner);
-            p.setResultConfirmStatus(ConfirmStatusEnum.PENDING);
-            p.setResultConfirmTime(null);
+            if (p.getUserId().equals(userId)) {
+                p.setResultConfirmStatus(ConfirmStatusEnum.CONFIRMED);
+                p.setResultConfirmTime(now);
+            } else {
+                p.setResultConfirmStatus(ConfirmStatusEnum.PENDING);
+                p.setResultConfirmTime(null);
+            }
         });
     }
 
@@ -211,18 +208,11 @@ public class TournamentMatch {
                 Assert.notBlank(rejectReasonText, BizErrorCode.PARAM_ERROR);
             }
 
+            // 拒绝结果即拒绝比赛：比赛终止（REJECTED），保留已提交的比分/胜负等记录供追溯，不做回退重报
             participant.setResultConfirmStatus(ConfirmStatusEnum.REJECTED);
             participant.setResultConfirmTime(now);
-            data.setStatus(TournamentMatchStatusEnum.PENDING_PLAY);
-            data.setSubmittedTime(null);
-            data.setSubmitterUserId(null);
+            data.setStatus(TournamentMatchStatusEnum.REJECTED);
             data.setRejectReason(rejectReason.getCode() + (rejectReasonText != null ? ":" + rejectReasonText : ""));
-
-            participants.forEach(p -> {
-                p.setIsWinner(null);
-                p.setResultConfirmStatus(ConfirmStatusEnum.PENDING);
-                p.setResultConfirmTime(null);
-            });
         } else {
             participant.setResultConfirmStatus(ConfirmStatusEnum.CONFIRMED);
             participant.setResultConfirmTime(now);
@@ -230,6 +220,9 @@ public class TournamentMatch {
             boolean allConfirmed = participants.stream().allMatch(p -> p.getResultConfirmStatus() == ConfirmStatusEnum.CONFIRMED);
             if (allConfirmed) {
                 data.setStatus(TournamentMatchStatusEnum.COMPLETED);
+                data.setCompletedTime(now);
+                Integer winnerEntryNo = participants.stream().filter(p -> Boolean.TRUE.equals(p.getIsWinner())).map(MatchParticipantData::getEntryNo).findFirst().orElse(null);
+                data.setWinnerEntryNo(winnerEntryNo);
             }
         }
     }

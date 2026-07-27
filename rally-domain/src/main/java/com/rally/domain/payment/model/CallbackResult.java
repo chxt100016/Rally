@@ -7,12 +7,12 @@ import lombok.Data;
  */
 @Data
 public class CallbackResult {
-    /** 回调类型：TRANSACTION 支付 / PROFIT_SHARE 分账 */
+    /** 回调类型：TRANSACTION 支付 */
     private String callbackType;
-    /** 我方单号（out_trade_no / out_order_no） */
+    /** 我方单号（out_trade_no） */
     private String outTradeNo;
     private String channelTransactionId;
-    /** 是否支付/分账成功 */
+    /** 是否支付成功 */
     private boolean success;
     /** 解密后的原始报文，落 payment_log */
     private String decryptedBody;

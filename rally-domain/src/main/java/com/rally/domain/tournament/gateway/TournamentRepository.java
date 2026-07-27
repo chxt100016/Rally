@@ -1,6 +1,7 @@
 package com.rally.domain.tournament.gateway;
 
 import com.rally.domain.meetup.model.PageDTO;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.model.TournamentAdminListCmd;
 import com.rally.domain.tournament.model.TournamentData;
 
@@ -36,4 +37,9 @@ public interface TournamentRepository {
      * 原子扣位：where current_filled_slots &lt; total_slots 时 +1，防超卖。返回是否成功
      */
     boolean incrementFilledSlots(String tournamentId);
+
+    /**
+     * 推进当前轮次：仅当新轮次晚于（或当前为空）已存轮次时才更新，防止乱序覆盖
+     */
+    void advanceCurrentRoundIfLater(String tournamentId, TournamentRoundEnum round);
 }

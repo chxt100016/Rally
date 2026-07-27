@@ -69,6 +69,9 @@ public enum BizErrorCode {
     NOT_CREATOR(41016, "仅发布者可操作"),
     CITY_NOT_OPENED(41017, "该城市暂未开通"),
     CANNOT_JOIN_OWN(41018, "不能报名自己发布的约球"),
+    MEETUP_TOURNAMENT_QUIT_FORBIDDEN(41023, "这是赛事约球，无法在此退出，请返回比赛页面进行相关操作"),
+    MEETUP_TOURNAMENT_CLOSE_FORBIDDEN(41024, "这是赛事约球，无法在此关闭，请返回比赛页面进行相关操作"),
+    MEETUP_TOURNAMENT_EDIT_FORBIDDEN(41025, "双方已确认赛约，赛事信息无法修改"),
 
     // ========== 评价域 42001-42999 ==========
     REVIEW_DUPLICATE(42001, "重复评价"),
@@ -106,8 +109,6 @@ public enum BizErrorCode {
     PAYMENT_CHANNEL_NOT_SUPPORTED(45005, "暂不支持该支付渠道"),
     PAYMENT_CREATE_FAILED(45006, "创建支付单失败"),
     COLLECTION_NOT_ALLOWED(45007, "当前不可发起收款"),
-    SETTLEMENT_FAILED(45008, "分账失败"),
-    SHARE_RECEIVER_BIND_FAILED(45009, "分账接收方绑定失败"),
 
     // ========== 赛事域 46001-46999 ==========
     TOURNAMENT_NOT_FOUND(46001, "赛事不存在"),
@@ -131,7 +132,8 @@ public enum BizErrorCode {
     TOURNAMENT_REBOOK_REASON_REQUIRED(46019, "请提供打回重订理由"),
     TOURNAMENT_SCHEDULE_TIME_REQUIRED(46020, "请提供赛约时间"),
     TOURNAMENT_RESULT_WINNER_REQUIRED(46021, "请选择获胜方"),
-    TOURNAMENT_SLOTS_FULL(46022, "正赛席位已满，暂无法支付");
+    TOURNAMENT_SLOTS_FULL(46022, "正赛席位已满，暂无法支付"),
+    TOURNAMENT_PARTNER_ALREADY_PAIRED(46023, "该队友已与他人组队，无法选择");
 
     private final int code;
     private final String message;

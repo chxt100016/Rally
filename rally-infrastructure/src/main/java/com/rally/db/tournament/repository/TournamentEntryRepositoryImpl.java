@@ -83,4 +83,14 @@ public class TournamentEntryRepositoryImpl implements TournamentEntryRepository 
                 .map(TournamentRoundEnum::valueOf)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public int nextEntryNo(String tournamentId) {
+        TournamentEntryPO maxEntry = tournamentEntryService.lambdaQuery()
+                .eq(TournamentEntryPO::getTournamentId, tournamentId)
+                .orderByDesc(TournamentEntryPO::getEntryNo)
+                .last("LIMIT 1")
+                .one();
+        return maxEntry == null ? 1 : maxEntry.getEntryNo() + 1;
+    }
 }

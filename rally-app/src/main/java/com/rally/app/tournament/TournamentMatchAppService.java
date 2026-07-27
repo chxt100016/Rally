@@ -45,7 +45,7 @@ public class TournamentMatchAppService {
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> submitResult(SubmitResultCmd cmd) {
         String userId = UserContext.get();
-        matchFlowService.submitResult(cmd.getMatchId(), userId, cmd.getWinnerUserIds());
+        matchFlowService.submitResult(cmd.getMatchId(), userId, cmd.getWinnerEntryNos());
         return Result.ok();
     }
 

@@ -27,7 +27,7 @@ public class TournamentMatchPO {
     private LocalDateTime scheduleSubmittedTime;
     /** 关联的约球ID（订场创建的草稿约球） */
     private String meetupId;
-    private String winnerId;
+    private Integer winnerEntryNo;
     private String submittedBy;
     private LocalDateTime submittedTime;
     private String rejectPhase;

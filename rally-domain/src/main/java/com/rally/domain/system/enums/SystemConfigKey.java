@@ -157,9 +157,7 @@ public enum SystemConfigKey {
     /** 手续费展示文案 */
     PAYMENT_WECHAT_FEE_DESC("payment.wechat.fee_desc", "手续费展示文案", "含微信支付手续费 0.6%"),
     /** 待支付超时分钟数，0=不超时（默认） */
-    PAYMENT_PAY_TIMEOUT_MINUTES("payment.pay_timeout_minutes", "待支付超时分钟数，0=不超时（默认）", "0"),
-    /** 微信分账接收方数量上限，接近时触发 LRU 淘汰（后续） */
-    PAYMENT_WECHAT_SHARE_RECEIVER_MAX("payment.wechat.share_receiver_max", "微信分账接收方数量上限", "20000"),
+    PAYMENT_PAY_TIMEOUT_MINUTES("payment.pay_timeout_minutes", "待支付超时分钟数，0=不超时；默认 30 分钟，同时作为微信 time_expire 传出", "30"),
 
     // ==================== 系统 ====================
 

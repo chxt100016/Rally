@@ -40,4 +40,9 @@ public interface TournamentEntryRepository {
      * 查询某赛事某阶段下所有排队候选人（WAITING）实际存在的轮次（去重），用于正赛逐轮匹配时确定需要跑哪些轮次
      */
     List<TournamentRoundEnum> findDistinctWaitingRounds(String tournamentId, TournamentEntryStageEnum stage);
+
+    /**
+     * 分配赛事内递增的 entryNo（取当前赛事已有最大 entryNo + 1，无记录则从1开始）
+     */
+    int nextEntryNo(String tournamentId);
 }

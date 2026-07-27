@@ -74,7 +74,9 @@ public class TournamentMatchFlowService {
 
         // TEXT/MAP 模式下，通过 courtId 查询球场库数据，球场信息以库数据为准
         CourtData courtData = resolveCourtData(cmd.getCourtSelectMode(), cmd.getCourtId());
-        Meetup draft = MeetupFactory.createTournamentDraft(cmd, userId, courtData, match.getParticipants());
+        TournamentData tournamentData = tournamentRepository.findByBizId(match.getData().getTournamentId());
+        Assert.notNull(tournamentData, BizErrorCode.TOURNAMENT_NOT_FOUND);
+        Meetup draft = MeetupFactory.createTournamentDraft(cmd, userId, courtData, match.getParticipants(), tournamentData.getTournamentName());
         meetupRepository.save(draft);
         match.getData().setMeetupId(draft.getMeetupId());
 
@@ -118,8 +120,8 @@ public class TournamentMatchFlowService {
             if (rejectReason != null) {
                 incrementRejectCount(userEntry);
             }
-            // 比赛终止，关闭草稿约球
-            closeDraftMeetup(match.getData().getMeetupId());
+            // 比赛终止：关闭草稿约球 + 双方回 WAITING 匹配池
+            settleRejectedMatch(match);
         }
 
         if (match.getData().getStatus() == TournamentMatchStatusEnum.PENDING_PLAY) {
@@ -157,10 +159,11 @@ public class TournamentMatchFlowService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void submitResult(String matchId, String userId, List<String> winnerUserIds) {
+    public void submitResult(String matchId, String userId, List<Integer> winnerEntryNos) {
         TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
         Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
 
+        List<String> winnerUserIds = resolveWinnerUserIds(match, winnerEntryNos);
         match.submitResult(userId, winnerUserIds);
 
         boolean success = matchRepository.updateWithVersion(match.getData());
@@ -168,6 +171,14 @@ public class TournamentMatchFlowService {
             throw new BusinessException(BizErrorCode.TOURNAMENT_MATCH_VERSION_CONFLICT);
         }
         matchRepository.saveParticipants(match.getParticipants());
+    }
+
+    /** 把编号翻译为本场比赛参与者中对应的 userId（双打一个编号对应2个userId） */
+    private List<String> resolveWinnerUserIds(TournamentMatch match, List<Integer> winnerEntryNos) {
+        return match.getParticipants().stream()
+                .filter(p -> winnerEntryNos.contains(p.getEntryNo()))
+                .map(MatchParticipantData::getUserId)
+                .collect(Collectors.toList());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -190,10 +201,39 @@ public class TournamentMatchFlowService {
 
         if (!confirm && rejectReason != null) {
             incrementRejectCount(userEntry);
+            // 拒绝结果即拒赛：比赛终止，关闭草稿约球 + 双方回 WAITING 匹配池
+            settleRejectedMatch(match);
         }
 
         if (match.getData().getStatus() == TournamentMatchStatusEnum.COMPLETED) {
             updateEntryStatusOnComplete(match);
+            computeCurrentRound(match.getData().getTournamentId());
+        }
+    }
+
+    /**
+     * 重新计算并推进赛事当前轮次：从资格赛到决赛依次判断每轮已完成场次是否达到应打场次，
+     * 达到则该轮视为完成，取所有已完成轮次中最靠后的一个作为新的 currentRound（只前进不回退）
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void computeCurrentRound(String tournamentId) {
+        Tournament tournament = getTournament(tournamentId);
+        int totalSlots = tournament.getData().getTotalSlots();
+
+        TournamentRoundEnum latestCompletedRound = null;
+        for (TournamentRoundEnum round : TournamentRoundEnum.values()) {
+            int requiredCount = round.requiredMatchCount(totalSlots);
+            if (requiredCount <= 0) {
+                continue;
+            }
+            int completedCount = matchRepository.countCompletedByTournamentAndRound(tournamentId, round);
+            if (completedCount >= requiredCount) {
+                latestCompletedRound = round;
+            }
+        }
+
+        if (latestCompletedRound != null) {
+            tournamentRepository.advanceCurrentRoundIfLater(tournamentId, latestCompletedRound);
         }
     }
 
@@ -207,6 +247,39 @@ public class TournamentMatchFlowService {
         TournamentEntryData entryData = entryRepository.findByTournamentAndUser(tournamentId, userId);
         Assert.notNull(entryData, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
         return new TournamentEntry(entryData);
+    }
+
+    /**
+     * 退赛联动：关闭该用户在本赛事进行中的比赛（若有）。比赛置 REJECTED、关闭草稿约球，
+     * 对手回 WAITING 匹配池（退赛人已置 WITHDRAWN，不会被回退）。退赛不计拒绝次数。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void closeActiveMatchOnWithdraw(String tournamentId, String userId) {
+        TournamentMatch match = matchRepository.findActiveMatchByTournamentAndUser(tournamentId, userId);
+        if (match == null) {
+            return;
+        }
+        match.getData().setStatus(TournamentMatchStatusEnum.REJECTED);
+        boolean success = matchRepository.updateWithVersion(match.getData());
+        if (!success) {
+            throw new BusinessException(BizErrorCode.TOURNAMENT_MATCH_VERSION_CONFLICT);
+        }
+        settleRejectedMatch(match);
+    }
+
+    /**
+     * 比赛终止（REJECTED）后的统一落地：关闭草稿约球，并把该场全体参与者的报名状态回退到 WAITING 重新进入匹配池
+     * （currentRound 不变；拒赛/退赛人数是否变化交由后续匹配 bye 兜底处理）。拒绝次数由调用方按场景决定是否自增。
+     */
+    private void settleRejectedMatch(TournamentMatch match) {
+        closeDraftMeetup(match.getData().getMeetupId());
+        for (MatchParticipantData participant : match.getParticipants()) {
+            TournamentEntry entry = getUserEntry(match.getData().getTournamentId(), participant.getUserId());
+            if (entry.getData().getStatus() == TournamentEntryStatusEnum.IN_MATCH) {
+                entry.getData().setStatus(TournamentEntryStatusEnum.WAITING);
+                entryRepository.save(entry.getData());
+            }
+        }
     }
 
     private void incrementRejectCount(TournamentEntry entry) {

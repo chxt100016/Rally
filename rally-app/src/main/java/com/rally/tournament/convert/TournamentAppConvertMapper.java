@@ -18,6 +18,7 @@ public interface TournamentAppConvertMapper {
 
     @Mapping(target = "tournamentId", source = "bizId")
     @Mapping(target = "posterUrl", expression = "java(com.rally.config.property.QiniuConfiguration.buildSignedUrl(data.getPosterKey()))")
+    @Mapping(target = "wechatGroupQrCodeUrl", expression = "java(com.rally.config.property.QiniuConfiguration.buildSignedUrl(data.getWechatGroupQrCodeKey()))")
     TournamentAdminItemDTO toTournamentAdminItemDTO(TournamentData data);
 
     List<TournamentAdminItemDTO> toTournamentAdminItemDTOList(List<TournamentData> dataList);

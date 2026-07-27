@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class MatchParticipantDTO {
     private String userId;
-    private String teamId;
+    private Integer entryNo;
     private ConfirmStatusEnum confirmStatus;
     private ConfirmStatusEnum resultConfirmStatus;
     private Boolean isWinner;

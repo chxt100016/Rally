@@ -1,6 +1,7 @@
 package com.rally.domain.tournament.gateway;
 
 import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.model.MatchParticipantData;
 import com.rally.domain.tournament.model.TournamentMatch;
 import com.rally.domain.tournament.model.TournamentMatchData;
@@ -32,6 +33,11 @@ public interface TournamentMatchRepository {
      * 根据 bizId 查询
      */
     TournamentMatchData findByBizId(String bizId);
+
+    /**
+     * 根据关联的约球 meetupId 查询比赛，无则返回 null
+     */
+    TournamentMatchData findByMeetupId(String meetupId);
 
     /**
      * 加载单个match+participants
@@ -77,5 +83,10 @@ public interface TournamentMatchRepository {
      * 统计某赛事下已生成的比赛总场数
      */
     int countByTournamentId(String tournamentId);
+
+    /**
+     * 统计某赛事某轮次下已完成（COMPLETED）的比赛场数
+     */
+    int countCompletedByTournamentAndRound(String tournamentId, TournamentRoundEnum round);
 }
 

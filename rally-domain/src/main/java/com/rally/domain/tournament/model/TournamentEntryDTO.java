@@ -16,6 +16,7 @@ public class TournamentEntryDTO {
     private String entryId;
     private String tournamentId;
     private String partnerId;
+    private Integer entryNo;
     private List<String> preferredDistricts;
     private CourtAbilityEnum courtAbility;
     private List<String> availableTimes;

@@ -18,4 +18,5 @@ public class TournamentDetailDTO {
     private List<TournamentTimelineEventDTO> myTimeline;
     private TournamentBracketDTO bracket;
     private List<TournamentRejectRecordDTO> rejectRecords;
+    private List<TournamentEntrantDTO> entrants;
 }

@@ -7,6 +7,7 @@ import com.rally.db.tournament.entity.TournamentMatchPO;
 import com.rally.db.tournament.service.MatchParticipantMybatisService;
 import com.rally.db.tournament.service.TournamentMatchMybatisService;
 import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.gateway.TournamentMatchRepository;
 import com.rally.domain.tournament.model.MatchParticipantData;
 import com.rally.domain.tournament.model.TournamentMatch;
@@ -63,6 +64,12 @@ public class TournamentMatchRepositoryImpl implements TournamentMatchRepository 
     @Override
     public TournamentMatchData findByBizId(String bizId) {
         TournamentMatchPO po = tournamentMatchService.lambdaQuery().eq(TournamentMatchPO::getBizId, bizId).one();
+        return MATCH_MAPPER.toTournamentMatchData(po);
+    }
+
+    @Override
+    public TournamentMatchData findByMeetupId(String meetupId) {
+        TournamentMatchPO po = tournamentMatchService.lambdaQuery().eq(TournamentMatchPO::getMeetupId, meetupId).last("LIMIT 1").one();
         return MATCH_MAPPER.toTournamentMatchData(po);
     }
 
@@ -128,6 +135,15 @@ public class TournamentMatchRepositoryImpl implements TournamentMatchRepository 
     @Override
     public int countByTournamentId(String tournamentId) {
         return Math.toIntExact(tournamentMatchService.lambdaQuery().eq(TournamentMatchPO::getTournamentId, tournamentId).count());
+    }
+
+    @Override
+    public int countCompletedByTournamentAndRound(String tournamentId, TournamentRoundEnum round) {
+        return Math.toIntExact(tournamentMatchService.lambdaQuery()
+                .eq(TournamentMatchPO::getTournamentId, tournamentId)
+                .eq(TournamentMatchPO::getRound, round.name())
+                .eq(TournamentMatchPO::getStatus, TournamentMatchStatusEnum.COMPLETED.name())
+                .count());
     }
 
     @Override

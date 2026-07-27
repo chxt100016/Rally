@@ -23,13 +23,13 @@ public class TournamentPolicy {
     private static final Set<Integer> VALID_TOTAL_SLOTS = Set.of(16, 32, 64);
 
     /**
-     * 创建/编辑参数校验：签位数枚举合法、offlineFromRound < totalSlots、entryFee ≥ 0、时间点先后
+     * 创建/编辑参数校验：签位数枚举合法、offlineFromRound 对应签位数 < totalSlots、entryFee ≥ 0、时间点先后
      */
     public void assertParam(TournamentCreateCmd cmd) {
         if (!VALID_TOTAL_SLOTS.contains(cmd.getTotalSlots())) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "正赛签位数只能是16/32/64");
         }
-        if (cmd.getOfflineFromRound() >= cmd.getTotalSlots()) {
+        if (cmd.getOfflineFromRound().getSlotCount() >= cmd.getTotalSlots()) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "转线下轮次必须小于正赛签位数");
         }
         if (cmd.getEntryFee() < 0) {

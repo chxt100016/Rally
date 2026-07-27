@@ -1,6 +1,6 @@
 package com.rally.web.tournament;
 
-import com.rally.domain.payment.model.PrepayResult;
+import com.rally.domain.payment.model.PrepayDTO;
 import com.rally.domain.tour.model.Result;
 import com.rally.domain.tournament.model.TournamentEntryDTO;
 import com.rally.domain.tournament.model.TournamentEntryPayCmd;
@@ -44,7 +44,7 @@ public class TournamentEntryController {
      * 支付报名费，锁定正赛席位
      */
     @PostMapping("/pay")
-    public Result<PrepayResult> pay(@Valid @RequestBody TournamentEntryPayCmd cmd) {
+    public Result<PrepayDTO> pay(@Valid @RequestBody TournamentEntryPayCmd cmd) {
         return Result.ok(tournamentEntryAppService.pay(cmd));
     }
 

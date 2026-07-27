@@ -13,6 +13,6 @@ public class TournamentBracketMatchDTO {
     private String matchId;
     private Integer matchNo;
     private List<MatchOpponentDTO> participants;
-    private String winnerId;
+    private Integer winnerEntryNo;
     private TournamentMatchStatusEnum status;
 }

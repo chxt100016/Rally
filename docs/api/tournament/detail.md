@@ -41,12 +41,14 @@
 | `cityName` | `string` | 城市名称 |
 | `ntrpLevel` | `string` | NTRP等级 |
 | `genderLimit` | `string` | 性别限制：`ALL`/`MALE`/`FEMALE` |
+| `genderLimitShow` | `string` | 性别限制中文：不限/男子/女子 |
 | `entryFee` | `number` | 报名费，单位：分 |
 | `registrationStartTime` | `string` | 报名开始时间 |
 | `registrationEndTime` | `string\|null` | 报名截止时间 |
 | `qualifierStartTime` | `string` | 资格赛开始时间 |
 | `qualifierEndTime` | `string\|null` | 资格赛截止时间 |
-| `offlineFromRound` | `number` | 几强后转线下 |
+| `offlineFromRound` | `string` | 几强后转线下，枚举值：`ROUND_4`/`ROUND_8`/`ROUND_16` |
+| `offlineFromRoundShow` | `string` | 转线下轮次中文 |
 | `matchRuleDescription` | `string\|null` | 比赛规则描述，纯文本，支持 `\n` 换行 |
 | `displayStatus` | `string` | 展示状态（基于时间计算）：`NOT_STARTED`/`REGISTRATION`/`IN_PROGRESS`/`ENDED`/`ABANDONED` |
 | `displayStatusShow` | `string` | 展示状态中文：未开始/报名中/进行中/已结束/已废弃 |
@@ -56,11 +58,13 @@
 | 字段 | 类型 | 说明 |
 |---|---|---|
 | `entryCount` | `number` | 报名人数（赛事所有报名记录总数） |
-| `currentFilledSlots` | `number` | 已支付锁定的正赛席位数 |
 | `totalSlots` | `number` | 正赛总签位数 |
 | `currentRound` | `string\|null` | 当前公开进行的轮次，尚无比赛时为 null |
+| `currentRoundShow` | `string\|null` | 当前轮次中文 |
 | `currentRoundTotalMatches` | `number` | 本轮总比赛场数 |
 | `currentRoundCompletedMatches` | `number` | 本轮已完成场数 |
+| `currentRoundAdvanceableSlots` | `number\|null` | 当前轮次可晋级名额：资格赛为正赛总签位数(totalSlots)，正赛为该轮签位数 |
+| `currentRoundAdvancedCount` | `number\|null` | 当前轮次已晋级名额：按 entryNo 去重统计已进入下一轮的报名数 |
 | `totalMatchCount` | `number` | 当前赛事已生成的比赛总场数（资格赛+正赛累计） |
 | `registrationEndTime` | `string\|null` | 报名截止时间 |
 | `qualifierEndTime` | `string\|null` | 资格赛截止时间 |
@@ -116,9 +120,9 @@
 
 `TournamentBracketDTO`：`rounds: TournamentBracketRoundDTO[]`，按轮次顺序排列。
 
-`TournamentBracketRoundDTO`：`round`/`matches: TournamentBracketMatchDTO[]`，同轮次内按 `matchNo` 排列。
+`TournamentBracketRoundDTO`：`round`/`roundShow`/`matches: TournamentBracketMatchDTO[]`，同轮次内按 `matchNo` 排列。
 
-`TournamentBracketMatchDTO`：`matchId`/`matchNo`/`participants: MatchOpponentDTO[]`/`winnerId`/`status`
+`TournamentBracketMatchDTO`：`matchId`/`matchNo`/`participants: MatchOpponentDTO[]`/`winnerEntryNo`/`status`
 
 ### rejectRecords（拒绝比赛次数统计）
 

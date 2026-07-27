@@ -17,7 +17,7 @@ import java.util.Map;
  * 微信支付异步回调（设计 §5.2）。
  * <p>
  * 接口路径：{@code /api/rally/wechat/pay/notify}（与 wechat.pay.pay-notify-url 对齐）。
- * 验签解密、状态推进、分账触发全部下沉 {@link PaymentAppService#handlePayCallback}；
+ * 验签解密、状态推进全部下沉 {@link PaymentAppService#handlePayCallback}；
  * 这里只负责把 body + headers 转给 app 层，并按微信要求写应答体。
  */
 @Slf4j
@@ -31,7 +31,7 @@ public class WechatPayNotifyController {
     /**
      * 支付异步回调
      */
-    @PostMapping({"/notify", "/share-notify"})
+    @PostMapping("/notify")
     public Map<String, String> notify(@RequestBody String body, HttpServletRequest request, HttpServletResponse response) {
         Map<String, String> headers = readHeaders(request);
         boolean success = paymentAppService.handlePayCallback(body, headers);

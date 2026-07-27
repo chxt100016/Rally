@@ -2,12 +2,9 @@ package com.rally.domain.payment.gateway;
 
 import com.rally.domain.payment.enums.PayChannelEnum;
 import com.rally.domain.payment.model.CallbackResult;
-import com.rally.domain.payment.model.ChannelShareResult;
 import com.rally.domain.payment.model.ChannelTradeResult;
 import com.rally.domain.payment.model.PaymentOrder;
 import com.rally.domain.payment.model.PrepayResult;
-import com.rally.domain.payment.model.SettlementOrder;
-import com.rally.domain.payment.model.ShareReceiver;
 
 import java.util.Map;
 
@@ -23,23 +20,14 @@ public interface PaymentChannelClient {
     /** JSAPI 下单，返回小程序拉起参数 */
     PrepayResult prepay(PaymentOrder order, String payerOpenid);
 
+    /** 用已有 prepayId 重新生成小程序拉起参数（凭证复用，不重新下单） */
+    PrepayResult buildRequestPayment(String prepayId);
+
     /** 关闭渠道订单（关闭收款/超时关单，best-effort） */
     void closeTrade(String outTradeNo);
 
     /** 查单（对账兜底） */
     ChannelTradeResult queryTrade(String outTradeNo);
-
-    /** 添加分账接收方（分账前置） */
-    void addShareReceiver(ShareReceiver receiver);
-
-    /** 删除接收方（LRU 淘汰） */
-    void deleteShareReceiver(ShareReceiver receiver);
-
-    /** 发起分账 */
-    ChannelShareResult profitShare(SettlementOrder order);
-
-    /** 查分账结果 */
-    ChannelShareResult queryProfitShare(String outOrderNo);
 
     /** 验签 + 解密回调 */
     CallbackResult verifyAndParse(String body, Map<String, String> headers);

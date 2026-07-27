@@ -29,6 +29,7 @@ public class MeetupVO {
     private String courtAddress;
     private Double courtLng;
     private Double courtLat;
+    private String backgroundImage;
     private LevelModeEnum levelMode;
     private BigDecimal levelMin;
     private BigDecimal levelMax;

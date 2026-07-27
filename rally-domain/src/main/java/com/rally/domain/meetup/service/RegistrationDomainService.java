@@ -1,6 +1,8 @@
 package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.auth.exception.BusinessException;
+import com.rally.domain.meetup.enums.MeetupTypeEnum;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.gateway.RegistrationRepository;
@@ -66,6 +68,11 @@ public class RegistrationDomainService {
      * @return 退出结果（NORMAL / PENALIZED）
      */
     public QuitResult quit(Meetup meetup, String userId) {
+        // 0. 赛事约球不允许在约球页面退出，需回到比赛页面操作
+        if (MeetupTypeEnum.TOURNAMENT.getCode().equals(meetup.getData().getMeetupType())) {
+            throw new BusinessException(BizErrorCode.MEETUP_TOURNAMENT_QUIT_FORBIDDEN);
+        }
+
         // 1. 调用聚合根 quit（校验 + 更新状态）
         QuitResult result = meetup.quit(userId);
 

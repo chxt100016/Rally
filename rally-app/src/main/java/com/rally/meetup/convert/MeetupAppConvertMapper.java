@@ -33,6 +33,7 @@ public interface MeetupAppConvertMapper {
     @Mapping(target = "creatorNtrp", ignore = true)
     @Mapping(target = "participants", ignore = true)
     @Mapping(target = "recap", ignore = true)
+    @Mapping(target = "backgroundImage", source = "backgroundImage", qualifiedByName = "parseAvatar")
     MeetupVO toMeetupVO(MeetupData data);
 
     List<MeetupVO> toMeetupVOList(List<MeetupData> dataList);
@@ -41,6 +42,7 @@ public interface MeetupAppConvertMapper {
 
     @Mapping(target = "meetupId", source = "bizId")
     @Mapping(target = "primaryLabel", ignore = true)
+    @Mapping(target = "backgroundImage", source = "backgroundImage", qualifiedByName = "parseAvatar")
     MeetupCardDTO toMeetupCardDTO(MeetupData data);
 
     List<MeetupCardDTO> toMeetupCardDTOList(List<MeetupData> dataList);
@@ -52,6 +54,7 @@ public interface MeetupAppConvertMapper {
 
     @Mapping(target = "meetupId", source = "bizId")
     @Mapping(target = "matchTypeLabel", expression = "java(getMatchTypeLabel(data))")
+    @Mapping(target = "backgroundImage", source = "backgroundImage", qualifiedByName = "parseAvatar")
     MeetupDTO toMeetupDTO(MeetupData data);
 
     default String getMatchTypeLabel(MeetupData data) {

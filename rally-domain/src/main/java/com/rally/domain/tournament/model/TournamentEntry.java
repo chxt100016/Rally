@@ -25,12 +25,13 @@ public class TournamentEntry {
     }
 
     /** 创建报名：stage=QUALIFY、status=WAITING、currentRound=QUALIFIER */
-    public static TournamentEntry create(String tournamentId, String userId, String partnerId, java.util.List<String> preferredDistricts, com.rally.domain.tournament.enums.CourtAbilityEnum courtAbility, java.util.List<String> availableTimes) {
+    public static TournamentEntry create(String tournamentId, String userId, String partnerId, int entryNo, java.util.List<String> preferredDistricts, com.rally.domain.tournament.enums.CourtAbilityEnum courtAbility, java.util.List<String> availableTimes) {
         TournamentEntryData data = new TournamentEntryData();
         data.setBizId(IdWorker.getIdStr());
         data.setTournamentId(tournamentId);
         data.setUserId(userId);
         data.setPartnerId(partnerId);
+        data.setEntryNo(entryNo);
         data.setPreferredDistricts(preferredDistricts);
         data.setCourtAbility(courtAbility);
         data.setAvailableTimes(availableTimes);
@@ -42,9 +43,9 @@ public class TournamentEntry {
         return new TournamentEntry(data);
     }
 
-    /** 仅排队阶段（未进入 IN_MATCH）可修改偏好 */
+    /** 排队态或待支付态可修改偏好 */
     public void assertCanUpdatePreference() {
-        Assert.isTrue(this.data.getStatus() == TournamentEntryStatusEnum.WAITING, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
+        Assert.isTrue(this.data.getStatus() == TournamentEntryStatusEnum.WAITING || this.data.getStatus() == TournamentEntryStatusEnum.PAYING, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
     }
 
     public void updatePreference(java.util.List<String> preferredDistricts, com.rally.domain.tournament.enums.CourtAbilityEnum courtAbility, java.util.List<String> availableTimes) {

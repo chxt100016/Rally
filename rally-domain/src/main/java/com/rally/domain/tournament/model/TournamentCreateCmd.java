@@ -2,6 +2,7 @@ package com.rally.domain.tournament.model;
 
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.tournament.enums.TournamentGenderLimitEnum;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -20,6 +21,9 @@ public class TournamentCreateCmd {
 
     /** 活动海报图片key（对象存储） */
     private String posterKey;
+
+    /** 微信群拉群二维码图片key（对象存储） */
+    private String wechatGroupQrCodeKey;
 
     /** 类型：单打/双打 */
     @NotNull(message = "请选择单打还是双打")
@@ -41,9 +45,9 @@ public class TournamentCreateCmd {
     @NotNull(message = "请选择正赛签位数")
     private Integer totalSlots;
 
-    /** 几强后转线下：4/8/16 */
+    /** 几强后转线下 */
     @NotNull(message = "请填写转线下轮次")
-    private Integer offlineFromRound;
+    private TournamentRoundEnum offlineFromRound;
 
     /** 资格赛每组人数，默认2 */
     @NotNull(message = "请填写资格赛组人数")
@@ -54,6 +58,10 @@ public class TournamentCreateCmd {
     @NotNull(message = "请填写报名费")
     @Min(value = 0, message = "报名费不能为负")
     private Long entryFee;
+
+    /** 奖金配置，逗号分隔，第1个为第一名奖金，第2个为第二名奖金，依此类推，单位：分 */
+    @Pattern(regexp = "^\\d+(,\\d+)*$", message = "奖金格式不正确，应为逗号分隔的数字")
+    private String prizeMoney;
 
     /** 报名开始时间 */
     @NotNull(message = "请选择报名开始时间")

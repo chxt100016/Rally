@@ -14,7 +14,7 @@ public class MatchParticipantData {
     private String matchId;
     private String tournamentId;
     private String userId;
-    private String teamId;
+    private Integer entryNo;
     private ConfirmStatusEnum confirmStatus;
     private LocalDateTime confirmTime;
     private ConfirmStatusEnum resultConfirmStatus;

@@ -29,7 +29,7 @@ public class PaymentLog {
         return build(channel, PaymentLogTypeEnum.PREPAY, "ORDER", refId, rawBody, PaymentLogStatusEnum.PROCESSED);
     }
 
-    /** 渠道回调留痕（支付/分账），落 RECEIVED 待处理 */
+    /** 渠道回调留痕（支付），落 RECEIVED 待处理 */
     public static PaymentLog callback(PayChannelEnum channel, String refType, String refId, String rawBody) {
         return build(channel, PaymentLogTypeEnum.CALLBACK, refType, refId, rawBody, PaymentLogStatusEnum.RECEIVED);
     }

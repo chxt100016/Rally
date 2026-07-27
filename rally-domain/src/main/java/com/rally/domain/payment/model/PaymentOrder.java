@@ -34,25 +34,27 @@ public class PaymentOrder {
     /**
      * 工厂：算手续费 + 生成 bizId(out_trade_no) + 置 PENDING + 算 expireTime。金额一律后端算。
      * @param timeoutMinutes 超时分钟数，<=0 则不超时（expireTime=null）
-     * @param payeeAccount 收款受益人渠道账号（微信 openid），冗余进单方便分账直接取
      */
-    public static PaymentOrder create(PayChannelEnum channel, BizTypeEnum bizType, String batchId, String meetupId, String payerUserId, String payeeUserId, String payeeAccount, int baseAmount, BigDecimal feeRate, int timeoutMinutes) {
+    public static PaymentOrder create(PayChannelEnum channel, BizTypeEnum bizType, String refBizId, String payerUserId, int baseAmount, BigDecimal feeRate, int timeoutMinutes) {
         int feeAmount = calcFee(baseAmount, feeRate);
         PaymentOrderData data = new PaymentOrderData();
         data.setBizId(IdWorker.getIdStr());
         data.setChannel(channel);
         data.setBizType(bizType);
-        data.setCollectionBatchId(batchId);
-        data.setMeetupId(meetupId);
+        data.setRefBizId(refBizId);
         data.setPayerUserId(payerUserId);
-        data.setPayeeUserId(payeeUserId);
-        data.setPayeeAccount(payeeAccount);
         data.setBaseAmount(baseAmount);
         data.setFeeAmount(feeAmount);
         data.setPayAmount(baseAmount + feeAmount);
         data.setStatus(PaymentStatusEnum.PENDING);
+        data.setActiveRefKey(buildActiveRefKey(bizType, refBizId, payerUserId));
         data.setExpireTime(timeoutMinutes > 0 ? LocalDateTime.now().plusMinutes(timeoutMinutes) : null);
         return new PaymentOrder(data);
+    }
+
+    /** 活跃标识位：活跃(PENDING/PAID)时承载唯一性，关闭/失败时清空。格式 bizType:refBizId:payerUserId */
+    public static String buildActiveRefKey(BizTypeEnum bizType, String refBizId, String payerUserId) {
+        return bizType.name() + ":" + refBizId + ":" + payerUserId;
     }
 
     /** ceil(base * rate) */
@@ -80,21 +82,18 @@ public class PaymentOrder {
         }
         Assert.isTrue(data.getStatus() == PaymentStatusEnum.PENDING, BizErrorCode.PAYMENT_STATUS_ILLEGAL);
         data.setStatus(PaymentStatusEnum.CLOSED);
+        data.setActiveRefKey(null);
     }
 
     /** 失败：仅 PENDING → FAILED */
     public void markFailed(String reason) {
         Assert.isTrue(data.getStatus() == PaymentStatusEnum.PENDING, BizErrorCode.PAYMENT_STATUS_ILLEGAL);
         data.setStatus(PaymentStatusEnum.FAILED);
+        data.setActiveRefKey(null);
         data.setDescription(reason);
     }
 
     // ======================== 断言 / 判定 ========================
-
-    /** 分账前置：必须已支付 */
-    public void assertPaid() {
-        Assert.isTrue(data.getStatus() == PaymentStatusEnum.PAID, BizErrorCode.PAYMENT_STATUS_ILLEGAL);
-    }
 
     /** prepay 前置：当前用户必须是付款人 */
     public void assertPayer(String userId) {
@@ -108,6 +107,24 @@ public class PaymentOrder {
     /** 是否已超时（expireTime != null && expireTime < now；默认 null=永不超时） */
     public boolean isExpired() {
         return data.getExpireTime() != null && data.getExpireTime().isBefore(LocalDateTime.now());
+    }
+
+    /** 微信 prepay_id 有效期（分钟）：2 小时 */
+    private static final int PREPAY_VALID_MINUTES = 120;
+
+    /** 预支付凭证是否可复用：PENDING 且 prepayId 非空且未过期 */
+    public boolean isPrepayReusable() {
+        return isPending() && data.getPrepayId() != null && data.getPrepayExpireTime() != null && data.getPrepayExpireTime().isAfter(LocalDateTime.now());
+    }
+
+    /** 计算 prepay 凭证有效期 = min(now+2h, 支付单超时时间) */
+    public LocalDateTime calcPrepayExpireTime() {
+        LocalDateTime prepayExpire = LocalDateTime.now().plusMinutes(PREPAY_VALID_MINUTES);
+        LocalDateTime orderExpire = data.getExpireTime();
+        if (orderExpire != null && orderExpire.isBefore(prepayExpire)) {
+            return orderExpire;
+        }
+        return prepayExpire;
     }
 
     /** 内部态 → 对外视图态（避免内部枚举外泄，见 §5.5） */

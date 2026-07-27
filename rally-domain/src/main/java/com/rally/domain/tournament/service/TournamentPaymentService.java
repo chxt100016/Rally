@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * 赛事支付与晋级领域服务（编排 Payment 域，见模块 5）：资格赛胜者支付锁正赛席位，推进 entry/tournament 状态。
- * 报名费归平台所有，不走分账，payeeUserId/payeeAccount 留空。
  */
 @Service
 @RequiredArgsConstructor
@@ -26,25 +25,24 @@ public class TournamentPaymentService {
     private final TournamentEntryRepository tournamentEntryRepository;
 
     /**
-     * 建单：校验 entry 处于 PAYING、赛事未满员 → 建单（payeeUserId/payeeAccount 为空，报名费归平台不分账）
+     * 建单：校验 entry 处于 PAYING、赛事未满员 → 建单
      */
     public PaymentOrder createEntryOrder(TournamentEntry entry, Tournament tournament) {
         entry.assertCanPay();
         tournament.assertSlotsNotFull();
         int baseAmount = tournament.getData().getEntryFee().intValue();
-        return paymentDomainService.createSingle(BizTypeEnum.TOURNAMENT_ENTRY_FEE, tournament.getTournamentId(), entry.getData().getUserId(), null, null, baseAmount, PayChannelEnum.WECHAT);
+        return paymentDomainService.createSingle(BizTypeEnum.TOURNAMENT_ENTRY_FEE, entry.getEntryId(), entry.getData().getUserId(), baseAmount, PayChannelEnum.WECHAT);
     }
 
     /**
      * 支付成功推进：entry PAYING→WAITING、stage→MAIN，写 paidTime；席位原子 +1（防超卖，失败则整体回滚由外层事务保证）。
-     * bizRefId 即建单时冗余的 tournamentId（存于 payment_order.meetup_id 列）。
+     * refBizId 即建单时冗余的 tournament_entry.biz_id。
      */
     public void advanceOnPaid(PaymentOrder paidOrder) {
-        String tournamentId = paidOrder.getData().getMeetupId();
-        String userId = paidOrder.getData().getPayerUserId();
-
+        String entryBizId = paidOrder.getData().getRefBizId();
+        TournamentEntry entry = getEntryByBizId(entryBizId);
+        String tournamentId = entry.getData().getTournamentId();
         Tournament tournament = getTournament(tournamentId);
-        TournamentEntry entry = getEntry(tournamentId, userId);
 
         boolean locked = tournamentRepository.incrementFilledSlots(tournamentId);
         Assert.isTrue(locked, BizErrorCode.TOURNAMENT_SLOTS_FULL);
@@ -70,8 +68,8 @@ public class TournamentPaymentService {
         return new Tournament(data);
     }
 
-    private TournamentEntry getEntry(String tournamentId, String userId) {
-        var data = tournamentEntryRepository.findByTournamentAndUser(tournamentId, userId);
+    private TournamentEntry getEntryByBizId(String entryBizId) {
+        var data = tournamentEntryRepository.findByBizId(entryBizId);
         Assert.notNull(data, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
         return new TournamentEntry(data);
     }
