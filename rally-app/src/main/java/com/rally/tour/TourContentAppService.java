@@ -11,6 +11,10 @@ import com.rally.domain.tour.model.*;
 import com.rally.domain.translation.model.TranslationEntityTypeEnum;
 import com.rally.domain.translation.model.TranslationKey;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
+import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.utils.Assert;
+import com.rally.tour.poster.PosterPromptBuilder;
+import com.rally.tour.poster.PosterStyleEnum;
 import com.rally.translation.TourTranslationService;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
@@ -41,6 +45,23 @@ public class TourContentAppService {
     private TourTranslationService tourTranslationService;
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    /**
+     * 生成赛事海报生图提示词，同时返回写实与3D卡通两种风格，用分割线分隔。
+     */
+    public String generatePosterPrompt(String tournamentId) {
+        TournamentData data = tourTournamentQueryDomainService.findByTournamentId(tournamentId);
+        Assert.notNull(data, BizErrorCode.TOURNAMENT_NOT_FOUND);
+
+        StringBuilder sb = new StringBuilder();
+        PosterStyleEnum[] styles = PosterStyleEnum.values();
+        for (int i = 0; i < styles.length; i++) {
+            if (i > 0) sb.append("\n\n---\n\n");
+            sb.append("【").append(styles[i].name()).append("】\n");
+            sb.append(PosterPromptBuilder.build(data, styles[i]));
+        }
+        return sb.toString();
+    }
 
     public String generateDailyContent() {
         LocalDate date = LocalDate.now();

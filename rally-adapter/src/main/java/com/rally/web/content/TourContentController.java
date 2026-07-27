@@ -29,4 +29,9 @@ public class TourContentController {
             @RequestParam(value = "lang", defaultValue = "ZH_CN") TranslationLanguageEnum lang) {
         return tourContentAppService.generateSeedListContent(tournamentIds, lang);
     }
+
+    @GetMapping(value = "/poster/prompt", produces = "text/plain;charset=UTF-8")
+    public String getPosterPrompt(@RequestParam("tournamentId") String tournamentId) {
+        return tourContentAppService.generatePosterPrompt(tournamentId);
+    }
 }

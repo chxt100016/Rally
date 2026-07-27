@@ -14,6 +14,10 @@ public class TourTournamentQueryDomainService {
     @Resource
     private TourTournamentRepository tourTournamentRepository;
 
+    public TournamentData findByTournamentId(String tournamentId) {
+        return tourTournamentRepository.findByTournamentId(tournamentId);
+    }
+
     public List<TournamentData> findValidCurrentTournaments(LocalDate date) {
         List<TournamentData> tournaments = tourTournamentRepository.findCurrentTournaments(date);
         return tournaments.stream().filter(data -> isCategoryKept(data.getCategory())).toList();
