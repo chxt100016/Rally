@@ -177,6 +177,10 @@ public class TournamentDetailService {
 
 
     private TournamentBracketDTO assembleBracket(TournamentData tournamentData, List<TournamentMatchData> allMatches) {
+        if (allMatches.isEmpty()) {
+            return null;
+        }
+
         Map<TournamentRoundEnum, List<TournamentMatchData>> byRound = allMatches.stream().collect(Collectors.groupingBy(TournamentMatchData::getRound));
 
         List<String> matchIds = allMatches.stream().map(TournamentMatchData::getBizId).collect(Collectors.toList());
@@ -402,6 +406,7 @@ public class TournamentDetailService {
             dto.setStatusShow(entry.getStatus().getLabel());
             entrants.add(dto);
         }
+        entrants.sort(Comparator.comparingInt(TournamentEntrantDTO::getEntryNo));
         return entrants;
     }
 }

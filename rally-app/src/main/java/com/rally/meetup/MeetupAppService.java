@@ -38,6 +38,8 @@ public class MeetupAppService {
 
     private final UserProfileDomainService userProfileDomainService;
 
+    private final MeetupBackgroundResolver backgroundResolver;
+
     /**
      * 发布约球
      */
@@ -80,7 +82,9 @@ public class MeetupAppService {
         meetupDomainService.edit(userId, meetup, cmd);
 
         // 4. 返回详情
-        return MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
+        MeetupVO vo = MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
+        vo.setBackgroundImage(backgroundResolver.resolveUrl(data));
+        return vo;
     }
 
     /**

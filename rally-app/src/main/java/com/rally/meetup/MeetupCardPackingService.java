@@ -7,16 +7,20 @@ import com.rally.domain.meetup.model.MeetupCardDTO;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.utils.GeoUtils;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 /**
  * 约球卡片包装服务
- * 负责 MeetupData → MeetupCardDTO 的转换，包括 primaryLabel 和距离计算
+ * 负责 MeetupData → MeetupCardDTO 的转换，包括 primaryLabel、距离计算和底图
  */
 @Service
+@RequiredArgsConstructor
 public class MeetupCardPackingService {
+
+    private final MeetupBackgroundResolver backgroundResolver;
 
     /**
      * 列表查询包装：OPEN 状态 primaryLabel 展示区域名，其余展示状态文案，计算距离
@@ -24,6 +28,7 @@ public class MeetupCardPackingService {
     public MeetupCardDTO packCard(MeetupData data, Double lng, Double lat) {
         MeetupCardDTO card = MeetupAppConvertMapper.INSTANCE.toMeetupCardDTO(data);
         card.setPrimaryLabel(toListPrimaryLabel(data));
+        card.setBackgroundImage(backgroundResolver.resolveUrl(data));
         if (lng != null && lat != null) {
             card.setDistanceKm(GeoUtils.distance(lat, lng, data.getCourtLat(), data.getCourtLng()));
         }
@@ -36,6 +41,7 @@ public class MeetupCardPackingService {
     public MeetupCardDTO packCardForTab(MeetupData data, UserMeetupTabEnum tab) {
         MeetupCardDTO card = MeetupAppConvertMapper.INSTANCE.toMeetupCardDTO(data);
         card.setPrimaryLabel(toTabPrimaryLabel(data, tab));
+        card.setBackgroundImage(backgroundResolver.resolveUrl(data));
         return card;
     }
 

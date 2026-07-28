@@ -31,5 +31,4 @@ public class CourtDTO {
     private String tel;
     private String cityName;
     private String districtName;
-    private String backgroundImage;
 }

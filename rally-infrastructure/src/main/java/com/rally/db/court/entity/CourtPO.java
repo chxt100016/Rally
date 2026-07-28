@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.rally.domain.court.enums.CourtEnvironmentEnum;
 import com.rally.domain.court.enums.CourtSourceEnum;
 import com.rally.domain.court.enums.CourtStatusEnum;
+import com.rally.domain.court.enums.CourtSurfaceEnum;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,8 @@ public class CourtPO {
     private String districtCode;
     private String remark;
     private CourtEnvironmentEnum type;
+    /** 场地材质：HARD/CLAY/GRASS */
+    private CourtSurfaceEnum surface;
     private String tags;
     private String cityName;
     private String districtName;
@@ -36,8 +39,6 @@ public class CourtPO {
     private String sourceId;
     private CourtStatusEnum status;
     private Integer meetupCount;
-    /** 背景图（七牛云 key） */
-    private String backgroundImage;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

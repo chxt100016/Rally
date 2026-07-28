@@ -1,12 +1,11 @@
 package com.rally.domain.court.service;
 
-import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.court.cache.CourtCache;
 import com.rally.domain.court.gateway.CourtRepository;
 import com.rally.domain.court.model.CourtData;
 import com.rally.domain.meetup.enums.CourtSelectModeEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.model.MeetupData;
-import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,24 +27,13 @@ public class CourtDomainService {
 
     private final CourtRepository courtRepository;
     private final MeetupRepository meetupRepository;
+    private final CourtCache courtCache;
 
     /**
-     * 根据 bizId 获取球场
+     * 根据 bizId 获取球场（走内存缓存，缺失回源 DB）
      */
     public CourtData getByBizId(String bizId) {
-        return courtRepository.findByBizId(bizId);
-    }
-
-    /**
-     * 更新球场背景图（管理端上传后回写）
-     * @param bizId 球场 bizId
-     * @param backgroundImage 七牛云 key
-     */
-    public void updateBackgroundImage(String bizId, String backgroundImage) {
-        CourtData court = courtRepository.findByBizId(bizId);
-        Assert.notNull(court, BizErrorCode.COURT_NOT_FOUND);
-        court.setBackgroundImage(backgroundImage);
-        courtRepository.save(court);
+        return courtCache.getByBizId(bizId);
     }
 
     /**
