@@ -67,21 +67,19 @@ public class TourContentAppService {
         LocalDate date = LocalDate.now();
         TranslationLanguageEnum lang = TranslationLanguageEnum.ZH_CN;
 
-        List<TournamentData> tournaments = tourTournamentQueryDomainService.findValidCurrentTournaments(date);
-        if (CollectionUtils.isEmpty(tournaments)) {
+        List<TournamentGroupData> groups = tourTournamentQueryDomainService.findValidCurrentTournamentGroups(date);
+        if (CollectionUtils.isEmpty(groups)) {
             return "# 比赛日程\n\n暂无比赛";
         }
 
-        List<List<TournamentData>> groups = groupByOverlap(tournaments);
         StringBuilder md = new StringBuilder();
         md.append("# 比赛日程\n\n");
 
-        for (List<TournamentData> group : groups) {
-            List<String> groupIds = group.stream().map(TournamentData::getTournamentId).toList();
-            List<MatchGroupDTO> dateGroups = tourMatchQueryDomainService.upcomingDateGroups(groupIds);
+        for (TournamentGroupData group : groups) {
+            List<MatchGroupDTO> dateGroups = tourMatchQueryDomainService.upcomingDateGroups(group.getTournamentIds());
             if (CollectionUtils.isEmpty(dateGroups)) continue;
 
-            String translatedTournamentName = translateAndJoinTournamentNames(group, lang);
+            String translatedTournamentName = translateAndJoinTournamentNames(group.getTournaments(), lang);
 
             for (MatchGroupDTO dateGroup : dateGroups) {
                 String dateText = formatDateText(dateGroup.getKey());
@@ -138,19 +136,18 @@ public class TourContentAppService {
             return "# 种子名单\n\n无赛事信息";
         }
 
-        List<List<TournamentData>> groups = groupByOverlap(tournaments);
+        List<TournamentGroupData> groups = tourTournamentQueryDomainService.groupAndSortTournaments(tournaments);
 
         StringBuilder md = new StringBuilder();
         md.append("# 种子名单\n\n");
 
-        for (List<TournamentData> group : groups) {
-            List<String> groupIds = group.stream().map(TournamentData::getTournamentId).toList();
-            List<SeedVO> seeds = tourMatchQueryDomainService.seeds(groupIds);
+        for (TournamentGroupData group : groups) {
+            List<SeedVO> seeds = tourMatchQueryDomainService.seeds(group.getTournamentIds());
             if (CollectionUtils.isEmpty(seeds)) continue;
 
             tourTranslationService.seeds(seeds, lang);
 
-            md.append("## ").append(groupTitle(group)).append("\n\n");
+            md.append("## ").append(groupTitle(group.getTournaments())).append("\n\n");
 
             Map<String, List<SeedVO>> bySeed = seeds.stream().collect(Collectors.groupingBy(SeedVO::getTour, LinkedHashMap::new, Collectors.toList()));
             for (Map.Entry<String, List<SeedVO>> entry : bySeed.entrySet()) {
@@ -175,39 +172,6 @@ public class TourContentAppService {
         }
 
         return md.toString();
-    }
-
-    /** 将赛事按"日期重叠 + 同城（忽略大小写）"分组，用 union-find 保证传递性合并 */
-    private List<List<TournamentData>> groupByOverlap(List<TournamentData> tournaments) {
-        int n = tournaments.size();
-        int[] parent = new int[n];
-        for (int i = 0; i < n; i++) parent[i] = i;
-        for (int i = 0; i < n; i++) {
-            for (int j = i + 1; j < n; j++) {
-                if (shouldMerge(tournaments.get(i), tournaments.get(j))) union(parent, i, j);
-            }
-        }
-        Map<Integer, List<TournamentData>> groups = new LinkedHashMap<>();
-        for (int i = 0; i < n; i++) {
-            groups.computeIfAbsent(find(parent, i), k -> new ArrayList<>()).add(tournaments.get(i));
-        }
-        return new ArrayList<>(groups.values());
-    }
-
-    private boolean shouldMerge(TournamentData a, TournamentData b) {
-        if (a.getStartDate() == null || a.getEndDate() == null || b.getStartDate() == null || b.getEndDate() == null) return false;
-        if (StringUtils.isBlank(a.getCity()) || StringUtils.isBlank(b.getCity())) return false;
-        boolean overlap = !a.getEndDate().isBefore(b.getStartDate()) && !b.getEndDate().isBefore(a.getStartDate());
-        return overlap && a.getCity().equalsIgnoreCase(b.getCity());
-    }
-
-    private int find(int[] parent, int i) {
-        while (parent[i] != i) { parent[i] = parent[parent[i]]; i = parent[i]; }
-        return i;
-    }
-
-    private void union(int[] parent, int i, int j) {
-        parent[find(parent, i)] = find(parent, j);
     }
 
     private String groupTitle(List<TournamentData> group) {

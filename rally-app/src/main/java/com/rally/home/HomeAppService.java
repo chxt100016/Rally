@@ -16,10 +16,12 @@ import com.rally.domain.tour.TourTournamentQueryDomainService;
 import com.rally.domain.tour.model.MatchGroupDTO;
 import com.rally.domain.tour.model.MatchQueryVO;
 import com.rally.domain.tour.model.TournamentData;
+import com.rally.domain.tour.model.TournamentGroupData;
 import com.rally.domain.translation.TranslationQueryService;
 import com.rally.domain.translation.model.TranslationEntityTypeEnum;
 import com.rally.domain.translation.model.TranslationKey;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
+import com.rally.home.convert.HomeAppConvertMapper;
 import com.rally.home.model.*;
 import com.rally.meetup.UserMeetupAppService;
 import com.rally.translation.TourTranslationService;
@@ -34,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -127,16 +130,18 @@ public class HomeAppService {
     }
 
     private HomeDisplayItemDTO buildMatchDisplay() {
-        List<TournamentData> tournaments = tourTournamentQueryDomainService.findValidCurrentTournaments(LocalDate.now());
-        if (CollectionUtils.isEmpty(tournaments)) {
+        List<TournamentGroupData> tournamentGroups = tourTournamentQueryDomainService.findValidCurrentTournamentGroups(LocalDate.now());
+        if (CollectionUtils.isEmpty(tournamentGroups)) {
             return null;
         }
 
         List<TournamentDisplayDTO> tournamentDisplays = new ArrayList<>();
-        for (TournamentData tournament : tournaments) {
-            TournamentDisplayDTO tournamentDisplay = buildTournamentDisplay(tournament);
+        List<TournamentGroupData> displayedTournamentGroups = new ArrayList<>();
+        for (TournamentGroupData tournamentGroup : tournamentGroups) {
+            TournamentDisplayDTO tournamentDisplay = buildTournamentDisplay(tournamentGroup);
             if (tournamentDisplay != null) {
                 tournamentDisplays.add(tournamentDisplay);
+                displayedTournamentGroups.add(tournamentGroup);
             }
         }
         if (tournamentDisplays.isEmpty()) {
@@ -148,14 +153,17 @@ public class HomeAppService {
         item.setDisplayType(DisplayType.TOUR_MATCH);
         MatchDisplayData data = new MatchDisplayData();
         data.setTitle("巡回赛");
-        data.setSubtitle(buildTourSubtitle(tournamentDisplays));
+        data.setSubtitle(buildTourSubtitle(displayedTournamentGroups));
         data.setTournaments(tournamentDisplays);
         item.setData(data);
         return item;
     }
 
-    private TournamentDisplayDTO buildTournamentDisplay(TournamentData tournament) {
-        List<String> tournamentIds = List.of(tournament.getTournamentId());
+    private TournamentDisplayDTO buildTournamentDisplay(TournamentGroupData tournamentGroup) {
+        List<String> tournamentIds = tournamentGroup.getTournamentIds();
+        if (CollectionUtils.isEmpty(tournamentIds)) {
+            return null;
+        }
         List<MatchGroupDTO> dateGroups = tourMatchQueryDomainService.upcomingDateGroups(tournamentIds);
         if (CollectionUtils.isEmpty(dateGroups)) {
             return null;
@@ -171,16 +179,13 @@ public class HomeAppService {
             return null;
         }
 
-        TournamentDisplayDTO dto = new TournamentDisplayDTO();
-        dto.setTournamentId(tournament.getTournamentId());
-        dto.setTournamentName(tournament.getName());
-        dto.setCategory(tournament.getCategory());
-        dto.setTour(tournament.getTour());
+        TournamentData representative = tournamentGroup.getRepresentative();
+        TournamentDisplayDTO dto = HomeAppConvertMapper.INSTANCE.toTournamentDisplayDTO(representative);
+        dto.setTour(joinTours(tournamentGroup.getTournaments()));
         dto.setCourtName(firstCourtGroup.getName());
         dto.setMatchDate(LocalDate.parse(firstDateGroup.getKey()));
-        dto.setImagePath(QiniuConfiguration.buildSignedUrl(tournament.getImagePath()));
+        dto.setImagePath(QiniuConfiguration.buildSignedUrl(representative.getImagePath()));
         dto.setMatches(firstCourtGroup.getData());
-
         return dto;
     }
 
@@ -210,10 +215,13 @@ public class HomeAppService {
         }
     }
 
-    private String buildTourSubtitle(List<TournamentDisplayDTO> tournamentDisplays) {
-        Map<String, Long> tourCountMap = tournamentDisplays.stream()
-                .filter(t -> t.getTour() != null)
-                .collect(Collectors.groupingBy(TournamentDisplayDTO::getTour, Collectors.counting()));
+    private String buildTourSubtitle(List<TournamentGroupData> tournamentGroups) {
+        Map<String, Long> tourCountMap = tournamentGroups.stream()
+                .flatMap(group -> group.getTournaments().stream())
+                .map(TournamentData::getTour)
+                .filter(tour -> tour != null && !tour.isBlank())
+                .map(tour -> tour.trim().toUpperCase(Locale.ROOT))
+                .collect(Collectors.groupingBy(tour -> tour, Collectors.counting()));
         long atpCount = tourCountMap.getOrDefault("ATP", 0L);
         long wtaCount = tourCountMap.getOrDefault("WTA", 0L);
 
@@ -229,6 +237,27 @@ public class HomeAppService {
         }
         subtitle.append("进行中");
         return subtitle.toString();
+    }
+
+    private String joinTours(List<TournamentData> tournaments) {
+        return tournaments.stream()
+                .map(TournamentData::getTour)
+                .filter(tour -> tour != null && !tour.isBlank())
+                .map(tour -> tour.trim().toUpperCase(Locale.ROOT))
+                .distinct()
+                .sorted((first, second) -> {
+                    int order = Integer.compare(tourOrder(first), tourOrder(second));
+                    return order != 0 ? order : first.compareTo(second);
+                })
+                .collect(Collectors.joining("/"));
+    }
+
+    private static int tourOrder(String tour) {
+        return switch (tour) {
+            case "ATP" -> 0;
+            case "WTA" -> 1;
+            default -> 2;
+        };
     }
 
     private HomeDisplayItemDTO buildPosterDisplay(String cityCode) {
