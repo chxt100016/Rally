@@ -15,6 +15,7 @@ import java.util.List;
 @RequestMapping("/content/tour")
 public class TourContentController {
 
+
     @Resource
     private TourContentAppService tourContentAppService;
 
