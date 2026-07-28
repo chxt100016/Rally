@@ -133,7 +133,8 @@ public enum BizErrorCode {
     TOURNAMENT_SCHEDULE_TIME_REQUIRED(46020, "请提供赛约时间"),
     TOURNAMENT_RESULT_WINNER_REQUIRED(46021, "请选择获胜方"),
     TOURNAMENT_SLOTS_FULL(46022, "正赛席位已满，暂无法支付"),
-    TOURNAMENT_PARTNER_ALREADY_PAIRED(46023, "该队友已与他人组队，无法选择");
+    TOURNAMENT_PARTNER_ALREADY_PAIRED(46023, "该队友已与他人组队，无法选择"),
+    TOURNAMENT_NTRP_LEVEL_NOT_MATCH(46024, "您的NTRP等级不符合赛事要求");
 
     private final int code;
     private final String message;

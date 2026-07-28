@@ -11,6 +11,7 @@ import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.utils.Assert;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -56,6 +57,13 @@ public class TournamentPolicy {
                 && (tournament.getData().getRegistrationEndTime() == null || !now.isAfter(tournament.getData().getRegistrationEndTime()));
         Assert.isTrue(inWindow, BizErrorCode.TOURNAMENT_REGISTRATION_CLOSED);
         assertGenderMatch(tournament, userProfile);
+        assertNtrpLevelMatch(tournament, userProfile);
+    }
+
+    private void assertNtrpLevelMatch(Tournament tournament, UserProfile userProfile) {
+        BigDecimal tournamentNtrpLevel = new BigDecimal(tournament.getData().getNtrpLevel());
+        BigDecimal userNtrpLevel = userProfile.getProfile() == null ? null : userProfile.getProfile().getNtrpScore();
+        Assert.isTrue(userNtrpLevel != null && userNtrpLevel.compareTo(tournamentNtrpLevel) == 0, BizErrorCode.TOURNAMENT_NTRP_LEVEL_NOT_MATCH);
     }
 
     private void assertGenderMatch(Tournament tournament, UserProfile userProfile) {

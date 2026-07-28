@@ -127,7 +127,7 @@ public class TournamentDetailService {
         } else if (now.isBefore(registrationStartTime)) {
             tournamentDTO.setDisplayStatus(TournamentDisplayStatusEnum.NOT_STARTED);
             tournamentDTO.setDisplayStatusShow(TournamentDisplayStatusEnum.NOT_STARTED.getLabel());
-        } else if (now.isBefore(qualifierStartTime)) {
+        } else if (qualifierStartTime == null || now.isBefore(qualifierStartTime)) {
             tournamentDTO.setDisplayStatus(TournamentDisplayStatusEnum.REGISTRATION);
             tournamentDTO.setDisplayStatusShow(TournamentDisplayStatusEnum.REGISTRATION.getLabel());
         } else {
@@ -296,7 +296,7 @@ public class TournamentDetailService {
             return TournamentActionStateEnum.AWAIT_PAYMENT;
         }
         if (status == TournamentEntryStatusEnum.WAITING) {
-            if (LocalDateTime.now().isBefore(tournamentData.getQualifierStartTime())) {
+            if (tournamentData.getQualifierStartTime() != null && LocalDateTime.now().isBefore(tournamentData.getQualifierStartTime())) {
                 return TournamentActionStateEnum.AWAIT_QUALIFIER_START;
             }
             return TournamentActionStateEnum.WAITING_MATCH;
