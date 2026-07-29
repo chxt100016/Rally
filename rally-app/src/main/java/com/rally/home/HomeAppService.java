@@ -48,10 +48,6 @@ public class HomeAppService {
 
     private static final String DEFAULT_CITY_CODE = "330100";
 
-    private static final Set<String> TOURNAMENT_POSTER_WHITELIST_USER_IDS = Set.of("2072996725997641729", "2067608260724289538", "2073445906881101825",
-        "2066416590124171265", "2066418913445625857", "2066467574913384450", "2066477861460721666", "2066560000248119298", "2069326111863681026"
-    );
-
     private final TourTournamentQueryDomainService tourTournamentQueryDomainService;
     private final TourMatchQueryDomainService tourMatchQueryDomainService;
     private final UserMeetupAppService userMeetupAppService;
@@ -65,9 +61,7 @@ public class HomeAppService {
 
         displayItems.add(buildMeetupDisplay());
 
-        if (isTournamentPosterVisible()) {
-            displayItems.add(buildTournamentPosterDisplay());
-        }
+        displayItems.add(buildTournamentPosterDisplay());
 
         HomeDisplayItemDTO matchDisplay = buildMatchDisplay();
         if (matchDisplay != null) {
@@ -103,11 +97,6 @@ public class HomeAppService {
         cmd.setTab(UserMeetupTabEnum.IN_PROGRESS);
         PageDTO<MeetupCardDTO> page = userMeetupAppService.queryUserMeetupList(cmd);
         return page.getList();
-    }
-
-    private boolean isTournamentPosterVisible() {
-        String userId = UserContext.getIfPresent();
-        return userId != null && TOURNAMENT_POSTER_WHITELIST_USER_IDS.contains(userId);
     }
 
     private HomeDisplayItemDTO buildTournamentPosterDisplay() {
