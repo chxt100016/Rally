@@ -1,6 +1,5 @@
 package com.rally.meetup;
 
-import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.court.enums.CourtBackgroundEnum;
 import com.rally.domain.court.enums.CourtEnvironmentEnum;
 import com.rally.domain.court.enums.CourtSurfaceEnum;
@@ -12,8 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
- * 约球卡片底图解析：按球场材质 + 室内外 + 开球时段 + 天气动态算 key，转签名 URL。
- * 天气模块未上线，weather 暂传 null（降级晴天）；FREE 模式无 courtId 时降级 HARD/OUTDOOR。
+ * 约球卡片背景样式解析：按球场材质、室内外、开球时段和天气返回样式标识，前端用 CSS 渐变渲染。
+ * 天气模块未上线，weather 暂传 null 降级晴天；无 courtId 时降级 HARD/OUTDOOR。
  */
 @Service
 @RequiredArgsConstructor
@@ -22,9 +21,9 @@ public class MeetupBackgroundResolver {
     private final CourtDomainService courtDomainService;
 
     /**
-     * 解析底图签名 URL。
+     * 解析背景样式标识，如 hard-day-clear、indoor-clay。
      */
-    public String resolveUrl(MeetupData data) {
+    public String resolveStyle(MeetupData data) {
         if (data == null || data.getStartTime() == null) {
             return null;
         }
@@ -38,7 +37,6 @@ public class MeetupBackgroundResolver {
                 venue = court.getType();
             }
         }
-        String key = CourtBackgroundEnum.resolveKey(surface, venue, data.getStartTime(), null);
-        return QiniuConfiguration.buildSignedUrl(key);
+        return CourtBackgroundEnum.resolveStyle(surface, venue, data.getStartTime(), null);
     }
 }

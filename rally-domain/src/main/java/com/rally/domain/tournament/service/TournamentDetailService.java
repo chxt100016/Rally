@@ -296,7 +296,7 @@ public class TournamentDetailService {
             return TournamentActionStateEnum.AWAIT_PAYMENT;
         }
         if (status == TournamentEntryStatusEnum.WAITING) {
-            if (tournamentData.getQualifierStartTime() != null && LocalDateTime.now().isBefore(tournamentData.getQualifierStartTime())) {
+            if (tournamentData.getQualifierStartTime() == null || LocalDateTime.now().isBefore(tournamentData.getQualifierStartTime())) {
                 return TournamentActionStateEnum.AWAIT_QUALIFIER_START;
             }
             return TournamentActionStateEnum.WAITING_MATCH;

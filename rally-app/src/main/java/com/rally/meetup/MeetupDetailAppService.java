@@ -78,7 +78,7 @@ public class MeetupDetailAppService {
 
         ActionStateEnum actionState = meetup.getActionState(currentUserId);
         MeetupDTO meetupDTO = MeetupAppConvertMapper.INSTANCE.toMeetupDTO(meetup.getData());
-        meetupDTO.setBackgroundImage(backgroundResolver.resolveUrl(meetup.getData()));
+        meetupDTO.setBackgroundImage(backgroundResolver.resolveStyle(meetup.getData()));
         MeetupDetailDTO detail = new MeetupDetailDTO()
                 .setMeetup(meetupDTO)
                 .setActionState(actionState)

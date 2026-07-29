@@ -83,7 +83,7 @@ public class MeetupAppService {
 
         // 4. 返回详情
         MeetupVO vo = MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
-        vo.setBackgroundImage(backgroundResolver.resolveUrl(data));
+        vo.setBackgroundImage(backgroundResolver.resolveStyle(data));
         return vo;
     }
 

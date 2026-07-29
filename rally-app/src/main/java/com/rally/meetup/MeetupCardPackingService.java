@@ -28,7 +28,7 @@ public class MeetupCardPackingService {
     public MeetupCardDTO packCard(MeetupData data, Double lng, Double lat) {
         MeetupCardDTO card = MeetupAppConvertMapper.INSTANCE.toMeetupCardDTO(data);
         card.setPrimaryLabel(toListPrimaryLabel(data));
-        card.setBackgroundImage(backgroundResolver.resolveUrl(data));
+        card.setBackgroundImage(backgroundResolver.resolveStyle(data));
         if (lng != null && lat != null) {
             card.setDistanceKm(GeoUtils.distance(lat, lng, data.getCourtLat(), data.getCourtLng()));
         }
@@ -41,7 +41,7 @@ public class MeetupCardPackingService {
     public MeetupCardDTO packCardForTab(MeetupData data, UserMeetupTabEnum tab) {
         MeetupCardDTO card = MeetupAppConvertMapper.INSTANCE.toMeetupCardDTO(data);
         card.setPrimaryLabel(toTabPrimaryLabel(data, tab));
-        card.setBackgroundImage(backgroundResolver.resolveUrl(data));
+        card.setBackgroundImage(backgroundResolver.resolveStyle(data));
         return card;
     }
 
