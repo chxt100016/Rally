@@ -2,6 +2,7 @@ package com.rally.domain.tournament.model;
 
 import com.rally.domain.tournament.enums.CourtAbilityEnum;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -21,6 +22,7 @@ public class TournamentJoinCmd {
     private String partnerId;
 
     /** 活动区域 */
+    @NotEmpty(message = "请至少选择一个活动区域")
     private List<String> preferredDistricts;
 
     /** 场地能力 */
@@ -28,5 +30,6 @@ public class TournamentJoinCmd {
     private CourtAbilityEnum courtAbility;
 
     /** 可比赛时间 */
+    @NotEmpty(message = "请至少选择一个可比赛时间")
     private List<String> availableTimes;
 }

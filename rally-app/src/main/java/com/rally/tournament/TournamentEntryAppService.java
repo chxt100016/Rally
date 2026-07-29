@@ -47,6 +47,7 @@ public class TournamentEntryAppService {
         String userId = UserContext.get();
         Tournament tournament = tournamentAdminService.get(cmd.getTournamentId());
         UserProfile userProfile = userProfileDomainService.get(userId);
+        userProfile.assertCompleted();
 
         TournamentEntry entry = tournamentEntryService.join(tournament, userProfile, userId, cmd);
         return TournamentEntryAppConvertMapper.INSTANCE.toTournamentEntryDTO(entry.getData());
