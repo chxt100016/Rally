@@ -22,7 +22,7 @@ public class NotifySubscribe {
     private String userId;
     /** 业务方向 */
     private NotifyBizType bizType;
-    /** 关联业务对象ID（当前为 meetupId） */
+    /** 关联业务对象ID（meetupId 或 tournamentId） */
     private String refBizId;
     /** 通知场景 */
     private NoticeScene noticeScene;

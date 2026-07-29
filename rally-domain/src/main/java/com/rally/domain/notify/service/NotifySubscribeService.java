@@ -16,8 +16,10 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -104,7 +106,12 @@ public class NotifySubscribeService {
             log.info("订阅通知无可用额度，跳过发送: scene={}, refBizId={}, userIds={}", scene, refBizId, userIds);
             return;
         }
+        // 一次触发每个用户只消耗最早的一条额度，其余额度留给后续轮次。
+        Set<String> handledUserIds = new HashSet<>();
         for (NotifySubscribe subscribe : list) {
+            if (!handledUserIds.add(subscribe.getUserId())) {
+                continue;
+            }
             try {
                 // 发送时成员校验：用户已退出活动则跳过（保留 UNUSED，不发送、不标记失败）
                 if (!shouldSend(recipientFilter, subscribe.getUserId(), scene)) {

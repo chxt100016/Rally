@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ResultConfirmCmd {
 
@@ -17,4 +19,6 @@ public class ResultConfirmCmd {
 
     private String rejectReasonText;
 
+    /** 本次微信订阅授权成功的赛事通知场景 */
+    private List<String> acceptedNoticeScenes;
 }

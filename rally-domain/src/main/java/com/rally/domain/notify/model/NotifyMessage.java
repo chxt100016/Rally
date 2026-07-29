@@ -27,7 +27,7 @@ public class NotifyMessage {
         message.setUserId(subscribe.getUserId());
         message.setScene(subscribe.getNoticeScene());
         message.setTemplateId(subscribe.getNoticeScene().getTemplateId());
-        // 跳转到对应活动详情页（refBizId 即 meetupId，详情页参数名为 id）
+        // 跳转到对应业务详情页（refBizId 由业务类型决定，详情页参数名为 id）
         message.setPage(subscribe.getNoticeScene().getPage() + "?id=" + subscribe.getRefBizId());
         message.setData(data);
         return message;

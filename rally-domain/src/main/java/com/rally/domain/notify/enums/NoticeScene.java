@@ -22,7 +22,16 @@ public enum NoticeScene {
     TEAM_SUCCESS("组团成功提醒", "GV_XfB27iGPWoXJsaPbV-xJjGz59KmRcJYuJWgFgmLk", "pages/meetup/detail/detail", NotifyChannel.WECHAT_SUBSCRIBE),
 
     /** 成员退出通知 —— 收件人：创建人/全体已加入参与人 */
-    MEMBER_QUIT("成员退出通知", "vRTf8GAOXTTeewdS8ivCEifKTf42uIAH4eIrdERtycc", "pages/meetup/detail/detail", NotifyChannel.WECHAT_SUBSCRIBE);
+    MEMBER_QUIT("成员退出通知", "vRTf8GAOXTTeewdS8ivCEifKTf42uIAH4eIrdERtycc", "pages/meetup/detail/detail", NotifyChannel.WECHAT_SUBSCRIBE),
+
+    /** 赛事匹配成功通知 —— 收件人：本场所有参赛人 */
+    TOURNAMENT_MATCHED("匹配上通知", "_pf-ADsRnNZs8Pc3cIA3fpz1a4fimPnT0p7OU2suEl8", "pages/tournament-detail/tournament-detail", NotifyChannel.WECHAT_SUBSCRIBE),
+
+    /** 赛事订场信息通知 —— 收件人：除订场人外的本场参赛人 */
+    TOURNAMENT_BOOKING_SUBMITTED("订场信息通知", "zLs0GKZdKVZAM4efd6TMq4zJUQppXxJCDWzi5ssmeqE", "pages/tournament-detail/tournament-detail", NotifyChannel.WECHAT_SUBSCRIBE),
+
+    /** 赛事拒绝通知 —— 收件人：除拒绝人外的本场参赛人 */
+    TOURNAMENT_REJECTED("拒绝通知", "zIdEOoMCKYP8tW_5zUNBJTW2EHjeG5HiklWGV0YV8ilpfI", "pages/tournament-detail/tournament-detail", NotifyChannel.WECHAT_SUBSCRIBE);
 
     private final String desc;
     private final String templateId;

@@ -4,6 +4,8 @@ import com.rally.domain.payment.model.PaymentOrder;
 import com.rally.domain.payment.model.PrepayDTO;
 import com.rally.domain.payment.model.PrepayResult;
 import com.rally.domain.payment.service.PaymentDomainService;
+import com.rally.domain.notify.enums.NotifyBizType;
+import com.rally.domain.notify.service.NotifySubscribeService;
 import com.rally.domain.tournament.model.Tournament;
 import com.rally.domain.tournament.model.TournamentEntry;
 import com.rally.domain.tournament.model.TournamentEntryDTO;
@@ -19,6 +21,7 @@ import com.rally.domain.tournament.service.TournamentPaymentService;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.payment.convert.PaymentAppConvertMapper;
+import com.rally.notify.TournamentNotifyAssembler;
 import com.rally.tournament.convert.TournamentEntryAppConvertMapper;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,7 @@ public class TournamentEntryAppService {
     private final TournamentPaymentService tournamentPaymentService;
     private final PaymentDomainService paymentDomainService;
     private final TournamentMatchFlowService tournamentMatchFlowService;
+    private final NotifySubscribeService notifySubscribeService;
 
     /**
      * 报名
@@ -50,6 +54,8 @@ public class TournamentEntryAppService {
         userProfile.assertCompleted();
 
         TournamentEntry entry = tournamentEntryService.join(tournament, userProfile, userId, cmd);
+        notifySubscribeService.grant(userId, NotifyBizType.TOURNAMENT, cmd.getTournamentId(),
+                TournamentNotifyAssembler.parseScenes(cmd.getAcceptedNoticeScenes()));
         return TournamentEntryAppConvertMapper.INSTANCE.toTournamentEntryDTO(entry.getData());
     }
 
