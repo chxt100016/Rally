@@ -113,13 +113,22 @@ public class TourTranslationService {
 
     private void collectGroupNames(List<MatchGroupDTO> groups, Map<TranslationKey, List<MatchGroupDTO>> map, TranslationLanguageEnum language) {
         for (MatchGroupDTO group : groups) {
-            if (group.getName() != null) {
+            // MatchGroupDTO 同时承载日期、球场和轮次分组。只有分组 key 与其比赛的
+            // court 一致时才是球场组，避免把“今天/明天/日期/轮次”当作球场翻译。
+            if (group.getName() != null && isCourtGroup(group)) {
                 map.computeIfAbsent(new TranslationKey(TranslationEntityTypeEnum.COURT, group.getName(), language), k -> new ArrayList<>()).add(group);
             }
             if (group.getChildren() != null) {
                 collectGroupNames(group.getChildren(), map, language);
             }
         }
+    }
+
+    private boolean isCourtGroup(MatchGroupDTO group) {
+        if (group.getKey() == null || CollectionUtils.isEmpty(group.getData())) {
+            return false;
+        }
+        return group.getData().stream().anyMatch(match -> Objects.equals(group.getKey(), match.getCourt()));
     }
 
     public void seeds(List<SeedVO> vos, TranslationLanguageEnum language) {
