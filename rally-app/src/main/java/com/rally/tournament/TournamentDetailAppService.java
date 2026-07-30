@@ -3,16 +3,19 @@ package com.rally.tournament;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.service.MeetupDomainService;
-import com.rally.meetup.MeetupCardPackingService;
+import com.rally.domain.tournament.enums.TournamentActionStateEnum;
+import com.rally.domain.tournament.enums.TournamentJoinRestrictionEnum;
 import com.rally.domain.tournament.model.MatchOpponentDTO;
 import com.rally.domain.tournament.model.MyCurrentMatchDTO;
 import com.rally.domain.tournament.model.TournamentBracketMatchDTO;
-import com.rally.domain.tournament.model.TournamentRejectRecordDTO;
 import com.rally.domain.tournament.model.TournamentDetailDTO;
 import com.rally.domain.tournament.model.TournamentEntrantDTO;
+import com.rally.domain.tournament.model.TournamentRejectRecordDTO;
 import com.rally.domain.tournament.service.TournamentDetailService;
+import com.rally.domain.tournament.service.TournamentPolicy;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserProfileDomainService;
+import com.rally.meetup.MeetupCardPackingService;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,8 @@ import java.util.Map;
 public class TournamentDetailAppService {
 
     private final TournamentDetailService tournamentDetailService;
+
+    private final TournamentPolicy tournamentPolicy;
 
     private final UserProfileDomainService userProfileDomainService;
 
@@ -47,6 +52,8 @@ public class TournamentDetailAppService {
             detail.getTournament().setWechatGroupQrCodeUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getWechatGroupQrCodeUrl()));
         }
 
+        fillJoinRestrictions(detail, userId);
+
         List<String> userIds = collectUserIds(detail);
         if (!userIds.isEmpty()) {
             Map<String, UserProfile> profiles = userProfileDomainService.listMap(userIds);
@@ -55,6 +62,20 @@ public class TournamentDetailAppService {
 
         fillMeetupCard(detail);
         return detail;
+    }
+
+    /**
+     * 未报名时返回登录、档案完整度和 NTRP 等级限制，供前端决定报名按钮及提示文案。
+     */
+    private void fillJoinRestrictions(TournamentDetailDTO detail, String userId) {
+        if (detail.getActionState() != TournamentActionStateEnum.NOT_REGISTERED || detail.getTournament() == null) {
+            return;
+        }
+        UserProfile userProfile = userId == null ? null : userProfileDomainService.get(userId);
+        List<TournamentJoinRestrictionEnum> restrictions = tournamentPolicy.collectJoinRestrictions(
+                detail.getTournament().getNtrpLevel(), userProfile);
+        detail.setRestrictions(restrictions);
+        detail.setJoinable(restrictions.isEmpty());
     }
 
     /**

@@ -27,6 +27,8 @@
 | `myEntry` | `TournamentEntryDTO\|null` | 当前用户报名信息，未报名/未登录为 null |
 | `myCurrentMatch` | `MyCurrentMatchDTO\|null` | 当前用户进行中的比赛，无则为 null |
 | `actionState` | `string` | 显式待办状态，驱动"当前待办卡片"渲染 |
+| `joinable` | `boolean\|null` | 是否满足报名用户条件，仅 `actionState=NOT_REGISTERED` 时返回 |
+| `restrictions` | `string[]\|null` | 不可报名原因，仅 `actionState=NOT_REGISTERED` 时返回，可叠加，文案由前端拼装 |
 | `myTimeline` | `TournamentTimelineEventDTO[]` | 个人视角事件流，不含未登录/未报名场景 |
 | `bracket` | `TournamentBracketDTO` | 签表对阵图数据 |
 | `rejectRecords` | `TournamentRejectRecordDTO[]` | 赛事所有参赛者的拒绝比赛次数统计（不限于本人） |
@@ -111,6 +113,8 @@
 | `ELIMINATED` | 已被淘汰 |
 | `WITHDRAWN` | 已主动退出 |
 | `QUALIFIED_MAIN_DRAW` | 已获得正赛资格，正赛排队中 |
+
+当 `actionState=NOT_REGISTERED` 时，`restrictions` 可能包含：`NOT_LOGGED_IN`（未登录）、`LEVEL_NOT_MATCH`（NTRP 等级不符）、`PROFILE_INCOMPLETE`（个人信息未完善）、`ONBOARDING_INCOMPLETE`（网球档案未完善）、`REGISTRATION_INCOMPLETE`（个人信息和网球档案均未完善）。列表为空时 `joinable=true`。
 
 ### myTimeline（个人事件流）
 

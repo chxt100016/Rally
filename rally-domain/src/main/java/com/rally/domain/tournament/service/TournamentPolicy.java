@@ -3,6 +3,7 @@ package com.rally.domain.tournament.service;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.tournament.enums.TournamentGenderLimitEnum;
+import com.rally.domain.tournament.enums.TournamentJoinRestrictionEnum;
 import com.rally.domain.tournament.enums.TournamentStatusEnum;
 import com.rally.domain.tournament.model.Tournament;
 import com.rally.domain.tournament.model.TournamentCreateCmd;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -61,9 +64,43 @@ public class TournamentPolicy {
     }
 
     private void assertNtrpLevelMatch(Tournament tournament, UserProfile userProfile) {
-        BigDecimal tournamentNtrpLevel = new BigDecimal(tournament.getData().getNtrpLevel());
+        boolean levelMatch = isNtrpLevelMatch(tournament.getData().getNtrpLevel(), userProfile);
+        Assert.isTrue(levelMatch, BizErrorCode.TOURNAMENT_NTRP_LEVEL_NOT_MATCH);
+    }
+
+    /**
+     * 判断用户 NTRP 等级是否符合赛事要求，与报名接口使用同一数值相等规则。
+     */
+    public boolean isNtrpLevelMatch(String requiredNtrpLevel, UserProfile userProfile) {
+        BigDecimal tournamentNtrpLevel = new BigDecimal(requiredNtrpLevel);
         BigDecimal userNtrpLevel = userProfile.getProfile() == null ? null : userProfile.getProfile().getNtrpScore();
-        Assert.isTrue(userNtrpLevel != null && userNtrpLevel.compareTo(tournamentNtrpLevel) == 0, BizErrorCode.TOURNAMENT_NTRP_LEVEL_NOT_MATCH);
+        return userNtrpLevel != null && userNtrpLevel.compareTo(tournamentNtrpLevel) == 0;
+    }
+
+    /**
+     * 收集赛事未报名场景下的用户准入限制。
+     * userProfile 为空表示用户未登录；网球档案未完善时由完善状态承接提示，不重复返回等级不符。
+     */
+    public List<TournamentJoinRestrictionEnum> collectJoinRestrictions(String requiredNtrpLevel, UserProfile userProfile) {
+        List<TournamentJoinRestrictionEnum> restrictions = new ArrayList<>();
+        if (userProfile == null) {
+            restrictions.add(TournamentJoinRestrictionEnum.NOT_LOGGED_IN);
+            return restrictions;
+        }
+
+        boolean basicDefault = userProfile.getUser().isBasicDefault();
+        boolean profileIncomplete = !userProfile.hasProfile();
+        if (basicDefault && profileIncomplete) {
+            restrictions.add(TournamentJoinRestrictionEnum.REGISTRATION_INCOMPLETE);
+        } else if (basicDefault) {
+            restrictions.add(TournamentJoinRestrictionEnum.PROFILE_INCOMPLETE);
+        } else if (profileIncomplete) {
+            restrictions.add(TournamentJoinRestrictionEnum.ONBOARDING_INCOMPLETE);
+        }
+        if (!profileIncomplete && !isNtrpLevelMatch(requiredNtrpLevel, userProfile)) {
+            restrictions.add(TournamentJoinRestrictionEnum.LEVEL_NOT_MATCH);
+        }
+        return restrictions;
     }
 
     private void assertGenderMatch(Tournament tournament, UserProfile userProfile) {
