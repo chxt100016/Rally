@@ -5,6 +5,7 @@ import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -25,4 +26,9 @@ public class MyCurrentMatchDTO {
     private MeetupCardDTO meetupCard;
     /** 订场阶段（BOOKING）对手的报名信息，供订场人参考对手场地偏好/可用时间 */
     private List<TournamentEntryDTO> opponentEntries;
+    /** 最近一次打回重订信息，仅在发生过打回重订时有值。 */
+    private String lastRebookBy;
+    private String lastRebookReasonCode;
+    private String lastRebookReasonText;
+    private LocalDateTime lastRebookTime;
 }

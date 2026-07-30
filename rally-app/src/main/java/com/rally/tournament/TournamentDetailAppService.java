@@ -4,9 +4,13 @@ import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.tournament.enums.TournamentActionStateEnum;
+import com.rally.domain.tournament.enums.TournamentActionStateTextEnum;
 import com.rally.domain.tournament.enums.TournamentJoinRestrictionEnum;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
+import com.rally.domain.tournament.enums.RebookReasonEnum;
 import com.rally.domain.tournament.model.MatchOpponentDTO;
 import com.rally.domain.tournament.model.MyCurrentMatchDTO;
+import com.rally.domain.tournament.model.TournamentActionStateTextDTO;
 import com.rally.domain.tournament.model.TournamentBracketMatchDTO;
 import com.rally.domain.tournament.model.TournamentDetailDTO;
 import com.rally.domain.tournament.model.TournamentEntrantDTO;
@@ -20,9 +24,12 @@ import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 落地页详情编排：装配领域数据后批量查询用户昵称/头像/NTRP 回填
@@ -54,12 +61,14 @@ public class TournamentDetailAppService {
 
         fillJoinRestrictions(detail, userId);
 
+        Map<String, UserProfile> profiles = Map.of();
         List<String> userIds = collectUserIds(detail);
         if (!userIds.isEmpty()) {
-            Map<String, UserProfile> profiles = userProfileDomainService.listMap(userIds);
+            profiles = userProfileDomainService.listMap(userIds);
             fillNicknames(detail, profiles);
         }
 
+        fillActionStateText(detail, profiles);
         fillMeetupCard(detail);
         return detail;
     }
@@ -95,6 +104,9 @@ public class TournamentDetailAppService {
         MyCurrentMatchDTO myCurrentMatch = detail.getMyCurrentMatch();
         if (myCurrentMatch != null && myCurrentMatch.getOpponents() != null) {
             myCurrentMatch.getOpponents().forEach(o -> userIds.add(o.getUserId()));
+        }
+        if (myCurrentMatch != null && myCurrentMatch.getLastRebookBy() != null) {
+            userIds.add(myCurrentMatch.getLastRebookBy());
         }
         if (detail.getBracket() != null && detail.getBracket().getRounds() != null) {
             detail.getBracket().getRounds().forEach(round -> round.getMatches().forEach(match -> match.getParticipants().forEach(p -> userIds.add(p.getUserId()))));
@@ -155,6 +167,103 @@ public class TournamentDetailAppService {
         opponent.setGender(profile.getUser().getGender());
         if (profile.getProfile() != null) {
             opponent.setNtrpScore(profile.getProfile().getNtrpScore());
+        }
+    }
+
+    /**
+     * 状态文案统一由枚举维护；涉及对手或打回重订的信息在昵称回填后替换占位内容。
+     */
+    private void fillActionStateText(TournamentDetailDTO detail, Map<String, UserProfile> profiles) {
+        TournamentActionStateTextEnum text = resolveActionStateText(detail);
+        String title = text.getTitle();
+        String subtitle = text.getSubtitle();
+        MyCurrentMatchDTO match = detail.getMyCurrentMatch();
+
+        if (text == TournamentActionStateTextEnum.AWAIT_BOOKING_REBOOK) {
+            subtitle = String.format(subtitle, rebookerDisplayName(match, profiles), rebookReason(match));
+        } else if (subtitle.contains("%s")) {
+            subtitle = String.format(subtitle, opponentNames(match));
+        }
+        detail.setActionStateText(new TournamentActionStateTextDTO(title, subtitle));
+    }
+
+    private TournamentActionStateTextEnum resolveActionStateText(TournamentDetailDTO detail) {
+        TournamentActionStateEnum actionState = detail.getActionState();
+        if (actionState == TournamentActionStateEnum.NOT_REGISTERED) {
+            if (detail.getProgress() != null
+                    && detail.getProgress().getCurrentRound() != null
+                    && detail.getProgress().getCurrentRound() != TournamentRoundEnum.QUALIFIER) {
+                return TournamentActionStateTextEnum.NOT_REGISTERED_NON_QUALIFIER;
+            }
+            if (detail.getTournament() != null
+                    && detail.getTournament().getRegistrationEndTime() != null
+                    && LocalDateTime.now().isAfter(detail.getTournament().getRegistrationEndTime())) {
+                return TournamentActionStateTextEnum.NOT_REGISTERED_CLOSED;
+            }
+            return TournamentActionStateTextEnum.NOT_REGISTERED;
+        }
+        if (actionState == TournamentActionStateEnum.AWAIT_BOOKING
+                && detail.getMyCurrentMatch() != null
+                && detail.getMyCurrentMatch().getLastRebookTime() != null) {
+            return TournamentActionStateTextEnum.AWAIT_BOOKING_REBOOK;
+        }
+        if (actionState == null || actionState == TournamentActionStateEnum.END) {
+            return TournamentActionStateTextEnum.DEFAULT;
+        }
+        try {
+            return TournamentActionStateTextEnum.valueOf(actionState.name());
+        } catch (IllegalArgumentException ignored) {
+            return TournamentActionStateTextEnum.DEFAULT;
+        }
+    }
+
+    private String opponentNames(MyCurrentMatchDTO match) {
+        if (match == null || match.getOpponents() == null) {
+            return "对手";
+        }
+        String names = match.getOpponents().stream()
+                .map(MatchOpponentDTO::getNickname)
+                .filter(Objects::nonNull)
+                .filter(name -> !name.isBlank())
+                .collect(Collectors.joining("、"));
+        return names.isBlank() ? "对手" : names;
+    }
+
+    private String rebookerDisplayName(MyCurrentMatchDTO match, Map<String, UserProfile> profiles) {
+        if (match == null || match.getLastRebookBy() == null) {
+            return "对手";
+        }
+        String nickname = match.getOpponents() == null ? null : match.getOpponents().stream()
+                .filter(opponent -> match.getLastRebookBy().equals(opponent.getUserId()))
+                .map(MatchOpponentDTO::getNickname)
+                .filter(Objects::nonNull)
+                .filter(name -> !name.isBlank())
+                .findFirst()
+                .orElse(null);
+        if (nickname != null) {
+            return "对手" + nickname;
+        }
+        UserProfile profile = profiles.get(match.getLastRebookBy());
+        if (profile == null || profile.getUser() == null || profile.getUser().getNickname() == null
+                || profile.getUser().getNickname().isBlank()) {
+            return "对手";
+        }
+        return "对手" + profile.getUser().getNickname();
+    }
+
+    private String rebookReason(MyCurrentMatchDTO match) {
+        if (match == null || match.getLastRebookReasonCode() == null) {
+            return "场地或时间不合适";
+        }
+        try {
+            RebookReasonEnum reason = RebookReasonEnum.valueOf(match.getLastRebookReasonCode());
+            if (reason == RebookReasonEnum.OTHER && match.getLastRebookReasonText() != null
+                    && !match.getLastRebookReasonText().isBlank()) {
+                return match.getLastRebookReasonText();
+            }
+            return reason.getLabel();
+        } catch (IllegalArgumentException ignored) {
+            return match.getLastRebookReasonCode();
         }
     }
 }

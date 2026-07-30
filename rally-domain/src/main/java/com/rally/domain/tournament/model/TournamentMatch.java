@@ -149,6 +149,9 @@ public class TournamentMatch {
             participant.setConfirmStatus(ConfirmStatusEnum.REJECTED);
             participant.setConfirmTime(now);
             data.setStatus(TournamentMatchStatusEnum.BOOKING);
+            data.setLastRebookBy(userId);
+            data.setLastRebookReasonCode(rebookReason.getCode());
+            data.setLastRebookReasonText(rebookReasonText);
             data.setLastRebookTime(now);
 
             participants.forEach(p -> {
@@ -227,4 +230,3 @@ public class TournamentMatch {
         }
     }
 }
-

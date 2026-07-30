@@ -248,6 +248,10 @@ public class TournamentDetailService {
         dto.setRound(data.getRound());
         dto.setCourtBookerId(data.getCourtBookerId());
         dto.setMeetupId(data.getMeetupId());
+        dto.setLastRebookBy(data.getLastRebookBy());
+        dto.setLastRebookReasonCode(data.getLastRebookReasonCode());
+        dto.setLastRebookReasonText(data.getLastRebookReasonText());
+        dto.setLastRebookTime(data.getLastRebookTime());
         dto.setStatus(data.getStatus());
         dto.setGroupSize(data.getRound() == TournamentRoundEnum.QUALIFIER ? tournamentData.getQualifierGroupSize() : 2);
 

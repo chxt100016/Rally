@@ -142,6 +142,8 @@ public class TournamentMatchTest {
         match.confirmSchedule("user1", false, null, null, RebookReasonEnum.TIME_NOT_SUITABLE, null, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
 
         Assert.assertEquals(TournamentMatchStatusEnum.BOOKING, match.getData().getStatus());
+        Assert.assertEquals("user1", match.getData().getLastRebookBy());
+        Assert.assertEquals(RebookReasonEnum.TIME_NOT_SUITABLE.getCode(), match.getData().getLastRebookReasonCode());
         Assert.assertNotNull(match.getData().getLastRebookTime());
     }
 

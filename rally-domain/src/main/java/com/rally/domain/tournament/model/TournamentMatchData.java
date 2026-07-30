@@ -25,6 +25,10 @@ public class TournamentMatchData {
     private String submitterUserId;
     private LocalDateTime submittedTime;
     private String rejectReason;
+    /** 最近一次打回重订的用户及理由，用于订场人重新提交时展示原因。 */
+    private String lastRebookBy;
+    private String lastRebookReasonCode;
+    private String lastRebookReasonText;
     private LocalDateTime lastRebookTime;
     private TournamentMatchStatusEnum status;
     private LocalDateTime matchedTime;
