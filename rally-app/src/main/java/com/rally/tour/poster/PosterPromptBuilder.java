@@ -3,6 +3,8 @@ package com.rally.tour.poster;
 import com.rally.domain.tour.model.TournamentData;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.stream.Stream;
+
 /**
  * 海报生图提示词组装器（模块可拔插）。
  * <p>
@@ -19,7 +21,7 @@ public class PosterPromptBuilder {
 
     public static String build(TournamentData data, PosterStyleEnum style) {
         String city = data.getCity() != null ? data.getCity().trim() : "";
-        String name = data.getName() != null ? data.getName().trim() : "";
+        String name = buildTournamentName(data);
 
         TourLevelEnum level = TourLevelEnum.fromCategory(data.getCategory());
         SurfaceEnum surface = SurfaceEnum.fromCode(data.getSurface());
@@ -41,6 +43,13 @@ public class PosterPromptBuilder {
         }
         sb.append(TAIL);
         return sb.toString();
+    }
+
+    private static String buildTournamentName(TournamentData data) {
+        return Stream.of(data.getName(), "tennis open", data.getTour(), data.getCategory())
+                .filter(StringUtils::isNotBlank)
+                .map(String::trim)
+                .collect(java.util.stream.Collectors.joining(" "));
     }
 
     /** 特色块：按级别二选一。素材库未命中时退化为通用文案。 */
