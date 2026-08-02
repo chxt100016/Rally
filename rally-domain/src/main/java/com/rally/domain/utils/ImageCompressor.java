@@ -22,6 +22,27 @@ public class ImageCompressor {
     private static final float MIN_QUALITY = 0.1f;
     private static final float SCALE_STEP = 0.1f;
 
+    /**
+     * 将图片统一转为 JPEG，并以指定 JPEG 质量编码。
+     *
+     * @param quality JPEG 质量，取值范围为 0 到 1
+     */
+    public static byte[] compressAsJpeg(InputStream inputStream, float quality) throws IOException {
+        if (quality < 0.0f || quality > 1.0f) {
+            throw new IllegalArgumentException("JPEG 质量必须介于 0 和 1 之间");
+        }
+        BufferedImage original = ImageIO.read(inputStream);
+        if (original == null) {
+            throw new IOException("无法读取图片，请检查格式是否支持");
+        }
+        return toBytes(toRgb(original), "jpg", quality);
+    }
+
+    /** 将图片统一转为 JPEG，并压缩到指定大小（KB）。 */
+    public static byte[] compressToJpeg(InputStream inputStream, int targetKb) throws IOException {
+        return compress(inputStream, "jpg", targetKb);
+    }
+
     public static byte[] compress(InputStream inputStream, String format, int targetKb) throws IOException {
         long targetBytes = (long) targetKb * 1024;
         BufferedImage original = ImageIO.read(inputStream);
@@ -30,8 +51,7 @@ public class ImageCompressor {
         }
 
         String fmt = format.toLowerCase().replace("jpeg", "jpg");
-        if ("png".equals(fmt)) {
-            fmt = "jpg";
+        if ("jpg".equals(fmt)) {
             original = toRgb(original);
         }
 
