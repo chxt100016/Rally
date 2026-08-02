@@ -23,6 +23,7 @@ import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,7 @@ public class TournamentDetailAppService {
             fillNicknames(detail, profiles);
         }
 
+        resolveAwaitPlayingState(detail);
         fillAction(detail, profiles);
         fillMeetupCard(detail);
         fillOfflineMeetupCard(detail);
@@ -217,6 +219,24 @@ public class TournamentDetailAppService {
         action.setStateShow(text.getLabel());
         action.setStateTitle(title);
         action.setStateSubtitle(subtitle);
+    }
+
+    /**
+     * 比赛状态进入待录入结果后，仍需以关联赛约的开赛时间作为结果录入的前置条件。
+     */
+    private void resolveAwaitPlayingState(TournamentDetailDTO detail) {
+        if (actionState(detail) != TournamentActionStateEnum.AWAIT_RESULT_SUBMIT) {
+            return;
+        }
+        MyCurrentMatchDTO match = detail.getMyCurrentMatch();
+        if (match == null || match.getMeetupId() == null) {
+            return;
+        }
+        Meetup meetup = meetupDomainService.get(match.getMeetupId());
+        LocalDateTime startTime = meetup.getData().getStartTime();
+        if (startTime != null && !LocalDateTime.now().isAfter(startTime)) {
+            detail.getAction().setState(TournamentActionStateEnum.AWAIT_PLAYING);
+        }
     }
 
     private TournamentActionStateEnum resolveActionStateText(TournamentDetailDTO detail) {

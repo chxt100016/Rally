@@ -21,6 +21,7 @@ public enum TournamentActionStateEnum {
     AWAIT_BOOKING_OPPONENT("协商赛约", "对方订场中", "对阵%s，等待对方提交球场与时间，请耐心等候。"),
     AWAIT_SCHEDULE_CONFIRM("协商赛约", "对方已提交赛约，请确认", "对阵%s。请核对球场与时间后接受，或打回重订。"),
     AWAIT_OPPONENT_SCHEDULE_CONFIRM("协商赛约", "你已确认赛约，等待对方确认", "对阵%s，对方确认后即可开赛，请耐心等候。"),
+    AWAIT_PLAYING("待开赛", "比赛尚未开始", "对阵%s。请在约定开赛时间后提交比赛结果。"),
     AWAIT_RESULT_SUBMIT("录入结果", "比赛已结束，请提交结果", "对阵%s。选择本场胜者提交，对手确认后晋级生效。"),
     AWAIT_RESULT_CONFIRM("录入结果", "对方已提交结果，请确认", "对阵%s，%s获胜。确认无误即晋级生效，如有异议可拒绝。"),
     AWAIT_OPPONENT_RESULT_CONFIRM("录入结果", "我已确认比赛结果，等待其他人确认", "对阵%s，%s获胜。对方确认后即可晋级生效，请耐心等候。"),
