@@ -54,6 +54,7 @@ public class TournamentDetailAppService {
         TournamentDetailDTO detail = tournamentDetailService.assembleDetail(tournamentId, userId);
         if (detail.getTournament() != null) {
             detail.getTournament().setPosterUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getPosterUrl()));
+            detail.getTournament().setRulePosterUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getRulePosterUrl()));
             detail.getTournament().setWechatGroupQrCodeUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getWechatGroupQrCodeUrl()));
         }
 

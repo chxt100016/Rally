@@ -8,6 +8,7 @@ CREATE TABLE `rally_tournament` (
     `biz_id` VARCHAR(32) NOT NULL COMMENT '雪花ID',
     `tournament_name` VARCHAR(128) NOT NULL COMMENT '赛事名称',
     `poster_key` VARCHAR(256) DEFAULT NULL COMMENT '活动海报图片key（对象存储）',
+    `rule_poster_key` VARCHAR(256) DEFAULT NULL COMMENT '规则海报图片key（对象存储）',
     `wechat_group_qr_code_key` VARCHAR(256) DEFAULT NULL COMMENT '微信群拉群二维码图片key（对象存储）',
     `match_type` VARCHAR(16) NOT NULL COMMENT '比赛类型：SINGLE/DOUBLE',
     `city_code` VARCHAR(16) NOT NULL COMMENT '城市编码',

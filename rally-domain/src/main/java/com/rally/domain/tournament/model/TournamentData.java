@@ -16,6 +16,7 @@ public class TournamentData {
     private String bizId;
     private String tournamentName;
     private String posterKey;
+    private String rulePosterKey;
     private String wechatGroupQrCodeKey;
     private MatchTypeEnum matchType;
     private String cityCode;

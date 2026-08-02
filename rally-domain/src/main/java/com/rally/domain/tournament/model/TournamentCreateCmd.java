@@ -22,6 +22,9 @@ public class TournamentCreateCmd {
     /** 活动海报图片key（对象存储） */
     private String posterKey;
 
+    /** 规则海报图片key（对象存储） */
+    private String rulePosterKey;
+
     /** 微信群拉群二维码图片key（对象存储） */
     private String wechatGroupQrCodeKey;
 

@@ -32,6 +32,7 @@ public interface TournamentDomainConvertMapper {
 
     @Mapping(target = "tournamentId", source = "bizId")
     @Mapping(target = "posterUrl", source = "posterKey")
+    @Mapping(target = "rulePosterUrl", source = "rulePosterKey")
     @Mapping(target = "wechatGroupQrCodeUrl", source = "wechatGroupQrCodeKey")
     @Mapping(target = "matchTypeShow", ignore = true)
     @Mapping(target = "genderLimitShow", ignore = true)

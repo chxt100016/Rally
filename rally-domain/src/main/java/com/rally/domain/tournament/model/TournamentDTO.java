@@ -17,6 +17,8 @@ public class TournamentDTO {
     private String tournamentId;
     private String tournamentName;
     private String posterUrl;
+    /** 规则海报签名访问地址；未配置时为 null。 */
+    private String rulePosterUrl;
     private String wechatGroupQrCodeUrl;
     private MatchTypeEnum matchType;
     private String matchTypeShow;
