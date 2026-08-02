@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -235,6 +236,55 @@ public class TournamentMatchFlowService {
             updateEntryStatusOnComplete(match);
             tournamentRoundProgressService.advanceIfReady(match.getData().getTournamentId());
         }
+    }
+
+    /**
+     * 尚未选出订场人的比赛超时：终止比赛，并将参赛者退回匹配池。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void handleMatchedTimeout(String matchId) {
+        TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
+        Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+        if (match.getData().getStatus() != TournamentMatchStatusEnum.MATCHED) {
+            return;
+        }
+
+        match.getData().setStatus(TournamentMatchStatusEnum.REJECTED);
+        match.getData().setRejectReasonCode("TIMEOUT");
+        boolean success = matchRepository.updateWithVersion(match.getData());
+        if (!success) {
+            throw new BusinessException(BizErrorCode.TOURNAMENT_MATCH_VERSION_CONFLICT);
+        }
+        settleRejectedMatch(match);
+    }
+
+    /**
+     * 赛果确认超时：自动确认未确认的赛果，结算参赛者并推进赛事轮次。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void completePendingConfirmTimeout(String matchId) {
+        TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
+        Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+        if (match.getData().getStatus() != TournamentMatchStatusEnum.PENDING_CONFIRM) {
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        match.getParticipants().forEach(participant -> {
+            if (participant.getResultConfirmStatus() == ConfirmStatusEnum.PENDING) {
+                participant.setResultConfirmStatus(ConfirmStatusEnum.CONFIRMED);
+                participant.setResultConfirmTime(now);
+            }
+        });
+        match.getData().setStatus(TournamentMatchStatusEnum.COMPLETED);
+        match.getData().setCompletedTime(now);
+        boolean success = matchRepository.updateWithVersion(match.getData());
+        if (!success) {
+            throw new BusinessException(BizErrorCode.TOURNAMENT_MATCH_VERSION_CONFLICT);
+        }
+        matchRepository.saveParticipants(match.getParticipants());
+        updateEntryStatusOnComplete(match);
+        tournamentRoundProgressService.advanceIfReady(match.getData().getTournamentId());
     }
 
     private Tournament getTournament(String tournamentId) {

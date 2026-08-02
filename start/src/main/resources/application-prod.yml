@@ -51,8 +51,6 @@ job:
     enabled: false
     cron: "0 0 2 * * ?"
   # 赛事比赛超时处理（每2小时扫描）
-  # 本次新增，发布时先关闭，确认无误后再手动开启
   tournamentMatchTimeout:
-    enabled: false
+    enabled: true
     cron: "0 0 */2 * * ?"
-

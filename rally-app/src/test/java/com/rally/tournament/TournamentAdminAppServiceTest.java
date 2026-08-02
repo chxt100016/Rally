@@ -35,8 +35,7 @@ public class TournamentAdminAppServiceTest {
 
         appService.runTournamentMatch();
 
-        assertEquals(1, batchMatchService.qualifierRunCount);
-        assertEquals(1, batchMatchService.mainRoundRunCount);
+        assertEquals(1, batchMatchService.currentRoundRunCount);
         assertEquals(1, notifySubscribeService.notifyCount);
         assertEquals(List.of("user-1"), notifySubscribeService.userIds);
         assertEquals("匹配成功", notifySubscribeService.data.get("phrase2"));
@@ -46,11 +45,10 @@ public class TournamentAdminAppServiceTest {
 
         private final TournamentData tournament;
         private final TournamentMatch qualifierMatch;
-        private int qualifierRunCount;
-        private int mainRoundRunCount;
+        private int currentRoundRunCount;
 
         private RecordingBatchMatchService(TournamentData tournament, TournamentMatch qualifierMatch) {
-            super(null, null, null, null);
+            super(null, null, null, null, null, null);
             this.tournament = tournament;
             this.qualifierMatch = qualifierMatch;
         }
@@ -61,15 +59,9 @@ public class TournamentAdminAppServiceTest {
         }
 
         @Override
-        public List<TournamentMatch> matchQualifier(String tournamentId) {
-            qualifierRunCount++;
+        public List<TournamentMatch> matchCurrentRound(String tournamentId) {
+            currentRoundRunCount++;
             return List.of(qualifierMatch);
-        }
-
-        @Override
-        public List<TournamentMatch> matchMainRoundsAll(String tournamentId) {
-            mainRoundRunCount++;
-            return List.of();
         }
     }
 

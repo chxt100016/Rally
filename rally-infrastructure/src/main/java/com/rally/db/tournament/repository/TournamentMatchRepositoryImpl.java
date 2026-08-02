@@ -62,6 +62,18 @@ public class TournamentMatchRepositoryImpl implements TournamentMatchRepository 
     }
 
     @Override
+    public boolean deleteUnsubmittedWithParticipants(String matchId) {
+        boolean removed = tournamentMatchService.lambdaUpdate()
+                .eq(TournamentMatchPO::getBizId, matchId)
+                .in(TournamentMatchPO::getStatus, TournamentMatchStatusEnum.MATCHED.name(), TournamentMatchStatusEnum.BOOKING.name())
+                .remove();
+        if (removed) {
+            matchParticipantService.lambdaUpdate().eq(MatchParticipantPO::getMatchId, matchId).remove();
+        }
+        return removed;
+    }
+
+    @Override
     public TournamentMatchData findByBizId(String bizId) {
         TournamentMatchPO po = tournamentMatchService.lambdaQuery().eq(TournamentMatchPO::getBizId, bizId).one();
         return MATCH_MAPPER.toTournamentMatchData(po);
@@ -180,4 +192,3 @@ public class TournamentMatchRepositoryImpl implements TournamentMatchRepository 
     }
 
 }
-

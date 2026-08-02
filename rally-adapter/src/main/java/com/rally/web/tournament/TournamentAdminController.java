@@ -59,10 +59,25 @@ public class TournamentAdminController {
         return Result.ok(tournamentAdminAppService.createOfflineMeetup(cmd));
     }
 
-    /** 手动执行一次赛事批量匹配。 */
+    /**
+     * 手动执行赛事匹配；不传参数时扫描全部到时赛事，传 manualGroups 时必须同时指定 tournamentId。
+     */
     @PostMapping("/match/run")
-    public Result<Void> runTournamentMatch() {
-        tournamentAdminAppService.runTournamentMatch();
+    public Result<Void> runTournamentMatch(@RequestBody(required = false) TournamentMatchRunCmd cmd) {
+        if (cmd != null && cmd.getManualGroups() != null && !cmd.getManualGroups().isEmpty()) {
+            tournamentAdminAppService.runTournamentMatch(cmd.getTournamentId(), cmd.getManualGroups(), cmd.getExcludedEntryNos());
+        } else if (cmd != null && cmd.getExcludedEntryNos() != null && !cmd.getExcludedEntryNos().isEmpty()) {
+            tournamentAdminAppService.runTournamentMatchWithExcludedEntries(cmd.getTournamentId(), cmd.getExcludedEntryNos());
+        } else {
+            tournamentAdminAppService.runTournamentMatch();
+        }
+        return Result.ok();
+    }
+
+    /** 取消该赛事所有尚未提交订场信息的比赛，并使参赛队重新回到 WAITING 匹配池。 */
+    @PostMapping("/match/cancel")
+    public Result<Void> cancelTournamentMatch(@Valid @RequestBody TournamentMatchCancelCmd cmd) {
+        tournamentAdminAppService.cancelUnsubmittedTournamentMatches(cmd.getTournamentId());
         return Result.ok();
     }
 

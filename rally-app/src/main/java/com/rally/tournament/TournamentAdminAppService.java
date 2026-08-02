@@ -81,12 +81,33 @@ public class TournamentAdminAppService {
         List<TournamentData> tournaments = tournamentBatchMatchService.listTournamentsToMatch(LocalDateTime.now());
         for (TournamentData tournament : tournaments) {
             try {
-                notifyMatched(tournament, tournamentBatchMatchService.matchQualifier(tournament.getBizId()));
-                notifyMatched(tournament, tournamentBatchMatchService.matchMainRoundsAll(tournament.getBizId()));
+                notifyMatched(tournament, tournamentBatchMatchService.matchCurrentRound(tournament.getBizId()));
             } catch (Exception e) {
                 log.error("赛事匹配失败 tournamentId={}", tournament.getBizId(), e);
             }
         }
+    }
+
+    /** 运营手动指定一个赛事当前轮次的分组，校验由领域服务完成。 */
+    public synchronized void runTournamentMatch(String tournamentId, List<List<Integer>> manualGroups) {
+        runTournamentMatch(tournamentId, manualGroups, null);
+    }
+
+    /** 运营指定分组并可临时排除多个 entryNo。 */
+    public synchronized void runTournamentMatch(String tournamentId, List<List<Integer>> manualGroups, List<Integer> excludedEntryNos) {
+        TournamentData tournament = tournamentAdminService.get(tournamentId).getData();
+        notifyMatched(tournament, tournamentBatchMatchService.matchCurrentRoundManually(tournamentId, manualGroups, excludedEntryNos));
+    }
+
+    /** 运营仅匹配指定赛事当前轮次，并可临时排除多个 entryNo。 */
+    public synchronized void runTournamentMatchWithExcludedEntries(String tournamentId, List<Integer> excludedEntryNos) {
+        TournamentData tournament = tournamentAdminService.get(tournamentId).getData();
+        notifyMatched(tournament, tournamentBatchMatchService.matchCurrentRound(tournamentId, excludedEntryNos));
+    }
+
+    /** 运营批量取消一个赛事中尚未提交订场信息的比赛，并将参赛者退回当前轮次的匹配池。 */
+    public void cancelUnsubmittedTournamentMatches(String tournamentId) {
+        tournamentBatchMatchService.cancelUnsubmittedMatches(tournamentId);
     }
 
     private void notifyMatched(TournamentData tournament, List<TournamentMatch> matches) {

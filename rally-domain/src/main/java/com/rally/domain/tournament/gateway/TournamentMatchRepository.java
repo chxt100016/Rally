@@ -30,6 +30,11 @@ public interface TournamentMatchRepository {
     void saveParticipants(List<MatchParticipantData> participants);
 
     /**
+     * 删除尚未提交订场信息的比赛及其参与者。仅 MATCHED、BOOKING 状态可删除，返回 false 表示比赛已被并发更新。
+     */
+    boolean deleteUnsubmittedWithParticipants(String matchId);
+
+    /**
      * 根据 bizId 查询
      */
     TournamentMatchData findByBizId(String bizId);
@@ -89,4 +94,3 @@ public interface TournamentMatchRepository {
      */
     int countCompletedByTournamentAndRound(String tournamentId, TournamentRoundEnum round);
 }
-

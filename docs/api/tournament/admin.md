@@ -201,13 +201,37 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/admin/list' \
 
 **POST** `/match/run`
 
-扫描所有 `ACTIVE` 且已到资格赛开始时间的赛事，执行一次资格赛和正赛待匹配轮次处理。该接口与定时任务调用同一应用服务，不受 `job.tournamentMatch.enabled` 开关影响。
+不传请求体时，扫描所有 `ACTIVE` 且已到资格赛开始时间的赛事，并只匹配各赛事的 `currentRound`。该接口与定时任务调用同一应用服务，不受 `job.tournamentMatch.enabled` 开关影响。
 
-**请求参数**：无
+传入 `tournamentId` 和 `manualGroups` 时，运营可直接指定当前轮次的 `entryNo` 分组；每个内部数组代表一场比赛。正赛每组必须有 2 个 `entryNo`，资格赛每组必须等于 `qualifierGroupSize`。指定的队伍必须唯一、属于当前轮次且处于 `WAITING`，否则请求失败。指定分组会优先生成比赛，之后其余 `WAITING` 队伍继续自动匹配补齐。
+
+**请求参数**：可选。例如手工指定两场正赛：
+
+```json
+{
+  "tournamentId": "123456",
+  "manualGroups": [[1, 2], [3, 4]],
+  "excludedEntryNos": [5, 6]
+}
+```
+
+`excludedEntryNos` 为可选字段，传入时必须同时传 `tournamentId`；这些队仅在本次匹配中被排除，报名仍保持 `WAITING`。
 
 **响应数据**：无
 
 **curl 示例**
 ```bash
 curl -X POST 'http://localhost:8080/api/rally/tournament/admin/match/run'
+```
+
+### 7. 取消未提交订场信息的比赛
+
+**POST** `/match/cancel`
+
+按赛事批量取消所有 `MATCHED` 或 `BOOKING` 状态的比赛。取消会删除比赛及参与者记录，并把参赛者恢复为当前轮次的 `WAITING`，可随后再次自动匹配或使用手工分组。已提交订场信息的比赛不可取消。
+
+```json
+{
+  "tournamentId": "123456"
+}
 ```

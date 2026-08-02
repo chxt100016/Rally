@@ -43,9 +43,10 @@ public class TournamentEntry {
         return new TournamentEntry(data);
     }
 
-    /** 排队态或待支付态可修改偏好 */
+    /** 已退出或已淘汰的报名不可修改偏好 */
     public void assertCanUpdatePreference() {
-        Assert.isTrue(this.data.getStatus() == TournamentEntryStatusEnum.WAITING || this.data.getStatus() == TournamentEntryStatusEnum.PAYING, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
+        Assert.isTrue(this.data.getStatus() != TournamentEntryStatusEnum.WITHDRAWN
+                && this.data.getStatus() != TournamentEntryStatusEnum.ELIMINATED, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
     }
 
     public void updatePreference(java.util.List<String> preferredDistricts, com.rally.domain.tournament.enums.CourtAbilityEnum courtAbility, java.util.List<String> availableTimes) {
