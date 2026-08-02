@@ -42,7 +42,7 @@ public interface MeetupAppConvertMapper {
 
     @Mapping(target = "meetupId", source = "bizId")
     @Mapping(target = "primaryLabel", ignore = true)
-    @Mapping(target = "backgroundImage", ignore = true)
+    @Mapping(target = "backgroundKey", ignore = true)
     MeetupCardDTO toMeetupCardDTO(MeetupData data);
 
     List<MeetupCardDTO> toMeetupCardDTOList(List<MeetupData> dataList);

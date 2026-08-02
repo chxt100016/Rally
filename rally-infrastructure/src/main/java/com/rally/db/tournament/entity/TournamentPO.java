@@ -41,6 +41,7 @@ public class TournamentPO {
     private String status;
     private Integer currentFilledSlots;
     private String currentRound;
+    private String offlineMeetupId;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

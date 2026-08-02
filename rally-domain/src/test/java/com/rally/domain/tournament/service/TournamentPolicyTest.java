@@ -3,8 +3,10 @@ package com.rally.domain.tournament.service;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.tournament.enums.TournamentGenderLimitEnum;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.enums.TournamentStatusEnum;
 import com.rally.domain.tournament.model.Tournament;
+import com.rally.domain.tournament.model.TournamentCreateCmd;
 import com.rally.domain.tournament.model.TournamentData;
 import com.rally.domain.user.model.TennisProfileData;
 import com.rally.domain.user.model.UserProfile;
@@ -35,6 +37,16 @@ public class TournamentPolicyTest {
         assertNtrpLevelNotMatch(UserProfile.create(null, null));
     }
 
+    @Test
+    public void shouldAllowPowerOfTwoTotalSlotsFromTwoToSixtyFour() {
+        for (int totalSlots : new int[]{2, 4, 8, 16, 32, 64}) {
+            tournamentPolicy.assertParam(createCmd(totalSlots));
+        }
+        assertEquals(TournamentRoundEnum.FINAL, TournamentRoundEnum.firstMainRound(2));
+        assertEquals(TournamentRoundEnum.ROUND_4, TournamentRoundEnum.firstMainRound(4));
+        assertEquals(TournamentRoundEnum.ROUND_8, TournamentRoundEnum.firstMainRound(8));
+    }
+
     private void assertNtrpLevelNotMatch(UserProfile userProfile) {
         try {
             tournamentPolicy.assertCanJoin(tournament("3.5"), userProfile);
@@ -57,5 +69,16 @@ public class TournamentPolicyTest {
         TennisProfileData profile = new TennisProfileData();
         profile.setNtrpScore(new BigDecimal(ntrpLevel));
         return UserProfile.create(null, profile);
+    }
+
+    private TournamentCreateCmd createCmd(int totalSlots) {
+        LocalDateTime now = LocalDateTime.now();
+        TournamentCreateCmd cmd = new TournamentCreateCmd();
+        cmd.setTotalSlots(totalSlots);
+        cmd.setOfflineFromRound(TournamentRoundEnum.QUALIFIER);
+        cmd.setEntryFee(0L);
+        cmd.setRegistrationStartTime(now);
+        cmd.setQualifierStartTime(now.plusMinutes(1));
+        return cmd;
     }
 }

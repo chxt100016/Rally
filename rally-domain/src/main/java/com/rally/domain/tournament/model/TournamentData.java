@@ -38,6 +38,8 @@ public class TournamentData {
     private TournamentStatusEnum status;
     private Integer currentFilledSlots;
     private TournamentRoundEnum currentRound;
+    /** 线下赛活动 ID，创建线下赛活动后写入。 */
+    private String offlineMeetupId;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

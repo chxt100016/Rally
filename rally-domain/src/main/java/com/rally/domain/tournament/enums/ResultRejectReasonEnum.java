@@ -10,10 +10,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ResultRejectReasonEnum {
 
-    DISPUTE_APPEAL("DISPUTE_APPEAL", "不服，我要申诉重来"),
-    OPPONENT_LEVEL_MISMATCH("OPPONENT_LEVEL_MISMATCH", "对手水平明显超出本赛事等级"),
-    RESULT_INCORRECT("RESULT_INCORRECT", "提交的结果不属实"),
-    OTHER("OTHER", "其他");
+    DISPUTE_APPEAL("DISPUTE_APPEAL", "没发挥好，不服再战"),
+    OPPONENT_LEVEL_MISMATCH("OPPONENT_LEVEL_MISMATCH", "对手水平明显超出赛事等级"),
+    RESULT_INCORRECT("RESULT_INCORRECT", "比赛结果与实际不符"),
+    ;
 
     private final String code;
     private final String label;

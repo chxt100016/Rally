@@ -22,13 +22,16 @@ public enum TournamentRoundEnum {
     /** 该轮参赛签位数，QUALIFIER 无固定签位数（按 totalSlots 单独计算） */
     public final int slotCount;
 
-    /** 资格赛晋级正赛后的首个轮次：totalSlots(16/32/64) 直接对应 ROUND_16/ROUND_32/ROUND_64 */
+    /** 资格赛晋级正赛后的首个轮次：签位数直接对应同签位数的轮次。 */
     public static TournamentRoundEnum firstMainRound(int totalSlots) {
         return switch (totalSlots) {
+            case 2 -> FINAL;
+            case 4 -> ROUND_4;
+            case 8 -> ROUND_8;
             case 16 -> ROUND_16;
             case 32 -> ROUND_32;
             case 64 -> ROUND_64;
-            default -> throw new IllegalArgumentException("totalSlots 只能是 16/32/64");
+            default -> throw new IllegalArgumentException("totalSlots 只能是 2 到 64 的 2 次方");
         };
     }
 

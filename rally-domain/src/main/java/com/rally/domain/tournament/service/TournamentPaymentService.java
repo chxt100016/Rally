@@ -23,6 +23,7 @@ public class TournamentPaymentService {
     private final PaymentDomainService paymentDomainService;
     private final TournamentRepository tournamentRepository;
     private final TournamentEntryRepository tournamentEntryRepository;
+    private final TournamentRoundProgressService tournamentRoundProgressService;
 
     /**
      * 建单：校验 entry 处于 PAYING、赛事未满员 → 建单
@@ -49,6 +50,7 @@ public class TournamentPaymentService {
 
         entry.advanceToMainDrawPaid(tournament.getData().getTotalSlots());
         tournamentEntryRepository.save(entry.getData());
+        tournamentRoundProgressService.advanceIfReady(tournamentId);
     }
 
     /**

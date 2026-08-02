@@ -15,9 +15,10 @@ import java.util.List;
 public class MyCurrentMatchDTO {
     private String matchId;
     private TournamentRoundEnum round;
-    private List<MatchOpponentDTO> opponents;
     private String courtBookerId;
     private String meetupId;
+    /** 本场待确认或已确认的获胜方报名编号；双打同队成员共用该编号。 */
+    private Integer winnerEntryNo;
     private TournamentMatchStatusEnum status;
     /** 分组人数：资格赛取赛事的 qualifierGroupSize，正赛固定为2 */
     private Integer groupSize;
@@ -29,6 +30,5 @@ public class MyCurrentMatchDTO {
     /** 最近一次打回重订信息，仅在发生过打回重订时有值。 */
     private String lastRebookBy;
     private String lastRebookReasonCode;
-    private String lastRebookReasonText;
     private LocalDateTime lastRebookTime;
 }

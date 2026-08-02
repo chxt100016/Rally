@@ -19,7 +19,6 @@ public class MatchParticipantData {
     private LocalDateTime confirmTime;
     private ConfirmStatusEnum resultConfirmStatus;
     private LocalDateTime resultConfirmTime;
-    private Boolean isWinner;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

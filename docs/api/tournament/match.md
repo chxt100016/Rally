@@ -110,8 +110,8 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/book' \
 比赛须处于 `SCHEDULED` 状态。三种操作互斥：
 
 - **确认**：`confirm=true`
-- **拒绝比赛**（终止）：`confirm=false` + `rejectReason`（见下方枚举），可选 `rejectReasonText`（理由为 `OTHER` 时必填自由文本）
-- **打回重订**（退回订场人重新提交）：`confirm=false` + `rebookReason`（见下方枚举），可选 `rebookReasonText`（理由为 `OTHER` 时必填自由文本）
+- **拒绝比赛**（终止）：`confirm=false` + `rejectReason`（见下方枚举）
+- **打回重订**（退回订场人重新提交）：`confirm=false` + `rebookReason`（见下方枚举）
 
 全员确认后比赛进入 `PENDING_PLAY` 状态。
 
@@ -121,10 +121,8 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/book' \
 |---|---|---|---|
 | `matchId` | `string` | 是 | 比赛bizId |
 | `confirm` | `boolean` | 是 | 是否确认 |
-| `rejectReason` | `string` | 否 | 拒绝比赛理由：`TIME_PLACE_CONFLICT`/`DONT_WANT_PLAY`/`OTHER` |
-| `rejectReasonText` | `string` | 否 | 拒绝理由为 `OTHER` 时的自由文本 |
-| `rebookReason` | `string` | 否 | 打回重订理由：`TIME_NOT_SUITABLE`/`PLACE_NOT_SUITABLE`/`OTHER` |
-| `rebookReasonText` | `string` | 否 | 打回理由为 `OTHER` 时的自由文本 |
+| `rejectReason` | `string` | 否 | 拒绝比赛理由：`TIME_PLACE_CONFLICT`/`DONT_WANT_PLAY` |
+| `rebookReason` | `string` | 否 | 打回重订理由：`TIME_NOT_SUITABLE`/`PLACE_NOT_SUITABLE`/`DURATION_NOT_SUITABLE` |
 
 **响应数据**：无
 
@@ -165,7 +163,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/schedule-confirm'
 | 参数名 | 类型 | 必填 | 说明 |
 |---|---|---|---|
 | `matchId` | `string` | 是 | 比赛bizId |
-| `winnerUserIds` | `string[]` | 是 | 获胜方用户ID列表（单打1个，双打2个） |
+| `winnerEntryNo` | `integer` | 是 | 获胜方报名编号（单打、双打均传一个；双打队友共用同一编号） |
 
 **响应数据**：无
 
@@ -174,7 +172,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/schedule-confirm'
 curl -X POST 'http://localhost:8080/api/rally/tournament/match/submit-result' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer <token>' \
-  -d '{"matchId": "M202608100001", "winnerUserIds": ["user1"]}'
+  -d '{"matchId": "M202608100001", "winnerEntryNo": 1}'
 ```
 
 ---
@@ -186,7 +184,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/submit-result' \
 比赛须处于 `PENDING_CONFIRM` 状态。
 
 - **确认**：`confirm=true`。全员确认后比赛进入 `COMPLETED` 状态。
-- **拒绝**（申诉）：`confirm=false` + `rejectReason`（见下方枚举），可选 `rejectReasonText`（理由为 `OTHER` 时必填自由文本）。拒绝后比赛退回 `PENDING_PLAY`，需重新提交结果。
+- **拒绝**（申诉）：`confirm=false` + `rejectReason`（见下方枚举）。拒绝后比赛退回 `PENDING_PLAY`，需重新提交结果。
 
 **请求参数**
 
@@ -194,8 +192,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/submit-result' \
 |---|---|---|---|
 | `matchId` | `string` | 是 | 比赛bizId |
 | `confirm` | `boolean` | 是 | 是否确认 |
-| `rejectReason` | `string` | 否 | 拒绝结果理由：`DISPUTE_APPEAL`/`OPPONENT_LEVEL_MISMATCH`/`RESULT_INCORRECT`/`OTHER` |
-| `rejectReasonText` | `string` | 否 | 拒绝理由为 `OTHER` 时的自由文本 |
+| `rejectReason` | `string` | 否 | 拒绝结果理由：`DISPUTE_APPEAL`/`OPPONENT_LEVEL_MISMATCH`/`RESULT_INCORRECT` |
 
 **响应数据**：无
 

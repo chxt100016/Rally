@@ -32,12 +32,10 @@ public class TournamentMatchPO {
     private LocalDateTime submittedTime;
     private String rejectPhase;
     private String rejectReasonCode;
-    private String rejectReasonText;
     private String rejectedBy;
     private LocalDateTime rejectedTime;
     private String lastRebookBy;
     private String lastRebookReasonCode;
-    private String lastRebookReasonText;
     private LocalDateTime lastRebookTime;
     private String status;
     private LocalDateTime matchedTime;

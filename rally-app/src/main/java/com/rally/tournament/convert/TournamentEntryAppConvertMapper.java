@@ -15,5 +15,6 @@ public interface TournamentEntryAppConvertMapper {
     TournamentEntryAppConvertMapper INSTANCE = Mappers.getMapper(TournamentEntryAppConvertMapper.class);
 
     @Mapping(target = "entryId", source = "bizId")
+    @Mapping(target = "currentRoundShow", expression = "java(data.getCurrentRound() == null ? null : data.getCurrentRound().getLabel())")
     TournamentEntryDTO toTournamentEntryDTO(TournamentEntryData data);
 }

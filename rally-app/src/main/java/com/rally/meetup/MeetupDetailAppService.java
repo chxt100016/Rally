@@ -53,7 +53,7 @@ public class MeetupDetailAppService {
     private final ScoreDomainService scoreDomainService;
     private final ChatDomainService chatDomainService;
     private final UserExtDomainService userExtDomainService;
-    private final MeetupBackgroundResolver backgroundResolver;
+    private final MeetupCardPackingService meetupCardPackingService;
 
 
     /**
@@ -78,7 +78,7 @@ public class MeetupDetailAppService {
 
         ActionStateEnum actionState = meetup.getActionState(currentUserId);
         MeetupDTO meetupDTO = MeetupAppConvertMapper.INSTANCE.toMeetupDTO(meetup.getData());
-        meetupDTO.setBackgroundImage(backgroundResolver.resolveStyle(meetup.getData()));
+        meetupDTO.setBackgroundImage(meetupCardPackingService.resolveBackgroundKey(meetup.getData()));
         MeetupDetailDTO detail = new MeetupDetailDTO()
                 .setMeetup(meetupDTO)
                 .setActionState(actionState)

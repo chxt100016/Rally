@@ -42,4 +42,7 @@ public interface TournamentRepository {
      * 推进当前轮次：仅当新轮次晚于（或当前为空）已存轮次时才更新，防止乱序覆盖
      */
     void advanceCurrentRoundIfLater(String tournamentId, TournamentRoundEnum round);
+
+    /** 仅当尚未创建线下赛活动时绑定活动，避免重复创建。 */
+    boolean bindOfflineMeetupIfAbsent(String tournamentId, String meetupId);
 }

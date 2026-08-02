@@ -25,7 +25,6 @@ public class MatchParticipantPO {
     private LocalDateTime confirmTime;
     private String resultConfirmStatus;
     private LocalDateTime resultConfirmTime;
-    private Boolean isWinner;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

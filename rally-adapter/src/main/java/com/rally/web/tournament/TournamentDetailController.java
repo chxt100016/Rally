@@ -1,5 +1,6 @@
 package com.rally.web.tournament;
 
+import com.rally.config.OptionalAuth;
 import com.rally.domain.tour.model.Result;
 import com.rally.domain.tournament.model.TournamentDetailDTO;
 import com.rally.tournament.TournamentDetailAppService;
@@ -22,6 +23,7 @@ public class TournamentDetailController {
     /**
      * 落地页核心聚合接口
      */
+    @OptionalAuth
     @GetMapping("/{bizId}")
     public Result<TournamentDetailDTO> detail(@PathVariable("bizId") String bizId) {
         return Result.ok(tournamentDetailAppService.detail(bizId));

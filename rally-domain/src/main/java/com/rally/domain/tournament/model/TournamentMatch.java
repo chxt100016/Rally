@@ -119,7 +119,7 @@ public class TournamentMatch {
         });
     }
 
-    public void confirmSchedule(String userId, boolean confirm, ScheduleRejectReasonEnum rejectReason, String rejectReasonText, RebookReasonEnum rebookReason, String rebookReasonText, int qualifierRejectLimit, int mainDrawRejectLimit, TournamentEntryStageEnum userStage, int userRejectCount) {
+    public void confirmSchedule(String userId, boolean confirm, ScheduleRejectReasonEnum rejectReason, RebookReasonEnum rebookReason, int qualifierRejectLimit, int mainDrawRejectLimit, TournamentEntryStageEnum userStage, int userRejectCount) {
         Assert.eq(data.getStatus(), TournamentMatchStatusEnum.SCHEDULED, BizErrorCode.TOURNAMENT_INVALID_SCHEDULE_CONFIRM);
 
         MatchParticipantData participant = participants.stream().filter(p -> p.getUserId().equals(userId)).findFirst().orElse(null);
@@ -127,31 +127,24 @@ public class TournamentMatch {
 
         LocalDateTime now = LocalDateTime.now();
 
+        if (!confirm) {
+            Assert.isTrue((rejectReason != null) ^ (rebookReason != null), BizErrorCode.TOURNAMENT_INVALID_REJECT_REASON);
+        }
+
         if (!confirm && rejectReason != null) {
             int limit = userStage == TournamentEntryStageEnum.QUALIFY ? qualifierRejectLimit : mainDrawRejectLimit;
             Assert.isTrue(userRejectCount < limit, BizErrorCode.TOURNAMENT_REJECT_LIMIT_REACHED);
-            Assert.isTrue(rejectReason == ScheduleRejectReasonEnum.TIME_PLACE_CONFLICT || rejectReason == ScheduleRejectReasonEnum.DONT_WANT_PLAY || rejectReason == ScheduleRejectReasonEnum.OTHER, BizErrorCode.TOURNAMENT_INVALID_REJECT_REASON);
-            if (rejectReason == ScheduleRejectReasonEnum.OTHER) {
-                Assert.notBlank(rejectReasonText, BizErrorCode.PARAM_ERROR);
-            }
-
             participant.setConfirmStatus(ConfirmStatusEnum.REJECTED);
             participant.setConfirmTime(now);
             data.setStatus(TournamentMatchStatusEnum.REJECTED);
-            data.setRejectReason(rejectReason.getCode() + (rejectReasonText != null ? ":" + rejectReasonText : ""));
+            data.setRejectReasonCode(rejectReason.getCode());
         } else if (!confirm && rebookReason != null) {
             Assert.notNull(rebookReason, BizErrorCode.TOURNAMENT_REBOOK_REASON_REQUIRED);
-            Assert.isTrue(rebookReason == RebookReasonEnum.TIME_NOT_SUITABLE || rebookReason == RebookReasonEnum.PLACE_NOT_SUITABLE || rebookReason == RebookReasonEnum.OTHER, BizErrorCode.TOURNAMENT_INVALID_REJECT_REASON);
-            if (rebookReason == RebookReasonEnum.OTHER) {
-                Assert.notBlank(rebookReasonText, BizErrorCode.PARAM_ERROR);
-            }
-
             participant.setConfirmStatus(ConfirmStatusEnum.REJECTED);
             participant.setConfirmTime(now);
             data.setStatus(TournamentMatchStatusEnum.BOOKING);
             data.setLastRebookBy(userId);
             data.setLastRebookReasonCode(rebookReason.getCode());
-            data.setLastRebookReasonText(rebookReasonText);
             data.setLastRebookTime(now);
 
             participants.forEach(p -> {
@@ -169,22 +162,22 @@ public class TournamentMatch {
         }
     }
 
-    public void submitResult(String userId, List<String> winnerUserIds) {
+    public void submitResult(String userId, Integer winnerEntryNo) {
         Assert.eq(data.getStatus(), TournamentMatchStatusEnum.PENDING_PLAY, BizErrorCode.TOURNAMENT_INVALID_RESULT_SUBMIT);
-        Assert.notNull(winnerUserIds, BizErrorCode.TOURNAMENT_RESULT_WINNER_REQUIRED);
-        Assert.isTrue(!winnerUserIds.isEmpty(), BizErrorCode.TOURNAMENT_RESULT_WINNER_REQUIRED);
+        Assert.notNull(winnerEntryNo, BizErrorCode.TOURNAMENT_RESULT_WINNER_REQUIRED);
 
         boolean isParticipant = participants.stream().anyMatch(p -> p.getUserId().equals(userId));
         Assert.isTrue(isParticipant, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+        boolean winnerIsParticipant = participants.stream().anyMatch(p -> winnerEntryNo.equals(p.getEntryNo()));
+        Assert.isTrue(winnerIsParticipant, BizErrorCode.TOURNAMENT_RESULT_WINNER_REQUIRED);
 
         LocalDateTime now = LocalDateTime.now();
+        data.setWinnerEntryNo(winnerEntryNo);
         data.setSubmittedTime(now);
         data.setSubmitterUserId(userId);
         data.setStatus(TournamentMatchStatusEnum.PENDING_CONFIRM);
 
         participants.forEach(p -> {
-            boolean isWinner = winnerUserIds.contains(p.getUserId());
-            p.setIsWinner(isWinner);
             if (p.getUserId().equals(userId)) {
                 p.setResultConfirmStatus(ConfirmStatusEnum.CONFIRMED);
                 p.setResultConfirmTime(now);
@@ -195,7 +188,7 @@ public class TournamentMatch {
         });
     }
 
-    public void confirmResult(String userId, boolean confirm, ResultRejectReasonEnum rejectReason, String rejectReasonText, int qualifierRejectLimit, int mainDrawRejectLimit, TournamentEntryStageEnum userStage, int userRejectCount) {
+    public void confirmResult(String userId, boolean confirm, ResultRejectReasonEnum rejectReason, int qualifierRejectLimit, int mainDrawRejectLimit, TournamentEntryStageEnum userStage, int userRejectCount) {
         Assert.eq(data.getStatus(), TournamentMatchStatusEnum.PENDING_CONFIRM, BizErrorCode.TOURNAMENT_INVALID_RESULT_CONFIRM);
 
         MatchParticipantData participant = participants.stream().filter(p -> p.getUserId().equals(userId)).findFirst().orElse(null);
@@ -207,25 +200,20 @@ public class TournamentMatch {
             int limit = userStage == TournamentEntryStageEnum.QUALIFY ? qualifierRejectLimit : mainDrawRejectLimit;
             Assert.isTrue(userRejectCount < limit, BizErrorCode.TOURNAMENT_REJECT_LIMIT_REACHED);
             Assert.notNull(rejectReason, BizErrorCode.TOURNAMENT_INVALID_REJECT_REASON);
-            if (rejectReason == ResultRejectReasonEnum.OTHER) {
-                Assert.notBlank(rejectReasonText, BizErrorCode.PARAM_ERROR);
-            }
-
             // 拒绝结果即拒绝比赛：比赛终止（REJECTED），保留已提交的比分/胜负等记录供追溯，不做回退重报
             participant.setResultConfirmStatus(ConfirmStatusEnum.REJECTED);
             participant.setResultConfirmTime(now);
             data.setStatus(TournamentMatchStatusEnum.REJECTED);
-            data.setRejectReason(rejectReason.getCode() + (rejectReasonText != null ? ":" + rejectReasonText : ""));
+            data.setRejectReasonCode(rejectReason.getCode());
         } else {
             participant.setResultConfirmStatus(ConfirmStatusEnum.CONFIRMED);
             participant.setResultConfirmTime(now);
 
             boolean allConfirmed = participants.stream().allMatch(p -> p.getResultConfirmStatus() == ConfirmStatusEnum.CONFIRMED);
             if (allConfirmed) {
+                Assert.notNull(data.getWinnerEntryNo(), BizErrorCode.TOURNAMENT_RESULT_WINNER_REQUIRED);
                 data.setStatus(TournamentMatchStatusEnum.COMPLETED);
                 data.setCompletedTime(now);
-                Integer winnerEntryNo = participants.stream().filter(p -> Boolean.TRUE.equals(p.getIsWinner())).map(MatchParticipantData::getEntryNo).findFirst().orElse(null);
-                data.setWinnerEntryNo(winnerEntryNo);
             }
         }
     }

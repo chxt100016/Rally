@@ -4,6 +4,7 @@ import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.court.gateway.CourtRepository;
 import com.rally.domain.court.model.CourtData;
+import com.rally.domain.meetup.convert.MeetupDomainConvertMapper;
 import com.rally.domain.meetup.enums.CourtSelectModeEnum;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
@@ -18,6 +19,7 @@ import com.rally.domain.tournament.model.*;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,8 @@ public class TournamentMatchFlowService {
     private final TournamentMatchRepository matchRepository;
     private final TournamentRepository tournamentRepository;
     private final TournamentEntryRepository entryRepository;
+
+    private final TournamentRoundProgressService tournamentRoundProgressService;
     private final MeetupRepository meetupRepository;
     private final CourtRepository courtRepository;
 
@@ -62,20 +66,23 @@ public class TournamentMatchFlowService {
     }
 
     /**
-     * 提交赛约（订场）：比赛进入 SCHEDULED，并按约球全量数据创建草稿约球（DRAFT），返回草稿 meetupId。
-     * 场地/时间等数据只落在约球上，比赛仅通过 meetupId 关联。后续修改由订场人跳转约球活动页编辑。
+     * 提交赛约（订场）：未传 meetupId 时创建草稿约球；传入 meetupId 时更新对应赛事约球。
      */
     @Transactional(rollbackFor = Exception.class)
     public String submitBooking(SubmitBookingCmd cmd, String userId) {
         TournamentMatch match = matchRepository.findByBizIdWithParticipants(cmd.getMatchId());
         Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
 
-        match.submitBooking(userId);
-
         // TEXT/MAP 模式下，通过 courtId 查询球场库数据，球场信息以库数据为准
         CourtData courtData = resolveCourtData(cmd.getCourtSelectMode(), cmd.getCourtId());
         TournamentData tournamentData = tournamentRepository.findByBizId(match.getData().getTournamentId());
         Assert.notNull(tournamentData, BizErrorCode.TOURNAMENT_NOT_FOUND);
+
+        if (StringUtils.isNotBlank(cmd.getMeetupId())) {
+            return updateBooking(cmd, userId, match, courtData, tournamentData);
+        }
+
+        match.submitBooking(userId);
         Meetup draft = MeetupFactory.createTournamentDraft(cmd, userId, courtData, match.getParticipants(), tournamentData.getTournamentName());
         meetupRepository.save(draft);
         match.getData().setMeetupId(draft.getMeetupId());
@@ -86,6 +93,34 @@ public class TournamentMatchFlowService {
         }
         matchRepository.saveParticipants(match.getParticipants());
         return draft.getMeetupId();
+    }
+
+    private String updateBooking(SubmitBookingCmd cmd, String userId, TournamentMatch match, CourtData courtData, TournamentData tournamentData) {
+        MeetupData meetup = meetupRepository.findByBizId(cmd.getMeetupId());
+        Assert.notNull(meetup, BizErrorCode.MEETUP_NOT_FOUND);
+        Assert.eq(match.getData().getMeetupId(), cmd.getMeetupId(), BizErrorCode.TOURNAMENT_BOOKING_MEETUP_MISMATCH);
+        Assert.eq(meetup.getCreatorId(), userId, BizErrorCode.NOT_CREATOR);
+
+        TournamentMatchStatusEnum status = match.getData().getStatus();
+        Assert.isTrue(status == TournamentMatchStatusEnum.BOOKING || status == TournamentMatchStatusEnum.SCHEDULED,
+                BizErrorCode.MEETUP_TOURNAMENT_EDIT_FORBIDDEN);
+
+        MeetupDomainConvertMapper.INSTANCE.updateTournamentMeetupData(meetup, cmd, courtData);
+        if (StringUtils.isBlank(meetup.getTitle())) {
+            meetup.setTitle(tournamentData.getTournamentName());
+        }
+        meetupRepository.save(meetup);
+
+        // 被打回重订时，更新原约球并重新提交赛约；已提交状态下仅更新约球信息。
+        if (status == TournamentMatchStatusEnum.BOOKING) {
+            match.submitBooking(userId);
+            boolean success = matchRepository.updateWithVersion(match.getData());
+            if (!success) {
+                throw new BusinessException(BizErrorCode.TOURNAMENT_MATCH_VERSION_CONFLICT);
+            }
+            matchRepository.saveParticipants(match.getParticipants());
+        }
+        return meetup.getBizId();
     }
 
     /**
@@ -99,7 +134,7 @@ public class TournamentMatchFlowService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void handleScheduleConfirm(String matchId, String userId, boolean confirm, ScheduleRejectReasonEnum rejectReason, String rejectReasonText, RebookReasonEnum rebookReason, String rebookReasonText) {
+    public void handleScheduleConfirm(String matchId, String userId, boolean confirm, ScheduleRejectReasonEnum rejectReason, RebookReasonEnum rebookReason) {
         TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
         Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
 
@@ -108,7 +143,7 @@ public class TournamentMatchFlowService {
 
         int rejectCount = userEntry.getData().getStage() == TournamentEntryStageEnum.QUALIFY ? userEntry.getData().getQualifierRejectCount() : userEntry.getData().getMainDrawRejectCount();
 
-        match.confirmSchedule(userId, confirm, rejectReason, rejectReasonText, rebookReason, rebookReasonText, tournament.getData().getQualifierRejectLimit(), tournament.getData().getMainDrawRejectLimit(), userEntry.getData().getStage(), rejectCount);
+        match.confirmSchedule(userId, confirm, rejectReason, rebookReason, tournament.getData().getQualifierRejectLimit(), tournament.getData().getMainDrawRejectLimit(), userEntry.getData().getStage(), rejectCount);
 
         boolean success = matchRepository.updateWithVersion(match.getData());
         if (!success) {
@@ -159,12 +194,11 @@ public class TournamentMatchFlowService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void submitResult(String matchId, String userId, List<Integer> winnerEntryNos) {
+    public void submitResult(String matchId, String userId, Integer winnerEntryNo) {
         TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
         Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
 
-        List<String> winnerUserIds = resolveWinnerUserIds(match, winnerEntryNos);
-        match.submitResult(userId, winnerUserIds);
+        match.submitResult(userId, winnerEntryNo);
 
         boolean success = matchRepository.updateWithVersion(match.getData());
         if (!success) {
@@ -173,16 +207,8 @@ public class TournamentMatchFlowService {
         matchRepository.saveParticipants(match.getParticipants());
     }
 
-    /** 把编号翻译为本场比赛参与者中对应的 userId（双打一个编号对应2个userId） */
-    private List<String> resolveWinnerUserIds(TournamentMatch match, List<Integer> winnerEntryNos) {
-        return match.getParticipants().stream()
-                .filter(p -> winnerEntryNos.contains(p.getEntryNo()))
-                .map(MatchParticipantData::getUserId)
-                .collect(Collectors.toList());
-    }
-
     @Transactional(rollbackFor = Exception.class)
-    public void handleResultConfirm(String matchId, String userId, boolean confirm, ResultRejectReasonEnum rejectReason, String rejectReasonText) {
+    public void handleResultConfirm(String matchId, String userId, boolean confirm, ResultRejectReasonEnum rejectReason) {
         TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
         Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
 
@@ -191,7 +217,7 @@ public class TournamentMatchFlowService {
 
         int rejectCount = userEntry.getData().getStage() == TournamentEntryStageEnum.QUALIFY ? userEntry.getData().getQualifierRejectCount() : userEntry.getData().getMainDrawRejectCount();
 
-        match.confirmResult(userId, confirm, rejectReason, rejectReasonText, tournament.getData().getQualifierRejectLimit(), tournament.getData().getMainDrawRejectLimit(), userEntry.getData().getStage(), rejectCount);
+        match.confirmResult(userId, confirm, rejectReason, tournament.getData().getQualifierRejectLimit(), tournament.getData().getMainDrawRejectLimit(), userEntry.getData().getStage(), rejectCount);
 
         boolean success = matchRepository.updateWithVersion(match.getData());
         if (!success) {
@@ -207,33 +233,7 @@ public class TournamentMatchFlowService {
 
         if (match.getData().getStatus() == TournamentMatchStatusEnum.COMPLETED) {
             updateEntryStatusOnComplete(match);
-            computeCurrentRound(match.getData().getTournamentId());
-        }
-    }
-
-    /**
-     * 重新计算并推进赛事当前轮次：从资格赛到决赛依次判断每轮已完成场次是否达到应打场次，
-     * 达到则该轮视为完成，取所有已完成轮次中最靠后的一个作为新的 currentRound（只前进不回退）
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void computeCurrentRound(String tournamentId) {
-        Tournament tournament = getTournament(tournamentId);
-        int totalSlots = tournament.getData().getTotalSlots();
-
-        TournamentRoundEnum latestCompletedRound = null;
-        for (TournamentRoundEnum round : TournamentRoundEnum.values()) {
-            int requiredCount = round.requiredMatchCount(totalSlots);
-            if (requiredCount <= 0) {
-                continue;
-            }
-            int completedCount = matchRepository.countCompletedByTournamentAndRound(tournamentId, round);
-            if (completedCount >= requiredCount) {
-                latestCompletedRound = round;
-            }
-        }
-
-        if (latestCompletedRound != null) {
-            tournamentRepository.advanceCurrentRoundIfLater(tournamentId, latestCompletedRound);
+            tournamentRoundProgressService.advanceIfReady(match.getData().getTournamentId());
         }
     }
 
@@ -292,16 +292,20 @@ public class TournamentMatchFlowService {
     }
 
     private void updateEntryStatusOnComplete(TournamentMatch match) {
-        List<String> winnerUserIds = match.getParticipants().stream().filter(p -> p.getIsWinner() != null && p.getIsWinner()).map(MatchParticipantData::getUserId).collect(Collectors.toList());
-        List<String> loserUserIds = match.getParticipants().stream().filter(p -> p.getIsWinner() != null && !p.getIsWinner()).map(MatchParticipantData::getUserId).collect(Collectors.toList());
+        Integer winnerEntryNo = match.getData().getWinnerEntryNo();
+        Assert.notNull(winnerEntryNo, BizErrorCode.TOURNAMENT_RESULT_WINNER_REQUIRED);
+        List<String> winnerUserIds = match.getParticipants().stream()
+                .filter(p -> winnerEntryNo.equals(p.getEntryNo()))
+                .map(MatchParticipantData::getUserId)
+                .collect(Collectors.toList());
+        List<String> loserUserIds = match.getParticipants().stream()
+                .filter(p -> !winnerEntryNo.equals(p.getEntryNo()))
+                .map(MatchParticipantData::getUserId)
+                .collect(Collectors.toList());
 
         for (String userId : winnerUserIds) {
             TournamentEntry entry = getUserEntry(match.getData().getTournamentId(), userId);
-            if (entry.getData().getStage() == TournamentEntryStageEnum.QUALIFY) {
-                entry.getData().setStatus(TournamentEntryStatusEnum.PAYING);
-            } else {
-                entry.getData().setStatus(TournamentEntryStatusEnum.WAITING);
-            }
+            entry.advanceAfterWin(match.getData().getRound());
             entryRepository.save(entry.getData());
         }
 

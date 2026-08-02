@@ -20,7 +20,7 @@
 ## 接口清单
 
 ### `POST /tournament/admin/create`
-创建赛事草稿。入参 `TournamentCreateCmd`（全部配置项）。app 层用 mapstruct 转领域配置对象 → 调 `create` → 返回 bizId 的 DTO。校验：签位数枚举合法（16/32/64）、offlineFromRound < totalSlots、entryFee ≥ 0、时间点先后。
+创建赛事草稿。入参 `TournamentCreateCmd`（全部配置项）。app 层用 mapstruct 转领域配置对象 → 调 `create` → 返回 bizId 的 DTO。校验：签位数为 2 到 64 的 2 次方、offlineFromRound < totalSlots、entryFee ≥ 0、时间点先后。
 
 ### `POST /tournament/admin/update`
 编辑草稿。入参 `TournamentUpdateCmd`（bizId + 可改配置）。仅当 status=DRAFT 才允许，否则 Assert 抛错。

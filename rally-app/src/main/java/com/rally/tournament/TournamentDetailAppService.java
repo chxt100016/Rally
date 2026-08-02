@@ -4,13 +4,12 @@ import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.tournament.enums.TournamentActionStateEnum;
-import com.rally.domain.tournament.enums.TournamentActionStateTextEnum;
 import com.rally.domain.tournament.enums.TournamentJoinRestrictionEnum;
-import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.enums.RebookReasonEnum;
 import com.rally.domain.tournament.model.MatchOpponentDTO;
+import com.rally.domain.tournament.model.MatchParticipantDTO;
 import com.rally.domain.tournament.model.MyCurrentMatchDTO;
-import com.rally.domain.tournament.model.TournamentActionStateTextDTO;
+import com.rally.domain.tournament.model.TournamentActionDTO;
 import com.rally.domain.tournament.model.TournamentBracketMatchDTO;
 import com.rally.domain.tournament.model.TournamentDetailDTO;
 import com.rally.domain.tournament.model.TournamentEntrantDTO;
@@ -24,7 +23,6 @@ import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,8 +66,9 @@ public class TournamentDetailAppService {
             fillNicknames(detail, profiles);
         }
 
-        fillActionStateText(detail, profiles);
+        fillAction(detail, profiles);
         fillMeetupCard(detail);
+        fillOfflineMeetupCard(detail);
         return detail;
     }
 
@@ -77,7 +76,14 @@ public class TournamentDetailAppService {
      * 未报名时返回登录、档案完整度和 NTRP 等级限制，供前端决定报名按钮及提示文案。
      */
     private void fillJoinRestrictions(TournamentDetailDTO detail, String userId) {
-        if (detail.getActionState() != TournamentActionStateEnum.NOT_REGISTERED || detail.getTournament() == null) {
+        TournamentActionStateEnum actionState = actionState(detail);
+        if ((actionState != TournamentActionStateEnum.NOT_REGISTERED
+                && actionState != TournamentActionStateEnum.NOT_REGISTERED_CLOSED)
+                || detail.getTournament() == null) {
+            return;
+        }
+        if (actionState == TournamentActionStateEnum.NOT_REGISTERED_CLOSED) {
+            detail.setJoinable(false);
             return;
         }
         UserProfile userProfile = userId == null ? null : userProfileDomainService.get(userId);
@@ -99,11 +105,20 @@ public class TournamentDetailAppService {
         myCurrentMatch.setMeetupCard(meetupCardPackingService.packCard(meetup.getData(), null, null));
     }
 
+    /** 已创建线下赛活动时才查询并填充对应约球卡片。 */
+    private void fillOfflineMeetupCard(TournamentDetailDTO detail) {
+        if (detail.getOffline() == null || detail.getOffline().getMeetupId() == null) {
+            return;
+        }
+        Meetup meetup = meetupDomainService.get(detail.getOffline().getMeetupId());
+        detail.getOffline().setMeetupCard(meetupCardPackingService.packCard(meetup.getData(), null, null));
+    }
+
     private List<String> collectUserIds(TournamentDetailDTO detail) {
         List<String> userIds = new ArrayList<>();
         MyCurrentMatchDTO myCurrentMatch = detail.getMyCurrentMatch();
-        if (myCurrentMatch != null && myCurrentMatch.getOpponents() != null) {
-            myCurrentMatch.getOpponents().forEach(o -> userIds.add(o.getUserId()));
+        if (myCurrentMatch != null && myCurrentMatch.getParticipants() != null) {
+            myCurrentMatch.getParticipants().forEach(p -> userIds.add(p.getUserId()));
         }
         if (myCurrentMatch != null && myCurrentMatch.getLastRebookBy() != null) {
             userIds.add(myCurrentMatch.getLastRebookBy());
@@ -122,8 +137,8 @@ public class TournamentDetailAppService {
 
     private void fillNicknames(TournamentDetailDTO detail, Map<String, UserProfile> profiles) {
         MyCurrentMatchDTO myCurrentMatch = detail.getMyCurrentMatch();
-        if (myCurrentMatch != null && myCurrentMatch.getOpponents() != null) {
-            myCurrentMatch.getOpponents().forEach(o -> fillOpponentInfo(o, profiles));
+        if (myCurrentMatch != null && myCurrentMatch.getParticipants() != null) {
+            myCurrentMatch.getParticipants().forEach(p -> fillParticipantInfo(p, profiles));
         }
         if (detail.getBracket() != null && detail.getBracket().getRounds() != null) {
             for (var round : detail.getBracket().getRounds()) {
@@ -170,72 +185,86 @@ public class TournamentDetailAppService {
         }
     }
 
+    private void fillParticipantInfo(MatchParticipantDTO participant, Map<String, UserProfile> profiles) {
+        UserProfile profile = profiles.get(participant.getUserId());
+        if (profile == null || profile.getUser() == null) {
+            return;
+        }
+        participant.setNickname(profile.getUser().getNickname());
+        participant.setAvatarUrl(QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl()));
+        participant.setGender(profile.getUser().getGender());
+    }
+
     /**
      * 状态文案统一由枚举维护；涉及对手或打回重订的信息在昵称回填后替换占位内容。
      */
-    private void fillActionStateText(TournamentDetailDTO detail, Map<String, UserProfile> profiles) {
-        TournamentActionStateTextEnum text = resolveActionStateText(detail);
+    private void fillAction(TournamentDetailDTO detail, Map<String, UserProfile> profiles) {
+        TournamentActionStateEnum text = resolveActionStateText(detail);
+        TournamentActionDTO action = detail.getAction();
         String title = text.getTitle();
         String subtitle = text.getSubtitle();
         MyCurrentMatchDTO match = detail.getMyCurrentMatch();
 
-        if (text == TournamentActionStateTextEnum.AWAIT_BOOKING_REBOOK) {
+        if (text == TournamentActionStateEnum.AWAIT_BOOKING_REBOOK) {
             subtitle = String.format(subtitle, rebookerDisplayName(match, profiles), rebookReason(match));
+        } else if (text == TournamentActionStateEnum.AWAIT_RESULT_CONFIRM
+                || text == TournamentActionStateEnum.AWAIT_OPPONENT_RESULT_CONFIRM) {
+            subtitle = String.format(subtitle, opponentNames(match), winnerNames(match));
         } else if (subtitle.contains("%s")) {
             subtitle = String.format(subtitle, opponentNames(match));
         }
-        detail.setActionStateText(new TournamentActionStateTextDTO(title, subtitle));
+        action.setStateShow(text.getLabel());
+        action.setStateTitle(title);
+        action.setStateSubtitle(subtitle);
     }
 
-    private TournamentActionStateTextEnum resolveActionStateText(TournamentDetailDTO detail) {
-        TournamentActionStateEnum actionState = detail.getActionState();
-        if (actionState == TournamentActionStateEnum.NOT_REGISTERED) {
-            if (detail.getProgress() != null
-                    && detail.getProgress().getCurrentRound() != null
-                    && detail.getProgress().getCurrentRound() != TournamentRoundEnum.QUALIFIER) {
-                return TournamentActionStateTextEnum.NOT_REGISTERED_NON_QUALIFIER;
-            }
-            if (detail.getTournament() != null
-                    && detail.getTournament().getRegistrationEndTime() != null
-                    && LocalDateTime.now().isAfter(detail.getTournament().getRegistrationEndTime())) {
-                return TournamentActionStateTextEnum.NOT_REGISTERED_CLOSED;
-            }
-            return TournamentActionStateTextEnum.NOT_REGISTERED;
-        }
-        if (actionState == TournamentActionStateEnum.AWAIT_BOOKING
-                && detail.getMyCurrentMatch() != null
-                && detail.getMyCurrentMatch().getLastRebookTime() != null) {
-            return TournamentActionStateTextEnum.AWAIT_BOOKING_REBOOK;
-        }
+    private TournamentActionStateEnum resolveActionStateText(TournamentDetailDTO detail) {
+        TournamentActionStateEnum actionState = actionState(detail);
         if (actionState == null || actionState == TournamentActionStateEnum.END) {
-            return TournamentActionStateTextEnum.DEFAULT;
+            return TournamentActionStateEnum.END;
         }
-        try {
-            return TournamentActionStateTextEnum.valueOf(actionState.name());
-        } catch (IllegalArgumentException ignored) {
-            return TournamentActionStateTextEnum.DEFAULT;
-        }
+        return actionState;
+    }
+
+    private TournamentActionStateEnum actionState(TournamentDetailDTO detail) {
+        return detail.getAction() == null ? null : detail.getAction().getState();
     }
 
     private String opponentNames(MyCurrentMatchDTO match) {
-        if (match == null || match.getOpponents() == null) {
+        if (match == null || match.getParticipants() == null) {
             return "对手";
         }
-        String names = match.getOpponents().stream()
-                .map(MatchOpponentDTO::getNickname)
+        String currentUserId = UserContext.getIfPresent();
+        String names = match.getParticipants().stream()
+                .filter(participant -> !participant.getUserId().equals(currentUserId))
+                .map(MatchParticipantDTO::getNickname)
                 .filter(Objects::nonNull)
                 .filter(name -> !name.isBlank())
                 .collect(Collectors.joining("、"));
         return names.isBlank() ? "对手" : names;
     }
 
+    /** 同一 winnerEntryNo 的参与者均为胜者，支持双打同队成员共同展示。 */
+    private String winnerNames(MyCurrentMatchDTO match) {
+        if (match == null || match.getWinnerEntryNo() == null || match.getParticipants() == null) {
+            return "获胜方";
+        }
+        String names = match.getParticipants().stream()
+                .filter(participant -> match.getWinnerEntryNo().equals(participant.getEntryNo()))
+                .map(MatchParticipantDTO::getNickname)
+                .filter(Objects::nonNull)
+                .filter(name -> !name.isBlank())
+                .collect(Collectors.joining("、"));
+        return names.isBlank() ? "获胜方" : names;
+    }
+
     private String rebookerDisplayName(MyCurrentMatchDTO match, Map<String, UserProfile> profiles) {
         if (match == null || match.getLastRebookBy() == null) {
             return "对手";
         }
-        String nickname = match.getOpponents() == null ? null : match.getOpponents().stream()
-                .filter(opponent -> match.getLastRebookBy().equals(opponent.getUserId()))
-                .map(MatchOpponentDTO::getNickname)
+        String nickname = match.getParticipants() == null ? null : match.getParticipants().stream()
+                .filter(participant -> match.getLastRebookBy().equals(participant.getUserId()))
+                .map(MatchParticipantDTO::getNickname)
                 .filter(Objects::nonNull)
                 .filter(name -> !name.isBlank())
                 .findFirst()
@@ -257,10 +286,6 @@ public class TournamentDetailAppService {
         }
         try {
             RebookReasonEnum reason = RebookReasonEnum.valueOf(match.getLastRebookReasonCode());
-            if (reason == RebookReasonEnum.OTHER && match.getLastRebookReasonText() != null
-                    && !match.getLastRebookReasonText().isBlank()) {
-                return match.getLastRebookReasonText();
-            }
             return reason.getLabel();
         } catch (IllegalArgumentException ignored) {
             return match.getLastRebookReasonCode();

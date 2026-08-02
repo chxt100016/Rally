@@ -68,6 +68,27 @@ public interface MeetupDomainConvertMapper {
     MeetupData toMeetupData(SubmitBookingCmd cmd, String userId, CourtData courtData);
 
     /**
+     * 更新赛事订场约球。赛事归属、创建人、状态及参赛人数均由比赛流程维护，不允许由订场参数覆盖。
+     */
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "bizId", ignore = true)
+    @Mapping(target = "meetupType", ignore = true)
+    @Mapping(target = "creatorId", ignore = true)
+    @Mapping(target = "matchType", ignore = true)
+    @Mapping(target = "maxPlayers", ignore = true)
+    @Mapping(target = "currentPlayers", ignore = true)
+    @Mapping(target = "cityCode", source = "cmd.cityCode")
+    @Mapping(target = "cityName", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "endTime", expression = "java(calculateEndTime(cmd.getStartTime(), cmd.getDuration()))")
+    @Mapping(target = "courtName", expression = "java(courtData != null ? courtData.getName() : cmd.getCourtName())")
+    @Mapping(target = "courtAddress", expression = "java(courtData != null ? courtData.getAddress() : cmd.getCourtAddress())")
+    @Mapping(target = "courtLng", expression = "java(courtData != null ? courtData.getLng() : cmd.getCourtLng())")
+    @Mapping(target = "courtLat", expression = "java(courtData != null ? courtData.getLat() : cmd.getCourtLat())")
+    @Mapping(target = "districtName", expression = "java(resolveBookingDistrictName(cmd, courtData))")
+    void updateTournamentMeetupData(@MappingTarget MeetupData data, SubmitBookingCmd cmd, CourtData courtData);
+
+    /**
      * 订场草稿区县名解析：courtData 有区县名取库数据，否则从地址解析
      */
     default String resolveBookingDistrictName(SubmitBookingCmd cmd, CourtData courtData) {

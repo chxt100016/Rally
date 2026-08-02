@@ -23,7 +23,8 @@ public class MeetupCardDTO {
     private String cityName;
     private String districtName;
     private String courtName;
-    private String backgroundImage;
+    /** 前端卡片背景样式 key */
+    private String backgroundKey;
     private LevelModeEnum levelMode;
     private String levelMin;
     private String levelMax;

@@ -6,9 +6,6 @@ import com.rally.domain.notify.enums.NoticeScene;
 import com.rally.domain.notify.enums.NotifyBizType;
 import com.rally.domain.notify.service.NotifySubscribeService;
 import com.rally.domain.tour.model.Result;
-import com.rally.domain.tournament.enums.ResultRejectReasonEnum;
-import com.rally.domain.tournament.enums.RebookReasonEnum;
-import com.rally.domain.tournament.enums.ScheduleRejectReasonEnum;
 import com.rally.domain.tournament.gateway.TournamentMatchRepository;
 import com.rally.domain.tournament.gateway.TournamentRepository;
 import com.rally.domain.tournament.model.*;
@@ -56,10 +53,8 @@ public class TournamentMatchAppService {
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> confirmSchedule(ScheduleConfirmCmd cmd) {
         String userId = UserContext.get();
-        ScheduleRejectReasonEnum rejectReason = cmd.getRejectReason() != null ? ScheduleRejectReasonEnum.valueOf(cmd.getRejectReason()) : null;
-        RebookReasonEnum rebookReason = cmd.getRebookReason() != null ? RebookReasonEnum.valueOf(cmd.getRebookReason()) : null;
-        matchFlowService.handleScheduleConfirm(cmd.getMatchId(), userId, cmd.getConfirm(), rejectReason, cmd.getRejectReasonText(), rebookReason, cmd.getRebookReasonText());
-        if (!cmd.getConfirm() && rejectReason != null) {
+        matchFlowService.handleScheduleConfirm(cmd.getMatchId(), userId, cmd.getConfirm(), cmd.getRejectReason(), cmd.getRebookReason());
+        if (!cmd.getConfirm() && cmd.getRejectReason() != null) {
             notifyRejected(cmd.getMatchId(), userId);
         }
         return Result.ok();
@@ -68,7 +63,7 @@ public class TournamentMatchAppService {
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> submitResult(SubmitResultCmd cmd) {
         String userId = UserContext.get();
-        matchFlowService.submitResult(cmd.getMatchId(), userId, cmd.getWinnerEntryNos());
+        matchFlowService.submitResult(cmd.getMatchId(), userId, cmd.getWinnerEntryNo());
         grantTournamentNotices(cmd.getMatchId(), userId, cmd.getAcceptedNoticeScenes());
         return Result.ok();
     }
@@ -76,8 +71,7 @@ public class TournamentMatchAppService {
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> confirmResult(ResultConfirmCmd cmd) {
         String userId = UserContext.get();
-        ResultRejectReasonEnum rejectReason = cmd.getRejectReason() != null ? ResultRejectReasonEnum.valueOf(cmd.getRejectReason()) : null;
-        matchFlowService.handleResultConfirm(cmd.getMatchId(), userId, cmd.getConfirm(), rejectReason, cmd.getRejectReasonText());
+        matchFlowService.handleResultConfirm(cmd.getMatchId(), userId, cmd.getConfirm(), cmd.getRejectReason());
         grantTournamentNotices(cmd.getMatchId(), userId, cmd.getAcceptedNoticeScenes());
         if (!cmd.getConfirm()) {
             notifyRejected(cmd.getMatchId(), userId);

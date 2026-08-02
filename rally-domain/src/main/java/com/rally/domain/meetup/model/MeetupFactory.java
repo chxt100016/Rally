@@ -76,6 +76,25 @@ public class MeetupFactory {
     }
 
     /**
+     * 创建赛事线下赛活动：创建人由运营端指定，报名表只写入晋级线下赛的用户。
+     * 人数上限按晋级人数强制设置，允许超过普通约球的 16 人限制。
+     */
+    public static Meetup createTournamentOffline(MeetupPublishCmd cmd, String creatorId, CourtData courtData, List<String> participantUserIds) {
+        MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, creatorId, courtData);
+        data.setBizId(IdWorker.getIdStr());
+        data.setCityName(CityConfig.getCityName(data.getCityCode()));
+        data.setMeetupType(MeetupTypeEnum.TOURNAMENT.getCode());
+        data.setMaxPlayers(participantUserIds.size());
+        data.setCurrentPlayers(participantUserIds.size());
+
+        List<RegistrationData> registrations = participantUserIds.stream()
+                .distinct()
+                .map(userId -> buildJoinedRegistration(data.getBizId(), userId))
+                .toList();
+        return new Meetup(data, registrations);
+    }
+
+    /**
      * 赛事约球人数/类型按参赛者强制，标题空则给默认值
      */
     private static void applyTournamentParticipants(MeetupData data, List<MatchParticipantData> participants, String tournamentName) {
@@ -130,4 +149,3 @@ public class MeetupFactory {
         };
     }
 }
-

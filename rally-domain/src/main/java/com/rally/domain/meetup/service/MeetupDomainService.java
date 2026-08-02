@@ -83,6 +83,14 @@ public class MeetupDomainService {
         return meetup;
     }
 
+    /** 创建赛事线下赛活动，参与者由赛事流程直接指定。 */
+    public Meetup saveTournamentOffline(String creatorId, MeetupPublishCmd cmd, List<String> participantUserIds) {
+        CourtData courtData = resolveCourtData(cmd);
+        Meetup meetup = MeetupFactory.createTournamentOffline(cmd, creatorId, courtData, participantUserIds);
+        meetupRepository.save(meetup);
+        return meetup;
+    }
+
     /**
      * 关闭约球（权限校验 + 状态更新）
      * @param userId 当前用户

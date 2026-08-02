@@ -15,7 +15,7 @@
 
 ## 后端样式标识
 
-`backgroundImage` 字段暂时沿用原字段名，但返回值已经变为前端背景样式标识，不是图片 URL。
+`MeetupCardDTO.backgroundKey` 返回前端背景样式标识，不是图片 URL。
 
 ### 室外
 

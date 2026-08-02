@@ -23,14 +23,26 @@
 - **初始状态判定**：恰好一人 CAN_BOOK 其余 CANNOT_BOOK → 直接 BOOKING，该人为订场人；否则（都能/都不能订场）→ MATCHED，等先到先得。
 - 转线下轮次（round ≥ offlineFromRound 对应轮）：平台负责场地，跳过订场流程，直接进入待比赛/由运营安排（与模块 4 状态机约定）。
 
-## 接口清单（内部，无对外 HTTP）
+### TournamentBatchMatchService（批量匹配领域能力）
+- 查询已到资格赛开始时间的激活赛事。
+- 分别执行资格赛和正赛各轮次匹配，返回本次新产出的 `TournamentMatch`。
+- 只负责领域规则和比赛落地，不依赖 Job、HTTP Controller 或通知模板。
+
+## 调用入口
 
 ### 每日凌晨 2 点批量匹配 Job
-位于 `rally-adapter/com.rally.job`，开关 `job.tournamentMatch.enabled`，cron 在 `application-prod.yml`。逻辑：
+位于 `rally-adapter/com.rally.job`，开关 `job.tournamentMatch.enabled`，cron 在 `application-prod.yml`。Job 只调用 `TournamentAdminAppService.runTournamentMatch()`；开关关闭时不创建 Job Bean。
+
+### 运营后台手动匹配
+`POST /tournament/admin/match/run`，直接调用同一个 `TournamentAdminAppService.runTournamentMatch()`，不依赖定时 Job 是否开启。
+
+### 应用编排逻辑
+`TournamentAdminAppService` 负责：
 1. 扫描所有 ACTIVE 且已过 qualifierStartTime 的赛事。
 2. 资格赛：取该赛事 stage=QUALIFY & status=WAITING 的 Entry，若席位已满则跳过资格赛匹配。调 MatchingService 分组，Assemble 落地。
 3. 正赛：按当前轮次取 stage=MAIN & status=WAITING 的 Entry，逐轮两两匹配（groupSize=2），同样避让互相拒绝组合。
-4. 幂等：同一 Entry 一次 Job 内只进一组；已 IN_MATCH 不参与。
+4. 对本次新产出的比赛触发 `TOURNAMENT_MATCHED` 通知。
+5. 幂等：已进入 IN_MATCH 的 Entry 不再参与后续匹配。
 
 ## 与其他模块的边界
 - 候选人来源于模块 2/4/5（报名成功、比赛被拒回池、支付进正赛）。

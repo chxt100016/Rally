@@ -16,6 +16,7 @@ import com.rally.domain.tournament.model.MatchOpponentDTO;
 import com.rally.domain.tournament.model.MatchParticipantData;
 import com.rally.domain.tournament.model.MatchParticipantDTO;
 import com.rally.domain.tournament.model.MyCurrentMatchDTO;
+import com.rally.domain.tournament.model.TournamentActionDTO;
 import com.rally.domain.tournament.model.Tournament;
 import com.rally.domain.tournament.model.TournamentBracketDTO;
 import com.rally.domain.tournament.model.TournamentBracketMatchDTO;
@@ -29,6 +30,7 @@ import com.rally.domain.tournament.model.TournamentEntryData;
 import com.rally.domain.tournament.model.TournamentEntryDTO;
 import com.rally.domain.tournament.model.TournamentMatch;
 import com.rally.domain.tournament.model.TournamentMatchData;
+import com.rally.domain.tournament.model.TournamentOfflineDTO;
 import com.rally.domain.tournament.model.TournamentProgressDTO;
 import com.rally.domain.tournament.model.TournamentTimelineEventDTO;
 import com.rally.domain.utils.Assert;
@@ -63,7 +65,7 @@ public class TournamentDetailService {
     private final TournamentEntryService tournamentEntryService;
 
     /**
-     * 聚合装配赛事详情，userId 为空时只返回公开区块（tournament + progress + bracket）
+     * 聚合装配赛事详情，userId 为空时只返回公开区块，并标记为未登录状态
      */
     public TournamentDetailDTO assembleDetail(String tournamentId, String userId) {
         TournamentData tournamentData = tournamentRepository.findByBizId(tournamentId);
@@ -76,19 +78,24 @@ public class TournamentDetailService {
         TournamentDTO tournamentDTO = TournamentDomainConvertMapper.INSTANCE.toTournamentDTO(tournamentData);
         calculateStatus(tournamentDTO, tournamentData);
         detail.setTournament(tournamentDTO);
+        if (tournamentData.getOfflineMeetupId() != null) {
+            TournamentOfflineDTO offline = new TournamentOfflineDTO();
+            offline.setMeetupId(tournamentData.getOfflineMeetupId());
+            detail.setOffline(offline);
+        }
         detail.setProgress(assembleProgress(tournamentData, allMatches, allEntries.size()));
         detail.setBracket(assembleBracket(tournamentData, allMatches));
         detail.setRejectRecords(assembleRejectRecords(allEntries));
         detail.setEntrants(assembleEntrants(allEntries));
 
         if (userId == null) {
-            detail.setActionState(TournamentActionStateEnum.NOT_REGISTERED);
+            setAction(detail, TournamentActionStateEnum.NOT_LOGGED_IN);
             return detail;
         }
 
         TournamentEntryData myEntryData = tournamentEntryRepository.findByTournamentAndUser(tournamentId, userId);
         if (myEntryData == null) {
-            detail.setActionState(TournamentActionStateEnum.NOT_REGISTERED);
+            setAction(detail, calculateNotRegisteredActionState(tournamentData));
             return detail;
         }
 
@@ -101,7 +108,7 @@ public class TournamentDetailService {
             detail.setMyCurrentMatch(toMyCurrentMatchDTO(activeMatch, userId, tournamentId, tournamentData));
         }
 
-        detail.setActionState(calculateActionState(tournamentData, myEntryData, activeMatch, userId));
+        setAction(detail, calculateActionState(tournamentData, myEntryData, activeMatch, userId));
         detail.setMyTimeline(assembleTimeline(tournamentId, userId, myEntryData));
         return detail;
     }
@@ -162,17 +169,27 @@ public class TournamentDetailService {
         return progress;
     }
 
-    /** 应打总场次 = 资格赛 totalSlots 场 + 正赛 totalSlots-1 场；进度 = 已完成场次 / 应打总场次，满值为 1 */
+    /** 资格赛与正赛各占 50%：资格赛按晋级正赛人数计算，正赛按已完成场次计算。 */
     private BigDecimal calculateProgressRate(TournamentData tournamentData, List<TournamentMatchData> allMatches) {
         int totalSlots = tournamentData.getTotalSlots();
-        int totalRequiredMatches = totalSlots + (totalSlots - 1);
-        if (totalRequiredMatches <= 0) {
+        int mainDrawTotalMatches = totalSlots - 1;
+        if (totalSlots <= 0 || mainDrawTotalMatches <= 0) {
             return BigDecimal.ZERO;
         }
-        long completedCount = allMatches.stream().filter(m -> m.getStatus() == TournamentMatchStatusEnum.COMPLETED).count();
-        return BigDecimal.valueOf(completedCount)
-                .divide(BigDecimal.valueOf(totalRequiredMatches), 4, RoundingMode.HALF_UP)
+
+        BigDecimal qualifierProgress = BigDecimal.valueOf(tournamentEntryService.countRoundEntry(tournamentData.getBizId(), TournamentRoundEnum.QUALIFIER))
+                .divide(BigDecimal.valueOf(totalSlots), 4, RoundingMode.HALF_UP)
                 .min(BigDecimal.ONE);
+        long completedMainDrawMatches = allMatches.stream()
+                .filter(m -> m.getRound() != TournamentRoundEnum.QUALIFIER)
+                .filter(m -> m.getStatus() == TournamentMatchStatusEnum.COMPLETED)
+                .count();
+        BigDecimal mainDrawProgress = BigDecimal.valueOf(completedMainDrawMatches)
+                .divide(BigDecimal.valueOf(mainDrawTotalMatches), 4, RoundingMode.HALF_UP)
+                .min(BigDecimal.ONE);
+
+        return qualifierProgress.add(mainDrawProgress)
+                .divide(BigDecimal.valueOf(2), 4, RoundingMode.HALF_UP);
     }
 
 
@@ -235,6 +252,7 @@ public class TournamentDetailService {
     private MatchOpponentDTO toOpponentDTO(MatchParticipantData participant) {
         MatchOpponentDTO dto = new MatchOpponentDTO();
         dto.setUserId(participant.getUserId());
+        dto.setEntryNo(participant.getEntryNo());
         return dto;
     }
 
@@ -248,9 +266,9 @@ public class TournamentDetailService {
         dto.setRound(data.getRound());
         dto.setCourtBookerId(data.getCourtBookerId());
         dto.setMeetupId(data.getMeetupId());
+        dto.setWinnerEntryNo(data.getWinnerEntryNo());
         dto.setLastRebookBy(data.getLastRebookBy());
         dto.setLastRebookReasonCode(data.getLastRebookReasonCode());
-        dto.setLastRebookReasonText(data.getLastRebookReasonText());
         dto.setLastRebookTime(data.getLastRebookTime());
         dto.setStatus(data.getStatus());
         dto.setGroupSize(data.getRound() == TournamentRoundEnum.QUALIFIER ? tournamentData.getQualifierGroupSize() : 2);
@@ -258,8 +276,6 @@ public class TournamentDetailService {
         List<MatchParticipantData> opponentParticipants = match.getParticipants().stream()
                 .filter(p -> !p.getUserId().equals(userId))
                 .collect(Collectors.toList());
-
-        dto.setOpponents(opponentParticipants.stream().map(this::toOpponentDTO).collect(Collectors.toList()));
 
         if (data.getStatus() == TournamentMatchStatusEnum.BOOKING) {
             dto.setOpponentEntries(opponentParticipants.stream()
@@ -275,7 +291,6 @@ public class TournamentDetailService {
             participantDTO.setEntryNo(p.getEntryNo());
             participantDTO.setConfirmStatus(p.getConfirmStatus());
             participantDTO.setResultConfirmStatus(p.getResultConfirmStatus());
-            participantDTO.setIsWinner(p.getIsWinner());
             return participantDTO;
         }).collect(Collectors.toList()));
 
@@ -293,7 +308,7 @@ public class TournamentDetailService {
         if (status == TournamentEntryStatusEnum.ELIMINATED) {
             return TournamentActionStateEnum.ELIMINATED;
         }
-        if (tournamentData.getCurrentRound() == tournamentData.getOfflineFromRound()) {
+        if (entry.getCurrentRound() == tournamentData.getOfflineFromRound()) {
             return TournamentActionStateEnum.IN_OFFLINE_STAGE;
         }
         if (status == TournamentEntryStatusEnum.PAYING) {
@@ -314,7 +329,12 @@ public class TournamentDetailService {
             case MATCHED:
                 return TournamentActionStateEnum.AWAIT_COURT_BOOKER_SELECT;
             case BOOKING:
-                return userId.equals(matchData.getCourtBookerId()) ? TournamentActionStateEnum.AWAIT_BOOKING : TournamentActionStateEnum.AWAIT_BOOKING_OPPONENT;
+                if (userId.equals(matchData.getCourtBookerId())) {
+                    return matchData.getLastRebookTime() == null
+                            ? TournamentActionStateEnum.AWAIT_BOOKING
+                            : TournamentActionStateEnum.AWAIT_BOOKING_REBOOK;
+                }
+                return TournamentActionStateEnum.AWAIT_BOOKING_OPPONENT;
             case SCHEDULED:
                 if (isPending(activeMatch, userId, false)) {
                     return TournamentActionStateEnum.AWAIT_SCHEDULE_CONFIRM;
@@ -330,6 +350,22 @@ public class TournamentDetailService {
             default:
                 return TournamentActionStateEnum.WAITING_MATCH;
         }
+    }
+
+    private TournamentActionStateEnum calculateNotRegisteredActionState(TournamentData tournamentData) {
+        boolean registrationClosed = tournamentData.getRegistrationEndTime() != null
+                && LocalDateTime.now().isAfter(tournamentData.getRegistrationEndTime());
+        boolean enteredNonQualifierStage = tournamentData.getCurrentRound() != null
+                && tournamentData.getCurrentRound() != TournamentRoundEnum.QUALIFIER;
+        return registrationClosed || enteredNonQualifierStage
+                ? TournamentActionStateEnum.NOT_REGISTERED_CLOSED
+                : TournamentActionStateEnum.NOT_REGISTERED;
+    }
+
+    private void setAction(TournamentDetailDTO detail, TournamentActionStateEnum state) {
+        TournamentActionDTO action = new TournamentActionDTO();
+        action.setState(state);
+        detail.setAction(action);
     }
 
     private boolean isPending(TournamentMatch match, String userId, boolean resultConfirm) {

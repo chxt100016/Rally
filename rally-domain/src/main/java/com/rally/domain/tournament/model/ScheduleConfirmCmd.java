@@ -1,5 +1,7 @@
 package com.rally.domain.tournament.model;
 
+import com.rally.domain.tournament.enums.RebookReasonEnum;
+import com.rally.domain.tournament.enums.ScheduleRejectReasonEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -13,12 +15,8 @@ public class ScheduleConfirmCmd {
     @NotNull(message = "确认状态不能为空")
     private Boolean confirm;
 
-    private String rejectReason;
+    private ScheduleRejectReasonEnum rejectReason;
 
-    private String rejectReasonText;
-
-    private String rebookReason;
-
-    private String rebookReasonText;
+    private RebookReasonEnum rebookReason;
 
 }

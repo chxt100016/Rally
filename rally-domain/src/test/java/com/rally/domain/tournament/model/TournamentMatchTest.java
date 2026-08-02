@@ -107,7 +107,7 @@ public class TournamentMatchTest {
         List<MatchParticipantData> participants = Arrays.asList(p1, p2);
 
         TournamentMatch match = new TournamentMatch(data, participants);
-        match.confirmSchedule("user2", true, null, null, null, null, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
+        match.confirmSchedule("user2", true, null, null, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
 
         Assert.assertEquals(TournamentMatchStatusEnum.PENDING_PLAY, match.getData().getStatus());
         Assert.assertEquals(ConfirmStatusEnum.CONFIRMED, p2.getConfirmStatus());
@@ -123,7 +123,7 @@ public class TournamentMatchTest {
         List<MatchParticipantData> participants = Arrays.asList(p1);
 
         TournamentMatch match = new TournamentMatch(data, participants);
-        match.confirmSchedule("user1", false, ScheduleRejectReasonEnum.DONT_WANT_PLAY, null, null, null, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
+        match.confirmSchedule("user1", false, ScheduleRejectReasonEnum.DONT_WANT_PLAY, null, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
 
         Assert.assertEquals(TournamentMatchStatusEnum.REJECTED, match.getData().getStatus());
         Assert.assertEquals(ConfirmStatusEnum.REJECTED, p1.getConfirmStatus());
@@ -139,7 +139,7 @@ public class TournamentMatchTest {
         List<MatchParticipantData> participants = Arrays.asList(p1);
 
         TournamentMatch match = new TournamentMatch(data, participants);
-        match.confirmSchedule("user1", false, null, null, RebookReasonEnum.TIME_NOT_SUITABLE, null, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
+        match.confirmSchedule("user1", false, null, RebookReasonEnum.TIME_NOT_SUITABLE, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
 
         Assert.assertEquals(TournamentMatchStatusEnum.BOOKING, match.getData().getStatus());
         Assert.assertEquals("user1", match.getData().getLastRebookBy());
@@ -153,16 +153,17 @@ public class TournamentMatchTest {
         data.setStatus(TournamentMatchStatusEnum.PENDING_PLAY);
         MatchParticipantData p1 = new MatchParticipantData();
         p1.setUserId("user1");
+        p1.setEntryNo(1);
         MatchParticipantData p2 = new MatchParticipantData();
         p2.setUserId("user2");
+        p2.setEntryNo(2);
         List<MatchParticipantData> participants = Arrays.asList(p1, p2);
 
         TournamentMatch match = new TournamentMatch(data, participants);
-        match.submitResult("user1", Arrays.asList("user1"));
+        match.submitResult("user1", 1);
 
         Assert.assertEquals(TournamentMatchStatusEnum.PENDING_CONFIRM, match.getData().getStatus());
-        Assert.assertEquals(Boolean.TRUE, p1.getIsWinner());
-        Assert.assertEquals(Boolean.FALSE, p2.getIsWinner());
+        Assert.assertEquals(Integer.valueOf(1), match.getData().getWinnerEntryNo());
         Assert.assertNotNull(match.getData().getSubmittedTime());
     }
 
@@ -170,6 +171,7 @@ public class TournamentMatchTest {
     public void testConfirmResult_AllConfirm() {
         TournamentMatchData data = new TournamentMatchData();
         data.setStatus(TournamentMatchStatusEnum.PENDING_CONFIRM);
+        data.setWinnerEntryNo(1);
         MatchParticipantData p1 = new MatchParticipantData();
         p1.setUserId("user1");
         p1.setResultConfirmStatus(ConfirmStatusEnum.CONFIRMED);
@@ -179,7 +181,7 @@ public class TournamentMatchTest {
         List<MatchParticipantData> participants = Arrays.asList(p1, p2);
 
         TournamentMatch match = new TournamentMatch(data, participants);
-        match.confirmResult("user2", true, null, null, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
+        match.confirmResult("user2", true, null, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
 
         Assert.assertEquals(TournamentMatchStatusEnum.COMPLETED, match.getData().getStatus());
         Assert.assertEquals(ConfirmStatusEnum.CONFIRMED, p2.getResultConfirmStatus());
@@ -194,16 +196,14 @@ public class TournamentMatchTest {
         MatchParticipantData p1 = new MatchParticipantData();
         p1.setUserId("user1");
         p1.setResultConfirmStatus(ConfirmStatusEnum.PENDING);
-        p1.setIsWinner(true);
         List<MatchParticipantData> participants = Arrays.asList(p1);
 
         TournamentMatch match = new TournamentMatch(data, participants);
-        match.confirmResult("user1", false, ResultRejectReasonEnum.DISPUTE_APPEAL, null, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
+        match.confirmResult("user1", false, ResultRejectReasonEnum.DISPUTE_APPEAL, 1, 1, TournamentEntryStageEnum.QUALIFY, 0);
 
         // 拒绝结果即拒赛：比赛终止（REJECTED），已提交的比分/胜负等记录保留供追溯
         Assert.assertEquals(TournamentMatchStatusEnum.REJECTED, match.getData().getStatus());
         Assert.assertEquals(submittedTime, match.getData().getSubmittedTime());
         Assert.assertEquals(ConfirmStatusEnum.REJECTED, p1.getResultConfirmStatus());
-        Assert.assertTrue(p1.getIsWinner());
     }
 }

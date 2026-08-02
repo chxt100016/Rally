@@ -41,6 +41,7 @@ public interface TournamentDomainConvertMapper {
     TournamentDTO toTournamentDTO(TournamentData data);
 
     @Mapping(target = "entryId", source = "bizId")
+    @Mapping(target = "currentRoundShow", expression = "java(data.getCurrentRound() == null ? null : data.getCurrentRound().getLabel())")
     TournamentEntryDTO toTournamentEntryDTO(TournamentEntryData data);
 
     static List<Long> splitPrizeMoney(String prizeMoney) {

@@ -90,10 +90,10 @@
 `TEXT` 文本搜索 / `MAP` 地图选择 / `FREE` 自由输入
 
 ### ScheduleRejectReasonEnum（拒绝比赛理由）
-`TIME_PLACE_CONFLICT` 时间/场地实在协调不了 / `DONT_WANT_PLAY` 不想打了 / `OTHER` 其他
+`TIME_PLACE_CONFLICT` 时间或场地无法协调 / `DONT_WANT_PLAY` 暂不想参加这场比赛
 
 ### RebookReasonEnum（打回重订理由）
-`TIME_NOT_SUITABLE` 时间不合适 / `PLACE_NOT_SUITABLE` 地点不合适 / `OTHER` 其他
+`TIME_NOT_SUITABLE` 比赛时间不合适 / `PLACE_NOT_SUITABLE` 比赛地点不合适 / `DURATION_NOT_SUITABLE` 时长不合适
 
 ### ResultRejectReasonEnum（拒绝结果理由）
-`DISPUTE_APPEAL` 不服，我要申诉重来 / `OPPONENT_LEVEL_MISMATCH` 对手水平明显超出本赛事等级 / `RESULT_INCORRECT` 提交的结果不属实 / `OTHER` 其他
+`DISPUTE_APPEAL` 没发挥好，不服再战 / `OPPONENT_LEVEL_MISMATCH` 对手水平明显超出赛事等级 / `RESULT_INCORRECT` 比赛结果与实际不符

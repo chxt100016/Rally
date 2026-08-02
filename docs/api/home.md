@@ -96,6 +96,7 @@ GET /api/rally/home/page?cityCode=310100
 | `cityName` | `string` | 城市名 |
 | `districtName` | `string` | 区域名 |
 | `courtName` | `string` | 球场名 |
+| `backgroundKey` | `string\|null` | 卡片背景样式 key，如 `hard-day-clear` / `indoor-clay` |
 | `levelMode` | `LevelModeEnum` | 水平要求模式：`RANGE`区间 / `EXACT`精确 / `ABOVE`高于 / `BELOW`低于 |
 | `levelMin` | `string` | 水平下限 |
 | `levelMax` | `string` | 水平上限 |

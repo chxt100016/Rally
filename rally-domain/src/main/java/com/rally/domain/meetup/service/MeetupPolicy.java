@@ -46,6 +46,12 @@ public class MeetupPolicy {
         assertParam(cmd);
     }
 
+    /** 赛事线下赛活动沿用普通约球字段和城市校验，但不受个人日发布次数及 16 人上限约束。 */
+    public void assertTournamentOfflinePublish(MeetupPublishCmd cmd) {
+        CityConfig.assertCityOpened(cmd.getCityCode());
+        assertParam(cmd);
+    }
+
     /**
      * 校验当日发布上限
      */

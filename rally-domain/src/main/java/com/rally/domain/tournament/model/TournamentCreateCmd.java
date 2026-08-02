@@ -41,7 +41,7 @@ public class TournamentCreateCmd {
     @NotNull(message = "请选择性别限制")
     private TournamentGenderLimitEnum genderLimit;
 
-    /** 正赛签位：16/32/64 */
+    /** 正赛签位：2 到 64 的 2 次方 */
     @NotNull(message = "请选择正赛签位数")
     private Integer totalSlots;
 

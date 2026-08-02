@@ -17,8 +17,8 @@
 | `cityCode` | `string` | 是 | 城市编码 |
 | `ntrpLevel` | `string` | 是 | NTRP等级：3.0/3.5/4.0... |
 | `genderLimit` | `string` | 是 | 性别限制：`ALL`/`MALE`/`FEMALE` |
-| `totalSlots` | `number` | 是 | 正赛签位：16/32/64 |
-| `offlineFromRound` | `string` | 是 | 几强后转线下，枚举值：`ROUND_4`/`ROUND_8`/`ROUND_16` |
+| `totalSlots` | `number` | 是 | 正赛签位：2 到 64 的 2 次方（2/4/8/16/32/64） |
+| `offlineFromRound` | `string` | 是 | 转线下起始轮次，须小于 `totalSlots`；可选 `QUALIFIER`/`ROUND_64`/`ROUND_32`/`ROUND_16`/`ROUND_8`/`ROUND_4`/`FINAL` |
 | `qualifierGroupSize` | `number` | 是 | 资格赛每组人数，最小2 |
 | `entryFee` | `number` | 是 | 报名费，单位：分，不能为负 |
 | `registrationStartTime` | `string` | 是 | 报名开始时间，格式 `yyyy-MM-dd'T'HH:mm:ss` |
@@ -193,4 +193,21 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/admin/abandon' \
 curl -X POST 'http://localhost:8080/api/rally/tournament/admin/list' \
   -H 'Content-Type: application/json' \
   -d '{"status": "ACTIVE", "pageNum": 1, "pageSize": 20}'
+```
+
+---
+
+## 6. 手动执行赛事批量匹配
+
+**POST** `/match/run`
+
+扫描所有 `ACTIVE` 且已到资格赛开始时间的赛事，执行一次资格赛和正赛待匹配轮次处理。该接口与定时任务调用同一应用服务，不受 `job.tournamentMatch.enabled` 开关影响。
+
+**请求参数**：无
+
+**响应数据**：无
+
+**curl 示例**
+```bash
+curl -X POST 'http://localhost:8080/api/rally/tournament/admin/match/run'
 ```

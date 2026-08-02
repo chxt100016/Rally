@@ -23,7 +23,7 @@ public class TournamentProgressDTO {
     private Integer currentRoundAdvancedCount;
     /** 当前赛事已生成的比赛总场数（资格赛+正赛累计） */
     private Integer totalMatchCount;
-    /** 赛事总进度：已完成场次 / 应打总场次（资格赛 totalSlots 场 + 正赛 totalSlots-1 场），满值为 1 */
+    /** 赛事总进度：资格赛按晋级正赛人数计算、正赛按完成场次计算，两阶段各占 50%。 */
     private BigDecimal progressRate;
     private LocalDateTime registrationEndTime;
     private LocalDateTime qualifierEndTime;

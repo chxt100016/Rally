@@ -87,4 +87,13 @@ public class TournamentRepositoryImpl implements TournamentRepository {
                 .set(TournamentPO::getCurrentRound, round.name())
                 .update();
     }
+
+    @Override
+    public boolean bindOfflineMeetupIfAbsent(String tournamentId, String meetupId) {
+        return tournamentService.lambdaUpdate()
+                .eq(TournamentPO::getBizId, tournamentId)
+                .isNull(TournamentPO::getOfflineMeetupId)
+                .set(TournamentPO::getOfflineMeetupId, meetupId)
+                .update();
+    }
 }

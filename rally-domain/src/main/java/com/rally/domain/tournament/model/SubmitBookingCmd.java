@@ -16,6 +16,11 @@ import java.util.List;
 @Data
 public class SubmitBookingCmd {
 
+    /**
+     * 已创建的赛事约球ID；传入时更新该约球，不再创建新的草稿。
+     */
+    private String meetupId;
+
     /** 比赛ID */
     @NotBlank(message = "比赛ID不能为空")
     private String matchId;

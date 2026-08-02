@@ -87,4 +87,20 @@ public class TournamentEntry {
         this.data.setPaidTime(java.time.LocalDateTime.now());
         this.data.setCurrentRound(TournamentRoundEnum.firstMainRound(totalSlots));
     }
+
+    /**
+     * 比赛获胜后推进报名状态。资格赛胜者进入待支付；正赛胜者进入下一轮等待匹配。
+     * 决赛没有下一轮，冠军保留在 FINAL。
+     */
+    public void advanceAfterWin(TournamentRoundEnum completedRound) {
+        if (this.data.getStage() == TournamentEntryStageEnum.QUALIFY) {
+            this.data.setStatus(TournamentEntryStatusEnum.PAYING);
+            return;
+        }
+        this.data.setStatus(TournamentEntryStatusEnum.WAITING);
+        TournamentRoundEnum nextRound = completedRound.nextRound();
+        if (nextRound != null) {
+            this.data.setCurrentRound(nextRound);
+        }
+    }
 }

@@ -38,7 +38,7 @@ public class MeetupAppService {
 
     private final UserProfileDomainService userProfileDomainService;
 
-    private final MeetupBackgroundResolver backgroundResolver;
+    private final MeetupCardPackingService meetupCardPackingService;
 
     /**
      * 发布约球
@@ -83,7 +83,7 @@ public class MeetupAppService {
 
         // 4. 返回详情
         MeetupVO vo = MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
-        vo.setBackgroundImage(backgroundResolver.resolveStyle(data));
+        vo.setBackgroundImage(meetupCardPackingService.resolveBackgroundKey(data));
         return vo;
     }
 

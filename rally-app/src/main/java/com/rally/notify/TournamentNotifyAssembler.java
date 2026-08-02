@@ -36,10 +36,11 @@ public final class TournamentNotifyAssembler {
     }
 
     /** 匹配通知：thing7 赛事名称 / phrase2 匹配状态。 */
-    public static Map<String, Object> matchedData(String tournamentName, String opponentNames) {
+    public static Map<String, Object> matchedData(String tournamentName) {
         Map<String, Object> data = new HashMap<>();
         data.put("thing7", tournamentName);
-        data.put("phrase2", "已经为你匹配到对手「" + opponentNames + "」");
+        // 微信模板的 phrase 类型最多支持 5 个汉字，详细对手信息由赛事详情页展示。
+        data.put("phrase2", "匹配成功");
         return data;
     }
 

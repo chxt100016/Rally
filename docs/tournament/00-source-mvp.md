@@ -47,7 +47,7 @@ CREATE TABLE `rally_tournament` (
     `city_name` VARCHAR(32) NOT NULL COMMENT '城市名称',
     `ntrp_level` VARCHAR(16) NOT NULL COMMENT 'NTRP等级：3.0/3.5/4.0...',
     `gender_limit` VARCHAR(16) NOT NULL COMMENT '性别限制：ALL/MALE/FEMALE',
-    `total_slots` INT NOT NULL COMMENT '正赛签位：16/32/64',
+    `total_slots` INT NOT NULL COMMENT '正赛签位：2 到 64 的 2 次方',
     `offline_from_round` INT NOT NULL COMMENT '几强后转线下：4/8/16',
     `qualifier_group_size` INT NOT NULL DEFAULT 2 COMMENT '资格赛每组人数，默认2，可设3',
     `entry_fee` BIGINT NOT NULL COMMENT '报名费，单位：分',
@@ -132,12 +132,10 @@ CREATE TABLE `rally_tournament_match` (
     `submitted_time` DATETIME DEFAULT NULL COMMENT '结果提交时间',
     `reject_phase` VARCHAR(16) DEFAULT NULL COMMENT '终止比赛的拒绝发生阶段：SCHEDULE_REJECT(拒绝比赛)/RESULT_REJECT(拒绝结果)，仅终止比赛时写入',
     `reject_reason_code` VARCHAR(32) DEFAULT NULL COMMENT '拒绝理由编码，见理由预设表',
-    `reject_reason_text` VARCHAR(256) DEFAULT NULL COMMENT '理由为"其他"时的自由文本',
     `rejected_by` VARCHAR(32) DEFAULT NULL COMMENT '拒绝人用户ID',
     `rejected_time` DATETIME DEFAULT NULL COMMENT '拒绝时间',
     `last_rebook_by` VARCHAR(32) DEFAULT NULL COMMENT '最近一次打回重订的用户ID，打回不终止比赛，不留历史只记最近一次',
     `last_rebook_reason_code` VARCHAR(32) DEFAULT NULL COMMENT '打回理由编码',
-    `last_rebook_reason_text` VARCHAR(256) DEFAULT NULL COMMENT '打回理由为"其他"时的自由文本',
     `last_rebook_time` DATETIME DEFAULT NULL COMMENT '打回时间',
     `status` VARCHAR(16) NOT NULL DEFAULT 'MATCHED' COMMENT '状态：MATCHED/BOOKING/SCHEDULED/PENDING_CONFIRM/COMPLETED/REJECTED',
     `matched_time` DATETIME NOT NULL COMMENT '匹配时间',
@@ -169,27 +167,25 @@ CREATE TABLE `rally_tournament_match` (
 
 #### 拒绝理由预设
 
-两种终止性拒绝都必须选择理由，不能空着拒绝：
+两种终止性拒绝都必须选择理由，不能空着拒绝；理由只传并保存枚举 code：
 
 ```text
 拒绝比赛（SCHEDULE_REJECT）：
 - 时间/场地实在协调不了
 - 不想打了
-- 其他（需填自由文本）
 
 拒绝结果（RESULT_REJECT）：
-- 不服，我要申诉重来
-- 对手水平明显超出本赛事等级
-- 提交的结果不属实
-- 其他（需填自由文本）
+- 没发挥好，不服再战
+- 对手水平明显超出赛事等级
+- 比赛结果与实际不符
 ```
 
 打回重订（不终止）的理由预设：
 
 ```text
-- 时间不合适
-- 地点不合适
-- 其他（需填自由文本）
+- 比赛时间不合适
+- 比赛地点不合适
+- 时长不合适
 ```
 
 "不服，我要申诉重来"是刻意保留的产品设计：业余比赛氛围下，允许输家有一次不服气重来的机会，本质是把"拒绝结果"包装成一种有限额度的申诉权（受 `mainDrawRejectLimit`/`qualifierRejectLimit` 硬限制），用完即止，不是无成本翻盘。"提交的结果不属实"则是另一种性质——纠正记录错误，两者理由分开记录，方便后续观察数据分布。
@@ -211,7 +207,6 @@ CREATE TABLE `rally_tournament_match_participant` (
     `confirm_time` DATETIME DEFAULT NULL COMMENT '赛约确认时间',
     `result_confirm_status` VARCHAR(16) NOT NULL DEFAULT 'PENDING' COMMENT '结果确认状态：PENDING/CONFIRMED/REJECTED',
     `result_confirm_time` DATETIME DEFAULT NULL COMMENT '结果确认时间',
-    `is_winner` TINYINT(1) DEFAULT NULL COMMENT '是否晋级，流转到COMPLETED时按winnerId统一置位',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
@@ -220,7 +215,7 @@ CREATE TABLE `rally_tournament_match_participant` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='赛事比赛参与者表';
 ```
 
-昵称、性别等不冗余，需要时通过 `user_id` 查用户域。双打场景下同一队的两名选手各自一条记录（各自独立确认/拒绝），`team_id` 相同标识同队；单打每人一条，`team_id` 为空。提交比赛结果时"谁赢了"的选项按 `team_id` 分组展示为一个选项（而不是罗列4个用户），晋级判定时把同 `team_id` 的所有记录一并置 `is_winner`。
+昵称、性别等不冗余，需要时通过 `user_id` 查用户域。双打场景下同一队的两名选手各自一条记录（各自独立确认/拒绝），同队成员共用 `entry_no`；单打每人一条。比赛表的 `winner_entry_no` 是唯一胜者来源，展示与晋级时按参与者的 `entry_no` 匹配判断。
 
 - 单打1v1：2条记录；单打3人组：3条记录；双打1v1：4条记录（两队各2人，`team_id` 两两相同）
 - 赛约阶段：所有人 `confirmStatus = CONFIRMED` → 流转 `SCHEDULED`
@@ -462,9 +457,9 @@ Domain Service（TournamentMatchingService）职责：
 |------|------|
 | `POST /tournament/match/court-booker` | 选择/放弃订场人身份（乐观锁防止双方同时抢订场人身份） |
 | `POST /tournament/match/book` | 提交赛约（场地+时间） |
-| `POST /tournament/match/schedule-confirm` | 处理赛约：接受 / 打回重订（`rebookReasonCode`+可选文本） / 拒绝比赛（`rejectReasonCode`+可选文本） |
+| `POST /tournament/match/schedule-confirm` | 处理赛约：接受 / 打回重订（`rebookReasonCode`） / 拒绝比赛（`rejectReasonCode`） |
 | `POST /tournament/match/submit-result` | 提交比赛结果（选谁赢了/哪个队伍赢了） |
-| `POST /tournament/match/result-confirm` | 处理结果：确认 / 拒绝结果（`rejectReasonCode`+可选文本） |
+| `POST /tournament/match/result-confirm` | 处理结果：确认 / 拒绝结果（`rejectReasonCode`） |
 
 ### 4. 定时任务（内部）
 

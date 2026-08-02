@@ -39,7 +39,7 @@ public class TournamentMatchTimeoutJob {
         for (TournamentMatch match : matches) {
             try {
                 match.getData().setStatus(TournamentMatchStatusEnum.REJECTED);
-                match.getData().setRejectReason("TIMEOUT:无响应超时");
+                match.getData().setRejectReasonCode("TIMEOUT");
                 matchRepository.save(match.getData());
             } catch (Exception e) {
                 log.error("处理MATCHED超时比赛失败, matchId={}", match.getMatchId(), e);
@@ -54,7 +54,7 @@ public class TournamentMatchTimeoutJob {
         for (TournamentMatch match : matches) {
             try {
                 match.getData().setStatus(TournamentMatchStatusEnum.REJECTED);
-                match.getData().setRejectReason("TIMEOUT:订场人无响应超时");
+                match.getData().setRejectReasonCode("TIMEOUT");
                 matchRepository.save(match.getData());
             } catch (Exception e) {
                 log.error("处理BOOKING超时比赛失败, matchId={}", match.getMatchId(), e);

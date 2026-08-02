@@ -23,4 +23,5 @@ public class TournamentEntryDTO {
     private TournamentEntryStageEnum stage;
     private TournamentEntryStatusEnum status;
     private TournamentRoundEnum currentRound;
+    private String currentRoundShow;
 }

@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @Data
 public class MatchOpponentDTO {
     private String userId;
+    private Integer entryNo;
     private String nickname;
     private String avatarUrl;
     private GenderEnum gender;

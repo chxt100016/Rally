@@ -53,6 +53,19 @@ public class TournamentAdminController {
         return Result.ok();
     }
 
+    /** 创建赛事线下赛活动。 */
+    @PostMapping("/offline/meetup/create")
+    public Result<String> createOfflineMeetup(@Valid @RequestBody TournamentOfflineMeetupCmd cmd) {
+        return Result.ok(tournamentAdminAppService.createOfflineMeetup(cmd));
+    }
+
+    /** 手动执行一次赛事批量匹配。 */
+    @PostMapping("/match/run")
+    public Result<Void> runTournamentMatch() {
+        tournamentAdminAppService.runTournamentMatch();
+        return Result.ok();
+    }
+
     /**
      * 后台赛事列表
      */
