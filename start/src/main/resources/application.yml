@@ -25,6 +25,11 @@ upload:
     court:
         compress-kb: 20
 
+behavior-log:
+    enabled: true
+    queue-capacity: 2000
+    max-params-bytes: 16384
+
 wechat:
     mini:
         app-id: ${WECHAT_APP_ID}

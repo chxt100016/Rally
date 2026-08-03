@@ -45,7 +45,9 @@ public class AuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        com.rally.utils.UserContext.set(payload.get().getUserId());
+        String userId = payload.get().getUserId();
+        com.rally.utils.UserContext.set(userId);
+        request.setAttribute(UserBehaviorInterceptor.USER_ID_ATTRIBUTE, userId);
         return true;
     }
 
