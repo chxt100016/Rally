@@ -10,6 +10,7 @@ import com.rally.domain.tournament.model.Tournament;
 import com.rally.domain.tournament.model.TournamentEntry;
 import com.rally.domain.tournament.model.TournamentEntryDTO;
 import com.rally.domain.tournament.model.TournamentEntryPayCmd;
+import com.rally.domain.tournament.model.TournamentEntryUnfreezeCmd;
 import com.rally.domain.tournament.model.TournamentEntryUpdateCmd;
 import com.rally.domain.tournament.model.TournamentJoinCmd;
 import com.rally.domain.tournament.model.TournamentWithdrawCmd;
@@ -67,6 +68,16 @@ public class TournamentEntryAppService {
         String userId = UserContext.get();
         TournamentEntry entry = tournamentEntryService.getByTournamentAndUser(cmd.getTournamentId(), userId);
         tournamentEntryService.updatePreference(entry, cmd);
+    }
+
+    /** 解冻本人报名，恢复等待匹配状态。 */
+    @Transactional
+    public void unfreeze(TournamentEntryUnfreezeCmd cmd) {
+        String userId = UserContext.get();
+        Tournament tournament = tournamentAdminService.get(cmd.getTournamentId());
+        UserProfile userProfile = userProfileDomainService.get(userId);
+        TournamentEntry entry = tournamentEntryService.getByTournamentAndUser(cmd.getTournamentId(), userId);
+        tournamentEntryService.unfreeze(tournament, entry, userProfile);
     }
 
     /**

@@ -55,7 +55,7 @@ CREATE TABLE `rally_tournament_entry` (
     `court_ability` VARCHAR(16) NOT NULL COMMENT '场地能力：CAN_BOOK/CANNOT_BOOK',
     `available_times` VARCHAR(512) DEFAULT NULL COMMENT '可比赛时间，JSON数组',
     `stage` VARCHAR(8) NOT NULL DEFAULT 'QUALIFY' COMMENT '阶段：QUALIFY(资格赛)/MAIN(正赛)',
-    `status` VARCHAR(16) NOT NULL DEFAULT 'WAITING' COMMENT '状态：WAITING(排队匹配)/IN_MATCH(比赛中)/PAYING(待支付，仅QUALIFY阶段)/ELIMINATED(淘汰)/WITHDRAWN(主动退出)',
+    `status` VARCHAR(16) NOT NULL DEFAULT 'WAITING' COMMENT '状态：WAITING(排队匹配)/FROZEN(冻结)/IN_MATCH(比赛中)/PAYING(待支付，仅QUALIFY阶段)/ELIMINATED(淘汰)/WITHDRAWN(主动退出)',
     `current_round` VARCHAR(16) NOT NULL DEFAULT 'QUALIFIER' COMMENT '当前轮次：QUALIFIER/ROUND_32/ROUND_16/ROUND_8/ROUND_4/FINAL',
     `qualifier_reject_count` INT NOT NULL DEFAULT 0 COMMENT '资格赛阶段已拒绝次数',
     `main_draw_reject_count` INT NOT NULL DEFAULT 0 COMMENT '正赛阶段已拒绝次数',

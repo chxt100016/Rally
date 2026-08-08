@@ -46,6 +46,7 @@ public enum BizErrorCode {
     USER_EXT_NOT_FOUND(40013, "用户扩展信息不存在"),
     USER_EXT_KEY_INVALID(40014, "扩展字段类型无效"),
     WECHAT_PAYMENT_CODE_EMPTY(40015, "微信付款码不能为空"),
+    USER_PHONE_REQUIRED(40016, "请先绑定手机号"),
 
     // ========== 约球域 41001-41999 ==========
     MEETUP_NOT_FOUND(41001, "约球不存在"),

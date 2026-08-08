@@ -13,6 +13,8 @@ public class MatchParticipantDTO {
     private String nickname;
     private String avatarUrl;
     private GenderEnum gender;
+    /** 仅在当前用户查看自己的比赛时返回对手手机号。 */
+    private String phone;
     private Integer entryNo;
     private ConfirmStatusEnum confirmStatus;
     private ConfirmStatusEnum resultConfirmStatus;

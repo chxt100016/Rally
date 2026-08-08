@@ -63,6 +63,7 @@ public class TournamentPolicy {
         boolean inWindow = !now.isBefore(tournament.getData().getRegistrationStartTime())
                 && (tournament.getData().getRegistrationEndTime() == null || !now.isAfter(tournament.getData().getRegistrationEndTime()));
         Assert.isTrue(inWindow, BizErrorCode.TOURNAMENT_REGISTRATION_CLOSED);
+        assertPhoneBound(userProfile);
         assertGenderMatch(tournament, userProfile);
         assertNtrpLevelMatch(tournament, userProfile);
     }
@@ -104,7 +105,34 @@ public class TournamentPolicy {
         if (!profileIncomplete && !isNtrpLevelMatch(requiredNtrpLevel, userProfile)) {
             restrictions.add(TournamentJoinRestrictionEnum.LEVEL_NOT_MATCH);
         }
+        addPhoneRestriction(restrictions, userProfile);
         return restrictions;
+    }
+
+    public List<TournamentJoinRestrictionEnum> collectPhoneRestrictions(UserProfile userProfile) {
+        List<TournamentJoinRestrictionEnum> restrictions = new ArrayList<>();
+        if (userProfile == null) {
+            restrictions.add(TournamentJoinRestrictionEnum.NOT_LOGGED_IN);
+            return restrictions;
+        }
+        addPhoneRestriction(restrictions, userProfile);
+        return restrictions;
+    }
+
+    public void assertPhoneBound(UserProfile userProfile) {
+        Assert.isTrue(userProfile != null && userProfile.getUser() != null && userProfile.getUser().hasPhone(), BizErrorCode.USER_PHONE_REQUIRED);
+    }
+
+    public void assertCanUnfreeze(Tournament tournament) {
+        Assert.isTrue(tournament.getData().getStatus() == TournamentStatusEnum.ACTIVE, BizErrorCode.TOURNAMENT_STATUS_ILLEGAL);
+        LocalDateTime endTime = tournament.getData().getEndTime();
+        Assert.isTrue(endTime == null || !LocalDateTime.now().isAfter(endTime), BizErrorCode.TOURNAMENT_STATUS_ILLEGAL);
+    }
+
+    private void addPhoneRestriction(List<TournamentJoinRestrictionEnum> restrictions, UserProfile userProfile) {
+        if (userProfile.getUser() == null || !userProfile.getUser().hasPhone()) {
+            restrictions.add(TournamentJoinRestrictionEnum.PHONE_MISSING);
+        }
     }
 
     private void assertGenderMatch(Tournament tournament, UserProfile userProfile) {

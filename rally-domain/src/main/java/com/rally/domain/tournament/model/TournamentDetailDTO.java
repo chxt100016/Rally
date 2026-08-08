@@ -20,7 +20,7 @@ public class TournamentDetailDTO {
     private TournamentActionDTO action;
     /** 是否可报名（未报名时返回；NOT_REGISTERED_CLOSED 固定为 false） */
     private Boolean joinable;
-    /** 用户准入限制原因（仅 actionState 为 NOT_REGISTERED 时返回，可叠加） */
+    /** 用户限制原因（NOT_REGISTERED 返回报名限制，FROZEN 返回手机号限制，可叠加） */
     private List<TournamentJoinRestrictionEnum> restrictions;
     private List<TournamentTimelineEventDTO> myTimeline;
     private TournamentBracketDTO bracket;

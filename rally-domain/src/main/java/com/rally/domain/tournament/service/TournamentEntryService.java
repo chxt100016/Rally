@@ -95,6 +95,14 @@ public class TournamentEntryService {
         tournamentEntryRepository.save(entry.getData());
     }
 
+    /** 解冻本人报名：必须已绑定手机号且当前状态为 FROZEN，恢复为 WAITING。 */
+    public void unfreeze(Tournament tournament, TournamentEntry entry, UserProfile userProfile) {
+        tournamentPolicy.assertCanUnfreeze(tournament);
+        tournamentPolicy.assertPhoneBound(userProfile);
+        entry.unfreeze();
+        tournamentEntryRepository.save(entry.getData());
+    }
+
     /**
      * 统计某轮次已晋级下一轮的人数（按 entryNo 去重）
      * 资格赛特殊：统计 currentRound 不等于 QUALIFIER 的人数（即已进入正赛的人）

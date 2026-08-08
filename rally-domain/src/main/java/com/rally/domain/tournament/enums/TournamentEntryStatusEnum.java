@@ -10,6 +10,7 @@ import lombok.Getter;
 @Getter
 public enum TournamentEntryStatusEnum {
     WAITING("等待匹配"),
+    FROZEN("已冻结"),
     IN_MATCH("比赛中"),
     PAYING("待支付"),
     ELIMINATED("已淘汰"),

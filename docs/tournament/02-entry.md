@@ -7,12 +7,13 @@
 
 ## 聚合根 / 领域对象
 - **TournamentEntry（聚合根）**：一个用户在一个赛事内唯一一条报名（`uk_tournament_user`）。
-  - 关键字段：tournamentId、userId、partnerId（双打搭档）、preferredDistricts（区域 JSON）、courtAbility（CAN_BOOK/CANNOT_BOOK）、availableTimes（JSON）、stage（QUALIFY/MAIN）、status（WAITING/IN_MATCH/PAYING/ELIMINATED/WITHDRAWN）、currentRound、拒绝计数、qualifiedTime、paidTime。
+  - 关键字段：tournamentId、userId、partnerId（双打搭档）、preferredDistricts（区域 JSON）、courtAbility（CAN_BOOK/CANNOT_BOOK）、availableTimes（JSON）、stage（QUALIFY/MAIN）、status（WAITING/FROZEN/IN_MATCH/PAYING/ELIMINATED/WITHDRAWN）、currentRound、拒绝计数、qualifiedTime、paidTime。
   - 诞生：报名成功即 stage=QUALIFY、status=WAITING、currentRound=QUALIFIER。
   - 昵称/NTRP/性别不冗余，用 userId 回查用户域。
 
 ## 领域 Service 能力（TournamentEntryService）
-- `join(tournamentId, userId, 偏好)`：校验赛事 ACTIVE、在报名开放窗口内、性别/NTRP 符合限制、未重复报名；创建 Entry（WAITING）。
+- `join(tournamentId, userId, 偏好)`：校验赛事 ACTIVE、在报名开放窗口内、已绑定手机号、性别/NTRP 符合限制、未重复报名；创建 Entry（WAITING）。
+- `unfreeze(entry, userProfile)`：校验已绑定手机号且状态为 FROZEN，恢复为 WAITING。
 - `updatePreference(entry, 偏好)`：报名信息可随时修改（区域/场地能力/可比赛时间），仅在排队阶段（未进入 IN_MATCH）允许，避免比赛中改动影响匹配。
 - `withdraw(entry)`：退出。资格赛阶段直接置 WITHDRAWN；正赛阶段（已支付）需先触发退款（委托模块 5），退款成功后释放席位再置 WITHDRAWN。
 - 获取领域对象用 EntryService，不直接调 gateway。
@@ -24,6 +25,9 @@
 
 ### `POST /tournament/entry/update`
 修改报名偏好。入参 `TournamentEntryUpdateCmd`（entryId/tournamentId + 偏好字段）。仅本人、仅排队态可改。用于影响下一次凌晨匹配。
+
+### `POST /tournament/entry/unfreeze`
+解冻本人报名。入参仅含 tournamentId，userId 从 `UserContext.get()` 获取；仅允许 FROZEN → WAITING，且必须已绑定手机号。
 
 ### `POST /tournament/entry/withdraw`
 退出赛事。入参含 tournamentId。领域层按 stage 分流：

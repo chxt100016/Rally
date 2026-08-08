@@ -2,7 +2,7 @@
 
 **Base URL**: `/api/rally/tournament/detail`（微信小程序渠道：`/api/rally/wechat/tournament/detail`，入参/返参一致）
 
-只读聚合接口，赛事落地页收口为一个接口：聚合赛事信息、公开进程、当前用户报名与比赛、显式 `actionState`、个人时间线、签表、信用记录。前端只按 `actionState` switch-case 渲染"当前待办卡片"，不自行拼状态。
+只读聚合接口，赛事落地页收口为一个接口：聚合赛事信息、公开进程、当前用户报名与比赛、显式 `action`、个人时间线、签表、信用记录。前端只按 `action.state` switch-case 渲染"当前待办卡片"，不自行拼状态。
 
 ---
 
@@ -10,7 +10,7 @@
 
 **GET** `/{bizId}`
 
-`userId` 从登录态取，**支持匿名访问**（未登录时只返回 `tournament`/`progress`/`bracket` 公开区块，`actionState` 固定为 `NOT_LOGGED_IN`）。
+`userId` 从登录态取，**支持匿名访问**（未登录时 `action.state` 固定为 `NOT_LOGGED_IN`）。
 
 **路径参数**
 
@@ -26,9 +26,9 @@
 | `progress` | `TournamentProgressDTO` | 公开进程，所有访问者可见 |
 | `myEntry` | `TournamentEntryDTO\|null` | 当前用户报名信息，未报名/未登录为 null |
 | `myCurrentMatch` | `MyCurrentMatchDTO\|null` | 当前用户进行中的比赛，无则为 null |
-| `actionState` | `string` | 显式待办状态，驱动"当前待办卡片"渲染 |
-| `joinable` | `boolean\|null` | 是否满足报名用户条件，仅 `actionState=NOT_REGISTERED` 时返回 |
-| `restrictions` | `string[]\|null` | 不可报名原因，仅 `actionState=NOT_REGISTERED` 时返回，可叠加，文案由前端拼装 |
+| `action` | `TournamentActionDTO` | 待办状态及展示文案：`state`/`stateShow`/`stateTitle`/`stateSubtitle` |
+| `joinable` | `boolean\|null` | 是否满足报名条件，仅 `action.state=NOT_REGISTERED` 时返回；报名关闭时固定为 false |
+| `restrictions` | `string[]\|null` | `NOT_REGISTERED` 返回报名限制，`FROZEN` 返回手机号限制，可叠加，文案由前端拼装 |
 | `myTimeline` | `TournamentTimelineEventDTO[]` | 个人视角事件流，不含未登录/未报名场景 |
 | `bracket` | `TournamentBracketDTO` | 签表对阵图数据 |
 | `rejectRecords` | `TournamentRejectRecordDTO[]` | 赛事所有参赛者的拒绝比赛次数统计（不限于本人） |
@@ -95,29 +95,37 @@
 
 `MatchOpponentDTO`：`userId`/`nickname`/`avatarUrl`/`ntrpScore`
 
-`MatchParticipantDTO`：`userId`/`entryNo`/`confirmStatus`/`resultConfirmStatus`
+`MatchParticipantDTO`：`userId`/`nickname`/`avatarUrl`/`gender`/`phone`/`entryNo`/`confirmStatus`/`resultConfirmStatus`。`phone` 仅在当前用户查看自己的进行中比赛时，为不同 `entryNo` 的对手返回；本人和同队搭档不返回。
 
-### actionState（待办状态枚举）
+### action.state（待办状态枚举）
 
 由后端根据 `myEntry.status` + `myCurrentMatch.status` + 是否为订场人 + 各方确认状态一次性计算，前端只需 switch-case 渲染，不需要自行拼装状态判断逻辑。
 
 | 取值 | 说明 |
 |---|---|
 | `NOT_LOGGED_IN` | 未登录 |
-| `NOT_REGISTERED` | 未报名 |
+| `NOT_REGISTERED` | 未报名，可检查报名限制 |
+| `NOT_REGISTERED_CLOSED` | 报名已关闭 |
+| `FROZEN` | 报名已冻结，绑定手机号后可解冻 |
+| `AWAIT_QUALIFIER_START` | 报名成功，等待资格赛开始 |
 | `AWAIT_PAYMENT` | 待支付锁定正赛席位 |
-| `AWAIT_COURT_BOOKER_SELECT` | 待选订场人 |
-| `AWAIT_BOOKING` | 我是订场人，待提交场地时间 |
+| `AWAIT_COURT_BOOKER_SELECT` | 待选择订场人 |
+| `AWAIT_BOOKING` | 本人是订场人，待提交场地时间 |
+| `AWAIT_BOOKING_REBOOK` | 赛约被打回，待重新提交 |
 | `AWAIT_BOOKING_OPPONENT` | 对方订场中 |
-| `AWAIT_SCHEDULE_CONFIRM` | 待我接受/打回重订/拒绝比赛 |
-| `AWAIT_RESULT_SUBMIT` | 待提交谁赢了 |
-| `AWAIT_RESULT_CONFIRM` | 待我确认结果/拒绝结果 |
-| `WAITING_MATCH` | 排队等待下次匹配（或已操作，等对方响应） |
+| `AWAIT_SCHEDULE_CONFIRM` | 待本人确认赛约 |
+| `AWAIT_OPPONENT_SCHEDULE_CONFIRM` | 本人已确认，等待对方确认赛约 |
+| `AWAIT_PLAYING` | 尚未到约定开赛时间 |
+| `AWAIT_RESULT_SUBMIT` | 待提交比赛结果 |
+| `AWAIT_RESULT_CONFIRM` | 待本人确认结果 |
+| `AWAIT_OPPONENT_RESULT_CONFIRM` | 本人已确认，等待其他人确认结果 |
+| `WAITING_MATCH` | 等待匹配或等待对方后续操作 |
+| `IN_OFFLINE_STAGE` | 已进入线下赛阶段 |
 | `ELIMINATED` | 已被淘汰 |
 | `WITHDRAWN` | 已主动退出 |
-| `QUALIFIED_MAIN_DRAW` | 已获得正赛资格，正赛排队中 |
+| `END` | 赛事已结束 |
 
-当 `actionState=NOT_REGISTERED` 时，`restrictions` 可能包含：`NOT_LOGGED_IN`（未登录）、`LEVEL_NOT_MATCH`（NTRP 等级不符）、`PROFILE_INCOMPLETE`（个人信息未完善）、`ONBOARDING_INCOMPLETE`（网球档案未完善）、`REGISTRATION_INCOMPLETE`（个人信息和网球档案均未完善）。列表为空时 `joinable=true`。
+当 `action.state=NOT_REGISTERED` 时，`restrictions` 可能包含：`NOT_LOGGED_IN`、`LEVEL_NOT_MATCH`、`PROFILE_INCOMPLETE`、`ONBOARDING_INCOMPLETE`、`REGISTRATION_INCOMPLETE`、`PHONE_MISSING`。列表为空时 `joinable=true`。当 `action.state=FROZEN` 时仅检查手机号，未绑定返回 `PHONE_MISSING`，已绑定返回空列表。
 
 ### myTimeline（个人事件流）
 

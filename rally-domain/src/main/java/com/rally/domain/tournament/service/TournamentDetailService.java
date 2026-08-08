@@ -45,6 +45,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -105,7 +106,7 @@ public class TournamentDetailService {
         TournamentMatch activeMatch = null;
         if (myEntryData.getStatus() == TournamentEntryStatusEnum.IN_MATCH) {
             activeMatch = tournamentMatchRepository.findActiveMatchByTournamentAndUser(tournamentId, userId);
-            detail.setMyCurrentMatch(toMyCurrentMatchDTO(activeMatch, userId, tournamentId, tournamentData));
+            detail.setMyCurrentMatch(toMyCurrentMatchDTO(activeMatch, myEntryData.getEntryNo(), tournamentId, tournamentData));
         }
 
         setAction(detail, calculateActionState(tournamentData, myEntryData, activeMatch, userId));
@@ -256,7 +257,7 @@ public class TournamentDetailService {
         return dto;
     }
 
-    private MyCurrentMatchDTO toMyCurrentMatchDTO(TournamentMatch match, String userId, String tournamentId, TournamentData tournamentData) {
+    private MyCurrentMatchDTO toMyCurrentMatchDTO(TournamentMatch match, Integer currentEntryNo, String tournamentId, TournamentData tournamentData) {
         if (match == null) {
             return null;
         }
@@ -274,7 +275,7 @@ public class TournamentDetailService {
         dto.setGroupSize(data.getRound() == TournamentRoundEnum.QUALIFIER ? tournamentData.getQualifierGroupSize() : 2);
 
         List<MatchParticipantData> opponentParticipants = match.getParticipants().stream()
-                .filter(p -> !p.getUserId().equals(userId))
+                .filter(p -> currentEntryNo != null && p.getEntryNo() != null && !Objects.equals(p.getEntryNo(), currentEntryNo))
                 .collect(Collectors.toList());
 
         if (data.getStatus() == TournamentMatchStatusEnum.BOOKING) {
@@ -297,7 +298,7 @@ public class TournamentDetailService {
         return dto;
     }
 
-    private TournamentActionStateEnum calculateActionState(TournamentData tournamentData, TournamentEntryData entry, TournamentMatch activeMatch, String userId) {
+    TournamentActionStateEnum calculateActionState(TournamentData tournamentData, TournamentEntryData entry, TournamentMatch activeMatch, String userId) {
         TournamentEntryStatusEnum status = entry.getStatus();
         if (tournamentData.getEndTime() != null && LocalDateTime.now().isAfter(tournamentData.getEndTime())) {
             return TournamentActionStateEnum.END;
@@ -307,6 +308,9 @@ public class TournamentDetailService {
         }
         if (status == TournamentEntryStatusEnum.ELIMINATED) {
             return TournamentActionStateEnum.ELIMINATED;
+        }
+        if (status == TournamentEntryStatusEnum.FROZEN) {
+            return TournamentActionStateEnum.FROZEN;
         }
         if (entry.getCurrentRound() == tournamentData.getOfflineFromRound()) {
             return TournamentActionStateEnum.IN_OFFLINE_STAGE;
@@ -320,7 +324,7 @@ public class TournamentDetailService {
             }
             return TournamentActionStateEnum.WAITING_MATCH;
         }
-        // IN_MATCH
+        Assert.isTrue(status == TournamentEntryStatusEnum.IN_MATCH, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
         if (activeMatch == null) {
             return TournamentActionStateEnum.WAITING_MATCH;
         }

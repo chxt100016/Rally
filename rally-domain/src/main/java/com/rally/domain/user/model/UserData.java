@@ -30,4 +30,8 @@ public class UserData {
     public boolean isBasicDefault() {
         return UserConst.DEFAULT_AVATAR_URL.equals(avatarUrl) || UserConst.DEFAULT_NICKNAME.equals(nickname);
     }
+
+    public boolean hasPhone() {
+        return StringUtils.isNotBlank(phone);
+    }
 }

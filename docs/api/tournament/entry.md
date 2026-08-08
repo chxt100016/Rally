@@ -8,7 +8,7 @@
 
 **POST** `/join`
 
-需赛事处于 `ACTIVE` 状态且在报名时间窗口内，同一用户对同一赛事只能报名一次。
+需赛事处于 `ACTIVE` 状态且在报名时间窗口内，同一用户对同一赛事只能报名一次；用户必须已绑定手机号。
 
 **请求参数**
 
@@ -31,7 +31,7 @@
 | `courtAbility` | `string` | 场地能力 |
 | `availableTimes` | `string[]` | 可比赛时间 |
 | `stage` | `string` | 报名阶段：`QUALIFY`/`MAIN` |
-| `status` | `string` | 报名状态：`WAITING`/`IN_MATCH`/`PAYING`/`ELIMINATED`/`WITHDRAWN` |
+| `status` | `string` | 报名状态：`WAITING`/`FROZEN`/`IN_MATCH`/`PAYING`/`ELIMINATED`/`WITHDRAWN` |
 | `currentRound` | `string` | 当前轮次 |
 
 **curl 示例**
@@ -136,3 +136,29 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/entry/pay' \
   -H 'Authorization: Bearer <token>' \
   -d '{"tournamentId": "T202608010001"}'
 ```
+
+---
+
+## 5. 解冻本人报名
+
+**POST** `/unfreeze`
+
+仅允许当前登录用户解冻自己在指定赛事中的报名。报名状态必须为 `FROZEN`，且用户必须已绑定手机号；解冻成功后状态变为 `WAITING`，重新进入匹配池。
+
+**请求参数**
+
+| 参数名 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `tournamentId` | `string` | 是 | 赛事bizId |
+
+**响应数据**：无
+
+**curl 示例**
+```bash
+curl -X POST 'http://localhost:8080/api/rally/tournament/entry/unfreeze' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <token>' \
+  -d '{"tournamentId": "T202608010001"}'
+```
+
+微信小程序渠道路径为 `/api/rally/wechat/tournament/entry/unfreeze`，请求体一致。

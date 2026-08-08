@@ -75,6 +75,15 @@ public class TournamentEntry {
         this.data.setStatus(TournamentEntryStatusEnum.WITHDRAWN);
     }
 
+    public void assertCanUnfreeze() {
+        Assert.isTrue(this.data.getStatus() == TournamentEntryStatusEnum.FROZEN, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
+    }
+
+    public void unfreeze() {
+        assertCanUnfreeze();
+        this.data.setStatus(TournamentEntryStatusEnum.WAITING);
+    }
+
     /** 支付下单前置：必须处于资格赛待支付状态 */
     public void assertCanPay() {
         Assert.isTrue(this.data.getStatus() == TournamentEntryStatusEnum.PAYING, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);

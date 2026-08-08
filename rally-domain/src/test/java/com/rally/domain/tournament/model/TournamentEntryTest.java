@@ -63,6 +63,30 @@ public class TournamentEntryTest {
         new TournamentEntry(data).assertCanUpdatePreference();
     }
 
+    @Test
+    public void shouldUnfreezeEntryToWaitingWithoutChangingProgress() {
+        TournamentEntryData data = entryData(TournamentEntryStageEnum.MAIN, TournamentRoundEnum.ROUND_16);
+        data.setStatus(TournamentEntryStatusEnum.FROZEN);
+        data.setEntryNo(8);
+        data.setPartnerId("partner");
+
+        new TournamentEntry(data).unfreeze();
+
+        assertEquals(TournamentEntryStatusEnum.WAITING, data.getStatus());
+        assertEquals(TournamentEntryStageEnum.MAIN, data.getStage());
+        assertEquals(TournamentRoundEnum.ROUND_16, data.getCurrentRound());
+        assertEquals(Integer.valueOf(8), data.getEntryNo());
+        assertEquals("partner", data.getPartnerId());
+    }
+
+    @Test(expected = BusinessException.class)
+    public void shouldRejectUnfreezeWhenEntryIsNotFrozen() {
+        TournamentEntryData data = entryData(TournamentEntryStageEnum.MAIN, TournamentRoundEnum.ROUND_16);
+        data.setStatus(TournamentEntryStatusEnum.WAITING);
+
+        new TournamentEntry(data).unfreeze();
+    }
+
     private TournamentEntryData entryData(TournamentEntryStageEnum stage, TournamentRoundEnum round) {
         TournamentEntryData data = new TournamentEntryData();
         data.setStage(stage);

@@ -59,15 +59,15 @@ public class TournamentDetailAppService {
             detail.getTournament().setWechatGroupQrCodeUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getWechatGroupQrCodeUrl()));
         }
 
-        fillJoinRestrictions(detail, userId);
-
         Map<String, UserProfile> profiles = Map.of();
         List<String> userIds = collectUserIds(detail);
         if (!userIds.isEmpty()) {
             profiles = userProfileDomainService.listMap(userIds);
             fillNicknames(detail, profiles);
+            fillOpponentPhones(detail, userId, profiles);
         }
 
+        fillJoinRestrictions(detail, userId, profiles);
         resolveAwaitPlayingState(detail);
         fillAction(detail, profiles);
         fillMeetupCard(detail);
@@ -78,20 +78,24 @@ public class TournamentDetailAppService {
     /**
      * 未报名时返回登录、档案完整度和 NTRP 等级限制，供前端决定报名按钮及提示文案。
      */
-    private void fillJoinRestrictions(TournamentDetailDTO detail, String userId) {
+    private void fillJoinRestrictions(TournamentDetailDTO detail, String userId, Map<String, UserProfile> profiles) {
         TournamentActionStateEnum actionState = actionState(detail);
-        if ((actionState != TournamentActionStateEnum.NOT_REGISTERED
-                && actionState != TournamentActionStateEnum.NOT_REGISTERED_CLOSED)
-                || detail.getTournament() == null) {
-            return;
-        }
         if (actionState == TournamentActionStateEnum.NOT_REGISTERED_CLOSED) {
             detail.setJoinable(false);
             return;
         }
-        UserProfile userProfile = userId == null ? null : userProfileDomainService.get(userId);
-        List<TournamentJoinRestrictionEnum> restrictions = tournamentPolicy.collectJoinRestrictions(
-                detail.getTournament().getNtrpLevel(), userProfile);
+        if ((actionState != TournamentActionStateEnum.NOT_REGISTERED && actionState != TournamentActionStateEnum.FROZEN) || detail.getTournament() == null) {
+            return;
+        }
+        UserProfile userProfile = userId == null ? null : profiles.get(userId);
+        if (userProfile == null && userId != null) {
+            userProfile = userProfileDomainService.get(userId);
+        }
+        if (actionState == TournamentActionStateEnum.FROZEN) {
+            detail.setRestrictions(tournamentPolicy.collectPhoneRestrictions(userProfile));
+            return;
+        }
+        List<TournamentJoinRestrictionEnum> restrictions = tournamentPolicy.collectJoinRestrictions(detail.getTournament().getNtrpLevel(), userProfile);
         detail.setRestrictions(restrictions);
         detail.setJoinable(restrictions.isEmpty());
     }
@@ -198,6 +202,26 @@ public class TournamentDetailAppService {
         participant.setGender(profile.getUser().getGender());
     }
 
+    /** 仅向当前用户返回不同 entryNo 对手的手机号；无法确认本人队伍时不返回任何手机号。 */
+    void fillOpponentPhones(TournamentDetailDTO detail, String userId, Map<String, UserProfile> profiles) {
+        MyCurrentMatchDTO match = detail.getMyCurrentMatch();
+        if (userId == null || detail.getMyEntry() == null || detail.getMyEntry().getEntryNo() == null || match == null || match.getParticipants() == null) {
+            return;
+        }
+        Integer currentEntryNo = detail.getMyEntry().getEntryNo();
+        long currentParticipantCount = match.getParticipants().stream().filter(participant -> userId.equals(participant.getUserId())).filter(participant -> Objects.equals(currentEntryNo, participant.getEntryNo())).count();
+        boolean entryNoConflict = match.getParticipants().stream().filter(participant -> userId.equals(participant.getUserId())).anyMatch(participant -> !Objects.equals(currentEntryNo, participant.getEntryNo()));
+        if (currentParticipantCount != 1 || entryNoConflict) {
+            return;
+        }
+        match.getParticipants().stream().filter(participant -> participant.getEntryNo() != null && !Objects.equals(currentEntryNo, participant.getEntryNo())).forEach(participant -> {
+            UserProfile profile = profiles.get(participant.getUserId());
+            if (profile != null && profile.getUser() != null && profile.getUser().hasPhone()) {
+                participant.setPhone(profile.getUser().getPhone());
+            }
+        });
+    }
+
     /**
      * 状态文案统一由枚举维护；涉及对手或打回重订的信息在昵称回填后替换占位内容。
      */
@@ -256,8 +280,17 @@ public class TournamentDetailAppService {
             return "对手";
         }
         String currentUserId = UserContext.getIfPresent();
+        Integer currentEntryNo = match.getParticipants().stream()
+                .filter(participant -> Objects.equals(participant.getUserId(), currentUserId))
+                .map(MatchParticipantDTO::getEntryNo)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+        if (currentEntryNo == null) {
+            return "对手";
+        }
         String names = match.getParticipants().stream()
-                .filter(participant -> !participant.getUserId().equals(currentUserId))
+                .filter(participant -> participant.getEntryNo() != null && !Objects.equals(participant.getEntryNo(), currentEntryNo))
                 .map(MatchParticipantDTO::getNickname)
                 .filter(Objects::nonNull)
                 .filter(name -> !name.isBlank())

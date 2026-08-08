@@ -4,6 +4,7 @@ import com.rally.domain.payment.model.PrepayDTO;
 import com.rally.domain.tour.model.Result;
 import com.rally.domain.tournament.model.TournamentEntryDTO;
 import com.rally.domain.tournament.model.TournamentEntryPayCmd;
+import com.rally.domain.tournament.model.TournamentEntryUnfreezeCmd;
 import com.rally.domain.tournament.model.TournamentEntryUpdateCmd;
 import com.rally.domain.tournament.model.TournamentJoinCmd;
 import com.rally.domain.tournament.model.TournamentWithdrawCmd;
@@ -37,6 +38,15 @@ public class TournamentEntryController {
     @PostMapping("/update")
     public Result<Void> update(@Valid @RequestBody TournamentEntryUpdateCmd cmd) {
         tournamentEntryAppService.update(cmd);
+        return Result.ok();
+    }
+
+    /**
+     * 解冻本人报名，重新进入匹配池
+     */
+    @PostMapping("/unfreeze")
+    public Result<Void> unfreeze(@Valid @RequestBody TournamentEntryUnfreezeCmd cmd) {
+        tournamentEntryAppService.unfreeze(cmd);
         return Result.ok();
     }
 

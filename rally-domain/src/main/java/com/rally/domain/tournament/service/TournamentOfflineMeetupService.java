@@ -9,6 +9,7 @@ import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.model.MeetupPublishCmd;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.MeetupPolicy;
+import com.rally.domain.tournament.enums.TournamentEntryStatusEnum;
 import com.rally.domain.tournament.gateway.TournamentEntryRepository;
 import com.rally.domain.tournament.gateway.TournamentRepository;
 import com.rally.domain.tournament.model.TournamentData;
@@ -42,6 +43,7 @@ public class TournamentOfflineMeetupService {
 
         List<String> participantUserIds = tournamentEntryRepository.findByTournamentId(cmd.getTournamentId()).stream()
                 .filter(entry -> entry.getCurrentRound() == tournament.getOfflineFromRound())
+                .filter(entry -> entry.getStatus() == TournamentEntryStatusEnum.WAITING)
                 .map(entry -> entry.getUserId())
                 .distinct()
                 .toList();

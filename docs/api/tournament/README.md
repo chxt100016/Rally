@@ -72,7 +72,7 @@
 `QUALIFY` 资格赛 / `MAIN` 正赛
 
 ### TournamentEntryStatusEnum（报名状态）
-`WAITING` 排队匹配 / `IN_MATCH` 比赛中 / `PAYING` 待支付（仅 QUALIFY 阶段） / `ELIMINATED` 淘汰 / `WITHDRAWN` 主动退出
+`WAITING` 排队匹配 / `FROZEN` 已冻结 / `IN_MATCH` 比赛中 / `PAYING` 待支付（仅 QUALIFY 阶段） / `ELIMINATED` 淘汰 / `WITHDRAWN` 主动退出
 
 ### TournamentRoundEnum（轮次）
 `QUALIFIER` / `ROUND_32` / `ROUND_16` / `ROUND_8` / `ROUND_4` / `FINAL`

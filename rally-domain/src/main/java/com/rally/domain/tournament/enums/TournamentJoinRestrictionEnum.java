@@ -1,10 +1,10 @@
 package com.rally.domain.tournament.enums;
 
 /**
- * 赛事未报名场景下的准入限制原因（可叠加）。
+ * 赛事报名和解冻场景下的用户限制原因（可叠加）。
  * <p>
- * 仅在 actionState 为 NOT_REGISTERED 时计算；列表为空表示当前用户满足报名所需的
- * 登录、档案和 NTRP 等级条件，具体文案由前端拼装。
+ * NOT_REGISTERED 返回报名所需的登录、档案、NTRP 和手机号限制；
+ * FROZEN 仅返回手机号限制，具体文案由前端拼装。
  */
 public enum TournamentJoinRestrictionEnum {
     /** 尚未登录 */
@@ -17,5 +17,7 @@ public enum TournamentJoinRestrictionEnum {
     ONBOARDING_INCOMPLETE,
     /** 个人信息和球员档案均未完善 */
     REGISTRATION_INCOMPLETE,
+    /** 尚未绑定手机号 */
+    PHONE_MISSING,
     ;
 }
