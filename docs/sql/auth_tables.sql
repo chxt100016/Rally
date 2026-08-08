@@ -16,7 +16,7 @@ CREATE TABLE user (
     birthday    DATE         DEFAULT NULL COMMENT '生日，用于年龄段筛选',
     bio         VARCHAR(255) DEFAULT NULL COMMENT '个人简介',
     city_code   VARCHAR(32)  DEFAULT NULL COMMENT '用户当前城市编码',
-    phone       VARCHAR(20)  DEFAULT NULL COMMENT '手机号（MVP 不收集，列保留供后续手机号注册使用）',
+    phone       VARCHAR(20)  DEFAULT NULL COMMENT '微信授权手机号',
     email       VARCHAR(100) DEFAULT NULL COMMENT '邮箱（MVP 不收集，列保留）',
     create_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
     update_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',

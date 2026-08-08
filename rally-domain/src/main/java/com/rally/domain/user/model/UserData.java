@@ -20,6 +20,7 @@ public class UserData {
     private String bio;
     /** 用户当前城市编码 */
     private String cityCode;
+    private String phone;
 
 
 

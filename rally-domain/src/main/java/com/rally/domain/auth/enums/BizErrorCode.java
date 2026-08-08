@@ -27,6 +27,7 @@ public enum BizErrorCode {
     // ========== 微信相关 30001-39999 ==========
     WECHAT_LOGIN_FAILED(30001, "微信登录失败"),
     WECHAT_AUTH_FAILED(30002, "微信授权失败"),
+    WECHAT_PHONE_NUMBER_FAILED(30003, "获取微信手机号失败"),
 
     // ========== 用户域 40001-40999 ==========
     ONBOARDING_INCOMPLETE(40001, "请先完善网球档案"),

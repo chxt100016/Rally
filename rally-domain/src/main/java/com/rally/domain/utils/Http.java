@@ -91,6 +91,8 @@ public class Http {
 
     private boolean printCurl;
 
+    private boolean sensitive;
+
     private HttpHost proxy;
 
     private String proxyUsername;
@@ -162,6 +164,11 @@ public class Http {
     public Http formEncoded(){
         this.formEncoded = true;
         this.header("Content-Type", "application/x-www-form-urlencoded");
+        return this;
+    }
+
+    public Http sensitive() {
+        this.sensitive = true;
         return this;
     }
 
@@ -337,7 +344,7 @@ public class Http {
         this.setUri();
         this.setEntity();
 
-        if (this.printCurl) {
+        if (this.printCurl && !this.sensitive) {
             log.info("[curl] {}", buildCurlCommand());
         }
 
@@ -371,9 +378,8 @@ public class Http {
             this.success = true;
 
         } catch (Exception e) {
-            log.error("http 请求异常，url:{}, entity:{}",
-                this.request.getURI() != null ? this.request.getURI().toString() : "unknown",
-                this.entity, e);
+            String requestUrl = this.sensitive ? "***" : this.request.getURI() != null ? this.request.getURI().toString() : "unknown";
+            log.error("http 请求异常，url:{}, entity:{}", requestUrl, this.sensitive ? "***" : this.entity, e);
             this.contentByteArray = null;
             this.success = false;
         } finally {

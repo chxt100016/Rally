@@ -3,6 +3,8 @@ package com.rally.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rally.domain.behavior.model.UserBehaviorLogData;
 import com.rally.utils.UserContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +27,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -37,6 +40,7 @@ public class UserBehaviorInterceptor implements HandlerInterceptor {
 
     private static final String START_TIME_ATTRIBUTE = UserBehaviorInterceptor.class.getName() + ".startTime";
     private static final String OCCURRED_AT_ATTRIBUTE = UserBehaviorInterceptor.class.getName() + ".occurredAt";
+    private static final Set<String> SENSITIVE_PARAM_NAMES = Set.of("code", "phone", "phonenumber", "purephonenumber");
 
     private final UserBehaviorLogWriter writer;
     private final ObjectMapper objectMapper;
@@ -125,6 +129,7 @@ public class UserBehaviorInterceptor implements HandlerInterceptor {
             }
         }
         params.put("body", body);
+        params = redactSensitive(params);
 
         String json = toJson(params);
         int jsonBytes = json.getBytes(StandardCharsets.UTF_8).length;
@@ -205,6 +210,49 @@ public class UserBehaviorInterceptor implements HandlerInterceptor {
             }
         }
         return isText(wrapper.getContentType()) ? body : Collections.emptyMap();
+    }
+
+    private Map<String, Object> redactSensitive(Map<?, ?> source) {
+        Map<String, Object> redacted = new LinkedHashMap<>();
+        source.forEach((key, value) -> {
+            String name = String.valueOf(key);
+            redacted.put(name, isSensitiveParam(name) ? "***" : redactSensitiveValue(value));
+        });
+        return redacted;
+    }
+
+    private Object redactSensitiveValue(Object value) {
+        if (value instanceof Map<?, ?> map) {
+            return redactSensitive(map);
+        }
+        if (value instanceof List<?> list) {
+            return list.stream().map(this::redactSensitiveValue).toList();
+        }
+        if (value instanceof ObjectNode objectNode) {
+            ObjectNode redacted = objectNode.deepCopy();
+            List<String> names = new ArrayList<>();
+            redacted.fieldNames().forEachRemaining(names::add);
+            names.forEach(name -> {
+                if (isSensitiveParam(name)) {
+                    redacted.put(name, "***");
+                } else {
+                    redacted.set(name, (JsonNode) redactSensitiveValue(redacted.get(name)));
+                }
+            });
+            return redacted;
+        }
+        if (value instanceof ArrayNode arrayNode) {
+            ArrayNode redacted = arrayNode.deepCopy();
+            for (int i = 0; i < redacted.size(); i++) {
+                redacted.set(i, (JsonNode) redactSensitiveValue(redacted.get(i)));
+            }
+            return redacted;
+        }
+        return value;
+    }
+
+    private boolean isSensitiveParam(String name) {
+        return SENSITIVE_PARAM_NAMES.contains(name.toLowerCase(Locale.ROOT));
     }
 
     private Map<String, Object> omittedBody(String reason, long originalBytes) {
