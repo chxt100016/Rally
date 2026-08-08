@@ -81,6 +81,13 @@ public class TournamentAdminController {
         return Result.ok();
     }
 
+    /** 将指定用户处于等待匹配状态的赛事报名冻结。 */
+    @PostMapping("/entry/freeze")
+    public Result<Void> freezeEntry(@Valid @RequestBody TournamentEntryFreezeCmd cmd) {
+        tournamentAdminAppService.freezeEntry(cmd);
+        return Result.ok();
+    }
+
     /**
      * 后台赛事列表
      */

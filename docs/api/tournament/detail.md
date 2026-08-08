@@ -27,7 +27,6 @@
 | `myEntry` | `TournamentEntryDTO\|null` | 当前用户报名信息，未报名/未登录为 null |
 | `myCurrentMatch` | `MyCurrentMatchDTO\|null` | 当前用户进行中的比赛，无则为 null |
 | `action` | `TournamentActionDTO` | 待办状态及展示文案：`state`/`stateShow`/`stateTitle`/`stateSubtitle` |
-| `joinable` | `boolean\|null` | 是否满足报名条件，仅 `action.state=NOT_REGISTERED` 时返回；报名关闭时固定为 false |
 | `restrictions` | `string[]\|null` | `NOT_REGISTERED` 返回报名限制，`FROZEN` 返回手机号限制，可叠加，文案由前端拼装 |
 | `myTimeline` | `TournamentTimelineEventDTO[]` | 个人视角事件流，不含未登录/未报名场景 |
 | `bracket` | `TournamentBracketDTO` | 签表对阵图数据 |
@@ -125,7 +124,7 @@
 | `WITHDRAWN` | 已主动退出 |
 | `END` | 赛事已结束 |
 
-当 `action.state=NOT_REGISTERED` 时，`restrictions` 可能包含：`NOT_LOGGED_IN`、`LEVEL_NOT_MATCH`、`PROFILE_INCOMPLETE`、`ONBOARDING_INCOMPLETE`、`REGISTRATION_INCOMPLETE`、`PHONE_MISSING`。列表为空时 `joinable=true`。当 `action.state=FROZEN` 时仅检查手机号，未绑定返回 `PHONE_MISSING`，已绑定返回空列表。
+当 `action.state=NOT_REGISTERED` 时，`restrictions` 可能包含：`NOT_LOGGED_IN`、`LEVEL_NOT_MATCH`、`PROFILE_INCOMPLETE`、`ONBOARDING_INCOMPLETE`、`REGISTRATION_INCOMPLETE`、`PHONE_MISSING`。列表为空时允许报名。当 `action.state=FROZEN` 时仅检查手机号，未绑定返回 `PHONE_MISSING`，已绑定返回空列表。
 
 ### myTimeline（个人事件流）
 

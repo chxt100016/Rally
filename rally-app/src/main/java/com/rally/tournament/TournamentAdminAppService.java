@@ -7,6 +7,7 @@ import com.rally.domain.notify.service.NotifySubscribeService;
 import com.rally.domain.tournament.model.*;
 import com.rally.domain.tournament.service.TournamentAdminService;
 import com.rally.domain.tournament.service.TournamentBatchMatchService;
+import com.rally.domain.tournament.service.TournamentEntryService;
 import com.rally.domain.tournament.service.TournamentOfflineMeetupService;
 import com.rally.notify.TournamentNotifyAssembler;
 import com.rally.tournament.convert.TournamentAppConvertMapper;
@@ -31,6 +32,8 @@ public class TournamentAdminAppService {
     private final TournamentOfflineMeetupService tournamentOfflineMeetupService;
 
     private final TournamentBatchMatchService tournamentBatchMatchService;
+
+    private final TournamentEntryService tournamentEntryService;
 
     private final NotifySubscribeService notifySubscribeService;
 
@@ -108,6 +111,13 @@ public class TournamentAdminAppService {
     /** 运营批量取消一个赛事中尚未提交订场信息的比赛，并将参赛者退回当前轮次的匹配池。 */
     public void cancelUnsubmittedTournamentMatches(String tournamentId) {
         tournamentBatchMatchService.cancelUnsubmittedMatches(tournamentId);
+    }
+
+    /** 运营将指定用户处于等待匹配状态的报名冻结。 */
+    @Transactional
+    public void freezeEntry(TournamentEntryFreezeCmd cmd) {
+        TournamentEntry entry = tournamentEntryService.getByTournamentAndUser(cmd.getTournamentId(), cmd.getUserId());
+        tournamentEntryService.freeze(entry);
     }
 
     private void notifyMatched(TournamentData tournament, List<TournamentMatch> matches) {

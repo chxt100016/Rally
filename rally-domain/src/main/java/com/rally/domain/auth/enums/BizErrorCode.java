@@ -138,7 +138,11 @@ public enum BizErrorCode {
     TOURNAMENT_PARTNER_ALREADY_PAIRED(46023, "该队友已与他人组队，无法选择"),
     TOURNAMENT_NTRP_LEVEL_NOT_MATCH(46024, "您的NTRP等级不符合赛事要求"),
     TOURNAMENT_BOOKING_MEETUP_MISMATCH(46025, "约球与比赛不匹配"),
-    TOURNAMENT_MATCH_CANCEL_FORBIDDEN(46026, "仅未提交订场信息的比赛可以取消");
+    TOURNAMENT_MATCH_CANCEL_FORBIDDEN(46026, "仅未提交订场信息的比赛可以取消"),
+    TOURNAMENT_BOOKING_REJECT_FORBIDDEN(46027, "当前不是订场阶段"),
+    TOURNAMENT_MATCH_REJECT_TOO_EARLY(46028, "等待超时后可拒绝"),
+    TOURNAMENT_NO_BOOKER_REJECT_FORBIDDEN(46029, "当前不是待选订场人阶段"),
+    TOURNAMENT_WAITING_BOOKING_REJECT_FORBIDDEN(46030, "当前不是等待对方订场阶段");
 
     private final int code;
     private final String message;

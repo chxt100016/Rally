@@ -275,7 +275,6 @@ Domain Service（TournamentMatchingService）职责：
     ↓ 任意人点击"我来订场"（乐观锁防止双方同时抢占）
 [BOOKING]（限时48小时）
     ├─ 订场人提交场地和时间 → [SCHEDULED]
-    └─ 订场人"放弃订场权" → 退回 [MATCHED]，重新开始24小时计时
 [SCHEDULED]（限时48小时，非订场人操作）
     ├─ 全部人接受（confirmStatus 全部 CONFIRMED）→ 创建 Meetup → 待比赛
     ├─ 任意人"打回重订" → 退回 [BOOKING]（不终止，重新开始48小时计时）
@@ -295,9 +294,8 @@ Domain Service（TournamentMatchingService）职责：
 - 24小时内无人选择 → 视为"拒绝比赛"终止，双方都记未响应次数
 
 ### 2. BOOKING：订场
-- 订场人视角：用已有的球场选择组件，选场地+时间，**不需要**在此确定比赛形式（线下自行协商）；同时展示"放弃订场权"按钮
+- 订场人视角：用已有的球场选择组件，选场地+时间，**不需要**在此确定比赛形式（线下自行协商）
 - 非订场人视角：只看到"对方正在订场"的等待态；若之前被打回过，展示上一次打回理由供参考
-- 订场人点击"放弃订场权" → 退回 `MATCHED`，重新开始24小时倒计时，双方都可以重新选择
 - 48小时内订场人未提交 → 视为"拒绝比赛"终止，订场人记未响应次数
 
 ### 3. SCHEDULED：确认赛约
@@ -455,7 +453,7 @@ Domain Service（TournamentMatchingService）职责：
 
 | 接口 | 说明 |
 |------|------|
-| `POST /tournament/match/court-booker` | 选择/放弃订场人身份（乐观锁防止双方同时抢订场人身份） |
+| `POST /tournament/match/court-booker` | 选择订场人身份（乐观锁防止双方同时抢订场人身份） |
 | `POST /tournament/match/book` | 提交赛约（场地+时间） |
 | `POST /tournament/match/schedule-confirm` | 处理赛约：接受 / 打回重订（`rebookReasonCode`） / 拒绝比赛（`rejectReasonCode`） |
 | `POST /tournament/match/submit-result` | 提交比赛结果（选谁赢了/哪个队伍赢了） |

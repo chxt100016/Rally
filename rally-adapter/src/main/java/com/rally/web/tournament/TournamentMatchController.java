@@ -24,6 +24,21 @@ public class TournamentMatchController {
         return tournamentMatchAppService.submitBooking(cmd);
     }
 
+    @PostMapping("/reject-on-await-court-booker-select")
+    public Result<Void> rejectOnAwaitCourtBookerSelect(@Valid @RequestBody RejectOnAwaitCourtBookerSelectCmd cmd) {
+        return tournamentMatchAppService.rejectOnAwaitCourtBookerSelect(cmd);
+    }
+
+    @PostMapping("/reject-on-await-booking")
+    public Result<Void> rejectOnAwaitBooking(@Valid @RequestBody RejectOnAwaitBookingCmd cmd) {
+        return tournamentMatchAppService.rejectOnAwaitBooking(cmd);
+    }
+
+    @PostMapping("/reject-on-await-booking-opponent")
+    public Result<Void> rejectOnAwaitBookingOpponent(@Valid @RequestBody RejectOnAwaitBookingOpponentCmd cmd) {
+        return tournamentMatchAppService.rejectOnAwaitBookingOpponent(cmd);
+    }
+
     @PostMapping("/schedule-confirm")
     public Result<Void> confirmSchedule(@Valid @RequestBody ScheduleConfirmCmd cmd) {
         return tournamentMatchAppService.confirmSchedule(cmd);

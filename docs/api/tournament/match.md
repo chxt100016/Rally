@@ -103,7 +103,73 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/book' \
 
 ---
 
-## 3. 确认/拒绝/打回赛约
+## 3. 无订场人时拒绝比赛
+
+对应 `actionState=AWAIT_COURT_BOOKER_SELECT`。
+
+**POST** `/reject-on-await-court-booker-select`
+
+比赛处于 `MATCHED` 状态、尚未选出订场人时，当前比赛的参赛者可在该比赛创建匹配达到配置等待时长后拒绝比赛。等待时长读取 `tournament.match.reject_timeout_hours`，默认 48 小时。
+
+```bash
+curl -X POST 'http://localhost:8080/api/rally/tournament/match/reject-on-await-court-booker-select' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <token>' \
+  -d '{"matchId": "M202608100001", "rejectReason": "DONT_WANT_PLAY"}'
+```
+
+未达到配置等待时长返回 `46028`；状态不为 `MATCHED` 返回 `46029`。
+
+---
+
+## 4. 订场人拒绝比赛
+
+对应 `actionState=AWAIT_BOOKING` 或 `AWAIT_BOOKING_REBOOK`。
+
+**POST** `/reject-on-await-booking`
+
+仅当前订场人可以操作。比赛必须处于 `BOOKING` 状态，且当前一轮订场阶段已达到配置等待时长；首次订场从选择订场人的时间开始计算，被打回重订后从最近一次打回时间重新计算。等待时长读取 `tournament.match.reject_timeout_hours`，默认 48 小时。
+
+**请求参数**
+
+| 参数名 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `matchId` | `string` | 是 | 比赛 bizId |
+| `rejectReason` | `string` | 是 | 拒绝理由：`TIME_PLACE_CONFLICT`/`DONT_WANT_PLAY` |
+
+```bash
+curl -X POST 'http://localhost:8080/api/rally/tournament/match/reject-on-await-booking' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <token>' \
+  -d '{"matchId": "M202608100001", "rejectReason": "TIME_PLACE_CONFLICT"}'
+```
+
+未达到配置等待时长返回 `46028`；状态不为 `BOOKING` 返回 `46027`。
+
+---
+
+## 5. 等待对方订场时拒绝比赛
+
+对应 `actionState=AWAIT_BOOKING_OPPONENT`。
+
+**POST** `/reject-on-await-booking-opponent`
+
+仅当前比赛中非订场人的参与者可以操作。比赛必须处于 `BOOKING` 状态，且当前一轮订场阶段已达到配置等待时长。等待时长读取 `tournament.match.reject_timeout_hours`，默认 48 小时。
+
+```bash
+curl -X POST 'http://localhost:8080/api/rally/tournament/match/reject-on-await-booking-opponent' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <token>' \
+  -d '{"matchId": "M202608100001", "rejectReason": "TIME_PLACE_CONFLICT"}'
+```
+
+未达到配置等待时长返回 `46028`；状态或用户角色不符合要求返回 `46030`。
+
+上述三个拒绝接口成功后，当前比赛统一进入 `REJECTED`，所有参与者回到 `WAITING` 匹配池；这些操作不校验拒绝次数上限，也不累计拒绝次数。
+
+---
+
+## 6. 确认/拒绝/打回赛约
 
 **POST** `/schedule-confirm`
 
@@ -152,7 +218,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/schedule-confirm'
 
 ---
 
-## 4. 提交比赛结果
+## 7. 提交比赛结果
 
 **POST** `/submit-result`
 
@@ -177,7 +243,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/submit-result' \
 
 ---
 
-## 5. 确认/拒绝比赛结果
+## 8. 确认/拒绝比赛结果
 
 **POST** `/result-confirm`
 

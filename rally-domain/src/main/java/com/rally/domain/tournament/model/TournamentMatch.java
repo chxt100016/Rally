@@ -3,6 +3,8 @@ package com.rally.domain.tournament.model;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.meetup.enums.CourtSelectModeEnum;
+import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.tournament.enums.*;
 import com.rally.domain.utils.Assert;
 import lombok.Getter;
@@ -87,13 +89,67 @@ public class TournamentMatch {
         data.setStatus(TournamentMatchStatusEnum.BOOKING);
     }
 
-    public void giveUpCourtBooker(String userId) {
-        Assert.eq(data.getStatus(), TournamentMatchStatusEnum.BOOKING, BizErrorCode.TOURNAMENT_INVALID_SCHEDULE_CONFIRM);
-        Assert.eq(data.getCourtBookerId(), userId, BizErrorCode.TOURNAMENT_NOT_COURT_BOOKER);
+    /** 尚未选出订场人时，等待达到配置时长后，参赛者可以拒绝比赛。 */
+    public void rejectOnAwaitCourtBookerSelect(String userId, ScheduleRejectReasonEnum rejectReason) {
+        Assert.eq(data.getStatus(), TournamentMatchStatusEnum.MATCHED, BizErrorCode.TOURNAMENT_NO_BOOKER_REJECT_FORBIDDEN);
+        Assert.notNull(rejectReason, BizErrorCode.TOURNAMENT_INVALID_REJECT_REASON);
 
-        data.setCourtBookerId(null);
-        data.setCourtBookerSelectedTime(null);
-        data.setStatus(TournamentMatchStatusEnum.MATCHED);
+        MatchParticipantData participant = participants.stream()
+                .filter(p -> p.getUserId().equals(userId))
+                .findFirst()
+                .orElse(null);
+        Assert.notNull(participant, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+        rejectMatch(participant, rejectReason, data.getMatchedTime());
+    }
+
+    /** 等待达到配置时长后，订场人可以拒绝比赛。 */
+    public void rejectOnAwaitBooking(String userId, ScheduleRejectReasonEnum rejectReason) {
+        Assert.eq(data.getStatus(), TournamentMatchStatusEnum.BOOKING, BizErrorCode.TOURNAMENT_BOOKING_REJECT_FORBIDDEN);
+        Assert.eq(data.getCourtBookerId(), userId, BizErrorCode.TOURNAMENT_NOT_COURT_BOOKER);
+        Assert.notNull(rejectReason, BizErrorCode.TOURNAMENT_INVALID_REJECT_REASON);
+
+        MatchParticipantData participant = participants.stream()
+                .filter(p -> p.getUserId().equals(userId))
+                .findFirst()
+                .orElse(null);
+        Assert.notNull(participant, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+        rejectMatch(participant, rejectReason, getBookingStageStartedAt());
+    }
+
+    /** 等待达到配置时长后，非订场人可以拒绝继续等待对方订场。 */
+    public void rejectOnAwaitBookingOpponent(String userId, ScheduleRejectReasonEnum rejectReason) {
+        Assert.eq(data.getStatus(), TournamentMatchStatusEnum.BOOKING, BizErrorCode.TOURNAMENT_WAITING_BOOKING_REJECT_FORBIDDEN);
+        Assert.notNull(rejectReason, BizErrorCode.TOURNAMENT_INVALID_REJECT_REASON);
+        Assert.notNull(data.getCourtBookerId(), BizErrorCode.TOURNAMENT_WAITING_BOOKING_REJECT_FORBIDDEN);
+        Assert.isTrue(!data.getCourtBookerId().equals(userId), BizErrorCode.TOURNAMENT_WAITING_BOOKING_REJECT_FORBIDDEN);
+
+        MatchParticipantData participant = participants.stream()
+                .filter(p -> p.getUserId().equals(userId))
+                .findFirst()
+                .orElse(null);
+        Assert.notNull(participant, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+        rejectMatch(participant, rejectReason, getBookingStageStartedAt());
+    }
+
+    private LocalDateTime getBookingStageStartedAt() {
+        LocalDateTime bookingStageStartedAt = data.getCourtBookerSelectedTime();
+        if (data.getLastRebookTime() != null
+                && (bookingStageStartedAt == null || data.getLastRebookTime().isAfter(bookingStageStartedAt))) {
+            bookingStageStartedAt = data.getLastRebookTime();
+        }
+        return bookingStageStartedAt;
+    }
+
+    private void rejectMatch(MatchParticipantData participant, ScheduleRejectReasonEnum rejectReason, LocalDateTime stageStartedAt) {
+        Assert.notNull(stageStartedAt, BizErrorCode.TOURNAMENT_MATCH_REJECT_TOO_EARLY);
+        int timeoutHours = SystemConfig.getInt(SystemConfigKey.TOURNAMENT_MATCH_REJECT_TIMEOUT_HOURS.getKey());
+        LocalDateTime now = LocalDateTime.now();
+        Assert.isTrue(!now.isBefore(stageStartedAt.plusHours(timeoutHours)), BizErrorCode.TOURNAMENT_MATCH_REJECT_TOO_EARLY);
+
+        participant.setConfirmStatus(ConfirmStatusEnum.REJECTED);
+        participant.setConfirmTime(now);
+        data.setStatus(TournamentMatchStatusEnum.REJECTED);
+        data.setRejectReasonCode(rejectReason.getCode());
     }
 
     /**

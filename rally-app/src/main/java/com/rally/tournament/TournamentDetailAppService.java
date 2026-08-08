@@ -80,10 +80,6 @@ public class TournamentDetailAppService {
      */
     private void fillJoinRestrictions(TournamentDetailDTO detail, String userId, Map<String, UserProfile> profiles) {
         TournamentActionStateEnum actionState = actionState(detail);
-        if (actionState == TournamentActionStateEnum.NOT_REGISTERED_CLOSED) {
-            detail.setJoinable(false);
-            return;
-        }
         if ((actionState != TournamentActionStateEnum.NOT_REGISTERED && actionState != TournamentActionStateEnum.FROZEN) || detail.getTournament() == null) {
             return;
         }
@@ -97,7 +93,6 @@ public class TournamentDetailAppService {
         }
         List<TournamentJoinRestrictionEnum> restrictions = tournamentPolicy.collectJoinRestrictions(detail.getTournament().getNtrpLevel(), userProfile);
         detail.setRestrictions(restrictions);
-        detail.setJoinable(restrictions.isEmpty());
     }
 
     /**

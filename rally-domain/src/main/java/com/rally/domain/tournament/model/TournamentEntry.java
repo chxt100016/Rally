@@ -75,6 +75,13 @@ public class TournamentEntry {
         this.data.setStatus(TournamentEntryStatusEnum.WITHDRAWN);
     }
 
+    /** 运营冻结报名：仅允许等待匹配状态进入冻结状态。 */
+    public void freeze() {
+        Assert.isTrue(this.data.getStatus() == TournamentEntryStatusEnum.WAITING,
+                BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
+        this.data.setStatus(TournamentEntryStatusEnum.FROZEN);
+    }
+
     public void assertCanUnfreeze() {
         Assert.isTrue(this.data.getStatus() == TournamentEntryStatusEnum.FROZEN, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
     }

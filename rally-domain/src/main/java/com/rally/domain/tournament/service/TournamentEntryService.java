@@ -95,6 +95,12 @@ public class TournamentEntryService {
         tournamentEntryRepository.save(entry.getData());
     }
 
+    /** 运营冻结指定用户的报名：仅允许 WAITING 状态。 */
+    public void freeze(TournamentEntry entry) {
+        entry.freeze();
+        tournamentEntryRepository.save(entry.getData());
+    }
+
     /** 解冻本人报名：必须已绑定手机号且当前状态为 FROZEN，恢复为 WAITING。 */
     public void unfreeze(Tournament tournament, TournamentEntry entry, UserProfile userProfile) {
         tournamentPolicy.assertCanUnfreeze(tournament);

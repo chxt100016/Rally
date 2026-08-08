@@ -159,6 +159,11 @@ public enum SystemConfigKey {
     /** 待支付超时分钟数，0=不超时（默认） */
     PAYMENT_PAY_TIMEOUT_MINUTES("payment.pay_timeout_minutes", "待支付超时分钟数，0=不超时；默认 30 分钟，同时作为微信 time_expire 传出", "30"),
 
+    // ==================== 赛事比赛 ====================
+
+    /** 比赛在当前订场相关阶段达到该时长后，允许参赛者主动拒绝（小时） */
+    TOURNAMENT_MATCH_REJECT_TIMEOUT_HOURS("tournament.match.reject_timeout_hours", "赛事比赛允许主动拒绝的等待时长（小时）", "48"),
+
     // ==================== 系统 ====================
 
     /** 群聊二维码（base64） */

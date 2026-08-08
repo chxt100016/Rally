@@ -54,16 +54,39 @@ public class TournamentMatchFlowService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void giveUpCourtBooker(String matchId, String userId) {
+    public void rejectOnAwaitCourtBookerSelect(String matchId, String userId, ScheduleRejectReasonEnum rejectReason) {
         TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
         Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
 
-        match.giveUpCourtBooker(userId);
+        match.rejectOnAwaitCourtBookerSelect(userId, rejectReason);
+        persistRejectedMatch(match);
+    }
 
+    @Transactional(rollbackFor = Exception.class)
+    public void rejectOnAwaitBooking(String matchId, String userId, ScheduleRejectReasonEnum rejectReason) {
+        TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
+        Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+
+        match.rejectOnAwaitBooking(userId, rejectReason);
+        persistRejectedMatch(match);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void rejectOnAwaitBookingOpponent(String matchId, String userId, ScheduleRejectReasonEnum rejectReason) {
+        TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
+        Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+
+        match.rejectOnAwaitBookingOpponent(userId, rejectReason);
+        persistRejectedMatch(match);
+    }
+
+    private void persistRejectedMatch(TournamentMatch match) {
         boolean success = matchRepository.updateWithVersion(match.getData());
         if (!success) {
             throw new BusinessException(BizErrorCode.TOURNAMENT_MATCH_VERSION_CONFLICT);
         }
+        matchRepository.saveParticipants(match.getParticipants());
+        settleRejectedMatch(match);
     }
 
     /**
