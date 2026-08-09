@@ -32,7 +32,8 @@ public class TournamentPaymentService {
         entry.assertCanPay();
         tournament.assertSlotsNotFull();
         int baseAmount = tournament.getData().getEntryFee().intValue();
-        return paymentDomainService.createSingle(BizTypeEnum.TOURNAMENT_ENTRY_FEE, entry.getEntryId(), entry.getData().getUserId(), baseAmount, PayChannelEnum.WECHAT);
+        return paymentDomainService.createSingle(BizTypeEnum.TOURNAMENT_ENTRY_FEE, entry.getEntryId(),
+                entry.getData().getUserId(), baseAmount, PayChannelEnum.WECHAT, false);
     }
 
     /**

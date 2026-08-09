@@ -49,16 +49,24 @@ public class PaymentDomainService {
     @Resource
     private PaymentPaidNotifier paymentPaidNotifier;
 
-    /**
-     * 单人建单（赛事报名费场景）：一单一付款人。refBizId 为业务关联 ID（如 tournamentId）。
-     */
+    /** 单人建单：默认向付款人收取渠道手续费。 */
     public PaymentOrder createSingle(BizTypeEnum bizType, String refBizId, String payerUserId, int baseAmount, PayChannelEnum channel) {
+        return createSingle(bizType, refBizId, payerUserId, baseAmount, channel, true);
+    }
+
+    /**
+     * 单人建单：chargeFee=false 时不向付款人收取渠道手续费。
+     */
+    public PaymentOrder createSingle(BizTypeEnum bizType, String refBizId, String payerUserId, int baseAmount,
+                                     PayChannelEnum channel, boolean chargeFee) {
         // 幂等：已有活跃单（PENDING/PAID）直接返回，历史关闭/失败单不阻塞重建
         PaymentOrder active = paymentOrderRepository.findActiveByRef(bizType, refBizId, payerUserId);
         if (active != null) {
             return active;
         }
-        BigDecimal feeRate = SystemConfig.getBigDecimal(SystemConfigKey.PAYMENT_WECHAT_FEE_RATE.getKey());
+        BigDecimal feeRate = chargeFee
+                ? SystemConfig.getBigDecimal(SystemConfigKey.PAYMENT_WECHAT_FEE_RATE.getKey())
+                : BigDecimal.ZERO;
         int timeoutMinutes = SystemConfig.getInt(SystemConfigKey.PAYMENT_PAY_TIMEOUT_MINUTES.getKey());
         PaymentOrder order = PaymentOrder.create(channel, bizType, refBizId, payerUserId, baseAmount, feeRate, timeoutMinutes);
         try {
@@ -69,7 +77,8 @@ public class PaymentDomainService {
             Assert.notNull(existing, BizErrorCode.PAYMENT_ORDER_NOT_FOUND);
             return existing;
         }
-        paymentLogRepository.save(PaymentLog.collect(channel, order.getBizId(), "bizType=" + bizType + ",refBizId=" + refBizId + ",base=" + baseAmount));
+        paymentLogRepository.save(PaymentLog.collect(channel, order.getBizId(), "bizType=" + bizType + ",refBizId=" + refBizId
+                + ",base=" + baseAmount + ",chargeFee=" + chargeFee));
         return order;
     }
 

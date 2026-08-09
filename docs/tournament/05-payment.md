@@ -9,7 +9,7 @@
 - 复用 **Payment 域**（PaymentDomainService、WechatPayClient、PaymentStatusEnum）。
 
 ## 领域 Service 能力（TournamentPaymentService，编排 Payment 域）
-- `createEntryOrder(entry)`：校验 entry 处于 PAYING、赛事未满员；按 entryFee + 手续费（复用 `SystemConfigKey.PAYMENT_WECHAT_FEE_RATE` 千6，承担方沿用 MEETUP_COLLECT 处理方式）下单，返回 `PrepayResult`（对齐 wx.requestPayment 入参）。
+- `createEntryOrder(entry)`：校验 entry 处于 PAYING、赛事未满员；按 entryFee 下单，报名费支付不向用户加收渠道手续费，返回 `PrepayResult`（对齐 wx.requestPayment 入参）。
 - `handlePayCallback(支付单)`：复用现有回调链路。成功后：entry PAYING→WAITING、stage→MAIN、写 paidTime、currentFilledSlots+1。校验满员边界（并发下用行锁/乐观更新防超卖）。
 - `queryAndAdvance(entry)`：兜底主动查单（复用 `WechatPayClient.queryTrade`），据结果推进，避免卡在"确认中"。
 - `refundForWithdraw(entry)`：正赛退出退款。**需新增能力**：现有支付体系无退款接口，需封装微信退款 API + 领域退款流程；退款成功后 currentFilledSlots-1 并放行模块 2 置 WITHDRAWN。（MVP 需评估是否纳入首版）
