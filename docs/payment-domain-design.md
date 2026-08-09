@@ -199,9 +199,9 @@ SettlementAppService.share(paymentOrder):
 - 查询分账结果：`POST .../v3/profitsharing/orders/{out_order_no}/query`（最终态权威来源；状态枚举 PROCESSING/FINISHED）。
 - 分账动账通知（可选加速）：商户平台配置 https 地址，AEAD_AES_256_GCM 解密，事件 `PROFITSHARING.*`。
 
-### 5.4 超时机制（默认不超时）
-后付费收款挂着不付不占名额、不影响他人，**默认不设业务超时**，何时停止收款由发起人手动决定（§5.6）。区分两层：
-- **系统超时（业务层，默认关闭）**：`payment.pay_timeout_minutes` **默认 0 = 不超时**，`payment_order.expire_time = null`。仅当配置为正整数时，`expire_time = now + 分钟数`，由 `PaymentTimeoutJob` 到期关单。
+### 5.4 超时机制（支付时惰性处理）
+支付单可配置业务超时；超时不影响用户再次支付。用户点击支付时若命中超时的活跃单，后端关闭旧单并重新建单。
+- **系统超时（业务层）**：`payment.pay_timeout_minutes` 默认 30 分钟。支付入口负责惰性处理超时单，`PaymentTimeoutJob` 仅作为可选的数据清理兜底。
 - **渠道超时（微信层，固有）**：`prepay_id` 有效期约 2h，到期前端**重新请求下单**即可（订单本身不超时，可反复下单）。下单时若 `expire_time` 非空则传 `time_expire` 对齐，否则不传（用微信默认）。
 
 ### 5.4.1 对账与兜底（支付流水核心诉求）

@@ -62,7 +62,17 @@ public class PaymentDomainService {
         // 幂等：已有活跃单（PENDING/PAID）直接返回，历史关闭/失败单不阻塞重建
         PaymentOrder active = paymentOrderRepository.findActiveByRef(bizType, refBizId, payerUserId);
         if (active != null) {
-            return active;
+            if (!active.isPending() || !active.isExpired()) {
+                return active;
+            }
+
+            // 惰性处理超时单：用户再次点击支付时释放旧单并重新建单，
+            // 支付正确性不依赖 PaymentTimeoutJob 是否开启。
+            log.info("支付时发现超时订单，关闭并重建: bizId={}, refBizId={}", active.getBizId(), refBizId);
+            active.close();
+            if (paymentOrderRepository.close(active.getBizId())) {
+                closeTradeQuietly(active);
+            }
         }
         BigDecimal feeRate = chargeFee
                 ? SystemConfig.getBigDecimal(SystemConfigKey.PAYMENT_WECHAT_FEE_RATE.getKey())

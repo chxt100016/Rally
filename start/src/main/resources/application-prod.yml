@@ -35,8 +35,7 @@ job:
       cron: "0 0 2 * * ?"
     court-statistics:
       cron: "0 0 3 * * ?"
-  # 支付超时关单：payment.pay_timeout_minutes 默认 30 分钟，扫超时未付单关单并解锁重建
-  # 本次新增，发布时先关闭，确认无误后再手动开启
+  # 支付超时单清理兜底；支付入口会自行判断并重建超时单，不依赖此任务
   payment_timeout:
     enabled: false
     cron: "0 */5 * * * ?"

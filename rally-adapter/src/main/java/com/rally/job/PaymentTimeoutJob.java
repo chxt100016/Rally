@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * 支付超时关单兜底任务（设计 §5.4.1）。
- * 默认 payment.pay_timeout_minutes=0 不超时，故默认 Job 关闭；配置了超时分钟数才启用。
+ * 可选的数据清理兜底；支付入口自身会惰性处理超时订单，不依赖本任务开启。
  */
 @Slf4j
 @Component
