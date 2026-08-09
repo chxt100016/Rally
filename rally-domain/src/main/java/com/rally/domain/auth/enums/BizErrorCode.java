@@ -142,7 +142,8 @@ public enum BizErrorCode {
     TOURNAMENT_BOOKING_REJECT_FORBIDDEN(46027, "当前不是订场阶段"),
     TOURNAMENT_MATCH_REJECT_TOO_EARLY(46028, "等待超时后可拒绝"),
     TOURNAMENT_NO_BOOKER_REJECT_FORBIDDEN(46029, "当前不是待选订场人阶段"),
-    TOURNAMENT_WAITING_BOOKING_REJECT_FORBIDDEN(46030, "当前不是等待对方订场阶段");
+    TOURNAMENT_WAITING_BOOKING_REJECT_FORBIDDEN(46030, "当前不是等待对方订场阶段"),
+    TOURNAMENT_WAITING_SCHEDULE_CONFIRM_REJECT_FORBIDDEN(46031, "当前不是等待对方确认阶段");
 
     private final int code;
     private final String message;

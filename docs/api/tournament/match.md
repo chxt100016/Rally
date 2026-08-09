@@ -165,11 +165,30 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/reject-on-await-b
 
 未达到配置等待时长返回 `46028`；状态或用户角色不符合要求返回 `46030`。
 
-上述三个拒绝接口成功后，当前比赛统一进入 `REJECTED`，所有参与者回到 `WAITING` 匹配池；这些操作不校验拒绝次数上限，也不累计拒绝次数。
+---
+
+## 6. 等待对方确认赛约时拒绝比赛
+
+对应 `actionState=AWAIT_OPPONENT_SCHEDULE_CONFIRM`。
+
+**POST** `/reject-on-await-opponent-schedule-confirm`
+
+仅已提交并确认赛约、正在等待其他参与者确认的订场人可以操作。比赛必须处于 `SCHEDULED` 状态，且从本轮赛约提交起已达到配置等待时长。
+
+```bash
+curl -X POST 'http://localhost:8080/api/rally/tournament/match/reject-on-await-opponent-schedule-confirm' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <token>' \
+  -d '{"matchId": "M202608100001", "rejectReason": "DONT_WANT_PLAY"}'
+```
+
+未达到配置等待时长返回 `46028`；状态或用户角色不符合要求返回 `46031`。
+
+上述四个拒绝接口成功后，当前比赛统一进入 `REJECTED`，所有参与者回到 `WAITING` 匹配池；这些操作不校验拒绝次数上限，也不累计拒绝次数。
 
 ---
 
-## 6. 确认/拒绝/打回赛约
+## 7. 确认/拒绝/打回赛约
 
 **POST** `/schedule-confirm`
 
@@ -218,7 +237,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/schedule-confirm'
 
 ---
 
-## 7. 提交比赛结果
+## 8. 提交比赛结果
 
 **POST** `/submit-result`
 
@@ -243,7 +262,7 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/match/submit-result' \
 
 ---
 
-## 8. 确认/拒绝比赛结果
+## 9. 确认/拒绝比赛结果
 
 **POST** `/result-confirm`
 

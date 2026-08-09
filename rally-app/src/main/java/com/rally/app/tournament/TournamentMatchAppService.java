@@ -51,7 +51,7 @@ public class TournamentMatchAppService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> rejectOnAwaitCourtBookerSelect(RejectOnAwaitCourtBookerSelectCmd cmd) {
+    public Result<Void> rejectOnAwaitCourtBookerSelect(RejectMatchCmd cmd) {
         String userId = UserContext.get();
         matchFlowService.rejectOnAwaitCourtBookerSelect(cmd.getMatchId(), userId, cmd.getRejectReason());
         notifyRejected(cmd.getMatchId(), userId);
@@ -59,7 +59,7 @@ public class TournamentMatchAppService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> rejectOnAwaitBooking(RejectOnAwaitBookingCmd cmd) {
+    public Result<Void> rejectOnAwaitBooking(RejectMatchCmd cmd) {
         String userId = UserContext.get();
         matchFlowService.rejectOnAwaitBooking(cmd.getMatchId(), userId, cmd.getRejectReason());
         notifyRejected(cmd.getMatchId(), userId);
@@ -67,9 +67,17 @@ public class TournamentMatchAppService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> rejectOnAwaitBookingOpponent(RejectOnAwaitBookingOpponentCmd cmd) {
+    public Result<Void> rejectOnAwaitBookingOpponent(RejectMatchCmd cmd) {
         String userId = UserContext.get();
         matchFlowService.rejectOnAwaitBookingOpponent(cmd.getMatchId(), userId, cmd.getRejectReason());
+        notifyRejected(cmd.getMatchId(), userId);
+        return Result.ok();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> rejectOnAwaitOpponentScheduleConfirm(RejectMatchCmd cmd) {
+        String userId = UserContext.get();
+        matchFlowService.rejectOnAwaitOpponentScheduleConfirm(cmd.getMatchId(), userId, cmd.getRejectReason());
         notifyRejected(cmd.getMatchId(), userId);
         return Result.ok();
     }

@@ -25,18 +25,23 @@ public class TournamentMatchController {
     }
 
     @PostMapping("/reject-on-await-court-booker-select")
-    public Result<Void> rejectOnAwaitCourtBookerSelect(@Valid @RequestBody RejectOnAwaitCourtBookerSelectCmd cmd) {
+    public Result<Void> rejectOnAwaitCourtBookerSelect(@Valid @RequestBody RejectMatchCmd cmd) {
         return tournamentMatchAppService.rejectOnAwaitCourtBookerSelect(cmd);
     }
 
     @PostMapping("/reject-on-await-booking")
-    public Result<Void> rejectOnAwaitBooking(@Valid @RequestBody RejectOnAwaitBookingCmd cmd) {
+    public Result<Void> rejectOnAwaitBooking(@Valid @RequestBody RejectMatchCmd cmd) {
         return tournamentMatchAppService.rejectOnAwaitBooking(cmd);
     }
 
     @PostMapping("/reject-on-await-booking-opponent")
-    public Result<Void> rejectOnAwaitBookingOpponent(@Valid @RequestBody RejectOnAwaitBookingOpponentCmd cmd) {
+    public Result<Void> rejectOnAwaitBookingOpponent(@Valid @RequestBody RejectMatchCmd cmd) {
         return tournamentMatchAppService.rejectOnAwaitBookingOpponent(cmd);
+    }
+
+    @PostMapping("/reject-on-await-opponent-schedule-confirm")
+    public Result<Void> rejectOnAwaitOpponentScheduleConfirm(@Valid @RequestBody RejectMatchCmd cmd) {
+        return tournamentMatchAppService.rejectOnAwaitOpponentScheduleConfirm(cmd);
     }
 
     @PostMapping("/schedule-confirm")

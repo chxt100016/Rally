@@ -131,6 +131,24 @@ public class TournamentMatch {
         rejectMatch(participant, rejectReason, getBookingStageStartedAt());
     }
 
+    /** 等待达到配置时长后，已确认赛约的订场人可以拒绝继续等待对方确认。 */
+    public void rejectOnAwaitOpponentScheduleConfirm(String userId, ScheduleRejectReasonEnum rejectReason) {
+        Assert.eq(data.getStatus(), TournamentMatchStatusEnum.SCHEDULED,
+                BizErrorCode.TOURNAMENT_WAITING_SCHEDULE_CONFIRM_REJECT_FORBIDDEN);
+        Assert.eq(data.getCourtBookerId(), userId,
+                BizErrorCode.TOURNAMENT_WAITING_SCHEDULE_CONFIRM_REJECT_FORBIDDEN);
+        Assert.notNull(rejectReason, BizErrorCode.TOURNAMENT_INVALID_REJECT_REASON);
+
+        MatchParticipantData participant = participants.stream()
+                .filter(p -> p.getUserId().equals(userId))
+                .findFirst()
+                .orElse(null);
+        Assert.notNull(participant, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+        Assert.eq(participant.getConfirmStatus(), ConfirmStatusEnum.CONFIRMED,
+                BizErrorCode.TOURNAMENT_WAITING_SCHEDULE_CONFIRM_REJECT_FORBIDDEN);
+        rejectMatch(participant, rejectReason, data.getScheduleSubmittedTime());
+    }
+
     private LocalDateTime getBookingStageStartedAt() {
         LocalDateTime bookingStageStartedAt = data.getCourtBookerSelectedTime();
         if (data.getLastRebookTime() != null

@@ -80,6 +80,15 @@ public class TournamentMatchFlowService {
         persistRejectedMatch(match);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public void rejectOnAwaitOpponentScheduleConfirm(String matchId, String userId, ScheduleRejectReasonEnum rejectReason) {
+        TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
+        Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+
+        match.rejectOnAwaitOpponentScheduleConfirm(userId, rejectReason);
+        persistRejectedMatch(match);
+    }
+
     private void persistRejectedMatch(TournamentMatch match) {
         boolean success = matchRepository.updateWithVersion(match.getData());
         if (!success) {
