@@ -38,8 +38,7 @@ public enum MatchStatus {
         }
     }
 
-    public static String toStatus(String code) {
-        MatchStatus status = fromCode(code);
-        return status != null ? status.name() : null;
+    public static MatchStatus toStatus(String code) {
+        return fromCode(code);
     }
 }

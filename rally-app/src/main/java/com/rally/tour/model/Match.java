@@ -1,5 +1,7 @@
 package com.rally.tour.model;
 
+import com.rally.domain.tour.model.MatchStatus;
+import com.rally.domain.tour.model.SetScore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +20,7 @@ public class Match {
     private Integer matchIndex;
     private String tournamentId;
     private Integer year;
+    private String drawType;
     private Long drawId;
     private Integer roundNumber;
     private String roundName;
@@ -25,7 +28,7 @@ public class Match {
     private String player2Id;
     private String playerName1;
     private String playerName2;
-    private String status;
+    private MatchStatus status;
     private String winnerId;
     private String court;
     private LocalDateTime scheduledAt;

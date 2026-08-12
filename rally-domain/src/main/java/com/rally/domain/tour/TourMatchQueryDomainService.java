@@ -247,17 +247,14 @@ public class TourMatchQueryDomainService {
         }
         Map<String, PlayerData> playerMap = matchQueryRepository.listPlayersByPlayerIds(new ArrayList<>(playerIds)).stream().collect(Collectors.toMap(PlayerData::getPlayerId, p -> p, (a, b) -> a));
         Map<String, Integer> seedMap = matchQueryRepository.listSeedsByTournamentIds(tournamentIds).stream().collect(Collectors.toMap(s -> s.getTournamentId() + ":" + s.getPlayerId(), PlayerSeedData::getSeed, (a, b) -> a));
-        List<Long> tourMatchIds = valid.stream().map(MatchData::getTourMatchId).filter(Objects::nonNull).toList();
-        Map<Long, List<SetScoreData>> setScoreMap = matchQueryRepository.listSetScoresByTourMatchIds(tourMatchIds).stream().collect(Collectors.groupingBy(SetScoreData::getTourMatchId));
-
         List<MatchQueryVO> vos = new ArrayList<>();
         for (MatchData m : valid) {
-            vos.add(toMatchVO(m, playerMap, setScoreMap, seedMap));
+            vos.add(toMatchVO(m, playerMap, seedMap));
         }
         return vos;
     }
 
-    private MatchQueryVO toMatchVO(MatchData match, Map<String, PlayerData> playerMap, Map<Long, List<SetScoreData>> setScoreMap, Map<String, Integer> seedMap) {
+    private MatchQueryVO toMatchVO(MatchData match, Map<String, PlayerData> playerMap, Map<String, Integer> seedMap) {
         MatchQueryVO vo = new MatchQueryVO();
         vo.setId(match.getMatchId());
         vo.setTournamentId(match.getTournamentId());
@@ -277,8 +274,8 @@ public class TourMatchQueryDomainService {
         }
         vo.setPlayer1(buildPlayerVO(match.getPlayer1Id(), match.getTournamentId(), playerMap, seedMap));
         vo.setPlayer2(buildPlayerVO(match.getPlayer2Id(), match.getTournamentId(), playerMap, seedMap));
-        List<SetScoreData> setScoreList = setScoreMap.getOrDefault(match.getTourMatchId(), List.of());
-        List<SetScoreVO> sets = setScoreList.stream().map(MatchConvertMapper.INSTANCE::toSetScoreVO).toList();
+        List<SetScoreVO> sets = Optional.ofNullable(match.getSets()).orElseGet(List::of)
+                .stream().map(MatchConvertMapper.INSTANCE::toSetScoreVO).toList();
         vo.setSets(sets);
         vo.setStatus(match.getStatus());
         vo.setCurrentSet(CollectionUtils.isEmpty(sets) ? null : sets.size());

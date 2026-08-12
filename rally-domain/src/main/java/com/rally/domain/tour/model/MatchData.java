@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 比赛数据模型（domain 层）
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 public class MatchData {
 
     private String matchId;
-    /** 对应 tour_match.id，用于关联盘分数据 */
+    /** 对应 tour_match.id */
     private Long tourMatchId;
     private Integer year;
     private Long drawId;
@@ -20,6 +21,7 @@ public class MatchData {
     private Integer matchIndex;
     private Integer roundNumber;
     private String tournamentId;
+    private String drawType;
     private String player1Id;
     private String player2Id;
     private String winnerId;
@@ -29,7 +31,11 @@ public class MatchData {
     private String status;
     private Integer durationMinutes;
     private String scheduledAtText;
+    private String description;
     private LocalDate matchDate;
     private LocalDateTime scheduledAt;
     private LocalDateTime startedAt;
+    private LocalDateTime endedAt;
+    /** 完整比分快照；null 表示来源未知比分。 */
+    private List<SetScore> sets;
 }

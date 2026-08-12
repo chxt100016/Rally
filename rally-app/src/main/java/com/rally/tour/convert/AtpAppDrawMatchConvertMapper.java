@@ -3,7 +3,7 @@ package com.rally.tour.convert;
 import com.rally.client.atp.model.AtpAppDrawResponse;
 import com.rally.tour.model.Match;
 import com.rally.domain.tour.model.MatchStatus;
-import com.rally.tour.model.SetScore;
+import com.rally.domain.tour.model.SetScore;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -41,9 +41,9 @@ public interface AtpAppDrawMatchConvertMapper {
     @Mapping(target = "year", ignore = true)
     Match toMatch(AtpAppDrawResponse.Match match);
 
-    default String getStatus(AtpAppDrawResponse.Match match) {
+    default MatchStatus getStatus(AtpAppDrawResponse.Match match) {
         if (match == null) return null;
-        return match.getWinningPlayerId() != null ? MatchStatus.FINISHED.name() : MatchStatus.PENDING.name();
+        return match.getWinningPlayerId() != null ? MatchStatus.FINISHED : MatchStatus.PENDING;
     }
 
     // 从 matchId 末尾提取数字，如 MS008 → 8

@@ -108,6 +108,7 @@ CREATE TABLE tour_match (
     duration_minutes SMALLINT    COMMENT '比赛时长（分钟）',
     description TEXT COMMENT '比赛描述',
     match_date DATE COMMENT '比赛日期，从MatchDate中提取',
+    sets_json JSON COMMENT '比赛各盘比分完整快照（player1/player2 方向）',
     create_time       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
@@ -119,19 +120,3 @@ CREATE TABLE tour_match (
     INDEX idx_tour_match_player2     (player2_id),
     INDEX idx_tour_match_status_time (status, scheduled_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='具体比赛场次';
-
-DROP TABLE IF EXISTS tour_set_score;
-CREATE TABLE tour_set_score (
-    id               BIGINT   NOT NULL AUTO_INCREMENT,
-    tour_match_id  BIGINT   NOT NULL COMMENT '关联 tour_match.id（自增主键），全局唯一，无跨赛事冲突',
-    set_number       TINYINT  NOT NULL COMMENT '第几盘：1 / 2 / 3 ...',
-    p1_games         TINYINT  NOT NULL DEFAULT 0 COMMENT 'player1 局数',
-    p2_games         TINYINT  NOT NULL DEFAULT 0 COMMENT 'player2 局数',
-    p1_tiebreak      TINYINT  COMMENT '抢七分数，NULL 表示该盘无抢七',
-    p2_tiebreak      TINYINT  COMMENT '抢七分数，NULL 表示该盘无抢七',
-    create_time       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    UNIQUE KEY uk_tour_set_match_id_set_number (tour_match_id, set_number),
-    INDEX idx_tour_set_tour_match_id (tour_match_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='每盘比分详情';

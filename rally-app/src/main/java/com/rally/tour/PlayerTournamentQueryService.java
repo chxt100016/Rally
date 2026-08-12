@@ -67,18 +67,7 @@ public class PlayerTournamentQueryService {
                 .filter(p -> p.getNationality() != null)
                 .collect(Collectors.toMap(PlayerData::getPlayerId, PlayerData::getNationality, (a, b) -> a));
 
-        // 7. 查询球员参与比赛的盘分数据
-        List<Long> tourMatchIds = playerMatches.stream()
-                .filter(m -> m.getTourMatchId() != null)
-                .map(MatchData::getTourMatchId)
-                .toList();
-        List<SetScoreData> setScores = CollectionUtils.isEmpty(tourMatchIds)
-                ? List.of()
-                : matchQueryRepository.listSetScoresByTourMatchIds(tourMatchIds);
-        Map<Long, List<SetScoreData>> setScoreMap = setScores.stream()
-                .collect(Collectors.groupingBy(SetScoreData::getTourMatchId));
-
-        // 8. 查询所有种子信息（用于前方对手种子推算）
+        // 7. 查询所有种子信息（用于前方对手种子推算）
         List<PlayerSeedData> allSeeds = matchQueryRepository.listSeedsByTournamentIds(List.of(tournamentId));
         Map<String, Integer> playerSeedMap = allSeeds.stream()
                 .collect(Collectors.toMap(PlayerSeedData::getPlayerId, PlayerSeedData::getSeed, (a, b) -> a));
@@ -117,7 +106,7 @@ public class PlayerTournamentQueryService {
             CountryVO opponentCountry = opponentId != null
                     ? CountryEnum.getCountry(playerNationalityMap.get(opponentId))
                     : null;
-            String score = formatScore(m, playerId, setScoreMap);
+            String score = formatScore(m, playerId);
 
             if ("FINISHED".equals(m.getStatus())) {
                 boolean won = playerId.equals(m.getWinnerId());
@@ -328,17 +317,17 @@ public class PlayerTournamentQueryService {
      * 格式化比分字符串，如 "6-3 6-4 7-6"
      * player1 视角：若 playerId 是 player1，直接用 p1Games-p2Games；否则反转
      */
-    private String formatScore(MatchData match, String playerId, Map<Long, List<SetScoreData>> setScoreMap) {
-        if (!"FINISHED".equals(match.getStatus()) || match.getTourMatchId() == null) {
+    static String formatScore(MatchData match, String playerId) {
+        if (!"FINISHED".equals(match.getStatus())) {
             return "待定";
         }
-        List<SetScoreData> sets = setScoreMap.getOrDefault(match.getTourMatchId(), List.of());
+        List<SetScore> sets = Optional.ofNullable(match.getSets()).orElseGet(List::of);
         if (CollectionUtils.isEmpty(sets)) {
             return "已完成";
         }
         boolean isPlayer1 = playerId.equals(match.getPlayer1Id());
         StringBuilder sb = new StringBuilder();
-        for (SetScoreData s : sets) {
+        for (SetScore s : sets) {
             if (sb.length() > 0) sb.append(" ");
             int myGames = isPlayer1 ? s.getP1Games() : s.getP2Games();
             int oppGames = isPlayer1 ? s.getP2Games() : s.getP1Games();

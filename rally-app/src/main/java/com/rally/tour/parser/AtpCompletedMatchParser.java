@@ -5,6 +5,7 @@ import com.rally.client.atp.model.AtpAppCompletedResponse;
 import com.rally.domain.tour.model.TourRoundEnum;
 import com.rally.domain.tour.model.MatchStatus;
 import com.rally.tour.model.*;
+import com.rally.domain.tour.model.SetScore;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;

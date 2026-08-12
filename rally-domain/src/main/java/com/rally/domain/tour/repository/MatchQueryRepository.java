@@ -4,7 +4,6 @@ import com.rally.domain.tour.model.MatchData;
 import com.rally.domain.tour.model.PlayerData;
 import com.rally.domain.tour.model.PlayerDetailData;
 import com.rally.domain.tour.model.PlayerSeedData;
-import com.rally.domain.tour.model.SetScoreData;
 import com.rally.domain.tour.model.TourDrawData;
 
 import java.time.LocalDate;
@@ -30,13 +29,6 @@ public interface MatchQueryRepository {
      * 根据 tournamentId 列表查询未结束比赛（status != FINISHED 且有比赛日期）
      */
     List<MatchData> listUnfinishedByTournamentIds(List<String> tournamentIds);
-
-    /**
-     * 根据 tour_match.id 列表查询盘分
-     * @param tourMatchIds tour_match.id 列表
-     * @return 盘分列表
-     */
-    List<SetScoreData> listSetScoresByTourMatchIds(List<Long> tourMatchIds);
 
     /**
      * 根据球员ID列表查询球员信息

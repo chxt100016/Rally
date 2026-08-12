@@ -6,7 +6,7 @@ import com.rally.tour.model.Discipline;
 import com.rally.tour.model.Match;
 import com.rally.domain.tour.model.MatchStatus;
 import com.rally.tour.model.Player;
-import com.rally.tour.model.SetScore;
+import com.rally.domain.tour.model.SetScore;
 import com.rally.tour.model.TournamentEntry;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;

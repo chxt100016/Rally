@@ -1,14 +1,14 @@
 package com.rally.db.tour.convert;
 
+import com.alibaba.fastjson2.JSON;
 import com.rally.db.tour.entity.TourDrawPO;
 import com.rally.db.tour.entity.TourMatchPO;
 import com.rally.db.tour.entity.TourPlayerPO;
-import com.rally.db.tour.entity.TourSetScorePO;
 import com.rally.db.tour.entity.TourTournamentEntryPO;
 import com.rally.db.tour.entity.TourTournamentPO;
 import com.rally.domain.tour.model.MatchData;
 import com.rally.domain.tour.model.PlayerData;
-import com.rally.domain.tour.model.SetScoreData;
+import com.rally.domain.tour.model.SetScore;
 import com.rally.domain.tour.model.TourDrawData;
 import com.rally.domain.tour.model.TournamentData;
 import com.rally.domain.tour.model.TournamentEntryData;
@@ -45,6 +45,8 @@ public interface TourConvertMapper {
     List<TourPlayerPO> toPlayerPOList(List<PlayerData> dataList);
 
     @Mapping(target = "tourMatchId", source = "id")
+    @Mapping(target = "drawType", ignore = true)
+    @Mapping(target = "sets", source = "setsJson")
     MatchData toMatchData(TourMatchPO po);
 
     List<MatchData> toMatchDataList(List<TourMatchPO> pos);
@@ -52,18 +54,20 @@ public interface TourConvertMapper {
     @Mapping(target = "id", source = "tourMatchId")
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
-    @Mapping(target = "endedAt", ignore = true)
-    @Mapping(target = "description", ignore = true)
+    @Mapping(target = "setsJson", source = "sets")
     TourMatchPO toMatchPO(MatchData data);
 
     List<TourMatchPO> toMatchPOList(List<MatchData> dataList);
 
-    SetScoreData toSetScoreData(TourSetScorePO po);
+    default String setsToJson(List<SetScore> sets) {
+        return sets == null || sets.isEmpty() ? null : JSON.toJSONString(sets);
+    }
 
-    @Mapping(target = "id", ignore = true)
-    TourSetScorePO toSetScorePO(SetScoreData data);
-
-    List<TourSetScorePO> toSetScorePOList(List<SetScoreData> dataList);
+    default List<SetScore> jsonToSets(String setsJson) {
+        return setsJson == null || setsJson.isBlank()
+                ? List.of()
+                : JSON.parseArray(setsJson, SetScore.class);
+    }
 
     TourDrawData toDrawData(TourDrawPO po);
 

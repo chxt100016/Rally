@@ -72,7 +72,15 @@ public class MatchCollectManager {
                     draw.getMeta().getDrawSize(), draw.getMeta().getTotalRounds());
 
             List<Match> matches = parser.getMatches(draw, tournamentId, drawId);
-            matchCollectService.saveMatches(matches);
+            matches.forEach(match -> match.setDrawType(draw.getDrawTypeCode()));
+            try {
+                matchCollectService.saveMatches(matches);
+            } catch (RuntimeException e) {
+                log.error("比赛保存失败: collectType={}, tournamentId={}, year={}, drawType={}, drawId={}, matchCount={}",
+                        parser.collectType(), tournamentId, draw.getYear(), draw.getDrawTypeCode(), drawId,
+                        matches.size(), e);
+                throw e;
+            }
 
             List<Player> players = parser.getPlayers(draw);
             // 统一在 manager 层设置  tour

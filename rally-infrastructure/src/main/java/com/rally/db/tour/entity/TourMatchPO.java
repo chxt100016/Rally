@@ -1,6 +1,7 @@
 package com.rally.db.tour.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,8 @@ public class TourMatchPO {
     private String matchId;
     private Integer matchIndex;
     private Long drawId;
+    @TableField(exist = false)
+    private String drawType;
     private String tournamentId;
     private Integer year;
     private Integer roundNumber;
@@ -37,6 +40,7 @@ public class TourMatchPO {
     private Integer courtSeq;
     private String description;
     private LocalDate matchDate;
+    private String setsJson;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

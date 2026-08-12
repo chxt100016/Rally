@@ -3,19 +3,16 @@ package com.rally.db.tour.repository;
 import com.rally.db.tour.entity.TourDrawPO;
 import com.rally.db.tour.entity.TourMatchPO;
 import com.rally.db.tour.entity.TourPlayerPO;
-import com.rally.db.tour.entity.TourSetScorePO;
 import com.rally.db.tour.entity.TourTournamentEntryPO;
 import com.rally.db.tour.service.TourDrawService;
 import com.rally.db.tour.service.TourMatchService;
 import com.rally.db.tour.service.TourPlayerService;
-import com.rally.db.tour.service.TourSetScoreService;
 import com.rally.db.tour.service.TourTournamentEntryService;
 import com.rally.domain.tour.repository.MatchQueryRepository;
 import com.rally.domain.tour.model.MatchData;
 import com.rally.domain.tour.model.PlayerData;
 import com.rally.domain.tour.model.PlayerDetailData;
 import com.rally.domain.tour.model.PlayerSeedData;
-import com.rally.domain.tour.model.SetScoreData;
 import com.rally.domain.tour.model.TourDrawData;
 import lombok.RequiredArgsConstructor;
 
@@ -36,7 +33,6 @@ public class MatchQueryRepositoryImpl implements MatchQueryRepository {
 
     private final TourMatchService matchService;
     private final TourPlayerService playerService;
-    private final TourSetScoreService setScoreService;
     private final TourTournamentEntryService tournamentEntryService;
     private final TourDrawService drawService;
 
@@ -79,18 +75,6 @@ public class MatchQueryRepositoryImpl implements MatchQueryRepository {
     }
 
     @Override
-    public List<SetScoreData> listSetScoresByTourMatchIds(List<Long> tourMatchIds) {
-        if (CollectionUtils.isEmpty(tourMatchIds)) {
-            return List.of();
-        }
-        List<TourSetScorePO> list = setScoreService.lambdaQuery()
-                .in(TourSetScorePO::getTourMatchId, tourMatchIds)
-                .orderByAsc(TourSetScorePO::getSetNumber)
-                .list();
-        return list.stream().map(this::toSetScoreData).toList();
-    }
-
-    @Override
     public List<PlayerData> listPlayersByPlayerIds(List<String> playerIds) {
         if (CollectionUtils.isEmpty(playerIds)) {
             return List.of();
@@ -126,37 +110,7 @@ public class MatchQueryRepositoryImpl implements MatchQueryRepository {
     }
 
     private MatchData toMatchData(TourMatchPO po) {
-        MatchData data = new MatchData();
-        data.setMatchId(po.getMatchId());
-        data.setTourMatchId(po.getId());
-        data.setDrawId(po.getDrawId());
-        data.setMatchIndex(po.getMatchIndex());
-        data.setRoundNumber(po.getRoundNumber());
-        data.setTournamentId(po.getTournamentId());
-        data.setPlayer1Id(po.getPlayer1Id());
-        data.setPlayer2Id(po.getPlayer2Id());
-        data.setWinnerId(po.getWinnerId());
-        data.setRoundName(po.getRoundName());
-        data.setCourt(po.getCourt());
-        data.setCourtSeq(po.getCourtSeq());
-        data.setStatus(po.getStatus());
-        data.setDurationMinutes(po.getDurationMinutes());
-        data.setScheduledAtText(po.getScheduledAtText());
-        data.setMatchDate(po.getMatchDate());
-        data.setScheduledAt(po.getScheduledAt());
-        data.setStartedAt(po.getStartedAt());
-        return data;
-    }
-
-    private SetScoreData toSetScoreData(TourSetScorePO po) {
-        SetScoreData data = new SetScoreData();
-        data.setTourMatchId(po.getTourMatchId());
-        data.setSetNumber(po.getSetNumber());
-        data.setP1Games(po.getP1Games());
-        data.setP2Games(po.getP2Games());
-        data.setP1Tiebreak(po.getP1Tiebreak());
-        data.setP2Tiebreak(po.getP2Tiebreak());
-        return data;
+        return com.rally.db.tour.convert.TourConvertMapper.INSTANCE.toMatchData(po);
     }
 
     private PlayerData toPlayerData(TourPlayerPO po) {
