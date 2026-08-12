@@ -5,6 +5,7 @@ import com.rally.client.atp.model.AtpAppLiveResponse;
 import com.rally.domain.tour.model.MatchStatus;
 import com.rally.tour.model.*;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import java.util.List;
  * 每次请求对应一个赛事，按 eventId + eventYear 拉取
  */
 @Component
+@Slf4j
 public class AtpAppLiveMatchParser extends MatchParser<AtpAppLiveResponse, List<AtpAppLiveResponse.LiveMatch>> {
 
     @Resource
@@ -54,6 +56,12 @@ public class AtpAppLiveMatchParser extends MatchParser<AtpAppLiveResponse, List<
     protected List<DrawResult<List<AtpAppLiveResponse.LiveMatch>>> buildDrawResult(AtpAppLiveResponse data, DrawParams params, String prefix, Discipline discipline) {
         if (data == null || data.getData() == null
                 || CollectionUtils.isEmpty(data.getData().getLiveMatches())) {
+            return List.of();
+        }
+        if (!isRequestedEvent(data.getData().getEventId(), data.getData().getEventYear(), params)) {
+            log.error("实时比赛响应赛事不匹配，拒绝采集: requestedEventId={}, requestedYear={}, responseEventId={}, responseYear={}",
+                    params.getTournamentId(), params.getYear(),
+                    data.getData().getEventId(), data.getData().getEventYear());
             return List.of();
         }
         // 按 MatchId 前缀过滤，只保留指定类型的比赛

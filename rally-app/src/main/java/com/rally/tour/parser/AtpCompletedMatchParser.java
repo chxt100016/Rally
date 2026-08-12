@@ -6,6 +6,7 @@ import com.rally.domain.tour.model.TourRoundEnum;
 import com.rally.domain.tour.model.MatchStatus;
 import com.rally.tour.model.*;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  * 数据源：app.atptour.com/api/v2/gateway/results/completed
  */
 @Component
+@Slf4j
 public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse, AtpAppCompletedResponse> {
 
     @Resource
@@ -33,6 +35,10 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
     @Override
     protected List<DrawResult<AtpAppCompletedResponse>> ms(AtpAppCompletedResponse data, DrawParams params) {
         if (data == null || data.getData() == null) return List.of();
+        if (!isRequestedEvent(data.getData().getEventId(), data.getData().getEventYear(), params)) {
+            logEventMismatch(data, params);
+            return List.of();
+        }
         List<AtpAppCompletedResponse.Match> filtered = filterByPrefix(data.getData().getMatches(), "MS");
         if (filtered.isEmpty()) return List.of();
         return List.of(new DrawResult<>(buildFiltered(data, filtered), Discipline.SINGLES, "MS",
@@ -42,6 +48,10 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
     @Override
     protected List<DrawResult<AtpAppCompletedResponse>> ls(AtpAppCompletedResponse data, DrawParams params) {
         if (data == null || data.getData() == null) return List.of();
+        if (!isRequestedEvent(data.getData().getEventId(), data.getData().getEventYear(), params)) {
+            logEventMismatch(data, params);
+            return List.of();
+        }
         List<AtpAppCompletedResponse.Match> filtered = filterByPrefix(data.getData().getMatches(), "LS");
         if (filtered.isEmpty()) return List.of();
         return List.of(new DrawResult<>(buildFiltered(data, filtered), Discipline.SINGLES, "LS",
@@ -106,6 +116,12 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
     @Override
     public CollectType collectType() {
         return CollectType.ATP_APP_COMPLETED;
+    }
+
+    private void logEventMismatch(AtpAppCompletedResponse data, DrawParams params) {
+        log.error("已完成比赛响应赛事不匹配，拒绝采集: requestedEventId={}, requestedYear={}, responseEventId={}, responseYear={}",
+                params.getTournamentId(), params.getYear(),
+                data.getData().getEventId(), data.getData().getEventYear());
     }
 
     /** 按 matchId 前缀过滤比赛列表 */

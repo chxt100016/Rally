@@ -42,6 +42,23 @@ public abstract class MatchParser<R, S> {
 
     protected List<DrawResult<S>> ld(R data, DrawParams params) { return List.of(); }
 
+    /**
+     * 校验上游响应是否属于本次请求的赛事，防止缓存或代理返回其他赛事数据后被错误落库。
+     * eventId 按数字比较，以兼容请求参数中的前导零（如 "0404"）。
+     */
+    protected boolean isRequestedEvent(Integer responseEventId, Integer responseYear, DrawParams params) {
+        if (responseEventId == null || responseYear == null || params == null
+                || params.getTournamentId() == null) {
+            return false;
+        }
+        try {
+            return responseEventId.equals(Integer.valueOf(params.getTournamentId()))
+                    && responseYear.equals(params.getYear());
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     /** 从切片提取所有比赛 */
     public abstract List<Match> getMatches(DrawResult<S> draw, String tournamentId, Long drawId);
 

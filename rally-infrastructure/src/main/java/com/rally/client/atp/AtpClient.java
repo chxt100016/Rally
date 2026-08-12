@@ -62,7 +62,7 @@ public class AtpClient {
 
     public AtpAppLiveResponse getLiveMatches(String eventId, int eventYear) {
         String url = LIVE_MATCHES_URL
-                + "?eventid=" + eventId + "&eventYear=" + eventYear;
+                + "?eventId=" + eventId + "&eventYear=" + eventYear;
         String json = doGet(url);
         return json == null ? null : JSON.parseObject(json, AtpAppLiveResponse.class);
     }
