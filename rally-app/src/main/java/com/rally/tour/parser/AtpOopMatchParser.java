@@ -49,7 +49,7 @@ public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopR
 
     @Override
     protected List<AtpOopResponse> request(DrawParams params) {
-        return atpTvClient.getOop();
+        return atpTvClient.getOop(collectType().getApiUrl());
     }
 
     @Override

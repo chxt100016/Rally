@@ -23,7 +23,7 @@ public class WtaLiveMatchParser extends MatchParser<WtaMatchesResponse, List<Wta
 
     @Override
     protected WtaMatchesResponse request(DrawParams params) {
-        return wtaClient.getLiveMatches(params.getTournamentId(), params.getYear());
+        return wtaClient.getLiveMatches(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
     }
 
     @Override

@@ -31,7 +31,7 @@ public class AtpAppLiveMatchParser extends MatchParser<AtpAppLiveResponse, List<
      */
     @Override
     protected AtpAppLiveResponse request(DrawParams params) {
-        return atpClient.getLiveMatches(params.getTournamentId(), params.getYear());
+        return atpClient.getLiveMatches(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
     }
 
     /**

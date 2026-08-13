@@ -27,7 +27,7 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
 
     @Override
     protected AtpDrawsResponse request(DrawParams params) {
-        return atpTvClient.getDraws(params.getTournamentId(), params.getYear());
+        return atpTvClient.getDraws(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
     }
 
     @Override

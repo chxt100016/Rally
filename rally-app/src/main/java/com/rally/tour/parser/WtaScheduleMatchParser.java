@@ -42,7 +42,7 @@ public class WtaScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
 
     @Override
     protected WtaScheduleResponse request(DrawParams params) {
-        return wtaClient.getSchedule(params.getTournamentId(), params.getYear());
+        return wtaClient.getSchedule(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
     }
 
     @Override

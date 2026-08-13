@@ -23,7 +23,7 @@ public class WtaDrawMatchParser extends MatchParser<WtaDrawsResponse, WtaDrawsRe
 
     @Override
     protected WtaDrawsResponse request(DrawParams params) {
-        return wtaClient.getDraws(params.getTournamentId(), params.getYear());
+        return wtaClient.getDraws(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
     }
 
     @Override

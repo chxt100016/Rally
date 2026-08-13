@@ -31,7 +31,7 @@ public class AtpScheduleMatch4WtaParser extends AtpScheduleMatchParser {
 
     @Override
     protected WtaScheduleResponse request(DrawParams params) {
-        return atpClient.getSchedule(params.getTournamentId(), params.getYear());
+        return atpClient.getSchedule(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
     }
 
 

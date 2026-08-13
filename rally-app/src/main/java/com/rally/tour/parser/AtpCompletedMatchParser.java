@@ -30,7 +30,7 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
 
     @Override
     protected AtpAppCompletedResponse request(DrawParams params) {
-        return atpClient.getCompleted(params.getTournamentId(), params.getYear());
+        return atpClient.getCompleted(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
     }
 
     @Override

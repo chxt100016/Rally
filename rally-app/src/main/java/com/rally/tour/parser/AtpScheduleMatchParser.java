@@ -41,7 +41,7 @@ public class AtpScheduleMatchParser extends MatchParser<WtaScheduleResponse, Wta
 
     @Override
     protected WtaScheduleResponse request(DrawParams params) {
-        return atpClient.getSchedule(params.getTournamentId(), params.getYear());
+        return atpClient.getSchedule(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
     }
 
     /** 过滤出 Tour=ATP 且 MatchId 以 "MS" 开头的单打比赛，产生一个 MS DrawResult */

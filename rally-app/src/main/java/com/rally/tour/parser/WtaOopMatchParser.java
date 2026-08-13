@@ -29,7 +29,7 @@ public class WtaOopMatchParser extends MatchParser<WtaMatchesResponse, WtaMatche
 
     @Override
     protected WtaMatchesResponse request(DrawParams params) {
-        return wtaClient.getMatches(params.getTournamentId(), params.getYear());
+        return wtaClient.getMatches(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
     }
 
     @Override

@@ -90,6 +90,9 @@ public class AtpOopResponse {
         private PlayerTeam playerTeam1;
         @JSONField(name = "PlayerTeam2")
         private PlayerTeam playerTeam2;
+        /** New OOP payload used for scheduled matches; legacy completed rows may still use PlayerTeam1/2. */
+        @JSONField(name = "TeamsInMatch")
+        private List<TeamInMatch> teamsInMatch;
         @JSONField(name = "TournamentId")
         private Integer tournamentId;
         @JSONField(name = "TournamentYear")
@@ -107,8 +110,36 @@ public class AtpOopResponse {
 
     @Data
     public static class RoundInfo {
+        @JSONField(name = "RoundName")
+        private String roundName;
         @JSONField(name = "LongName")
         private String longName;
+    }
+
+    @Data
+    public static class TeamInMatch {
+        @JSONField(name = "TeamNumber")
+        private Integer teamNumber;
+        @JSONField(name = "Players")
+        private List<TeamPlayer> players;
+        @JSONField(name = "IsKnown")
+        private Boolean known;
+    }
+
+    @Data
+    public static class TeamPlayer {
+        @JSONField(name = "PlayerId")
+        private String playerId;
+        @JSONField(name = "OrderInTeam")
+        private Integer orderInTeam;
+        @JSONField(name = "FirstName")
+        private String firstName;
+        @JSONField(name = "LastName")
+        private String lastName;
+        @JSONField(name = "Country")
+        private String country;
+        @JSONField(name = "Seed")
+        private Integer seed;
     }
 
     @Data

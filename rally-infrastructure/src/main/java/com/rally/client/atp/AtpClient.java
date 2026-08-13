@@ -23,15 +23,6 @@ public class AtpClient {
 
     private static final String RANKINGS_URL =
             "https://app.atptour.com/api/v2/gateway/rankings/sglroll";
-    private static final String DRAWS_URL =
-            "https://app.atptour.com/api/v2/gateway/draws/ms";
-    private static final String LIVE_MATCHES_URL =
-            "https://app.atptour.com/api/v2/gateway/livematches";
-    private static final String SCHEDULE_URL =
-            "https://app.atptour.com/api/v2/gateway/scores/schedule";
-    private static final String COMPLETED_URL =
-            "https://app.atptour.com/api/v2/gateway/results/completed";
-
     private static final String DEFAULT_USER_AGENT =
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36";
 
@@ -53,29 +44,29 @@ public class AtpClient {
         return json == null ? null : JSON.parseObject(json, AtpRankingsResponse.class);
     }
 
-    public AtpAppDrawResponse getDraws(String eventId, int eventYear) {
-        String url = DRAWS_URL
+    public AtpAppDrawResponse getDraws(String apiUrl, String eventId, int eventYear) {
+        String url = apiUrl
                 + "?eventId=" + eventId + "&eventYear=" + eventYear;
         String json = doGet(url);
         return json == null ? null : JSON.parseObject(json, AtpAppDrawResponse.class);
     }
 
-    public AtpAppLiveResponse getLiveMatches(String eventId, int eventYear) {
-        String url = LIVE_MATCHES_URL
+    public AtpAppLiveResponse getLiveMatches(String apiUrl, String eventId, int eventYear) {
+        String url = apiUrl
                 + "?eventId=" + eventId + "&eventYear=" + eventYear;
         String json = doGet(url);
         return json == null ? null : JSON.parseObject(json, AtpAppLiveResponse.class);
     }
 
-    public AtpAppCompletedResponse getCompleted(String eventId, int eventYear) {
-        String url = COMPLETED_URL
+    public AtpAppCompletedResponse getCompleted(String apiUrl, String eventId, int eventYear) {
+        String url = apiUrl
                 + "?eventId=" + eventId + "&eventYear=" + eventYear;
         String json = doGet(url);
         return json == null ? null : JSON.parseObject(json, AtpAppCompletedResponse.class);
     }
 
-    public WtaScheduleResponse getSchedule(String eventId, int eventYear) {
-        String url = SCHEDULE_URL
+    public WtaScheduleResponse getSchedule(String apiUrl, String eventId, int eventYear) {
+        String url = apiUrl
                 + "?eventId=" + eventId + "&eventYear=" + eventYear;
         String json = doGet(url);
         return json == null ? null : JSON.parseObject(json, WtaScheduleResponse.class);

@@ -22,17 +22,17 @@ public interface OopMatchAppConvertMapper {
     @Mapping(target = "matchIndex", expression = "java(extractMatchNumber(detail.getMatchId()))")
     @Mapping(target = "tournamentId", expression = "java(detail.getTournamentId() != null ? String.valueOf(detail.getTournamentId()) : null)")
     @Mapping(target = "year", source = "tournamentYear")
-    @Mapping(target = "player1Id", expression = "java(detail.getPlayerTeam1() != null ? detail.getPlayerTeam1().getPlayerId() : null)")
-    @Mapping(target = "player2Id", expression = "java(detail.getPlayerTeam2() != null ? detail.getPlayerTeam2().getPlayerId() : null)")
-    @Mapping(target = "playerName1", expression = "java(buildPlayerName(detail.getPlayerTeam1()))")
-    @Mapping(target = "playerName2", expression = "java(buildPlayerName(detail.getPlayerTeam2()))")
+    @Mapping(target = "player1Id", expression = "java(getPlayerId(detail, 1))")
+    @Mapping(target = "player2Id", expression = "java(getPlayerId(detail, 2))")
+    @Mapping(target = "playerName1", expression = "java(buildPlayerName(detail, 1))")
+    @Mapping(target = "playerName2", expression = "java(buildPlayerName(detail, 2))")
     @Mapping(target = "status", expression = "java(com.rally.domain.tour.model.MatchStatus.toStatus(detail.getStatus()))")
     @Mapping(target = "winnerId", expression = "java(detail.getWinningPlayerId())")
     @Mapping(target = "scheduledAt", expression = "java(parseScheduledAt(detail.getMatchDate(), detail.getNotBeforeISOTime()))")
     @Mapping(target = "scheduledAtText", expression = "java(parseNotBeforeText(detail))")
     @Mapping(target = "court", source = "courtName")
     @Mapping(target = "courtSeq", source = "courtSeq")
-    @Mapping(target = "roundName", expression = "java(com.rally.domain.tour.model.TourRoundEnum.of(detail.getRound() != null ? detail.getRound().getLongName() : null))")
+    @Mapping(target = "roundName", expression = "java(resolveRoundName(detail.getRound()))")
     @Mapping(target = "roundNumber", ignore = true)
     @Mapping(target = "drawId", ignore = true)
     @Mapping(target = "startedAt", ignore = true)
@@ -41,6 +41,50 @@ public interface OopMatchAppConvertMapper {
     @Mapping(target = "sets", ignore = true)
     @Mapping(target = "matchDate", expression = "java(parseMatchDate(detail.getMatchDate()))")
     Match toMatch(AtpOopResponse.MatchDetail detail);
+
+    default String getPlayerId(AtpOopResponse.MatchDetail detail, int teamNumber) {
+        AtpOopResponse.PlayerTeam legacyTeam = legacyTeam(detail, teamNumber);
+        if (legacyTeam != null && StringUtils.isNotBlank(legacyTeam.getPlayerId())) {
+            return legacyTeam.getPlayerId();
+        }
+        AtpOopResponse.TeamPlayer player = firstPlayer(detail, teamNumber);
+        return player != null ? player.getPlayerId() : null;
+    }
+
+    default String buildPlayerName(AtpOopResponse.MatchDetail detail, int teamNumber) {
+        AtpOopResponse.PlayerTeam legacyTeam = legacyTeam(detail, teamNumber);
+        if (legacyTeam != null && StringUtils.isNotBlank(legacyTeam.getPlayerId())) {
+            return buildPlayerName(legacyTeam);
+        }
+        AtpOopResponse.TeamPlayer player = firstPlayer(detail, teamNumber);
+        if (player == null) return null;
+        return joinName(player.getFirstName(), player.getLastName());
+    }
+
+    default AtpOopResponse.PlayerTeam legacyTeam(AtpOopResponse.MatchDetail detail, int teamNumber) {
+        if (detail == null) return null;
+        return teamNumber == 1 ? detail.getPlayerTeam1() : detail.getPlayerTeam2();
+    }
+
+    default AtpOopResponse.TeamPlayer firstPlayer(AtpOopResponse.MatchDetail detail, int teamNumber) {
+        if (detail == null || detail.getTeamsInMatch() == null) return null;
+        return detail.getTeamsInMatch().stream()
+                .filter(team -> Integer.valueOf(teamNumber).equals(team.getTeamNumber()))
+                .filter(team -> team.getPlayers() != null && !team.getPlayers().isEmpty())
+                .flatMap(team -> team.getPlayers().stream()
+                        .sorted(java.util.Comparator.comparing(
+                                AtpOopResponse.TeamPlayer::getOrderInTeam,
+                                java.util.Comparator.nullsLast(Integer::compareTo)))
+                        .limit(1))
+                .findFirst()
+                .orElse(null);
+    }
+
+    default String resolveRoundName(AtpOopResponse.RoundInfo round) {
+        if (round == null) return null;
+        String name = StringUtils.isNotBlank(round.getLongName()) ? round.getLongName() : round.getRoundName();
+        return com.rally.domain.tour.model.TourRoundEnum.of(name);
+    }
 
     default String buildPlayerName(AtpOopResponse.PlayerTeam team) {
         if (team == null) return null;
@@ -55,6 +99,12 @@ public interface OopMatchAppConvertMapper {
             sb.append(team.getPlayerLastName());
         }
         return sb.length() > 0 ? sb.toString() : null;
+    }
+
+    default String joinName(String firstName, String lastName) {
+        if (StringUtils.isBlank(firstName)) return StringUtils.defaultIfBlank(lastName, null);
+        if (StringUtils.isBlank(lastName)) return firstName;
+        return firstName + " " + lastName;
     }
 
     @Named("parseNotBeforeText")

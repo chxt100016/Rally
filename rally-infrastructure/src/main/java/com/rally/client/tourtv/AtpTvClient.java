@@ -35,9 +35,9 @@ public class AtpTvClient {
     /**
      * 接口1.1: 按状态查询比赛 (如 status=P 表示正在进行)
      */
-    public MatchesResponse getMatchesByStatus(String status) {
+    public MatchesResponse getMatchesByStatus(String apiUrl, String status) {
         try {
-            Http http = Http.uri(BASE_URI + "/matches")
+            Http http = Http.uri(apiUrl)
                     .param("status", status)
                     .header("origin", "https://www.tennistv.com")
                     .doGet();
@@ -51,9 +51,9 @@ public class AtpTvClient {
     /**
      * 接口2: 查询签表数据
      */
-    public AtpDrawsResponse getDraws(String tournamentId, int year) {
+    public AtpDrawsResponse getDraws(String apiUrl, String tournamentId, int year) {
         try {
-            return Http.uri(BASE_URI + "/tournaments/" + tournamentId + "/" + year + "/draws")
+            return Http.uri(apiUrl.formatted(tournamentId, year))
                     .doGet()
                     .result(AtpDrawsResponse.class);
         } catch (Exception e) {
@@ -83,9 +83,9 @@ public class AtpTvClient {
     /**
      * 接口3: 查询比赛详情 (每日安排)
      */
-    public List<AtpOopResponse> getOop() {
+    public List<AtpOopResponse> getOop(String apiUrl) {
         try {
-            Http http = Http.uri(BASE_URI + "/oop")
+            Http http = Http.uri(apiUrl)
                     .doGet();
             return http.resultArray(AtpOopResponse.class);
         } catch (Exception e) {

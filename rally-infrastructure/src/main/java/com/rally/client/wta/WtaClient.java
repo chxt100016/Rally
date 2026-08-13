@@ -31,9 +31,9 @@ public class WtaClient {
         }
     }
 
-    public WtaMatchesResponse getMatches(String tournamentId, int year) {
+    public WtaMatchesResponse getMatches(String apiUrl, String tournamentId, int year) {
         try {
-            String url = BASE_URI + "/" + tournamentId + "/" + year + "/matches";
+            String url = apiUrl.formatted(tournamentId, year);
             return Http.uri(url).doGet().result(WtaMatchesResponse.class);
         } catch (Exception e) {
             log.error("获取WTA签表失败, tournamentId={}, year={}", tournamentId, year, e);
@@ -41,10 +41,9 @@ public class WtaClient {
         }
     }
 
-    public WtaDrawsResponse getDraws(String tournamentId, int year) {
+    public WtaDrawsResponse getDraws(String apiUrl, String tournamentId, int year) {
         try {
-            String url = "https://wta-webapi-prod-apimanagement.azure-api.net/atpjoint-api/v1/TournamentDraws/draws";
-            return Http.uri(url)
+            return Http.uri(apiUrl)
                     .param("eventYear", String.valueOf(year))
                     .param("eventId", tournamentId)
                     .param("drawType", "ls")
@@ -58,9 +57,9 @@ public class WtaClient {
         }
     }
 
-    public WtaMatchesResponse getLiveMatches(String tournamentId, int year) {
+    public WtaMatchesResponse getLiveMatches(String apiUrl, String tournamentId, int year) {
         try {
-            String url = BASE_URI + "/" + tournamentId + "/" + year + "/matches";
+            String url = apiUrl.formatted(tournamentId, year);
             return Http.uri(url).param("states", "L").doGet().result(WtaMatchesResponse.class);
         } catch (Exception e) {
             log.error("获取WTA进行中比赛失败, tournamentId={}, year={}", tournamentId, year, e);
@@ -68,10 +67,9 @@ public class WtaClient {
         }
     }
 
-    public WtaScheduleResponse getSchedule(String tournamentId, int year) {
+    public WtaScheduleResponse getSchedule(String apiUrl, String tournamentId, int year) {
         try {
-            String url = "https://wta-webapi-prod-apimanagement.azure-api.net/atpjoint-api/v1/Scores/Schedule";
-            return Http.uri(url)
+            return Http.uri(apiUrl)
                     .param("eventId", tournamentId)
                     .param("eventYear", String.valueOf(year))
                     .header("apikey", "8334323343164715938a39449ac5bb69")

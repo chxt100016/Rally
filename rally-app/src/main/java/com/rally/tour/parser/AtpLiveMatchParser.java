@@ -47,7 +47,7 @@ public class AtpLiveMatchParser extends MatchParser<MatchesResponse, List<Matche
 
     @Override
     protected MatchesResponse request(DrawParams params) {
-        return atpTvClient.getMatchesByStatus("L");
+        return atpTvClient.getMatchesByStatus(collectType().getApiUrl(), "L");
     }
 
     @Override
