@@ -2,6 +2,7 @@ package com.rally.tour.convert;
 
 import com.alibaba.fastjson2.JSON;
 import com.rally.client.tourtv.model.AtpOopResponse;
+import com.rally.domain.tour.model.MatchData;
 import com.rally.tour.model.Match;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ public class OopMatchAppConvertMapperTest {
         String json = """
                 {
                   "MatchId":"MS001",
+                  "CourtSeq":3,
                   "TeamsInMatch":[
                     {"TeamNumber":1,"Players":[{"PlayerId":"S0S1","OrderInTeam":1,"FirstName":"Ben","LastName":"Shelton"}]},
                     {"TeamNumber":2,"Players":[{"PlayerId":"N0AE","OrderInTeam":1,"FirstName":"Brandon","LastName":"Nakashima"}]}
@@ -33,6 +35,10 @@ public class OopMatchAppConvertMapperTest {
         assertEquals("Ben Shelton", match.getPlayerName1());
         assertEquals("Brandon Nakashima", match.getPlayerName2());
         assertEquals("F", match.getRoundName());
+        assertEquals(Integer.valueOf(3), match.getCourtSeq());
+
+        MatchData matchData = MatchAppConvertMapper.INSTANCE.toMatchData(match);
+        assertEquals(Integer.valueOf(3), matchData.getCourtSeq());
     }
 
     @Test

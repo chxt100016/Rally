@@ -40,7 +40,7 @@ public interface MatchAppConvertMapper {
     Match toMatch(MatchesResponse.MatchInfo info);
 
     @Mapping(target = "tourMatchId", ignore = true)
-    @Mapping(target = "courtSeq", ignore = true)
+    @Mapping(target = "courtSeq", source = "courtSeq")
     MatchData toMatchData(Match match);
 
     List<MatchData> toMatchDataList(List<Match> matches);

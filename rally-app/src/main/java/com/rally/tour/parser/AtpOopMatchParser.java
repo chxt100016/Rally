@@ -63,26 +63,37 @@ public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopR
             for (AtpOopResponse.CourtDetail court : day.getCourts().values()) {
                 if (CollectionUtils.isEmpty(court.getMatches())) continue;
 
-                LocalDateTime lastMatchScheduledAt = null;
-                for (AtpOopResponse.MatchDetail detail : court.getMatches()) {
+                List<AtpOopResponse.MatchDetail> details = court.getMatches();
+                for (int i = 0; i < details.size(); i++) {
+                    AtpOopResponse.MatchDetail detail = details.get(i);
                     if (!"ATP".equals(detail.getAssociationCode())) continue;
 
                     Match match = OopMatchAppConvertMapper.INSTANCE.toMatch(detail);
                     match.setDrawId(drawId);
 
                     if ("Followed By".equals(detail.getNotBeforeText()) && match.getScheduledAt() == null) {
-                        if (lastMatchScheduledAt != null) {
-                            match.setScheduledAt(lastMatchScheduledAt.plusMinutes(70));
+                        LocalDateTime previousFixedScheduledAt = findPreviousFixedScheduledAt(details, i);
+                        if (previousFixedScheduledAt != null) {
+                            match.setScheduledAt(previousFixedScheduledAt.plusMinutes(100));
                         }
-                    }
-                    if (match.getScheduledAt() != null) {
-                        lastMatchScheduledAt = match.getScheduledAt();
                     }
                     matches.add(match);
                 }
             }
         }
         return matches;
+    }
+
+    private LocalDateTime findPreviousFixedScheduledAt(List<AtpOopResponse.MatchDetail> details, int currentIndex) {
+        for (int i = currentIndex - 1; i >= 0; i--) {
+            AtpOopResponse.MatchDetail previous = details.get(i);
+            if ("Followed By".equals(previous.getNotBeforeText())) continue;
+
+            LocalDateTime scheduledAt = OopMatchAppConvertMapper.INSTANCE.parseScheduledAt(
+                    previous.getMatchDate(), previous.getNotBeforeISOTime());
+            if (scheduledAt != null) return scheduledAt;
+        }
+        return null;
     }
 
     @Override
