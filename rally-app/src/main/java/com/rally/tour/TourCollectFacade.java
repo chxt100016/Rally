@@ -101,6 +101,15 @@ public class TourCollectFacade {
         }
     }
 
+    /** Phase 仅控制调度入口，具体 CollectType 仍由现有赛事判断决定。 */
+    public void matches(CollectType.Phase phase) {
+        switch (phase) {
+            case DRAW -> currentDraws();
+            case OOP -> oop();
+            case LIVE -> liveMatch();
+        }
+    }
+
     public void rank() {
         playerCollectService.atpRank();
         playerCollectService.wtaRank();

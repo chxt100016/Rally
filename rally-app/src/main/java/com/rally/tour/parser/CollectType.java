@@ -19,7 +19,34 @@ public enum CollectType {
     ATP_APP_COMPLETED(Phase.DRAW, "https://app.atptour.com/api/v2/gateway/results/completed"),
     ;
 
-    public enum Phase { DRAW, OOP, LIVE }
+    @Getter
+    public enum Phase {
+        DRAW(60),
+        OOP(60),
+        LIVE(5);
+
+        private final int intervalMinutes;
+
+        Phase(int intervalMinutes) {
+            if (intervalMinutes <= 0) {
+                throw new IllegalArgumentException("采集间隔必须大于 0");
+            }
+            this.intervalMinutes = intervalMinutes;
+        }
+
+        public boolean shouldRun(long epochMinute) {
+            return Math.floorMod(epochMinute, intervalMinutes) == 0;
+        }
+
+        static {
+            int baseInterval = LIVE.intervalMinutes;
+            for (Phase phase : values()) {
+                if (phase.intervalMinutes % baseInterval != 0) {
+                    throw new IllegalStateException("Phase 间隔必须是 LIVE 间隔的整数倍: " + phase);
+                }
+            }
+        }
+    }
 
     private final Phase phase;
     private final String apiUrl;

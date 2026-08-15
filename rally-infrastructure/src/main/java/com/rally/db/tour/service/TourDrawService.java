@@ -41,8 +41,8 @@ public class TourDrawService extends ServiceImpl<TourDrawMapper, TourDrawPO> {
                 .one();
 
         if (existing != null) {
-            existing.setSize(size);
-            existing.setTotalRounds(totalRounds);
+            if (size != null) existing.setSize(size);
+            if (totalRounds != null) existing.setTotalRounds(totalRounds);
             this.updateById(existing);
             return existing.getId();
         }

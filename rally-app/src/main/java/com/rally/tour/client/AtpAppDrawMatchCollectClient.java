@@ -1,4 +1,6 @@
-package com.rally.tour.parser;
+package com.rally.tour.client;
+
+import com.rally.tour.parser.*;
 
 import com.rally.client.atp.AtpClient;
 import com.rally.client.atp.model.AtpAppDrawResponse;
@@ -18,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAppDrawResponse> {
+public class AtpAppDrawMatchCollectClient extends AbstractMatchCollectClient<AtpAppDrawResponse, AtpAppDrawResponse> {
 
     @Resource
     private AtpClient atpClient;
@@ -55,7 +57,7 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
                 params.getTournamentId(), params.getYear()));
     }
     @Override
-    public List<Match> getMatches(DrawResult<AtpAppDrawResponse> draw, String tournamentId, Long drawId) {
+    public List<Match> getMatches(DrawResult<AtpAppDrawResponse> draw, String tournamentId) {
         AtpAppDrawResponse data = draw.getSlice();
         if (data == null || data.getData() == null || CollectionUtils.isEmpty(data.getData().getResults())) {
             return List.of();
@@ -67,7 +69,6 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
             for (AtpAppDrawResponse.Match m : roundResult.getMatches()) {
                 Match match = AtpAppDrawMatchConvertMapper.INSTANCE.toMatch(m);
                 match.setTournamentId(tournamentId);
-                match.setDrawId(drawId);
                 match.setYear(draw.getYear());
                 if (round != null) {
                     match.setRoundNumber(round.getId() != null ? Integer.parseInt(round.getId()) : null);
@@ -101,7 +102,7 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
     }
 
     @Override
-    public List<TournamentEntry> getEntries(DrawResult<AtpAppDrawResponse> draw, Long drawId) {
+    public List<TournamentEntry> getEntries(DrawResult<AtpAppDrawResponse> draw) {
         AtpAppDrawResponse data = draw.getSlice();
         if (data == null || data.getData() == null) return List.of();
 
@@ -124,7 +125,6 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
             entryMap.computeIfAbsent(key, id -> {
                 TournamentEntry item = new TournamentEntry();
                 item.setPlayerId(key);
-                item.setDrawId(drawId);
                 item.setSeed(value.shortValue());
                 return item;
             });
@@ -140,7 +140,6 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
                         entryMap.computeIfAbsent(m.getPlayerId().toUpperCase(), id -> {
                             TournamentEntry entry = new TournamentEntry();
                             entry.setPlayerId(id);
-                            entry.setDrawId(drawId);
                             Integer seed = seedMap.get(id);
                             entry.setSeed(seed != null ? seed.shortValue() : null);
                             entry.setEntryType(m.getPlayerEntryType());
@@ -151,7 +150,6 @@ public class AtpAppDrawMatchParser extends MatchParser<AtpAppDrawResponse, AtpAp
                         entryMap.computeIfAbsent(m.getOpponentId().toUpperCase(), id -> {
                             TournamentEntry entry = new TournamentEntry();
                             entry.setPlayerId(id);
-                            entry.setDrawId(drawId);
                             Integer seed = seedMap.get(id);
                             entry.setSeed(seed != null ? seed.shortValue() : null);
                             entry.setEntryType(m.getOpponentEntryType());

@@ -1,4 +1,6 @@
-package com.rally.tour.parser;
+package com.rally.tour.client;
+
+import com.rally.tour.parser.*;
 
 import com.rally.client.atp.AtpClient;
 import com.rally.client.atp.model.AtpAppLiveResponse;
@@ -14,13 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ATP App 实时比赛解析器（男子单打 MS）
+ * ATP App 实时比赛采集 Client（男子单打 MS）
  * 数据源：<a href="https://app.atptour.com/api/v2/gateway/livematches">...</a>
  * 每次请求对应一个赛事，按 eventId + eventYear 拉取
  */
 @Component
 @Slf4j
-public class AtpAppLiveMatchParser extends MatchParser<AtpAppLiveResponse, List<AtpAppLiveResponse.LiveMatch>> {
+public class AtpAppLiveMatchCollectClient extends AbstractMatchCollectClient<AtpAppLiveResponse, List<AtpAppLiveResponse.LiveMatch>> {
 
     @Resource
     private AtpClient atpClient;
@@ -87,14 +89,13 @@ public class AtpAppLiveMatchParser extends MatchParser<AtpAppLiveResponse, List<
      */
     @Override
     public List<Match> getMatches(DrawResult<List<AtpAppLiveResponse.LiveMatch>> draw,
-                                  String tournamentId, Long drawId) {
+                                  String tournamentId) {
         List<Match> matches = new ArrayList<>();
         for (AtpAppLiveResponse.LiveMatch lm : draw.getSlice()) {
             Match match = new Match();
             match.setMatchId(lm.getMatchId());
             match.setTournamentId(tournamentId);
             match.setYear(draw.getYear());
-            match.setDrawId(drawId);
             // PlayerTeam 对应 player1，OpponentTeam 对应 player2
             match.setPlayer1Id(lm.getPlayerTeam() != null && lm.getPlayerTeam().getPlayer() != null ? lm.getPlayerTeam().getPlayer().getPlayerId() : null);
             match.setPlayer2Id(lm.getOpponentTeam() != null && lm.getOpponentTeam().getPlayer() != null ? lm.getOpponentTeam().getPlayer().getPlayerId() : null);
@@ -113,7 +114,7 @@ public class AtpAppLiveMatchParser extends MatchParser<AtpAppLiveResponse, List<
     }
 
     @Override
-    public List<TournamentEntry> getEntries(DrawResult<List<AtpAppLiveResponse.LiveMatch>> draw, Long drawId) {
+    public List<TournamentEntry> getEntries(DrawResult<List<AtpAppLiveResponse.LiveMatch>> draw) {
         return List.of();
     }
 

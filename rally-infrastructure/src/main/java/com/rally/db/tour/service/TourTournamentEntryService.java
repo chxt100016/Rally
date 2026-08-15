@@ -23,7 +23,8 @@ public class TourTournamentEntryService extends ServiceImpl<TourTournamentEntryM
                     .one();
 
             if (existing != null) {
-                existing.setSeed(entry.getSeed());
+                if (entry.getSeed() != null) existing.setSeed(entry.getSeed());
+                if (entry.getEntryType() != null) existing.setEntryType(entry.getEntryType());
                 this.updateById(existing);
             } else {
                 this.save(entry);

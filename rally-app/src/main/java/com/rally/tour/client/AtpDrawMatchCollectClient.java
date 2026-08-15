@@ -1,4 +1,6 @@
-package com.rally.tour.parser;
+package com.rally.tour.client;
+
+import com.rally.tour.parser.*;
 
 
 import com.rally.client.tourtv.AtpTvClient;
@@ -20,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsResponse.Draw> {
+public class AtpDrawMatchCollectClient extends AbstractMatchCollectClient<AtpDrawsResponse, AtpDrawsResponse.Draw> {
 
     @Resource
     private AtpTvClient atpTvClient;
@@ -42,7 +44,7 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
 
 
     @Override
-    public List<Match> getMatches(DrawResult<AtpDrawsResponse.Draw> draw, String tournamentId, Long drawId) {
+    public List<Match> getMatches(DrawResult<AtpDrawsResponse.Draw> draw, String tournamentId) {
         AtpDrawsResponse.Draw drawData = draw.getSlice();
         if (drawData == null || CollectionUtils.isEmpty(drawData.getRounds())) {
             return List.of();
@@ -53,7 +55,6 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
             for (AtpDrawsResponse.Fixture fixture : round.getFixtures()) {
                 Match match = DrawMatchAppConvertMapper.INSTANCE.toMatch(fixture);
                 match.setTournamentId(tournamentId);
-                match.setDrawId(drawId);
                 match.setYear(draw.getYear());
                 match.setRoundNumber(round.getRoundId());
                 match.setRoundName(TourRoundEnum.of(round.getRoundName()));
@@ -88,28 +89,26 @@ public class AtpDrawMatchParser extends MatchParser<AtpDrawsResponse, AtpDrawsRe
     }
 
     @Override
-    public List<TournamentEntry> getEntries(DrawResult<AtpDrawsResponse.Draw> draw, Long drawId) {
+    public List<TournamentEntry> getEntries(DrawResult<AtpDrawsResponse.Draw> draw) {
         AtpDrawsResponse.Draw drawData = draw.getSlice();
         if (drawData == null || CollectionUtils.isEmpty(drawData.getRounds())) return List.of();
         Map<String, TournamentEntry> entryMap = new LinkedHashMap<>();
         for (AtpDrawsResponse.Round round : drawData.getRounds()) {
             if (CollectionUtils.isEmpty(round.getFixtures())) continue;
             for (AtpDrawsResponse.Fixture fixture : round.getFixtures()) {
-                extractFromDrawLine(fixture.getDrawLineTop(), drawId, entryMap);
-                extractFromDrawLine(fixture.getDrawLineBottom(), drawId, entryMap);
+                extractFromDrawLine(fixture.getDrawLineTop(), entryMap);
+                extractFromDrawLine(fixture.getDrawLineBottom(), entryMap);
             }
         }
         return new ArrayList<>(entryMap.values());
     }
 
-    private void extractFromDrawLine(AtpDrawsResponse.DrawLine drawLine, Long drawId,
-                                     Map<String, TournamentEntry> entryMap) {
+    private void extractFromDrawLine(AtpDrawsResponse.DrawLine drawLine, Map<String, TournamentEntry> entryMap) {
         if (drawLine == null || CollectionUtils.isEmpty(drawLine.getPlayers())) return;
         for (AtpDrawsResponse.PlayerInfo playerInfo : drawLine.getPlayers()) {
             if (playerInfo == null || playerInfo.getPlayerId() == null) continue;
             TournamentEntry entry = new TournamentEntry();
             entry.setPlayerId(playerInfo.getPlayerId() == null ? null : playerInfo.getPlayerId().toUpperCase());
-            entry.setDrawId(drawId);
             entry.setSeed(drawLine.getSeed() != null ? drawLine.getSeed().shortValue() : null);
             entryMap.put(playerInfo.getPlayerId(), entry);
         }

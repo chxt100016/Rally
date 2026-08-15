@@ -41,42 +41,79 @@ public class TourMatchServiceTest {
     }
 
     @Test
-    public void winnerOutsideParticipantsIsRejected() {
+    public void scoreAndParticipantsOverwriteWithoutDirectionValidation() {
+        TourMatchPO existing = match("315683", "");
         TourMatchPO incoming = match("p1", "p2");
-        incoming.setWinnerId("p3");
-
-        assertThrows(IllegalArgumentException.class, () -> TourMatchService.validateWinner(incoming));
-    }
-
-    @Test
-    public void scoreWithExactlyReversedParticipantsIsNormalized() {
-        TourMatchPO existing = match("p1", "p2");
-        TourMatchPO incoming = match("p2", "p1");
-        incoming.setSetsJson("[{\"setNumber\":1,\"p1Games\":4,\"p2Games\":6,\"p2Tiebreak\":5}]");
+        incoming.setPlayer1Id("315683");
+        incoming.setPlayer2Id("327061");
+        incoming.setWinnerId("315683");
+        incoming.setSetsJson("[{\"p1Games\":7,\"p2Games\":5,\"setNumber\":1}]");
 
         TourMatchPO merged = TourMatchService.merge(existing, incoming);
 
-        assertEquals("p1", merged.getPlayer1Id());
-        assertEquals("p2", merged.getPlayer2Id());
-        assertEquals("[{\"p1Games\":6,\"p1Tiebreak\":5,\"p2Games\":4,\"setNumber\":1}]", merged.getSetsJson());
+        assertEquals("315683", merged.getPlayer1Id());
+        assertEquals("327061", merged.getPlayer2Id());
+        assertEquals("315683", merged.getWinnerId());
+        assertEquals("[{\"p1Games\":7,\"p2Games\":5,\"setNumber\":1}]", merged.getSetsJson());
     }
 
     @Test
-    public void scoreWithDifferentParticipantsIsRejected() {
+    public void differentNonBlankParticipantsAlsoOverwrite() {
         TourMatchPO existing = match("p1", "p2");
         TourMatchPO incoming = match("p1", "p3");
         incoming.setSetsJson("[]");
 
-        assertThrows(IllegalArgumentException.class, () -> TourMatchService.merge(existing, incoming));
+        TourMatchPO merged = TourMatchService.merge(existing, incoming);
+
+        assertEquals("p1", merged.getPlayer1Id());
+        assertEquals("p3", merged.getPlayer2Id());
+        assertEquals("[]", merged.getSetsJson());
     }
 
     @Test
     public void completeExternalIdentityIsRequired() {
         TourMatchPO incoming = identityOnly();
+        incoming.setTournamentId(null);
 
         assertThrows(IllegalArgumentException.class, () -> TourMatchService.validateIdentity(incoming));
-        incoming.setDrawType("MS");
+        incoming.setTournamentId("806");
         TourMatchService.validateIdentity(incoming);
+    }
+
+    @Test
+    public void nonBlankStatusAlwaysOverwrites() {
+        TourMatchPO existing = match("p1", "p2");
+        existing.setStatus("LIVE");
+        TourMatchPO incoming = match("p1", "p2");
+        incoming.setStatus("PENDING");
+
+        TourMatchPO merged = TourMatchService.merge(existing, incoming);
+
+        assertEquals("PENDING", merged.getStatus());
+    }
+
+    @Test
+    public void blankStringsDoNotOverwriteExistingValues() {
+        TourMatchPO existing = match("p1", "p2");
+        existing.setCourt("Court 1");
+        existing.setSetsJson("score");
+        TourMatchPO incoming = match("p1", "p2");
+        incoming.setCourt(" ");
+        incoming.setSetsJson("");
+
+        TourMatchPO merged = TourMatchService.merge(existing, incoming);
+
+        assertEquals("Court 1", merged.getCourt());
+        assertEquals("score", merged.getSetsJson());
+    }
+
+    @Test
+    public void tournamentYearAndMatchIdMustRemainConsistent() {
+        TourMatchPO existing = match("p1", "p2");
+        TourMatchPO incoming = match("p1", "p2");
+        incoming.setTournamentId("9999");
+
+        assertThrows(IllegalArgumentException.class, () -> TourMatchService.merge(existing, incoming));
     }
 
     private TourMatchPO match(String player1Id, String player2Id) {

@@ -1,4 +1,6 @@
-package com.rally.tour.parser;
+package com.rally.tour.client;
+
+import com.rally.tour.parser.*;
 
 import com.rally.client.tourtv.AtpTvClient;
 import com.rally.client.tourtv.model.AtpOopResponse;
@@ -14,10 +16,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
-public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopResponse> {
+public class AtpOopMatchCollectClient extends AbstractMatchCollectClient<List<AtpOopResponse>, AtpOopResponse> {
 
     @Resource
     private AtpTvClient atpTvClient;
@@ -29,16 +30,6 @@ public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopR
         List<DrawResult<AtpOopResponse>> results = new ArrayList<>();
         for (AtpOopResponse tournament : data) {
             if (CollectionUtils.isEmpty(tournament.getOop())) continue;
-            // 预过滤：只保留 matchId 以 "MS" 开头的比赛
-            for (AtpOopResponse.OopDay day : tournament.getOop()) {
-                if (day.getCourts() == null) continue;
-                for (AtpOopResponse.CourtDetail court : day.getCourts().values()) {
-                    if (CollectionUtils.isEmpty(court.getMatches())) continue;
-                    court.setMatches(court.getMatches().stream()
-                            .filter(m -> m.getMatchId() != null && m.getMatchId().startsWith("MS"))
-                            .collect(Collectors.toList()));
-                }
-            }
             String tournamentId = String.valueOf(tournament.getId());
             Integer drawSize = tournament.getInfo() != null ? tournament.getInfo().getDrawSizeSM() : null;
             results.add(new DrawResult<>(tournament, Discipline.SINGLES, "MS",
@@ -53,7 +44,7 @@ public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopR
     }
 
     @Override
-    public List<Match> getMatches(DrawResult<AtpOopResponse> draw, String tournamentId, Long drawId) {
+    public List<Match> getMatches(DrawResult<AtpOopResponse> draw, String tournamentId) {
         AtpOopResponse tournament = draw.getSlice();
         if (tournament == null || CollectionUtils.isEmpty(tournament.getOop())) return List.of();
 
@@ -64,36 +55,30 @@ public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopR
                 if (CollectionUtils.isEmpty(court.getMatches())) continue;
 
                 List<AtpOopResponse.MatchDetail> details = court.getMatches();
-                for (int i = 0; i < details.size(); i++) {
-                    AtpOopResponse.MatchDetail detail = details.get(i);
-                    if (!"ATP".equals(detail.getAssociationCode())) continue;
+                LocalDateTime previousScheduledAt = null;
+                for (AtpOopResponse.MatchDetail detail : details) {
+                    LocalDateTime scheduledAt = OopMatchAppConvertMapper.INSTANCE.parseScheduledAt(
+                            detail.getMatchDate(), detail.getNotBeforeISOTime());
+                    if ("Followed By".equals(detail.getNotBeforeText()) && previousScheduledAt != null) {
+                        // Followed By 的 ISO 时间可能沿用上一场时间，始终以同场上一场的结果递推。
+                        scheduledAt = previousScheduledAt.plusMinutes(100);
+                    }
+                    if (scheduledAt != null) {
+                        previousScheduledAt = scheduledAt;
+                    }
+
+                    // 先用完整球场赛程计算时间，再只输出 ATP 男单比赛。
+                    if (!"ATP".equals(detail.getAssociationCode())
+                            || detail.getMatchId() == null
+                            || !detail.getMatchId().startsWith("MS")) continue;
 
                     Match match = OopMatchAppConvertMapper.INSTANCE.toMatch(detail);
-                    match.setDrawId(drawId);
-
-                    if ("Followed By".equals(detail.getNotBeforeText()) && match.getScheduledAt() == null) {
-                        LocalDateTime previousFixedScheduledAt = findPreviousFixedScheduledAt(details, i);
-                        if (previousFixedScheduledAt != null) {
-                            match.setScheduledAt(previousFixedScheduledAt.plusMinutes(100));
-                        }
-                    }
+                    match.setScheduledAt(scheduledAt);
                     matches.add(match);
                 }
             }
         }
         return matches;
-    }
-
-    private LocalDateTime findPreviousFixedScheduledAt(List<AtpOopResponse.MatchDetail> details, int currentIndex) {
-        for (int i = currentIndex - 1; i >= 0; i--) {
-            AtpOopResponse.MatchDetail previous = details.get(i);
-            if ("Followed By".equals(previous.getNotBeforeText())) continue;
-
-            LocalDateTime scheduledAt = OopMatchAppConvertMapper.INSTANCE.parseScheduledAt(
-                    previous.getMatchDate(), previous.getNotBeforeISOTime());
-            if (scheduledAt != null) return scheduledAt;
-        }
-        return null;
     }
 
     @Override
@@ -102,7 +87,7 @@ public class AtpOopMatchParser extends MatchParser<List<AtpOopResponse>, AtpOopR
     }
 
     @Override
-    public List<TournamentEntry> getEntries(DrawResult<AtpOopResponse> draw, Long drawId) {
+    public List<TournamentEntry> getEntries(DrawResult<AtpOopResponse> draw) {
         return List.of();
     }
 

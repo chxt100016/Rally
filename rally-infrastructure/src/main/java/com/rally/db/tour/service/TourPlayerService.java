@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,7 +30,8 @@ public class TourPlayerService extends ServiceImpl<TourPlayerMapper, TourPlayerP
                 .collect(Collectors.toMap(
                         TourPlayerService::playerKey,
                         p -> p,
-                        (a, b) -> b
+                        TourPlayerService::merge,
+                        LinkedHashMap::new
                 ))
                 .values());
 
@@ -55,18 +58,7 @@ public class TourPlayerService extends ServiceImpl<TourPlayerMapper, TourPlayerP
 
         List<TourPlayerPO> toUpdate = players.stream()
                 .filter(p -> existMap.containsKey(playerKey(p)))
-                .map(p -> {
-                    TourPlayerPO po = existMap.get(playerKey(p));
-                    po.setFirstName(p.getFirstName());
-                    po.setLastName(p.getLastName());
-                    po.setNationality(p.getNationality());
-                    po.setBirthDate(p.getBirthDate());
-                    po.setGender(p.getGender());
-                    if (p.getRank() != null) po.setRank(p.getRank());
-                    if (p.getPoints() != null) po.setPoints(p.getPoints());
-                    po.setHand(p.getHand());
-                    return po;
-                })
+                .map(p -> merge(existMap.get(playerKey(p)), p))
                 .toList();
 
         if (CollectionUtils.isNotEmpty(toInsert)) {
@@ -81,6 +73,27 @@ public class TourPlayerService extends ServiceImpl<TourPlayerMapper, TourPlayerP
 
     private static String playerKey(TourPlayerPO po) {
         return po.getTour() + ":" + po.getPlayerId();
+    }
+
+    /** Null means "not supplied" for every mutable field. */
+    static TourPlayerPO merge(TourPlayerPO existing, TourPlayerPO incoming) {
+        if (!Objects.equals(existing.getPlayerId(), incoming.getPlayerId())
+                || !Objects.equals(existing.getTour(), incoming.getTour())) {
+            throw new IllegalArgumentException("球员身份不一致，拒绝合并");
+        }
+        setIfNotNull(incoming.getFirstName(), existing::setFirstName);
+        setIfNotNull(incoming.getLastName(), existing::setLastName);
+        setIfNotNull(incoming.getNationality(), existing::setNationality);
+        setIfNotNull(incoming.getBirthDate(), existing::setBirthDate);
+        setIfNotNull(incoming.getGender(), existing::setGender);
+        setIfNotNull(incoming.getRank(), existing::setRank);
+        setIfNotNull(incoming.getPoints(), existing::setPoints);
+        setIfNotNull(incoming.getHand(), existing::setHand);
+        return existing;
+    }
+
+    private static <T> void setIfNotNull(T value, java.util.function.Consumer<T> setter) {
+        if (value != null) setter.accept(value);
     }
 
     public List<TourPlayerPO> listByPlayerIds(List<String> playerIds) {

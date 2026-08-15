@@ -1,7 +1,11 @@
-package com.rally.tour.parser;
+package com.rally.tour.client;
+
+import com.rally.tour.parser.*;
 
 import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaMatchesResponse;
+import com.rally.domain.tour.model.ScheduledAtTextEnum;
+import com.rally.tour.convert.OopMatchAppConvertMapper;
 import com.rally.tour.model.Discipline;
 import com.rally.tour.model.Match;
 import com.rally.domain.tour.model.MatchStatus;
@@ -9,42 +13,64 @@ import com.rally.tour.model.Player;
 import com.rally.domain.tour.model.SetScore;
 import com.rally.tour.model.TournamentEntry;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
-public class WtaLiveMatchParser extends MatchParser<WtaMatchesResponse, List<WtaMatchesResponse.MatchItem>> {
+public class WtaOopMatchCollectClient extends AbstractMatchCollectClient<WtaMatchesResponse, WtaMatchesResponse> {
 
     @Resource
     private WtaClient wtaClient;
 
     @Override
     protected WtaMatchesResponse request(DrawParams params) {
-        return wtaClient.getLiveMatches(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
+        return wtaClient.getMatches(collectType().getApiUrl(), params.getTournamentId(), params.getYear());
     }
 
     @Override
-    protected List<DrawResult<List<WtaMatchesResponse.MatchItem>>> ls(WtaMatchesResponse data, DrawParams params) {
+    protected List<DrawResult<WtaMatchesResponse>> ls(WtaMatchesResponse data, DrawParams params) {
         if (data == null || CollectionUtils.isEmpty(data.getMatches())) return List.of();
-        return List.of(new DrawResult<>(data.getMatches(), Discipline.SINGLES, "LS",
+        return List.of(new DrawResult<>(data, Discipline.SINGLES, "LS",
                 new DrawMeta(null, null), params.getTournamentId(), params.getYear()));
     }
 
     @Override
-    public List<Match> getMatches(DrawResult<List<WtaMatchesResponse.MatchItem>> draw, String tournamentId, Long drawId) {
+    public List<Match> getMatches(DrawResult<WtaMatchesResponse> draw, String tournamentId) {
+        WtaMatchesResponse response = draw.getSlice();
+        List<WtaMatchesResponse.MatchItem> filtered = response.getMatches().stream()
+                .filter(m -> "M".equals(m.getDrawLevelType()) && "S".equals(m.getDrawMatchType()))
+                .toList();
+
         List<Match> matches = new ArrayList<>();
-        for (WtaMatchesResponse.MatchItem m : draw.getSlice()) {
+        for (WtaMatchesResponse.MatchItem m : filtered) {
             Match match = new Match();
             match.setMatchId(m.getMatchID());
             match.setTournamentId(tournamentId);
-            match.setYear(m.getEventYear());
-            match.setDrawId(drawId);
+            match.setYear(draw.getYear());
+            match.setPlayer1Id(m.getPlayerIDA());
+            match.setPlayer2Id(m.getPlayerIDB());
+            match.setWinnerId(resolveWinner(m.getWinner(), m.getPlayerIDA(), m.getPlayerIDB()));
             match.setStatus(MatchStatus.toStatus(m.getMatchState()));
             match.setDurationMinutes(parseDuration(m.getMatchTimeTotal()));
-            match.setWinnerId(resolveWinner(m.getWinner(), m.getPlayerIDA(), m.getPlayerIDB()));
+            match.setCourt(m.getCourtName());
+            match.setScheduledAt(OopMatchAppConvertMapper.INSTANCE.parseScheduledAt(
+                    m.getMatchTimeStamp(), m.getNotBeforeISOTime()));
+            match.setScheduledAtText(ScheduledAtTextEnum.fromText(m.getNotBeforeText()));
+            if (m.getMatchTimeStamp() != null && !m.getMatchTimeStamp().isEmpty()) {
+                try {
+                    LocalDateTime ts = OffsetDateTime.parse(m.getMatchTimeStamp()).toLocalDateTime();
+                    match.setStartedAt(ts);
+                    if ("F".equals(m.getMatchState())) match.setEndedAt(ts);
+                    match.setMatchDate(ts.toLocalDate());
+                } catch (Exception ignored) {}
+            }
             match.setSets(parseSets(m));
             matches.add(match);
         }
@@ -52,12 +78,12 @@ public class WtaLiveMatchParser extends MatchParser<WtaMatchesResponse, List<Wta
     }
 
     @Override
-    public List<Player> getPlayers(DrawResult<List<WtaMatchesResponse.MatchItem>> draw) {
+    public List<Player> getPlayers(DrawResult<WtaMatchesResponse> draw) {
         return List.of();
     }
 
     @Override
-    public List<TournamentEntry> getEntries(DrawResult<List<WtaMatchesResponse.MatchItem>> draw, Long drawId) {
+    public List<TournamentEntry> getEntries(DrawResult<WtaMatchesResponse> draw) {
         return List.of();
     }
 
@@ -110,6 +136,6 @@ public class WtaLiveMatchParser extends MatchParser<WtaMatchesResponse, List<Wta
 
     @Override
     public CollectType collectType() {
-        return CollectType.WTA_LIVE;
+        return CollectType.WTA_OOP;
     }
 }

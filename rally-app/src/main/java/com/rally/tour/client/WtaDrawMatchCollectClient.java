@@ -1,4 +1,6 @@
-package com.rally.tour.parser;
+package com.rally.tour.client;
+
+import com.rally.tour.parser.*;
 
 import com.rally.client.wta.WtaClient;
 import com.rally.client.wta.model.WtaDrawsResponse;
@@ -16,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class WtaDrawMatchParser extends MatchParser<WtaDrawsResponse, WtaDrawsResponse.DrawData> {
+public class WtaDrawMatchCollectClient extends AbstractMatchCollectClient<WtaDrawsResponse, WtaDrawsResponse.DrawData> {
 
     @Resource
     private WtaClient wtaClient;
@@ -38,7 +40,7 @@ public class WtaDrawMatchParser extends MatchParser<WtaDrawsResponse, WtaDrawsRe
     }
 
     @Override
-    public List<Match> getMatches(DrawResult<WtaDrawsResponse.DrawData> draw, String tournamentId, Long drawId) {
+    public List<Match> getMatches(DrawResult<WtaDrawsResponse.DrawData> draw, String tournamentId) {
         WtaDrawsResponse.DrawData data = draw.getSlice();
         if (data == null || CollectionUtils.isEmpty(data.getResults())) return List.of();
 
@@ -54,7 +56,6 @@ public class WtaDrawMatchParser extends MatchParser<WtaDrawsResponse, WtaDrawsRe
                 match.setMatchId(m.getMatchId());
                 match.setMatchIndex(parseMatchIndex(m.getMatchId()));
                 match.setTournamentId(tournamentId);
-                match.setDrawId(drawId);
                 match.setYear(draw.getYear());
                 match.setRoundNumber(roundNumber);
                 match.setRoundName(roundName);
@@ -87,7 +88,7 @@ public class WtaDrawMatchParser extends MatchParser<WtaDrawsResponse, WtaDrawsRe
     }
 
     @Override
-    public List<TournamentEntry> getEntries(DrawResult<WtaDrawsResponse.DrawData> draw, Long drawId) {
+    public List<TournamentEntry> getEntries(DrawResult<WtaDrawsResponse.DrawData> draw) {
         WtaDrawsResponse.DrawData data = draw.getSlice();
         if (data == null || CollectionUtils.isEmpty(data.getDraw())) return List.of();
         List<TournamentEntry> entries = new ArrayList<>();
@@ -95,7 +96,6 @@ public class WtaDrawMatchParser extends MatchParser<WtaDrawsResponse, WtaDrawsRe
             if ("0".equals(e.getPlayerId())) continue;
             TournamentEntry entry = new TournamentEntry();
             entry.setPlayerId(e.getPlayerId());
-            entry.setDrawId(drawId);
             entry.setSeed(e.getSeed() != null ? e.getSeed().shortValue() : null);
             entry.setEntryType(e.getEntryType());
             entries.add(entry);

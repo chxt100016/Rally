@@ -1,4 +1,6 @@
-package com.rally.tour.parser;
+package com.rally.tour.client;
+
+import com.rally.tour.parser.*;
 
 import com.rally.client.tourtv.AtpTvClient;
 import com.rally.client.tourtv.model.MatchesResponse;
@@ -18,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class AtpLiveMatchParser extends MatchParser<MatchesResponse, List<MatchesResponse.MatchInfo>> {
+public class AtpLiveMatchCollectClient extends AbstractMatchCollectClient<MatchesResponse, List<MatchesResponse.MatchInfo>> {
 
     @Resource
     private AtpTvClient atpTvClient;
@@ -51,14 +53,13 @@ public class AtpLiveMatchParser extends MatchParser<MatchesResponse, List<Matche
     }
 
     @Override
-    public List<Match> getMatches(DrawResult<List<MatchesResponse.MatchInfo>> draw, String tournamentId, Long drawId) {
+    public List<Match> getMatches(DrawResult<List<MatchesResponse.MatchInfo>> draw, String tournamentId) {
         List<Match> matches = new ArrayList<>();
         for (MatchesResponse.MatchInfo info : draw.getSlice()) {
             Match match = new Match();
             match.setMatchId(info.getMatchId());
             match.setTournamentId(tournamentId);
             match.setYear(info.getTournamentYear());
-            match.setDrawId(drawId);
             match.setPlayer1Id(info.getPlayerTeam1() != null ? info.getPlayerTeam1().getPlayerId() : null);
             match.setPlayer2Id(info.getPlayerTeam2() != null ? info.getPlayerTeam2().getPlayerId() : null);
             match.setStatus(MatchStatus.toStatus(info.getStatus()));
@@ -77,7 +78,7 @@ public class AtpLiveMatchParser extends MatchParser<MatchesResponse, List<Matche
     }
 
     @Override
-    public List<TournamentEntry> getEntries(DrawResult<List<MatchesResponse.MatchInfo>> draw, Long drawId) {
+    public List<TournamentEntry> getEntries(DrawResult<List<MatchesResponse.MatchInfo>> draw) {
         return List.of();
     }
 

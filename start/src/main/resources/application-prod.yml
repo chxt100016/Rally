@@ -21,10 +21,6 @@ job:
   tour:
     enabled: true
     collect:
-      draws:
-        cron: "0 0 */1 * * ?"
-      matches:
-        cron: "0 0 */1 * * ?"
       live:
         cron: "0 */5 * * * ?"
       rank:

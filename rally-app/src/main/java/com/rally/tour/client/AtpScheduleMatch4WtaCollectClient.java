@@ -1,4 +1,9 @@
-package com.rally.tour.parser;
+package com.rally.tour.client;
+
+import com.rally.tour.parser.CollectType;
+import com.rally.tour.parser.DrawMeta;
+import com.rally.tour.parser.DrawParams;
+import com.rally.tour.parser.DrawResult;
 
 import com.rally.client.atp.AtpClient;
 import com.rally.client.wta.model.WtaScheduleResponse;
@@ -13,13 +18,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * ATP 赛程备用解析器，对应 app.atptour.com /scores/schedule 接口。
+ * 通过 ATP 赛程接口采集 WTA 比赛的 Client。
  * 响应结构与 WtaScheduleResponse 相同，按赛事+年份拉取，
  * 过滤 Tour=ATP 且 MatchId 以 "MS" 开头的单打比赛。
  */
 @Slf4j
 @Component
-public class AtpScheduleMatch4WtaParser extends AtpScheduleMatchParser {
+public class AtpScheduleMatch4WtaCollectClient extends AtpScheduleMatchCollectClient {
 
     private static final DateTimeFormatter UTC_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

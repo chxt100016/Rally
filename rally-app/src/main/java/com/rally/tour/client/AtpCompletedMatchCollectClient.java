@@ -1,4 +1,6 @@
-package com.rally.tour.parser;
+package com.rally.tour.client;
+
+import com.rally.tour.parser.*;
 
 import com.rally.client.atp.AtpClient;
 import com.rally.client.atp.model.AtpAppCompletedResponse;
@@ -18,12 +20,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * ATP App 已完成比赛解析器（男子单打 MS）
+ * ATP App 已完成比赛采集 Client（男子单打 MS）
  * 数据源：app.atptour.com/api/v2/gateway/results/completed
  */
 @Component
 @Slf4j
-public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse, AtpAppCompletedResponse> {
+public class AtpCompletedMatchCollectClient extends AbstractMatchCollectClient<AtpAppCompletedResponse, AtpAppCompletedResponse> {
 
     @Resource
     private AtpClient atpClient;
@@ -60,7 +62,7 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
     }
 
     @Override
-    public List<Match> getMatches(DrawResult<AtpAppCompletedResponse> draw, String tournamentId, Long drawId) {
+    public List<Match> getMatches(DrawResult<AtpAppCompletedResponse> draw, String tournamentId) {
         AtpAppCompletedResponse data = draw.getSlice();
         if (data == null || data.getData() == null
                 || CollectionUtils.isEmpty(data.getData().getMatches())) {
@@ -75,7 +77,6 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
             Match match = new Match();
             match.setMatchId(m.getMatchId());
             match.setTournamentId(tournamentId);
-            match.setDrawId(drawId);
             match.setYear(draw.getYear());
             match.setStatus(MatchStatus.toStatus(m.getStatus()));
             match.setWinnerId(m.getWinningPlayerId());
@@ -110,7 +111,7 @@ public class AtpCompletedMatchParser extends MatchParser<AtpAppCompletedResponse
     }
 
     @Override
-    public List<TournamentEntry> getEntries(DrawResult<AtpAppCompletedResponse> draw, Long drawId) {
+    public List<TournamentEntry> getEntries(DrawResult<AtpAppCompletedResponse> draw) {
         return List.of();
     }
 

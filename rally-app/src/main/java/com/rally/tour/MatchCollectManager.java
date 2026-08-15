@@ -2,11 +2,10 @@ package com.rally.tour;
 
 import com.rally.tour.model.Discipline;
 import com.rally.tour.model.Match;
-import com.rally.tour.model.Player;
+import com.rally.tour.client.MatchCollectClient;
+import com.rally.tour.client.MatchCollectResult;
 import com.rally.tour.parser.CollectType;
 import com.rally.tour.parser.DrawParams;
-import com.rally.tour.parser.DrawResult;
-import com.rally.tour.parser.MatchParser;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,30 +35,39 @@ public class MatchCollectManager {
     private PlayerCollectService playerCollectService;
 
     @Resource
-    private List<MatchParser<?, ?>> matchParsers;
+    private List<MatchCollectClient> matchCollectClients;
 
-    private Map<CollectType, MatchParser<?, ?>> parsers;
+    private Map<CollectType, MatchCollectClient> clients;
 
     @PostConstruct
-    private void initParsers() {
-        parsers = matchParsers.stream().collect(Collectors.toMap(
-                        MatchParser::collectType,
-                        p -> p,
-                        (a, b) -> a,
+    private void initClients() {
+        clients = matchCollectClients.stream().collect(Collectors.toMap(
+                        MatchCollectClient::collectType,
+                        client -> client,
+                        (a, b) -> {
+                            throw new IllegalStateException("重复的比赛采集 Client: " + a.collectType());
+                        },
                         () -> new EnumMap<>(CollectType.class)
                 ));
+        EnumSet<CollectType> missing = EnumSet.allOf(CollectType.class);
+        missing.removeAll(clients.keySet());
+        if (!missing.isEmpty()) {
+            throw new IllegalStateException("缺少比赛采集 Client: " + missing);
+        }
     }
 
-    @SuppressWarnings("unchecked")
     public void collect(CollectType type, DrawParams params) {
-        MatchParser<Object, Object> parser = (MatchParser<Object, Object>) parsers.get(type);
-        collect(params, parser);
+        MatchCollectClient client = clients.get(type);
+        if (client == null) {
+            throw new IllegalArgumentException("未注册比赛采集 Client: " + type);
+        }
+        collect(params, client);
     }
 
-    public <R, S> void collect(DrawParams params, MatchParser<R, S> parser) {
-        List<DrawResult<S>> draws = parser.fetch(params);
+    void collect(DrawParams params, MatchCollectClient client) {
+        List<MatchCollectResult> draws = client.collect(params);
 
-        for (DrawResult<S> draw : draws) {
+        for (MatchCollectResult draw : draws) {
             if (!shouldCollect(draw.getDiscipline())) continue;
 
             String tournamentId = draw.getTournamentId();
@@ -69,24 +78,22 @@ public class MatchCollectManager {
 
             Long drawId = drawCollectService.saveOrUpdate(
                     tournamentId, draw.getYear(), draw.getDrawTypeCode(),
-                    draw.getMeta().getDrawSize(), draw.getMeta().getTotalRounds());
+                    draw.getDrawMeta().getDrawSize(), draw.getDrawMeta().getTotalRounds());
 
-            List<Match> matches = parser.getMatches(draw, tournamentId, drawId);
-            matches.forEach(match -> match.setDrawType(draw.getDrawTypeCode()));
+            List<Match> matches = draw.getMatches();
+            matches.forEach(match -> match.setDrawId(drawId));
             try {
                 matchCollectService.saveMatches(matches);
             } catch (RuntimeException e) {
                 log.error("比赛保存失败: collectType={}, tournamentId={}, year={}, drawType={}, drawId={}, matchCount={}",
-                        parser.collectType(), tournamentId, draw.getYear(), draw.getDrawTypeCode(), drawId,
+                        client.collectType(), tournamentId, draw.getYear(), draw.getDrawTypeCode(), drawId,
                         matches.size(), e);
                 throw e;
             }
 
-            List<Player> players = parser.getPlayers(draw);
-            // 统一在 manager 层设置  tour
-            players.forEach(p -> p.setTour(params.getTour()));
-            playerCollectService.savePlayers(players);
-            tournamentCollectService.saveEntries(parser.getEntries(draw, drawId));
+            playerCollectService.savePlayers(draw.getPlayers());
+            draw.getEntries().forEach(entry -> entry.setDrawId(drawId));
+            tournamentCollectService.saveEntries(draw.getEntries());
         }
     }
 

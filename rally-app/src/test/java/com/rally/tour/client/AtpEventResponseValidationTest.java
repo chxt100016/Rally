@@ -1,8 +1,9 @@
-package com.rally.tour.parser;
+package com.rally.tour.client;
 
 import com.rally.client.atp.model.AtpAppCompletedResponse;
 import com.rally.client.atp.model.AtpAppLiveResponse;
 import com.rally.tour.model.Discipline;
+import com.rally.tour.parser.DrawParams;
 import org.junit.Test;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class AtpEventResponseValidationTest {
 
     @Test
     public void liveResponseFromAnotherEventIsRejected() {
-        AtpAppLiveMatchParser parser = new AtpAppLiveMatchParser();
+        AtpAppLiveMatchCollectClient parser = new AtpAppLiveMatchCollectClient();
         AtpAppLiveResponse response = liveResponse(2064, 2026);
 
         List<?> results = parser.buildDrawResult(
@@ -25,7 +26,7 @@ public class AtpEventResponseValidationTest {
 
     @Test
     public void liveResponseForRequestedEventIsAccepted() {
-        AtpAppLiveMatchParser parser = new AtpAppLiveMatchParser();
+        AtpAppLiveMatchCollectClient parser = new AtpAppLiveMatchCollectClient();
         AtpAppLiveResponse response = liveResponse(806, 2026);
 
         List<?> results = parser.buildDrawResult(
@@ -36,7 +37,7 @@ public class AtpEventResponseValidationTest {
 
     @Test
     public void eventIdWithLeadingZeroMatchesNumericResponseId() {
-        AtpAppLiveMatchParser parser = new AtpAppLiveMatchParser();
+        AtpAppLiveMatchCollectClient parser = new AtpAppLiveMatchCollectClient();
         AtpAppLiveResponse response = liveResponse(404, 2026);
 
         List<?> results = parser.buildDrawResult(
@@ -47,7 +48,7 @@ public class AtpEventResponseValidationTest {
 
     @Test
     public void completedResponseFromAnotherYearIsRejected() {
-        AtpCompletedMatchParser parser = new AtpCompletedMatchParser();
+        AtpCompletedMatchCollectClient parser = new AtpCompletedMatchCollectClient();
         AtpAppCompletedResponse response = completedResponse(806, 2025);
 
         assertTrue(parser.ls(response, new DrawParams("806", 2026, "WTA")).isEmpty());
