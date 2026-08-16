@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.HtmlUtils;
 
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -110,7 +111,7 @@ public class FlareSolverrClient {
     /**
      * 从 FlareSolverr 返回的 HTML 中提取 JSON 内容
      */
-    private String extractJson(String response) {
+    static String extractJson(String response) {
         if (response == null) return null;
         String trimmed = response.trim();
         if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
@@ -119,7 +120,9 @@ public class FlareSolverrClient {
         int preStart = trimmed.indexOf("<pre>");
         int preEnd = trimmed.lastIndexOf("</pre>");
         if (preStart >= 0 && preEnd > preStart) {
-            return trimmed.substring(preStart + 5, preEnd).trim();
+            // FlareSolverr serializes browser-rendered JSON as HTML. Text inside <pre>
+            // is therefore entity-escaped (for example, P&G becomes P&amp;G).
+            return HtmlUtils.htmlUnescape(trimmed.substring(preStart + 5, preEnd).trim());
         }
         return trimmed;
     }
