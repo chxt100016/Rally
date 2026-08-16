@@ -19,6 +19,11 @@ import java.util.stream.Collectors;
 public class TourMatchQueryDomainService {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final Comparator<MatchQueryVO> SCHEDULED_AT_COMPARATOR =
+            Comparator.comparing(MatchQueryVO::getScheduledAt, Comparator.nullsLast(Comparator.naturalOrder()));
+    static final Comparator<MatchQueryVO> UPCOMING_COURT_MATCH_COMPARATOR =
+            Comparator.comparing((MatchQueryVO match) -> StringUtils.isBlank(match.getWinnerId()))
+                    .thenComparing(SCHEDULED_AT_COMPARATOR);
 
     @Resource
     private MatchQueryRepository matchQueryRepository;
@@ -63,7 +68,7 @@ public class TourMatchQueryDomainService {
         }
 
         List<MatchQueryVO> vos = toMatchVOs(matches, tournamentIds);
-        vos.sort(Comparator.comparing(MatchQueryVO::getScheduledAt, Comparator.nullsLast(Comparator.naturalOrder())));
+        vos.sort(SCHEDULED_AT_COMPARATOR);
         return vos;
     }
 
@@ -147,6 +152,7 @@ public class TourMatchQueryDomainService {
         Map<String, Integer> courtTourOrderMap = new HashMap<>();
         for (Map.Entry<String, List<MatchQueryVO>> entry : courtMap.entrySet()) {
             List<MatchQueryVO> courtMatches = entry.getValue();
+            courtMatches.sort(UPCOMING_COURT_MATCH_COMPARATOR);
             MatchGroupDTO dto = new MatchGroupDTO();
             dto.setKey(courtMatches.get(0).getCourt());
             dto.setName(courtMatches.get(0).getCourt());
