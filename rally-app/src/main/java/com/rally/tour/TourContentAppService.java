@@ -47,20 +47,13 @@ public class TourContentAppService {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
-     * 生成赛事海报生图提示词，同时返回写实与3D卡通两种风格，用分割线分隔。
+     * 生成 3D 卡通风格的赛事海报生图提示词。
      */
     public String generatePosterPrompt(String tournamentId) {
         TournamentData data = tourTournamentQueryDomainService.findByTournamentId(tournamentId);
         Assert.notNull(data, BizErrorCode.TOURNAMENT_NOT_FOUND);
 
-        StringBuilder sb = new StringBuilder();
-        PosterStyleEnum[] styles = PosterStyleEnum.values();
-        for (int i = 0; i < styles.length; i++) {
-            if (i > 0) sb.append("\n\n---\n\n");
-            sb.append("【").append(styles[i].name()).append("】\n");
-            sb.append(PosterPromptBuilder.build(data, styles[i]));
-        }
-        return sb.toString();
+        return PosterPromptBuilder.build(data, PosterStyleEnum.CARTOON_3D);
     }
 
     public String generateDailyContent() {
