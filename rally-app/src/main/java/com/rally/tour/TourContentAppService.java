@@ -83,7 +83,7 @@ public class TourContentAppService {
         md.append(joinTournamentNames(displayedTournaments, translatedTournamentNames)).append("\n");
         md.append(buildScheduleSummary(displayedTournaments, date)).append("\n\n");
 
-        boolean hasTournamentSection = false;
+        boolean hasScheduleSection = false;
         for (DailyGroup dailyGroup : dailyGroups) {
             for (MatchGroupDTO dateGroup : dailyGroup.dateGroups()) {
                 if (CollectionUtils.isEmpty(dateGroup.getChildren())) continue;
@@ -93,35 +93,30 @@ public class TourContentAppService {
                     tourTranslationService.matches(courtGroup.getData(), lang);
                 }
 
-                for (TournamentData tournament : dailyGroup.group().getTournaments()) {
-                    List<MatchGroupDTO> tournamentCourts = dateGroup.getChildren().stream()
-                            .map(courtGroup -> matchesForTournament(courtGroup, tournament.getTournamentId()))
-                            .filter(court -> CollectionUtils.isNotEmpty(court.getData()))
-                            .toList();
-                    if (tournamentCourts.isEmpty()) continue;
+                List<TournamentData> dateTournaments = tournamentsForDate(dailyGroup.group(), dateGroup);
+                if (dateTournaments.isEmpty()) continue;
 
-                    if (hasTournamentSection) {
-                        md.append("\n");
-                    }
-                    hasTournamentSection = true;
-
-                    String tournamentName = translatedTournamentNames.getOrDefault(tournament.getName(), tournament.getName());
-                    md.append(tournamentName).append("赛程");
-                    String dateText = formatDateText(dateGroup.getKey());
-                    if (StringUtils.isNotBlank(dateText)) {
-                        md.append(" | ").append(dateText);
-                        String roundText = extractPrimaryRound(tournamentCourts);
-                        if (StringUtils.isNotBlank(roundText)) {
-                            md.append(" ").append(roundText);
-                        }
-                    }
+                if (hasScheduleSection) {
                     md.append("\n");
+                }
+                hasScheduleSection = true;
 
-                    for (MatchGroupDTO courtGroup : tournamentCourts) {
-                        md.append(courtGroup.getName()).append("\n");
-                        for (MatchQueryVO match : courtGroup.getData()) {
-                            appendMatch(md, match);
-                        }
+                md.append(joinTournamentNames(dateTournaments, translatedTournamentNames)).append("赛程");
+                String dateText = formatDateText(dateGroup.getKey());
+                if (StringUtils.isNotBlank(dateText)) {
+                    md.append(" | ").append(dateText);
+                    String roundText = extractPrimaryRound(dateGroup.getChildren());
+                    if (StringUtils.isNotBlank(roundText)) {
+                        md.append(" ").append(roundText);
+                    }
+                }
+                md.append("\n");
+
+                for (MatchGroupDTO courtGroup : dateGroup.getChildren()) {
+                    if (CollectionUtils.isEmpty(courtGroup.getData())) continue;
+                    md.append(courtGroup.getName()).append("\n");
+                    for (MatchQueryVO match : courtGroup.getData()) {
+                        appendMatch(md, match);
                     }
                 }
             }
@@ -191,16 +186,18 @@ public class TourContentAppService {
         return String.join("｜", summary);
     }
 
-    private MatchGroupDTO matchesForTournament(MatchGroupDTO courtGroup, String tournamentId) {
-        MatchGroupDTO result = new MatchGroupDTO();
-        result.setName(courtGroup.getName());
-        result.setKey(courtGroup.getKey());
-        result.setData(CollectionUtils.isEmpty(courtGroup.getData())
-                ? List.of()
-                : courtGroup.getData().stream()
-                        .filter(match -> Objects.equals(match.getTournamentId(), tournamentId))
-                        .toList());
-        return result;
+    private List<TournamentData> tournamentsForDate(TournamentGroupData group, MatchGroupDTO dateGroup) {
+        Set<String> tournamentIds = dateGroup.getChildren().stream()
+                .filter(Objects::nonNull)
+                .flatMap(courtGroup -> CollectionUtils.isEmpty(courtGroup.getData())
+                        ? java.util.stream.Stream.empty()
+                        : courtGroup.getData().stream())
+                .map(MatchQueryVO::getTournamentId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        return group.getTournaments().stream()
+                .filter(tournament -> tournamentIds.contains(tournament.getTournamentId()))
+                .toList();
     }
 
     private void appendMatch(StringBuilder md, MatchQueryVO match) {
