@@ -8,7 +8,7 @@ package com.rally.tour.poster;
  * <p>
  * 特色元素归属规则（{@link #useCenterCourtFeature}）：
  * <ul>
- *   <li>1000 以下（250 / 500）：中央球场无辨识度，改用<b>举办城市</b>特色作远景点缀（{@link TourFeatureEnum#fromCity}）。</li>
+ *   <li>1000 以下（250 / 500）：中央球场无辨识度，改用<b>举办城市</b>特色作远景点缀（{@link TourFeatureEnum#fromTournamentId}）。</li>
  *   <li>1000 及以上（1000 / 大满贯 / 年终总决赛）：中央球场本身即标志性符号，突出<b>中央球场</b>建筑特色（{@link TourFeatureEnum#fromTournamentId}）。</li>
  * </ul>
  *

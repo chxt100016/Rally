@@ -14,7 +14,6 @@ import com.rally.domain.translation.model.TranslationLanguageEnum;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.utils.Assert;
 import com.rally.tour.poster.PosterPromptBuilder;
-import com.rally.tour.poster.PosterStyleEnum;
 import com.rally.translation.TourTranslationService;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
@@ -53,7 +52,7 @@ public class TourContentAppService {
         TournamentData data = tourTournamentQueryDomainService.findByTournamentId(tournamentId);
         Assert.notNull(data, BizErrorCode.TOURNAMENT_NOT_FOUND);
 
-        return PosterPromptBuilder.build(data, PosterStyleEnum.CARTOON_3D);
+        return PosterPromptBuilder.build(data);
     }
 
     public String generateDailyContent() {

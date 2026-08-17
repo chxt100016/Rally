@@ -8,10 +8,13 @@ import java.util.stream.Stream;
 /**
  * 海报生图提示词组装器（模块可拔插）。
  * <p>
- * 拼接顺序：风格块 → 基础占位 → 场地材质 → 视角级别 → 光线氛围 → 观众规模 → 特色块 → 收尾约束。
+ * 拼接顺序：固定 3D 卡通风格 → 基础占位 → 场地材质 → 视角级别 → 光线氛围 → 观众规模 → 特色块 → 收尾约束。
  * 特色块按级别二选一：1000 以下用城市特色，1000 及以上用中央球场特色（见 {@link TourLevelEnum}）。
  */
 public class PosterPromptBuilder {
+
+    private static final String STYLE = "App Store风格的3D卡通渲染，圆润可爱的造型，鲜艳明快的配色，"
+            + "柔和的卡通光影，精致的3D图标质感，清新简洁。";
 
     private static final String TAIL = "球场正中央为空，不出现任何球员或人物；画面聚焦球场与看台建筑本身；"
             + "海报预留文字排版空间；图片比例16:9；高质量，细节丰富，专业体育海报。";
@@ -19,7 +22,7 @@ public class PosterPromptBuilder {
     private PosterPromptBuilder() {
     }
 
-    public static String build(TournamentData data, PosterStyleEnum style) {
+    public static String build(TournamentData data) {
         String city = data.getCity() != null ? data.getCity().trim() : "";
         String name = buildTournamentName(data);
 
@@ -27,7 +30,7 @@ public class PosterPromptBuilder {
         SurfaceEnum surface = SurfaceEnum.fromCode(data.getSurface());
 
         StringBuilder sb = new StringBuilder();
-        sb.append(style.getDesc());
+        sb.append(STYLE);
         sb.append("一张").append(StringUtils.isNotBlank(city) ? city : "")
                 .append(StringUtils.isNotBlank(name) ? name : "网球赛事")
                 .append("宣传海报，画面中心是一片专业网球场。");
@@ -61,7 +64,7 @@ public class PosterPromptBuilder {
             }
             return "着重刻画中央球场标志性的建筑轮廓与看台造型，作为画面记忆点。";
         }
-        TourFeatureEnum feature = TourFeatureEnum.fromCity(city);
+        TourFeatureEnum feature = TourFeatureEnum.fromTournamentId(data.getTournamentId());
         if (feature != null) {
             return "在远景自然融入" + city + "的城市特色（" + feature.getDesc() + "），不突兀、不遮挡球场主体。";
         }
