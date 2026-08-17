@@ -6,7 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum CountryEnum {
-
     ITA("ITA", "IT", "意大利"),
     ESP("ESP", "ES", "西班牙"),
     SRB("SRB", "RS", "塞尔维亚"),
