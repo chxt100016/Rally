@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +80,6 @@ public class AtpCompletedMatchCollectClient extends AbstractMatchCollectClient<A
             match.setStatus(MatchStatus.toStatus(m.getStatus()));
             match.setWinnerId(m.getWinningPlayerId());
             match.setCourt(m.getCourtName());
-            match.setMatchDate(parseDate(m.getMatchDate()));
 
             if (m.getRound() != null) {
                 match.setRoundNumber(parseRoundId(m.getRound().getRoundId()));
@@ -196,16 +194,6 @@ public class AtpCompletedMatchCollectClient extends AbstractMatchCollectClient<A
             sb.append(lastName);
         }
         return sb.toString();
-    }
-
-    /** 解析 "2026-05-24T00:00:00" 格式的日期 */
-    private LocalDate parseDate(String dateStr) {
-        if (dateStr == null || dateStr.length() < 10) return null;
-        try {
-            return LocalDate.parse(dateStr.substring(0, 10));
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     private Integer parseRoundId(String roundId) {

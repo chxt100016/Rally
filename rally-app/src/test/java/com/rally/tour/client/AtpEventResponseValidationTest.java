@@ -4,11 +4,13 @@ import com.rally.client.atp.model.AtpAppCompletedResponse;
 import com.rally.client.atp.model.AtpAppLiveResponse;
 import com.rally.tour.model.Discipline;
 import com.rally.tour.parser.DrawParams;
+import com.rally.tour.parser.DrawResult;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class AtpEventResponseValidationTest {
@@ -52,6 +54,19 @@ public class AtpEventResponseValidationTest {
         AtpAppCompletedResponse response = completedResponse(806, 2025);
 
         assertTrue(parser.ls(response, new DrawParams("806", 2026, "WTA")).isEmpty());
+    }
+
+    @Test
+    public void completedResponseDoesNotSetMatchDate() {
+        AtpCompletedMatchCollectClient parser = new AtpCompletedMatchCollectClient();
+        AtpAppCompletedResponse response = completedResponse(1017, 2026);
+        response.getData().getMatches().get(0).setMatchDate("2026-08-17T00:00:00");
+
+        DrawResult<AtpAppCompletedResponse> draw = parser
+                .ls(response, new DrawParams("1017", 2026, "WTA"))
+                .get(0);
+
+        assertNull(parser.getMatches(draw, "1017").get(0).getMatchDate());
     }
 
     private AtpAppLiveResponse liveResponse(int eventId, int year) {
