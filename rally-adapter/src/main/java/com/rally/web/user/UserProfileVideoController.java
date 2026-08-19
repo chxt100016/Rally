@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 用户视频管理
  */
 @RestController
-@RequestMapping("/user/profile/video")
+@RequestMapping({"/user/profile/video", "/wechat/user/profile/video"})
 public class UserProfileVideoController {
 
     @Resource

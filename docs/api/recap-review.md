@@ -5,7 +5,7 @@
 
 ## 通用约定
 
-- 全局前缀：`/api/rally`，模块前缀：`/wechat/recap/review`
+- 全局前缀：`/api/rally`，模块前缀：`/recap/review`
 - 请求方式：写操作 `POST`，查询 `GET`，`Content-Type: application/json`
 - 用户身份（评价发起人）：从登录态（token）自动获取，**无需在 body 里传当前用户 id**
 - 统一返回结构：
@@ -42,7 +42,7 @@
 
 一键标记「无需评价」，当前用户的报名状态变更为 `SKIPPED`，从待评价列表移除。
 
-- **URL**：`POST /api/rally/wechat/recap/review/skip`
+- **URL**：`POST /api/rally/recap/review/skip`
 
 ### 入参
 
@@ -61,7 +61,7 @@
 curl：
 
 ```bash
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/review/skip' \
+curl -X POST 'http://localhost:8080/api/rally/recap/review/skip' \
   -H 'Content-Type: application/json' \
   -d '{"meetupId":"1789000000000000001"}'
 ```
@@ -72,7 +72,7 @@ curl -X POST 'http://localhost:8080/api/rally/wechat/recap/review/skip' \
 
 一次评价一个用户，可同时提交多个维度。
 
-- **URL**：`POST /api/rally/wechat/recap/review`
+- **URL**：`POST /api/rally/recap/review`
 
 ### 入参
 
@@ -103,7 +103,7 @@ curl -X POST 'http://localhost:8080/api/rally/wechat/recap/review/skip' \
 curl：
 
 ```bash
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/review' \
+curl -X POST 'http://localhost:8080/api/rally/recap/review' \
   -H 'Content-Type: application/json' \
   -d '{"meetupId":"1789000000000000001","toUserId":"u_2001","reviews":[{"type":"LEVEL_VOTE","value":"SAME"},{"type":"ATTENDANCE_VOTE","value":"ON_TIME"},{"type":"TAG","value":"友善,技术好"}]}'
 ```
@@ -124,14 +124,14 @@ curl -X POST 'http://localhost:8080/api/rally/wechat/recap/review' \
 
 查询当前登录用户收到的所有评价汇总，含总数、各维度数量及 Top 标签。
 
-- **URL**：`GET /api/rally/wechat/recap/review/me`
+- **URL**：`GET /api/rally/recap/review/me`
 - **权限**：登录即可，无需约球参与资格
 - **入参**：无
 
 curl：
 
 ```bash
-curl -X GET 'http://localhost:8080/api/rally/wechat/recap/review/me'
+curl -X GET 'http://localhost:8080/api/rally/recap/review/me'
 ```
 
 ### 返回示例

@@ -8,7 +8,7 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user/upload")
+@RequestMapping({"/user/upload", "/wechat/user/upload"})
 public class UserUploadController {
 
     @Resource

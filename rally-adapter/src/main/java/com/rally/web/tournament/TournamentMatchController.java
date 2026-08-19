@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/tournament/match")
+@RequestMapping({"/tournament/match", "/wechat/tournament/match"})
 public class TournamentMatchController {
 
     @Resource

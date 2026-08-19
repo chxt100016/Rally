@@ -1,6 +1,6 @@
 # 比赛流程（用户端）接口
 
-**Base URL**: `/api/rally/tournament/match`（微信小程序渠道：`/api/rally/wechat/tournament/match`，入参/返参一致）
+**Base URL**: `/api/rally/tournament/match`
 
 ## 状态流转概览
 

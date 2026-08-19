@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tour/tournament")
+@RequestMapping({"/tour/tournament", "/wechat/tour/tournament"})
 public class TourQueryController {
 
     @Resource

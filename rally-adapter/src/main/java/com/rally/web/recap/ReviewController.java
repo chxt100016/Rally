@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/recap/review")
+@RequestMapping({"/recap/review", "/wechat/recap/review"})
 public class ReviewController {
 
     @Resource

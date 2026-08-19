@@ -1,6 +1,6 @@
 # 赛事落地页详情（聚合查询）接口
 
-**Base URL**: `/api/rally/tournament/detail`（微信小程序渠道：`/api/rally/wechat/tournament/detail`，入参/返参一致）
+**Base URL**: `/api/rally/tournament/detail`
 
 只读聚合接口，赛事落地页收口为一个接口：聚合赛事信息、公开进程、当前用户报名与比赛、显式 `action`、个人时间线、签表、信用记录。前端只按 `action.state` switch-case 渲染"当前待办卡片"，不自行拼状态。
 

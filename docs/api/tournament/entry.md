@@ -1,6 +1,6 @@
 # 赛事报名（用户端）接口
 
-**Base URL**: `/api/rally/tournament/entry`（微信小程序渠道：`/api/rally/wechat/tournament/entry`，入参/返参一致）
+**Base URL**: `/api/rally/tournament/entry`
 
 ---
 
@@ -161,4 +161,4 @@ curl -X POST 'http://localhost:8080/api/rally/tournament/entry/unfreeze' \
   -d '{"tournamentId": "T202608010001"}'
 ```
 
-微信小程序渠道路径为 `/api/rally/wechat/tournament/entry/unfreeze`，请求体一致。
+微信小程序通过 `X-Client-Channel: WECHAT_MINIAPP` 标识渠道，请求路径和请求体与其他客户端一致。

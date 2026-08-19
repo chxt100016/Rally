@@ -1,15 +1,9 @@
 ## controller 接口 规范
-1. 项目同时支持app、web、wechat等渠道， 非渠道专属能力统一放在web中并在对应渠道包下创建controller
-    - app放在`rally-adapter/src/main/java/com/rally/app`
-    - web放在`rally-adapter/src/main/java/com/rally/web`
-    - wechat放在`rally-adapter/src/main/java/com/rally/wechat`
-2. 如果为渠道专属能力，直接在对应包创建, 比如微信登陆能力是微信专属
-3. 如果为非渠道专属的通用能力，在web下创建通用接口，并在对应渠道包下创建实现类, 比如用户信息查询
-   - 类名为渠道名+原名，例：`WechatUserQueryController` 
-   - 重写类的mapping为`/{渠道}/{原mapping}`, 例子：`@RequestMapping("/query")` -> `@RequestMapping("/wechat/query")
-   - 如果没有特殊需求，直接空实现不要重写方法。
-   - 如果有渠道专属能力就重写方法或者新增方法。
-4. 每当新增api后都要在完成后 提供新api的curl
-5. RequestParam 一定要带上参数名字`@RequestParam("key")`
-6. 使用`spring-boot-starter-validation`校验入参，而不是自己写if判断
-7. controller不要捕获异常
+1. 通用业务能力统一放在`rally-adapter/src/main/java/com/rally/web`，规范接口不含渠道前缀。
+2. 客户端通过`X-Client-Channel`传递渠道，当前支持`WECHAT_MINIAPP`、`WEB`、`APP`。
+3. 只有直接依赖渠道 SDK、渠道身份体系或渠道回调协议的能力才放在渠道包并使用渠道路径，例如微信登录、微信手机号和微信支付回调放在`rally-adapter/src/main/java/com/rally/wechat`。
+4. 禁止为了增加渠道路径而创建空继承 Controller；旧渠道路径需要兼容时，在通用 Controller 上使用双路径映射，渠道差异通过渠道上下文和策略实现。
+5. 每当新增api后都要在完成后提供新api的curl。
+6. RequestParam 一定要带上参数名字`@RequestParam("key")`。
+7. 使用`spring-boot-starter-validation`校验入参，而不是自己写if判断。
+8. controller不要捕获异常。

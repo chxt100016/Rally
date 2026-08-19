@@ -5,7 +5,7 @@
 
 ## 通用约定
 
-- 全局前缀：`/api/rally`，模块前缀：`/wechat/recap/score`
+- 全局前缀：`/api/rally`，模块前缀：`/recap/score`
 - 请求方式：全部 `POST`，`Content-Type: application/json`
 - 用户身份：从登录态（token）自动获取，**无需在 body 里传当前用户 id**
 - 统一返回结构：
@@ -51,7 +51,7 @@
 
 一次新增一盘。
 
-- **URL**：`POST /api/rally/wechat/recap/score/add`
+- **URL**：`POST /api/rally/recap/score/add`
 - **入参**：见上方「比分字段说明」
 
 请求示例（双打一盘，6:4）：
@@ -75,7 +75,7 @@
 curl：
 
 ```bash
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/add' \
+curl -X POST 'http://localhost:8080/api/rally/recap/score/add' \
   -H 'Content-Type: application/json' \
   -d '{"meetupId":"1789000000000000001","setNum":1,"setFormatType":"GAME","matchType":"DOUBLE","sideAPlayer1":"u_1001","sideAPlayer2":"u_1002","sideBPlayer1":"u_2001","sideBPlayer2":"u_2002","sideAScore":6,"sideBScore":4,"winSide":"A"}'
 ```
@@ -86,7 +86,7 @@ curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/add' \
 
 一次修改一盘。用 `bizId` 定位记录 + `version` 乐观锁防止并发覆盖。
 
-- **URL**：`POST /api/rally/wechat/recap/score/update`
+- **URL**：`POST /api/rally/recap/score/update`
 - **入参**：在「比分字段说明」基础上**额外**增加：
 
 | 字段 | 类型 | 必填 | 说明 |
@@ -121,7 +121,7 @@ curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/add' \
 curl：
 
 ```bash
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/update' \
+curl -X POST 'http://localhost:8080/api/rally/recap/score/update' \
   -H 'Content-Type: application/json' \
   -d '{"meetupId":"1789000000000000001","bizId":"1789000000000000099","version":1,"setNum":1,"setFormatType":"TIEBREAK","matchType":"DOUBLE","sideAPlayer1":"u_1001","sideAPlayer2":"u_1002","sideBPlayer1":"u_2001","sideBPlayer2":"u_2002","sideAScore":7,"sideBScore":6,"sideATiebreakScore":7,"sideBTiebreakScore":3,"winSide":"A"}'
 ```
@@ -132,7 +132,7 @@ curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/update' \
 
 一次删除一盘。按 `bizId` 定位（bizId 为雪花，永不复用，天然防 ABA）。
 
-- **URL**：`POST /api/rally/wechat/recap/score/delete`
+- **URL**：`POST /api/rally/recap/score/delete`
 - **入参**：
 
 | 字段 | 类型 | 必填 | 说明 |
@@ -152,7 +152,7 @@ curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/update' \
 curl：
 
 ```bash
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/delete' \
+curl -X POST 'http://localhost:8080/api/rally/recap/score/delete' \
   -H 'Content-Type: application/json' \
   -d '{"meetupId":"1789000000000000001","bizId":"1789000000000000099"}'
 ```
@@ -163,7 +163,7 @@ curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/delete' \
 
 查询当前登录用户的比分记录，支持按胜负和单双打筛选，游标分页。
 
-- **URL**：`POST /api/rally/wechat/recap/score/list`
+- **URL**：`POST /api/rally/recap/score/list`
 - **权限**：登录即可，无需约球参与资格
 
 ### 入参
@@ -202,12 +202,12 @@ curl：
 
 ```bash
 # 第一页
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/list' \
+curl -X POST 'http://localhost:8080/api/rally/recap/score/list' \
   -H 'Content-Type: application/json' \
   -d '{}'
 
 # 下一页（传上一页的 nextCursor）
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/list' \
+curl -X POST 'http://localhost:8080/api/rally/recap/score/list' \
   -H 'Content-Type: application/json' \
   -d '{"lastId":"1789000000000000099"}'
 ```

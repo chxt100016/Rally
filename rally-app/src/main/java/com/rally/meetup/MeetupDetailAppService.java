@@ -142,7 +142,7 @@ public class MeetupDetailAppService {
             payment.setCurrentUserAmount(amountPerPerson);
         }
         String creatorId = meetup.getCreatorId();
-        UserExtData paymentCodeData = userExtDomainService.get(creatorId, UserExtKeyEnum.WECHAT_PAYMENT_CODE.getKey());
+        UserExtData paymentCodeData = userExtDomainService.get(creatorId, UserExtKeyEnum.PAYMENT_CODE.getKey());
         if (paymentCodeData != null) {
             payment.setPaymentCodeUrl(QiniuConfiguration.buildSignedUrl(paymentCodeData.getExtValue()));
         }

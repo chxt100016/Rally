@@ -1,6 +1,7 @@
 package com.rally.web.config;
 
 import com.rally.config.AuthInterceptor;
+import com.rally.config.ClientChannelInterceptor;
 import com.rally.config.LogInterceptor;
 import com.rally.config.UserBehaviorInterceptor;
 import jakarta.annotation.Resource;
@@ -20,16 +21,31 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Resource
     private UserBehaviorInterceptor userBehaviorInterceptor;
 
+    @Resource
+    private ClientChannelInterceptor clientChannelInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(clientChannelInterceptor)
+                .addPathPatterns("/**");
         registry.addInterceptor(userBehaviorInterceptor)
-                .addPathPatterns("/wechat/**");
+                .addPathPatterns("/**");
         registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/wechat/**")
+                .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/wechat/auth/login",
+                        "/wechat/pay/notify",
                         "/actuator/**",
+                        "/error",
+                        "/test/**",
                         "/tour/collect/**",
+                        "/tournament/admin/**",
+
+                        "/tour/tournament/tournaments",
+                        "/tour/match/upcoming",
+                        "/tour/match/finished",
+                        "/tour/player/players",
+                        "/tour/player/tournament",
 
                         "/wechat/tour/tournament/tournaments",
                         "/wechat/tour/match/upcoming",
@@ -37,7 +53,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/wechat/tour/player/players",
                         "/wechat/tour/player/tournament",
 
-
+                        "/meetup/list",
                         "/wechat/meetup/list"
 
                 );

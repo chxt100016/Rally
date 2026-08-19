@@ -1,6 +1,6 @@
 # 比分记录 API 文档
 
-基础路径：`/api/rally/wechat/recap/score`
+基础路径：`/api/rally/recap/score`
 
 ---
 
@@ -54,13 +54,13 @@ GET /stats/me
 
 ```bash
 # 查询全部统计
-curl -X GET 'http://localhost:8080/api/rally/wechat/recap/score/stats/me'
+curl -X GET 'http://localhost:8080/api/rally/recap/score/stats/me'
 
 # 只看单打统计
-curl -X GET 'http://localhost:8080/api/rally/wechat/recap/score/stats/me?matchType=SINGLE'
+curl -X GET 'http://localhost:8080/api/rally/recap/score/stats/me?matchType=SINGLE'
 
 # 只看双打统计
-curl -X GET 'http://localhost:8080/api/rally/wechat/recap/score/stats/me?matchType=DOUBLE'
+curl -X GET 'http://localhost:8080/api/rally/recap/score/stats/me?matchType=DOUBLE'
 ```
 
 ---
@@ -165,22 +165,22 @@ Content-Type: application/json
 
 ```bash
 # 首次查询（默认分页）
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/list/me' \
+curl -X POST 'http://localhost:8080/api/rally/recap/score/list/me' \
   -H 'Content-Type: application/json' \
   -d '{}'
 
 # 按单打过滤
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/list/me' \
+curl -X POST 'http://localhost:8080/api/rally/recap/score/list/me' \
   -H 'Content-Type: application/json' \
   -d '{"matchType": "SINGLE"}'
 
 # 按约球活动过滤
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/list/me' \
+curl -X POST 'http://localhost:8080/api/rally/recap/score/list/me' \
   -H 'Content-Type: application/json' \
   -d '{"meetupId": "1234567890"}'
 
 # 翻页（传入上一页返回的 nextCursor）
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/list/me' \
+curl -X POST 'http://localhost:8080/api/rally/recap/score/list/me' \
   -H 'Content-Type: application/json' \
   -d '{"lastId": "1800000000000001", "pageSize": 20}'
 ```
@@ -227,7 +227,7 @@ Content-Type: application/json
 ### curl 示例
 
 ```bash
-curl -X POST 'http://localhost:8080/api/rally/wechat/recap/score/delete' \
+curl -X POST 'http://localhost:8080/api/rally/recap/score/delete' \
   -H 'Content-Type: application/json' \
   -d '{"meetupId": "1234567890", "bizId": "1800000000000001"}'
 ```

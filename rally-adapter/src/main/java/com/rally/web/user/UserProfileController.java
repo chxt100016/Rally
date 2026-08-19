@@ -11,7 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user/profile")
+@RequestMapping({"/user/profile", "/wechat/user/profile"})
 public class UserProfileController {
 
     @Resource

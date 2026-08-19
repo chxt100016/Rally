@@ -11,10 +11,8 @@
 
 ## 渠道说明
 
-- Web 通用接口前缀如上表。
-- 微信小程序渠道额外提供以下前缀（入参/返参与对应 web 接口完全一致）：
-  - `/wechat/tournament/entry/*`
-  - `/wechat/tournament/match/*`
+- 所有客户端统一使用上表中的通用接口。
+- 微信小程序新版本请求携带 `X-Client-Channel: WECHAT_MINIAPP`，规范路径不增加 `/wechat` 前缀；旧版 `/wechat` 路径暂时兼容。
 
 ## 通用响应结构
 

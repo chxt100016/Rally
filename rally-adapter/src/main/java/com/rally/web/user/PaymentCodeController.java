@@ -9,26 +9,26 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user/payment-code")
+@RequestMapping({"/user/payment-code", "/wechat/user/payment-code"})
 public class PaymentCodeController {
 
     @Resource
     private PaymentCodeAppService paymentCodeAppService;
 
     @PostMapping("")
-    public Result<Void> saveWechatPaymentCode(@Valid @RequestBody PaymentCodeCmd cmd) {
-        paymentCodeAppService.saveWechatPaymentCode(cmd);
+    public Result<Void> savePaymentCode(@Valid @RequestBody PaymentCodeCmd cmd) {
+        paymentCodeAppService.savePaymentCode(cmd);
         return Result.ok();
     }
 
     @GetMapping("")
-    public Result<PaymentCodeDTO> getWechatPaymentCode() {
-        return Result.ok(paymentCodeAppService.getWechatPaymentCode());
+    public Result<PaymentCodeDTO> getPaymentCode() {
+        return Result.ok(paymentCodeAppService.getPaymentCode());
     }
 
     @DeleteMapping("")
-    public Result<Void> deleteWechatPaymentCode() {
-        paymentCodeAppService.deleteWechatPaymentCode();
+    public Result<Void> deletePaymentCode() {
+        paymentCodeAppService.deletePaymentCode();
         return Result.ok();
     }
 }

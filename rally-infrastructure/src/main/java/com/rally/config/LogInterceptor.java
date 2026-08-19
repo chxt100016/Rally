@@ -1,5 +1,6 @@
 package com.rally.config;
 
+import com.rally.utils.ClientChannelContext;
 import com.rally.utils.UserContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,9 +21,9 @@ public class LogInterceptor implements HandlerInterceptor {
         START_TIME.set(System.currentTimeMillis());
         String userId = UserContext.getIfPresent();
         if (userId != null) {
-            log.info("[REQ] IP={} userId={} {} {}", getClientIp(request), userId, request.getMethod(), request.getRequestURI());
+            log.info("[REQ] IP={} channel={} userId={} {} {}", getClientIp(request), ClientChannelContext.get(), userId, request.getMethod(), request.getRequestURI());
         } else {
-            log.info("[REQ] IP={} {} {}", getClientIp(request), request.getMethod(), request.getRequestURI());
+            log.info("[REQ] IP={} channel={} {} {}", getClientIp(request), ClientChannelContext.get(), request.getMethod(), request.getRequestURI());
         }
         return true;
     }

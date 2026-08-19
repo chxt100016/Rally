@@ -1,12 +1,14 @@
-# 微信付款码 API 文档
+# 用户收款码 API 文档
 
 ## 接口概述
 
-用户微信付款码管理接口，支持上传、查询、删除付款码图片。
+用户收款码管理接口，支持上传、查询、删除收款码图片，不限制收款平台。
 
 **Base URL**: `http://localhost:8080/api/rally`
 
 **认证方式**: Bearer Token（请求头 `Authorization: Bearer <token>`）
+
+微信小程序请求同时携带 `X-Client-Channel: WECHAT_MINIAPP`。
 
 ---
 
@@ -16,7 +18,7 @@
 
 获取七牛云上传凭证，用于上传付款码图片。
 
-**接口地址**: `GET /wechat/user/upload/upload-token/user`
+**接口地址**: `GET /user/upload/upload-token/user`
 
 **请求参数**:
 
@@ -26,7 +28,7 @@
 
 **请求示例**:
 ```bash
-curl -X GET "http://localhost:8080/api/rally/wechat/user/upload/upload-token/user?type=paymentCode" \
+curl -X GET "http://localhost:8080/api/rally/user/upload/upload-token/user?type=paymentCode" \
   -H "Authorization: Bearer <your_token>"
 ```
 
@@ -95,7 +97,7 @@ curl -X POST https://up-z0.qiniup.com \
 
 将上传成功的文件 key 保存到后端数据库。
 
-**接口地址**: `POST /wechat/user/payment-code`
+**接口地址**: `POST /user/payment-code`
 
 **请求参数**:
 ```json
@@ -106,7 +108,7 @@ curl -X POST https://up-z0.qiniup.com \
 
 **请求示例**:
 ```bash
-curl -X POST http://localhost:8080/api/rally/wechat/user/payment-code \
+curl -X POST http://localhost:8080/api/rally/user/payment-code \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <your_token>" \
   -d '{
@@ -133,11 +135,11 @@ curl -X POST http://localhost:8080/api/rally/wechat/user/payment-code \
 
 查询当前登录用户的付款码信息。
 
-**接口地址**: `GET /wechat/user/payment-code`
+**接口地址**: `GET /user/payment-code`
 
 **请求示例**:
 ```bash
-curl -X GET http://localhost:8080/api/rally/wechat/user/payment-code \
+curl -X GET http://localhost:8080/api/rally/user/payment-code \
   -H "Authorization: Bearer <your_token>"
 ```
 
@@ -175,11 +177,11 @@ curl -X GET http://localhost:8080/api/rally/wechat/user/payment-code \
 
 删除当前登录用户的付款码，同时删除七牛云文件。
 
-**接口地址**: `DELETE /wechat/user/payment-code`
+**接口地址**: `DELETE /user/payment-code`
 
 **请求示例**:
 ```bash
-curl -X DELETE http://localhost:8080/api/rally/wechat/user/payment-code \
+curl -X DELETE http://localhost:8080/api/rally/user/payment-code \
   -H "Authorization: Bearer <your_token>"
 ```
 
@@ -203,7 +205,7 @@ curl -X DELETE http://localhost:8080/api/rally/wechat/user/payment-code \
 
 ```
 1. 获取上传凭证
-   GET /wechat/user/upload/upload-token/user?type=paymentCode
+   GET /user/upload/upload-token/user?type=paymentCode
    ↓
    响应：{ uploadToken, key, uploadHost }
 
@@ -214,18 +216,18 @@ curl -X DELETE http://localhost:8080/api/rally/wechat/user/payment-code \
    响应：{ key }
 
 3. 保存到后端
-   POST /wechat/user/payment-code
+   POST /user/payment-code
    Body: { key }
    ↓
    响应：成功
 
 4. 查询付款码（可选）
-   GET /wechat/user/payment-code
+   GET /user/payment-code
    ↓
    响应：{ key, paymentCodeUrl }
 
 5. 删除付款码（可选）
-   DELETE /wechat/user/payment-code
+   DELETE /user/payment-code
    ↓
    响应：成功
 ```
@@ -239,7 +241,7 @@ curl -X DELETE http://localhost:8080/api/rally/wechat/user/payment-code \
 | 10001 | 未登录，请先登录 | Token 缺失或无效 | 重新登录获取 token |
 | 10002 | 登录已过期，请重新登录 | Token 已过期 | 重新登录 |
 | 40013 | 用户扩展信息不存在 | 删除不存在的付款码 | 确认用户是否已设置付款码 |
-| 40015 | 微信付款码不能为空 | key 字段为空 | 检查上传流程，确保 key 有值 |
+| 40015 | 收款码不能为空 | key 字段为空 | 检查上传流程，确保 key 有值 |
 
 ---
 
@@ -271,7 +273,7 @@ curl -X DELETE http://localhost:8080/api/rally/wechat/user/payment-code \
 
 ```bash
 # 1. 获取上传凭证
-TOKEN_RESPONSE=$(curl -s -X GET "http://localhost:8080/api/rally/wechat/user/upload/upload-token/user?type=paymentCode" \
+TOKEN_RESPONSE=$(curl -s -X GET "http://localhost:8080/api/rally/user/upload/upload-token/user?type=paymentCode" \
   -H "Authorization: Bearer your_token_here")
 
 # 提取字段
@@ -289,13 +291,13 @@ curl -X POST $UPLOAD_HOST \
   -F "file=@/path/to/your/image.jpg"
 
 # 3. 保存到后端
-curl -X POST http://localhost:8080/api/rally/wechat/user/payment-code \
+curl -X POST http://localhost:8080/api/rally/user/payment-code \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your_token_here" \
   -d "{\"key\": \"$KEY\"}"
 
 # 4. 查询验证
-curl -X GET http://localhost:8080/api/rally/wechat/user/payment-code \
+curl -X GET http://localhost:8080/api/rally/user/payment-code \
   -H "Authorization: Bearer your_token_here"
 ```
 

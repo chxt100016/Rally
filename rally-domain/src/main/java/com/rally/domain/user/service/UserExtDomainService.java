@@ -19,7 +19,7 @@ public class UserExtDomainService {
 
     public void save(String userId, String extKey, String extValue) {
         validateExtKey(extKey);
-        Assert.notBlank(extValue, BizErrorCode.WECHAT_PAYMENT_CODE_EMPTY);
+        Assert.notBlank(extValue, BizErrorCode.PAYMENT_CODE_EMPTY);
 
         UserExtData data = new UserExtData();
         data.setUserId(userId);

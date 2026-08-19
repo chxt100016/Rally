@@ -19,4 +19,4 @@ CREATE TABLE `user_behavior_log` (
   KEY `idx_user_time` (`user_id`, `occurred_at`),
   KEY `idx_route_time` (`route_pattern`, `occurred_at`),
   KEY `idx_occurred_at` (`occurred_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='微信端用户接口行为日志';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客户端用户接口行为日志';

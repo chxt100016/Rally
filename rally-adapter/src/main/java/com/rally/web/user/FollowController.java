@@ -11,7 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user/follow")
+@RequestMapping({"/user/follow", "/wechat/user/follow"})
 public class FollowController {
 
     @Resource

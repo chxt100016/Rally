@@ -4,7 +4,7 @@
 
 ## 通用约定
 
-- **统一前缀**：所有接口均带 `/api/rally` 前缀；微信渠道在此基础上多一层 `/wechat`（如 `/api/rally/wechat/user/profile/video/upload`），入参出参完全一致。
+- **统一前缀**：所有接口均带 `/api/rally` 前缀；客户端通过 `X-Client-Channel` 标识渠道。
 - **登录态**：均需登录，请求头携带 `Authorization: {token}`。
 - **统一响应包装** `Result<MyProfileDTO>`：
 

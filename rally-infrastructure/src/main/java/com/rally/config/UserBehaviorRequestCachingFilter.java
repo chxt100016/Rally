@@ -11,7 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Caches at most a small prefix of /wechat request bodies without consuming the
+ * Caches at most a small prefix of API request bodies without consuming the
  * stream before controllers read it.
  */
 @Component
@@ -29,8 +29,7 @@ public class UserBehaviorRequestCachingFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String servletPath = request.getServletPath();
-        return !enabled || !("/wechat".equals(servletPath) || servletPath.startsWith("/wechat/"));
+        return !enabled;
     }
 
     @Override

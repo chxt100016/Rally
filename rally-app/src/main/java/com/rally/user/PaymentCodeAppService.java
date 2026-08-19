@@ -24,24 +24,24 @@ public class PaymentCodeAppService {
     private static final PaymentCodeAppConvertMapper MAPPER = PaymentCodeAppConvertMapper.INSTANCE;
 
     @Transactional
-    public void saveWechatPaymentCode(PaymentCodeCmd cmd) {
+    public void savePaymentCode(PaymentCodeCmd cmd) {
         String userId = UserContext.get();
-        userExtDomainService.save(userId, UserExtKeyEnum.WECHAT_PAYMENT_CODE.getKey(), cmd.getKey());
+        userExtDomainService.save(userId, UserExtKeyEnum.PAYMENT_CODE.getKey(), cmd.getKey());
     }
 
-    public PaymentCodeDTO getWechatPaymentCode() {
+    public PaymentCodeDTO getPaymentCode() {
         String userId = UserContext.get();
-        UserExtData data = userExtDomainService.get(userId, UserExtKeyEnum.WECHAT_PAYMENT_CODE.getKey());
+        UserExtData data = userExtDomainService.get(userId, UserExtKeyEnum.PAYMENT_CODE.getKey());
         return MAPPER.toDTO(data);
     }
 
     @Transactional
-    public void deleteWechatPaymentCode() {
+    public void deletePaymentCode() {
         String userId = UserContext.get();
-        UserExtData data = userExtDomainService.get(userId, UserExtKeyEnum.WECHAT_PAYMENT_CODE.getKey());
+        UserExtData data = userExtDomainService.get(userId, UserExtKeyEnum.PAYMENT_CODE.getKey());
         if (data != null && data.getExtValue() != null) {
             qiniuClient.deleteFile(data.getExtValue());
         }
-        userExtDomainService.delete(userId, UserExtKeyEnum.WECHAT_PAYMENT_CODE.getKey());
+        userExtDomainService.delete(userId, UserExtKeyEnum.PAYMENT_CODE.getKey());
     }
 }

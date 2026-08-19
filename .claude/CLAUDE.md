@@ -9,6 +9,8 @@ mvn clean package -DskipTests
 
 ## 关键架构规则
 - 所有请求接口前缀在配置文件中配置了`/api/rally`
+- 通用接口不增加渠道路径前缀，客户端通过`X-Client-Channel`标识渠道
+- 旧版微信小程序的通用`/wechat`接口暂时通过同一 Controller 双路径兼容，不创建空继承 Controller
 - 任何方法的返回值都不应该用optional
 - FastJson2 作为 HTTP 消息转换器（`rally-infrastructure/config/FastJsonConfigClass.java`）
 - 枚举的name要使用大写
@@ -23,4 +25,4 @@ mvn clean package -DskipTests
 - 接口出入参数转换放在app层并且使用mapstruct 
 - app层不要try catch，将这个放在领域层的业务操作里
 - 通过api对外返回的对象创建专门DTO对象， 通过api接收的参数以Cmd结尾
-- 获取用户Id通过`UserContext.get()` 方法在app层获取， 
+- 获取用户Id通过`UserContext.get()` 方法在app层获取，

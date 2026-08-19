@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * 约球接口：发布/编辑/关闭/列表/详情
  */
 @RestController
-@RequestMapping("/meetup")
+@RequestMapping({"/meetup", "/wechat/meetup"})
 public class MeetupController {
 
 

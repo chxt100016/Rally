@@ -34,8 +34,9 @@ docs/plan/Rally/page/{页面标识}/
 ### 1. {接口名称}
 
 ```
-{METHOD} /api/rally/wechat/{path}
+{METHOD} /api/rally/{path}
 Authorization: Bearer <token>
+X-Client-Channel: WECHAT_MINIAPP
 Content-Type: application/json
 ```
 
@@ -162,7 +163,8 @@ Content-Type: application/json
 ### {接口名称}
 
 ```
-{METHOD} /api/rally/wechat/{path}
+{METHOD} /api/rally/{path}
+X-Client-Channel: WECHAT_MINIAPP
 ```
 
 **响应：** `Result<{DTO}>`
@@ -192,7 +194,7 @@ Content-Type: application/json
 ### 接口引用规则
 
 1. 接口引用使用 `[[api#{序号}. {名称}|{METHOD} {path}]]` 格式
-2. 示例：`[[api#1. 获取我的档案|GET /wechat/user/profile/me]]`
+2. 示例：`[[api#1. 获取我的档案|GET /user/profile/me]]`
 
 ### 内容规范
 

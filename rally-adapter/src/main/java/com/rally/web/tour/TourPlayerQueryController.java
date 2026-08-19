@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tour/player")
+@RequestMapping({"/tour/player", "/wechat/tour/player"})
 public class TourPlayerQueryController {
 
     @Resource
