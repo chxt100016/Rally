@@ -52,6 +52,11 @@ public class TournamentPaymentService {
         entry.advanceToMainDrawPaid(tournament.getData().getTotalSlots());
         tournamentEntryRepository.save(entry.getData());
         tournamentRoundProgressService.advanceIfReady(tournamentId);
+
+        Tournament latestTournament = getTournament(tournamentId);
+        if (latestTournament.isSlotsFull()) {
+            tournamentEntryRepository.eliminateWaitingQualifiers(tournamentId);
+        }
     }
 
     /**

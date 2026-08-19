@@ -42,6 +42,11 @@ public interface TournamentEntryRepository {
     List<TournamentRoundEnum> findDistinctWaitingRounds(String tournamentId, TournamentEntryStageEnum stage);
 
     /**
+     * 正赛名额已满时，淘汰仍在资格赛等待匹配的报名。
+     */
+    void eliminateWaitingQualifiers(String tournamentId);
+
+    /**
      * 分配赛事内递增的 entryNo（取当前赛事已有最大 entryNo + 1，无记录则从1开始）
      */
     int nextEntryNo(String tournamentId);

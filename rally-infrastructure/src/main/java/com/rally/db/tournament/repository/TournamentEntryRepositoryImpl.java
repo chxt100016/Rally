@@ -85,6 +85,16 @@ public class TournamentEntryRepositoryImpl implements TournamentEntryRepository 
     }
 
     @Override
+    public void eliminateWaitingQualifiers(String tournamentId) {
+        tournamentEntryService.lambdaUpdate()
+                .eq(TournamentEntryPO::getTournamentId, tournamentId)
+                .eq(TournamentEntryPO::getStage, TournamentEntryStageEnum.QUALIFY.name())
+                .eq(TournamentEntryPO::getStatus, TournamentEntryStatusEnum.WAITING.name())
+                .set(TournamentEntryPO::getStatus, TournamentEntryStatusEnum.ELIMINATED.name())
+                .update();
+    }
+
+    @Override
     public int nextEntryNo(String tournamentId) {
         TournamentEntryPO maxEntry = tournamentEntryService.lambdaQuery()
                 .eq(TournamentEntryPO::getTournamentId, tournamentId)

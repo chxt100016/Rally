@@ -394,7 +394,9 @@ public class TournamentMatchFlowService {
 
         for (String userId : loserUserIds) {
             TournamentEntry entry = getUserEntry(match.getData().getTournamentId(), userId);
-            entry.getData().setStatus(TournamentEntryStatusEnum.ELIMINATED);
+            entry.getData().setStatus(match.getData().getRound() == TournamentRoundEnum.QUALIFIER
+                    ? TournamentEntryStatusEnum.WAITING
+                    : TournamentEntryStatusEnum.ELIMINATED);
             entryRepository.save(entry.getData());
         }
     }
