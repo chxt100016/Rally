@@ -132,7 +132,7 @@ public class TournamentDetailAppService {
             detail.getRejectRecords().forEach(r -> userIds.add(r.getUserId()));
         }
         if (detail.getEntrants() != null) {
-            detail.getEntrants().forEach(e -> userIds.add(e.getUserId()));
+            detail.getEntrants().forEach(entrant -> userIds.add(entrant.getUserId()));
         }
         return userIds;
     }
@@ -160,7 +160,11 @@ public class TournamentDetailAppService {
             }
         }
         if (detail.getEntrants() != null) {
-            detail.getEntrants().forEach(e -> fillEntrantInfo(e, profiles));
+            detail.getEntrants().forEach(entrant -> fillEntrantInfo(entrant, profiles));
+        }
+        if (detail.getEntrantOverview() != null && detail.getEntrantOverview().getRounds() != null) {
+            detail.getEntrantOverview().getRounds().forEach(round ->
+                    round.getEntrants().forEach(entrant -> fillEntrantInfo(entrant, profiles)));
         }
     }
 

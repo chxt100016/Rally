@@ -29,6 +29,8 @@ public class TournamentEntryData {
     private Integer mainDrawRejectCount;
     private LocalDateTime qualifiedTime;
     private LocalDateTime paidTime;
+    /** 用户最近一次打开本赛事详情的时间。 */
+    private LocalDateTime lastVisitTime;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

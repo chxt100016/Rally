@@ -86,6 +86,7 @@ CREATE TABLE `rally_tournament_entry` (
     `main_draw_reject_count` INT NOT NULL DEFAULT 0 COMMENT '正赛阶段已拒绝次数',
     `qualified_time` DATETIME DEFAULT NULL COMMENT '获得正赛资格时间',
     `paid_time` DATETIME DEFAULT NULL COMMENT '支付时间（正赛席位锁定时间）',
+    `last_visit_time` DATETIME DEFAULT NULL COMMENT '用户最近一次打开本赛事详情的时间',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),

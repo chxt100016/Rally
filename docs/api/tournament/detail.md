@@ -2,7 +2,7 @@
 
 **Base URL**: `/api/rally/tournament/detail`
 
-只读聚合接口，赛事落地页收口为一个接口：聚合赛事信息、公开进程、当前用户报名与比赛、显式 `action`、个人时间线、签表、信用记录。前端只按 `action.state` switch-case 渲染"当前待办卡片"，不自行拼状态。
+赛事落地页聚合接口：聚合赛事信息、公开进程、当前用户报名与比赛、显式 `action`、个人时间线、签表、信用记录。已报名用户每次访问时会更新对应报名记录的 `lastVisitTime`。前端只按 `action.state` switch-case 渲染"当前待办卡片"，不自行拼状态。
 
 ---
 
@@ -10,7 +10,7 @@
 
 **GET** `/{bizId}`
 
-`userId` 从登录态取，**支持匿名访问**（未登录时 `action.state` 固定为 `NOT_LOGGED_IN`）。
+`userId` 从登录态取，**支持匿名访问**（未登录时 `action.state` 固定为 `NOT_LOGGED_IN`）。该 GET 接口对已报名用户具有写入副作用：包括页面预取、后台刷新在内的每次成功调用都会更新对应 entry 的最近访问时间；匿名及未报名用户不会写入。
 
 **路径参数**
 
@@ -31,6 +31,8 @@
 | `myTimeline` | `TournamentTimelineEventDTO[]` | 个人视角事件流，不含未登录/未报名场景 |
 | `bracket` | `TournamentBracketDTO` | 签表对阵图数据 |
 | `rejectRecords` | `TournamentRejectRecordDTO[]` | 赛事所有参赛者的拒绝比赛次数统计（不限于本人） |
+| `entrants` | `TournamentEntrantDTO[]` | 兼容原接口的扁平参赛者数组，包含已退赛用户，按 `entryNo` 正序排列 |
+| `entrantOverview` | `TournamentEntrantsDTO` | 报名人数统计及按轮次分组的参赛者（不在分组中返回已退赛用户） |
 
 ### TournamentDTO（赛事基础信息）
 
@@ -94,7 +96,7 @@
 
 `MatchOpponentDTO`：`userId`/`nickname`/`avatarUrl`/`ntrpScore`
 
-`MatchParticipantDTO`：`userId`/`nickname`/`avatarUrl`/`gender`/`phone`/`entryNo`/`confirmStatus`/`resultConfirmStatus`。`phone` 仅在当前用户查看自己的进行中比赛时，为不同 `entryNo` 的对手返回；本人和同队搭档不返回。
+`MatchParticipantDTO`：`userId`/`nickname`/`avatarUrl`/`gender`/`phone`/`entryNo`/`lastVisitTime`/`confirmStatus`/`resultConfirmStatus`。`phone` 和 `lastVisitTime` 仅在当前用户查看自己的进行中比赛时，为不同 `entryNo` 的对手返回；本人和同队搭档不返回。`lastVisitTime` 为无时区的 `LocalDateTime` 字符串；值为 `null` 可能表示该 participant 是本人/同队成员，或者对手从未访问过详情，前端应结合 `entryNo` 判断身份。
 
 ### action.state（待办状态枚举）
 
@@ -134,9 +136,41 @@
 
 `TournamentBracketDTO`：`rounds: TournamentBracketRoundDTO[]`，按轮次顺序排列。
 
-`TournamentBracketRoundDTO`：`round`/`roundShow`/`matches: TournamentBracketMatchDTO[]`，同轮次内按 `matchNo` 排列。
+`TournamentBracketRoundDTO`：`round`/`roundShow`/`matches: TournamentBracketMatchDTO[]`。同轮次内依次展示 `COMPLETED`、其他状态、`REJECTED`，每个状态分组内按 `matchNo` 正序排列。
 
 `TournamentBracketMatchDTO`：`matchId`/`matchNo`/`participants: MatchOpponentDTO[]`/`winnerEntryNo`/`status`
+
+### entrants / entrantOverview（参赛者）
+
+`entrants` 保持原有的 `TournamentEntrantDTO[]` 扁平数组结构，包含已退赛用户并按 `entryNo` 正序排列，用于兼容已有客户端。
+
+新增的 `entrantOverview` 为 `TournamentEntrantsDTO`：`totalCount`/`withdrawnCount`/`rounds: TournamentEntrantRoundDTO[]`。`totalCount` 包含已退赛用户；`withdrawnCount` 为已退赛人数。
+
+`TournamentEntrantRoundDTO`：`round`/`roundShow`/`entrants: TournamentEntrantDTO[]`。`rounds` 返回赛事完整轮次序列，尚无参赛者的轮次也会返回空 `entrants`。已退赛用户不进入轮次列表；同轮次内按 `IN_MATCH`、`WAITING`、其他状态三个优先级区段排列，每个区段内按 `entryNo` 正序排列，“其他状态”不再按具体状态细分。
+
+`TournamentEntrantDTO`：`userId`/`entryNo`/`entryNoShow`/`status`/`statusShow`/`nickname`/`avatarUrl`/`gender`。
+
+```json
+{
+  "entrants": [
+    { "userId": "u1", "entryNo": 1, "entryNoShow": "001", "status": "IN_MATCH" }
+  ],
+  "entrantOverview": {
+    "totalCount": 3,
+    "withdrawnCount": 1,
+    "rounds": [
+      {
+        "round": "QUALIFIER",
+        "roundShow": "资格赛",
+        "entrants": [
+          { "userId": "u1", "entryNo": 1, "entryNoShow": "001", "status": "IN_MATCH" }
+        ]
+      },
+      { "round": "ROUND_16", "roundShow": "16强", "entrants": [] }
+    ]
+  }
+}
+```
 
 ### rejectRecords（拒绝比赛次数统计）
 

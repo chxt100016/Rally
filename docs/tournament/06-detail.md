@@ -1,7 +1,7 @@
 # 模块 6：落地页详情（聚合查询）
 
 ## 职责
-赛事落地页收口为**一个详情接口**，聚合赛事信息、公开进程、当前用户报名与比赛、显式 action.state、个人时间线、签表、信用记录。前端只按 action.state switch-case 渲染"当前待办卡片"，不自行拼状态。此模块只读，不改状态。
+赛事落地页收口为**一个详情接口**，聚合赛事信息、公开进程、当前用户报名与比赛、显式 action.state、个人时间线、签表、信用记录。前端只按 action.state switch-case 渲染"当前待办卡片"，不自行拼状态。已报名用户访问详情时，更新报名记录的最近访问时间。
 
 ## 聚合根 / 领域对象（只读装配）
 - 读 **Tournament**（基础信息 + 席位进度 + 当前轮次概览）。
@@ -24,10 +24,12 @@
 - `tournament`：基础信息。
 - `progress`：公开进程（席位、轮次、本轮场数、各截止时间）。
 - `myEntry`：报名信息，未报名为 null。
-- `myCurrentMatch`：进行中比赛（matchId/round/meetupId/status/participants），无则 null；participants 仅为不同 entryNo 的对手返回手机号，本人和双打搭档不返回。
+- `myCurrentMatch`：进行中比赛（matchId/round/meetupId/status/participants），无则 null；participants 仅为不同 entryNo 的对手返回手机号及最近访问赛事详情时间，本人和双打搭档不返回。
 - `action.state`：显式待办状态，驱动待办卡片渲染。
 - `myTimeline`：个人事件流。
 - `bracket`：签表。
+- `entrants`：兼容原接口的扁平参赛者数组，包含已退赛用户。
+- `entrantOverview`：总报名/已退赛人数，以及排除已退赛用户后的按轮次分组参赛者。
 - `myCreditRecords`：与我相关的轻量化信用记录。
 
 三种视角由 action.state + myEntry 决定：未报名（赛事信息+席位进度+立即报名）、已报名进行中（待办卡片+对手+对应操作按钮）、已淘汰（战绩汇总+查看完整赛程）。

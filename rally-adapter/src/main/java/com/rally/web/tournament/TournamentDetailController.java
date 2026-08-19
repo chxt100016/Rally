@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 赛事落地页详情（聚合查询）接口：只读，可匿名访问
+ * 赛事落地页详情（聚合查询）接口：可匿名访问，已报名用户访问时记录最近访问时间
  */
 @RestController
 @RequestMapping({"/tournament/detail", "/wechat/tournament/detail"})

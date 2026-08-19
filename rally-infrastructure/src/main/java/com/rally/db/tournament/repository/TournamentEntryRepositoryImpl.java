@@ -11,6 +11,7 @@ import com.rally.domain.tournament.model.TournamentEntryData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,6 +68,15 @@ public class TournamentEntryRepositoryImpl implements TournamentEntryRepository 
                 .eq(TournamentEntryPO::getTournamentId, tournamentId)
                 .list();
         return pos.stream().map(MAPPER::toTournamentEntryData).collect(Collectors.toList());
+    }
+
+    @Override
+    public void updateLastVisitTime(String tournamentId, String userId, LocalDateTime lastVisitTime) {
+        tournamentEntryService.lambdaUpdate()
+                .eq(TournamentEntryPO::getTournamentId, tournamentId)
+                .eq(TournamentEntryPO::getUserId, userId)
+                .set(TournamentEntryPO::getLastVisitTime, lastVisitTime)
+                .update();
     }
 
     @Override

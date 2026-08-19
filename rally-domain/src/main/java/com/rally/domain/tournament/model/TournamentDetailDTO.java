@@ -23,5 +23,8 @@ public class TournamentDetailDTO {
     private List<TournamentTimelineEventDTO> myTimeline;
     private TournamentBracketDTO bracket;
     private List<TournamentRejectRecordDTO> rejectRecords;
+    /** 兼容原接口的扁平参赛者数组。 */
     private List<TournamentEntrantDTO> entrants;
+    /** 参赛者统计及按轮次分组的新结构。 */
+    private TournamentEntrantsDTO entrantOverview;
 }

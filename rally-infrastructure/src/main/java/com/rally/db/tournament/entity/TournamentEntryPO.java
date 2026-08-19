@@ -31,6 +31,7 @@ public class TournamentEntryPO {
     private Integer mainDrawRejectCount;
     private LocalDateTime qualifiedTime;
     private LocalDateTime paidTime;
+    private LocalDateTime lastVisitTime;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

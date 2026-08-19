@@ -26,6 +26,8 @@ import com.rally.domain.tournament.model.TournamentData;
 import com.rally.domain.tournament.model.TournamentDetailDTO;
 import com.rally.domain.tournament.model.TournamentDTO;
 import com.rally.domain.tournament.model.TournamentEntrantDTO;
+import com.rally.domain.tournament.model.TournamentEntrantRoundDTO;
+import com.rally.domain.tournament.model.TournamentEntrantsDTO;
 import com.rally.domain.tournament.model.TournamentEntryData;
 import com.rally.domain.tournament.model.TournamentEntryDTO;
 import com.rally.domain.tournament.model.TournamentMatch;
@@ -50,7 +52,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 落地页详情聚合领域服务：只读装配赛事/进程/我的报名/我的比赛/actionState/时间线/签表/信用记录
+ * 落地页详情聚合领域服务：装配赛事/进程/我的报名/我的比赛/actionState/时间线/签表/信用记录，
+ * 并记录已报名用户最近一次访问详情的时间
  * 不依赖用户域，昵称等展示信息由 app 层批量查询后回填
  */
 @Service
@@ -88,6 +91,7 @@ public class TournamentDetailService {
         detail.setBracket(assembleBracket(tournamentData, allMatches));
         detail.setRejectRecords(assembleRejectRecords(allEntries));
         detail.setEntrants(assembleEntrants(allEntries));
+        detail.setEntrantOverview(assembleEntrantOverview(tournamentData, allEntries));
 
         if (userId == null) {
             setAction(detail, TournamentActionStateEnum.NOT_LOGGED_IN);
@@ -100,13 +104,17 @@ public class TournamentDetailService {
             return detail;
         }
 
+        LocalDateTime lastVisitTime = LocalDateTime.now();
+        tournamentEntryRepository.updateLastVisitTime(tournamentId, userId, lastVisitTime);
+        myEntryData.setLastVisitTime(lastVisitTime);
+
         TournamentEntryDTO myEntry = TournamentDomainConvertMapper.INSTANCE.toTournamentEntryDTO(myEntryData);
         detail.setMyEntry(myEntry);
 
         TournamentMatch activeMatch = null;
         if (myEntryData.getStatus() == TournamentEntryStatusEnum.IN_MATCH) {
             activeMatch = tournamentMatchRepository.findActiveMatchByTournamentAndUser(tournamentId, userId);
-            detail.setMyCurrentMatch(toMyCurrentMatchDTO(activeMatch, myEntryData.getEntryNo(), tournamentId, tournamentData));
+            detail.setMyCurrentMatch(toMyCurrentMatchDTO(activeMatch, myEntryData.getEntryNo(), tournamentData, allEntries));
         }
 
         setAction(detail, calculateActionState(tournamentData, myEntryData, activeMatch, userId));
@@ -211,7 +219,8 @@ public class TournamentDetailService {
                     roundDTO.setRound(round);
                     roundDTO.setRoundShow(round.getLabel());
                     List<TournamentBracketMatchDTO> matches = byRound.getOrDefault(round, List.of()).stream()
-                            .sorted(Comparator.comparingInt(TournamentMatchData::getMatchNo))
+                            .sorted(Comparator.comparingInt((TournamentMatchData match) -> matchStatusOrder(match.getStatus()))
+                                    .thenComparing(TournamentMatchData::getMatchNo, Comparator.nullsLast(Integer::compareTo)))
                             .map(m -> toBracketMatchDTO(m, participantsByMatch.getOrDefault(m.getBizId(), List.of())))
                             .collect(Collectors.toList());
                     roundDTO.setMatches(matches);
@@ -257,7 +266,19 @@ public class TournamentDetailService {
         return dto;
     }
 
-    private MyCurrentMatchDTO toMyCurrentMatchDTO(TournamentMatch match, Integer currentEntryNo, String tournamentId, TournamentData tournamentData) {
+    /** 已结束、进行中及其他状态、已终止。 */
+    private int matchStatusOrder(TournamentMatchStatusEnum status) {
+        if (status == TournamentMatchStatusEnum.COMPLETED) {
+            return 0;
+        }
+        if (status == TournamentMatchStatusEnum.REJECTED) {
+            return 2;
+        }
+        return 1;
+    }
+
+    private MyCurrentMatchDTO toMyCurrentMatchDTO(TournamentMatch match, Integer currentEntryNo,
+                                                   TournamentData tournamentData, List<TournamentEntryData> allEntries) {
         if (match == null) {
             return null;
         }
@@ -278,9 +299,12 @@ public class TournamentDetailService {
                 .filter(p -> currentEntryNo != null && p.getEntryNo() != null && !Objects.equals(p.getEntryNo(), currentEntryNo))
                 .collect(Collectors.toList());
 
+        Map<String, TournamentEntryData> entriesByUser = allEntries.stream()
+                .collect(Collectors.toMap(TournamentEntryData::getUserId, entry -> entry, (first, ignored) -> first));
+
         if (data.getStatus() == TournamentMatchStatusEnum.BOOKING) {
             dto.setOpponentEntries(opponentParticipants.stream()
-                    .map(p -> tournamentEntryRepository.findByTournamentAndUser(tournamentId, p.getUserId()))
+                    .map(p -> entriesByUser.get(p.getUserId()))
                     .filter(java.util.Objects::nonNull)
                     .map(TournamentDomainConvertMapper.INSTANCE::toTournamentEntryDTO)
                     .collect(Collectors.toList()));
@@ -290,6 +314,10 @@ public class TournamentDetailService {
             MatchParticipantDTO participantDTO = new MatchParticipantDTO();
             participantDTO.setUserId(p.getUserId());
             participantDTO.setEntryNo(p.getEntryNo());
+            if (currentEntryNo != null && p.getEntryNo() != null && !Objects.equals(p.getEntryNo(), currentEntryNo)) {
+                TournamentEntryData opponentEntry = entriesByUser.get(p.getUserId());
+                participantDTO.setLastVisitTime(opponentEntry == null ? null : opponentEntry.getLastVisitTime());
+            }
             participantDTO.setConfirmStatus(p.getConfirmStatus());
             participantDTO.setResultConfirmStatus(p.getResultConfirmStatus());
             return participantDTO;
@@ -440,17 +468,62 @@ public class TournamentDetailService {
     }
 
     private List<TournamentEntrantDTO> assembleEntrants(List<TournamentEntryData> entries) {
-        List<TournamentEntrantDTO> entrants = new ArrayList<>();
-        for (TournamentEntryData entry : entries) {
-            TournamentEntrantDTO dto = new TournamentEntrantDTO();
-            dto.setUserId(entry.getUserId());
-            dto.setEntryNo(entry.getEntryNo());
-            dto.setEntryNoShow(String.format("%03d", entry.getEntryNo()));
-            dto.setStatus(entry.getStatus());
-            dto.setStatusShow(entry.getStatus().getLabel());
-            entrants.add(dto);
-        }
-        entrants.sort(Comparator.comparingInt(TournamentEntrantDTO::getEntryNo));
+        return entries.stream()
+                .sorted(Comparator.comparing(TournamentEntryData::getEntryNo, Comparator.nullsLast(Integer::compareTo)))
+                .map(this::toEntrantDTO)
+                .collect(Collectors.toList());
+    }
+
+    private TournamentEntrantsDTO assembleEntrantOverview(TournamentData tournamentData, List<TournamentEntryData> entries) {
+        Map<TournamentRoundEnum, List<TournamentEntryData>> entriesByRound = entries.stream()
+                .filter(entry -> entry.getStatus() != TournamentEntryStatusEnum.WITHDRAWN)
+                .filter(entry -> entry.getCurrentRound() != null)
+                .collect(Collectors.groupingBy(TournamentEntryData::getCurrentRound));
+
+        Comparator<TournamentEntryData> entrantOrder = Comparator
+                .comparingInt((TournamentEntryData entry) -> entrantStatusOrder(entry.getStatus()))
+                .thenComparing(TournamentEntryData::getEntryNo, Comparator.nullsLast(Integer::compareTo));
+
+        List<TournamentEntrantRoundDTO> rounds = allRounds(tournamentData.getTotalSlots()).stream()
+                .map(round -> {
+                    TournamentEntrantRoundDTO roundDTO = new TournamentEntrantRoundDTO();
+                    roundDTO.setRound(round);
+                    roundDTO.setRoundShow(round.getLabel());
+                    roundDTO.setEntrants(entriesByRound.getOrDefault(round, List.of()).stream()
+                            .sorted(entrantOrder)
+                            .map(this::toEntrantDTO)
+                            .collect(Collectors.toList()));
+                    return roundDTO;
+                })
+                .collect(Collectors.toList());
+
+        TournamentEntrantsDTO entrants = new TournamentEntrantsDTO();
+        entrants.setTotalCount(entries.size());
+        entrants.setWithdrawnCount((int) entries.stream()
+                .filter(entry -> entry.getStatus() == TournamentEntryStatusEnum.WITHDRAWN)
+                .count());
+        entrants.setRounds(rounds);
         return entrants;
+    }
+
+    private TournamentEntrantDTO toEntrantDTO(TournamentEntryData entry) {
+        TournamentEntrantDTO dto = new TournamentEntrantDTO();
+        dto.setUserId(entry.getUserId());
+        dto.setEntryNo(entry.getEntryNo());
+        dto.setEntryNoShow(entry.getEntryNo() == null ? null : String.format("%03d", entry.getEntryNo()));
+        dto.setStatus(entry.getStatus());
+        dto.setStatusShow(entry.getStatus() == null ? null : entry.getStatus().getLabel());
+        return dto;
+    }
+
+    /** 比赛中、等待匹配、其他状态。 */
+    private int entrantStatusOrder(TournamentEntryStatusEnum status) {
+        if (status == TournamentEntryStatusEnum.IN_MATCH) {
+            return 0;
+        }
+        if (status == TournamentEntryStatusEnum.WAITING) {
+            return 1;
+        }
+        return 2;
     }
 }
