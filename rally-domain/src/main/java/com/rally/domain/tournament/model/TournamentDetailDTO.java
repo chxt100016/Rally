@@ -18,6 +18,8 @@ public class TournamentDetailDTO {
     private MyCurrentMatchDTO myCurrentMatch;
     /** 当前用户的赛事待办状态及展示文案。 */
     private TournamentActionDTO action;
+    /** 当前参赛用户的评论状态；未登录、未报名或已退赛时为 null。 */
+    private TournamentCommentStateDTO commentState;
     /** 用户限制原因（NOT_REGISTERED 返回报名限制，FROZEN 返回手机号限制，可叠加） */
     private List<TournamentJoinRestrictionEnum> restrictions;
     private List<TournamentTimelineEventDTO> myTimeline;

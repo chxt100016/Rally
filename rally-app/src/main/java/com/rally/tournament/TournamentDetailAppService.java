@@ -3,6 +3,8 @@ package com.rally.tournament;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.meetup.model.Meetup;
 import com.rally.domain.meetup.service.MeetupDomainService;
+import com.rally.domain.meetup.service.ChatDomainService;
+import com.rally.domain.tournament.enums.TournamentEntryStatusEnum;
 import com.rally.domain.tournament.enums.TournamentActionStateEnum;
 import com.rally.domain.tournament.enums.TournamentJoinRestrictionEnum;
 import com.rally.domain.tournament.enums.RebookReasonEnum;
@@ -12,6 +14,7 @@ import com.rally.domain.tournament.model.MyCurrentMatchDTO;
 import com.rally.domain.tournament.model.TournamentActionDTO;
 import com.rally.domain.tournament.model.TournamentBracketMatchDTO;
 import com.rally.domain.tournament.model.TournamentDetailDTO;
+import com.rally.domain.tournament.model.TournamentCommentStateDTO;
 import com.rally.domain.tournament.model.TournamentEntrantDTO;
 import com.rally.domain.tournament.model.TournamentRejectRecordDTO;
 import com.rally.domain.tournament.service.TournamentDetailService;
@@ -47,12 +50,15 @@ public class TournamentDetailAppService {
 
     private final MeetupCardPackingService meetupCardPackingService;
 
+    private final ChatDomainService chatDomainService;
+
     /**
      * 赛事落地页详情，userId 从 UserContext 取，可匿名（未登录只返回公开区块）
      */
     public TournamentDetailDTO detail(String tournamentId) {
         String userId = UserContext.getIfPresent();
         TournamentDetailDTO detail = tournamentDetailService.assembleDetail(tournamentId, userId);
+        fillCommentState(detail, tournamentId, userId);
         if (detail.getTournament() != null) {
             detail.getTournament().setPosterUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getPosterUrl()));
             detail.getTournament().setRulePosterUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getRulePosterUrl()));
@@ -73,6 +79,16 @@ public class TournamentDetailAppService {
         fillMeetupCard(detail);
         fillOfflineMeetupCard(detail);
         return detail;
+    }
+
+    /** 详情只展示未读数，不推进评论的已读位置。 */
+    private void fillCommentState(TournamentDetailDTO detail, String tournamentId, String userId) {
+        if (userId == null || detail.getMyEntry() == null
+                || detail.getMyEntry().getStatus() == TournamentEntryStatusEnum.WITHDRAWN) {
+            return;
+        }
+        detail.setCommentState(new TournamentCommentStateDTO(
+                chatDomainService.getUnreadCount(tournamentId, userId)));
     }
 
     /**

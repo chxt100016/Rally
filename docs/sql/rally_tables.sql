@@ -254,14 +254,14 @@ CREATE TABLE `rally_court` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='球场信息表';
 
 -- ============================================================
--- 12. 约球域：活动群聊消息表
+-- 12. 通用聊天：业务消息表
 -- ============================================================
 
 DROP TABLE IF EXISTS `rally_meetup_chat_message`;
 CREATE TABLE `rally_meetup_chat_message` (
   `id`              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `biz_id`          VARCHAR(32)  NOT NULL COMMENT '消息业务主键（雪花ID）',
-  `meetup_id`       VARCHAR(32)  NOT NULL COMMENT '关联 rally_meetup.biz_id',
+  `ref_id`          VARCHAR(32)  NOT NULL COMMENT '关联业务ID（约球ID或赛事ID）',
   `sender_id`       VARCHAR(32)  NOT NULL COMMENT '发送者 user_id',
   `sender_name`     VARCHAR(64)  NOT NULL DEFAULT '' COMMENT '发送者昵称（冗余存储）',
   `sender_avatar`   VARCHAR(512) NOT NULL DEFAULT '' COMMENT '发送者头像URL（冗余存储）',
@@ -271,18 +271,18 @@ CREATE TABLE `rally_meetup_chat_message` (
   `update_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_biz_id` (`biz_id`),
-  KEY `idx_meetup_biz` (`meetup_id`, `biz_id`) COMMENT '按活动+bizId游标拉取消息'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动群聊消息表';
+  KEY `idx_ref_biz` (`ref_id`, `biz_id`) COMMENT '按关联业务+bizId游标拉取消息'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务聊天消息表';
 
 -- ============================================================
--- 13. 约球域：活动群聊用户表（含已读状态）
+-- 13. 通用聊天：业务用户表（含已读状态）
 -- ============================================================
 
 DROP TABLE IF EXISTS `rally_meetup_chat_user`;
 CREATE TABLE `rally_meetup_chat_user` (
   `id`                  BIGINT      NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `biz_id`              VARCHAR(32) NOT NULL COMMENT '业务主键（雪花ID）',
-  `meetup_id`           VARCHAR(32) NOT NULL COMMENT '关联 rally_meetup.biz_id',
+  `ref_id`              VARCHAR(32) NOT NULL COMMENT '关联业务ID（约球ID或赛事ID）',
   `user_id`             VARCHAR(32) NOT NULL COMMENT '用户 user_id',
   `last_read_message_id` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '已读最新消息bizId（仅用于未读数计算）',
   `last_read_time`      DATETIME    NULL COMMENT '最后一次已读时间（仅真实拉取触发已读时更新）',
@@ -292,9 +292,9 @@ CREATE TABLE `rally_meetup_chat_user` (
   `update_time`         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_biz_id` (`biz_id`),
-  UNIQUE KEY `uk_meetup_user` (`meetup_id`, `user_id`) COMMENT '每个用户在每个活动只有一条记录',
-  KEY `idx_meetup` (`meetup_id`) COMMENT '查询活动的所有参与者'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动群聊用户表（含已读状态）';
+  UNIQUE KEY `uk_ref_user` (`ref_id`, `user_id`) COMMENT '每个用户在每个关联业务只有一条记录',
+  KEY `idx_ref` (`ref_id`) COMMENT '查询关联业务的所有参与者'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务聊天用户表（含已读状态）';
 
 -- ============================================================
 -- 14. 用户域：用户关注关系表

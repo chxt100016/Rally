@@ -28,26 +28,26 @@ public class ChatUserRepository implements com.rally.domain.meetup.gateway.ChatU
     }
 
     @Override
-    public ChatUserData findByMeetupIdAndUserId(String meetupId, String userId) {
+    public ChatUserData findByRefIdAndUserId(String refId, String userId) {
         LambdaQueryWrapper<ChatUserPO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ChatUserPO::getMeetupId, meetupId)
+        wrapper.eq(ChatUserPO::getRefId, refId)
                 .eq(ChatUserPO::getUserId, userId);
         ChatUserPO po = chatUserService.getOne(wrapper);
         return po != null ? ChatConvertMapper.INSTANCE.toChatUserData(po) : null;
     }
 
     @Override
-    public boolean existsByMeetupIdAndUserId(String meetupId, String userId) {
+    public boolean existsByRefIdAndUserId(String refId, String userId) {
         LambdaQueryWrapper<ChatUserPO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ChatUserPO::getMeetupId, meetupId)
+        wrapper.eq(ChatUserPO::getRefId, refId)
                 .eq(ChatUserPO::getUserId, userId);
         return chatUserService.count(wrapper) > 0;
     }
 
     @Override
-    public void updateLastReadMessageId(String meetupId, String userId, String lastReadMessageId, java.time.LocalDateTime lastReadTime) {
+    public void updateLastReadMessageId(String refId, String userId, String lastReadMessageId, java.time.LocalDateTime lastReadTime) {
         LambdaUpdateWrapper<ChatUserPO> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(ChatUserPO::getMeetupId, meetupId)
+        wrapper.eq(ChatUserPO::getRefId, refId)
                 .eq(ChatUserPO::getUserId, userId)
                 .set(ChatUserPO::getLastReadMessageId, lastReadMessageId)
                 .set(ChatUserPO::getLastReadTime, lastReadTime);
@@ -55,9 +55,9 @@ public class ChatUserRepository implements com.rally.domain.meetup.gateway.ChatU
     }
 
     @Override
-    public java.util.Map<String, ChatUserData> findMapByMeetupId(String meetupId) {
+    public java.util.Map<String, ChatUserData> findMapByRefId(String refId) {
         LambdaQueryWrapper<ChatUserPO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ChatUserPO::getMeetupId, meetupId);
+        wrapper.eq(ChatUserPO::getRefId, refId);
         List<ChatUserPO> poList = chatUserService.list(wrapper);
         return poList.stream()
                 .map(ChatConvertMapper.INSTANCE::toChatUserData)
@@ -65,27 +65,27 @@ public class ChatUserRepository implements com.rally.domain.meetup.gateway.ChatU
     }
 
     @Override
-    public void updateUnreadCount(String meetupId, String userId, Integer unreadCount) {
+    public void updateUnreadCount(String refId, String userId, Integer unreadCount) {
         LambdaUpdateWrapper<ChatUserPO> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(ChatUserPO::getMeetupId, meetupId)
+        wrapper.eq(ChatUserPO::getRefId, refId)
                 .eq(ChatUserPO::getUserId, userId)
                 .set(ChatUserPO::getUnreadCount, unreadCount);
         chatUserService.update(wrapper);
     }
 
     @Override
-    public void incrementUnreadCountForAllExceptSender(String meetupId, String senderId) {
+    public void incrementUnreadCountForAllExceptSender(String refId, String senderId) {
         LambdaUpdateWrapper<ChatUserPO> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(ChatUserPO::getMeetupId, meetupId)
+        wrapper.eq(ChatUserPO::getRefId, refId)
                 .ne(ChatUserPO::getUserId, senderId)
                 .setSql("unread_count = unread_count + 1");
         chatUserService.update(wrapper);
     }
 
     @Override
-    public void deleteByMeetupIdAndUserId(String meetupId, String userId) {
+    public void deleteByRefIdAndUserId(String refId, String userId) {
         LambdaQueryWrapper<ChatUserPO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ChatUserPO::getMeetupId, meetupId)
+        wrapper.eq(ChatUserPO::getRefId, refId)
                 .eq(ChatUserPO::getUserId, userId);
         chatUserService.remove(wrapper);
     }

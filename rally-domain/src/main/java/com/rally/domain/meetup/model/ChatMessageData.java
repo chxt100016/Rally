@@ -13,7 +13,8 @@ public class ChatMessageData {
 
     /** 消息业务主键（雪花ID），同时作为消息拉取的游标 */
     private String bizId;
-    private String meetupId;
+    /** 关联业务ID，可指向约球、赛事等聊天载体。 */
+    private String refId;
     private String senderId;
     /** 发送者昵称（冗余存储） */
     private String senderName;

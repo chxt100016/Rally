@@ -25,6 +25,7 @@ public interface ChatAppConvertMapper {
      * ChatMessageData -> ChatMessageDTO
      */
     @Mapping(target = "messageId", source = "bizId")
+    @Mapping(target = "meetupId", source = "refId")
     @Mapping(target = "senderAvatar", source = "senderAvatar", qualifiedByName = "parseAvatar")
     ChatMessageDTO toChatMessageDTO(ChatMessageData data);
     List<ChatMessageDTO> toChatMessageDTO(List<ChatMessageData> data);

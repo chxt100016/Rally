@@ -37,7 +37,7 @@ public class ChatAppService {
         UserProfile sender = userProfileDomainService.get(senderId);
 
         // 发送消息
-        ChatMessageData message = chatDomainService.send(cmd, sender);
+        ChatMessageData message = chatDomainService.send(cmd.getMeetupId(), cmd.getContent(), cmd.getContentType(), sender);
 
         return ChatAppConvertMapper.INSTANCE.toChatMessageDTO(message);
     }

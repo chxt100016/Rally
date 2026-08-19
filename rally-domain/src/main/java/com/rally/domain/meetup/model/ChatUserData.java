@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 public class ChatUserData {
 
     private String bizId;
-    private String meetupId;
+    /** 关联业务ID，可指向约球、赛事等聊天载体。 */
+    private String refId;
     private String userId;
     /** 已读最新消息bizId，仅用于未读数计算，不参与拉取游标 */
     private String lastReadMessageId;

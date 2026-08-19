@@ -6,6 +6,7 @@ import com.rally.domain.payment.model.PrepayResult;
 import com.rally.domain.payment.service.PaymentDomainService;
 import com.rally.domain.notify.enums.NotifyBizType;
 import com.rally.domain.notify.service.NotifySubscribeService;
+import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.domain.tournament.model.Tournament;
 import com.rally.domain.tournament.model.TournamentEntry;
 import com.rally.domain.tournament.model.TournamentEntryDTO;
@@ -43,6 +44,7 @@ public class TournamentEntryAppService {
     private final PaymentDomainService paymentDomainService;
     private final TournamentMatchFlowService tournamentMatchFlowService;
     private final NotifySubscribeService notifySubscribeService;
+    private final ChatDomainService chatDomainService;
 
     /**
      * 报名
@@ -55,6 +57,7 @@ public class TournamentEntryAppService {
         userProfile.assertCompleted();
 
         TournamentEntry entry = tournamentEntryService.join(tournament, userProfile, userId, cmd);
+        chatDomainService.join(cmd.getTournamentId(), userId);
         notifySubscribeService.grant(userId, NotifyBizType.TOURNAMENT, cmd.getTournamentId(),
                 TournamentNotifyAssembler.parseScenes(cmd.getAcceptedNoticeScenes()));
         return TournamentEntryAppConvertMapper.INSTANCE.toTournamentEntryDTO(entry.getData());
@@ -103,6 +106,7 @@ public class TournamentEntryAppService {
         TournamentEntry entry = tournamentEntryService.getByTournamentAndUser(cmd.getTournamentId(), userId);
 
         tournamentEntryService.withdraw(entry);
+        chatDomainService.quit(cmd.getTournamentId(), userId);
         tournamentMatchFlowService.closeActiveMatchOnWithdraw(cmd.getTournamentId(), userId);
         return new TournamentWithdrawResultDTO(false);
     }

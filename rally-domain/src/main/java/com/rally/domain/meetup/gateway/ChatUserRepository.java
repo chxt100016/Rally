@@ -17,39 +17,39 @@ public interface ChatUserRepository {
     void save(ChatUserData data);
 
     /**
-     * 查询用户在活动的聊天信息
+     * 查询用户在关联业务的聊天信息
      */
-    ChatUserData findByMeetupIdAndUserId(String meetupId, String userId);
+    ChatUserData findByRefIdAndUserId(String refId, String userId);
 
     /**
      * 判断用户是否已加入聊天
      */
-    boolean existsByMeetupIdAndUserId(String meetupId, String userId);
+    boolean existsByRefIdAndUserId(String refId, String userId);
 
 
 
     /**
      * 更新用户的已读位置和已读时间
      */
-    void updateLastReadMessageId(String meetupId, String userId, String lastReadMessageId, LocalDateTime lastReadTime);
+    void updateLastReadMessageId(String refId, String userId, String lastReadMessageId, LocalDateTime lastReadTime);
 
     /**
-     * 批量查询活动下的聊天用户记录（key = userId）
+     * 批量查询关联业务下的聊天用户记录（key = userId）
      */
-    Map<String, ChatUserData> findMapByMeetupId(String meetupId);
+    Map<String, ChatUserData> findMapByRefId(String refId);
 
     /**
      * 更新用户的未读数
      */
-    void updateUnreadCount(String meetupId, String userId, Integer unreadCount);
+    void updateUnreadCount(String refId, String userId, Integer unreadCount);
 
     /**
-     * 增加活动所有用户的未读数（发消息时调用，排除发送者）
+     * 增加关联业务所有用户的未读数（发消息时调用，排除发送者）
      */
-    void incrementUnreadCountForAllExceptSender(String meetupId, String senderId);
+    void incrementUnreadCountForAllExceptSender(String refId, String senderId);
 
     /**
      * 删除聊天用户
      */
-    void deleteByMeetupIdAndUserId(String meetupId, String userId);
+    void deleteByRefIdAndUserId(String refId, String userId);
 }

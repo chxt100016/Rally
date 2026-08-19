@@ -147,7 +147,7 @@
              WHERE m.status != 'DRAFT'
              AND EXISTS (
                  SELECT 1 FROM rally_meetup_chat_user cu
-                 WHERE cu.meetup_id = m.biz_id AND cu.user_id = #{userId} AND cu.unread_count > 0
+                 WHERE cu.ref_id = m.biz_id AND cu.user_id = #{userId} AND cu.unread_count > 0
              )
              AND (
                  m.creator_id = #{userId}

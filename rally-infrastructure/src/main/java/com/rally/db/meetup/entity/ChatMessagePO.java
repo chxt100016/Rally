@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 活动群聊消息PO
+ * 业务聊天消息PO
  */
 @Data
 @TableName("rally_meetup_chat_message")
@@ -17,7 +17,7 @@ public class ChatMessagePO {
     @TableId(type = IdType.AUTO)
     private Long id;
     private String bizId;
-    private String meetupId;
+    private String refId;
     private String senderId;
     private String senderName;
     private String senderAvatar;
