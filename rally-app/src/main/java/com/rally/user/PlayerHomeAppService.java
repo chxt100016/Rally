@@ -192,13 +192,19 @@ public class PlayerHomeAppService {
                 .setSideAPlayer2AvatarUrl(buildSignedUrl(record.getSideAPlayer2Avatar()))
                 .setSideAPlayer2Gender(record.getSideAPlayer2Gender())
                 .setSideAScore(String.valueOf(record.getSideAScore()))
+                .setSideATiebreakScore(scoreToString(record.getSideATiebreakScore()))
                 .setSideBPlayer1UserId(record.getSideBPlayer1())
                 .setSideBPlayer1AvatarUrl(buildSignedUrl(record.getSideBPlayer1Avatar()))
                 .setSideBPlayer1Gender(record.getSideBPlayer1Gender())
                 .setSideBPlayer2UserId(record.getSideBPlayer2())
                 .setSideBPlayer2AvatarUrl(buildSignedUrl(record.getSideBPlayer2Avatar()))
                 .setSideBPlayer2Gender(record.getSideBPlayer2Gender())
-                .setSideBScore(String.valueOf(record.getSideBScore()));
+                .setSideBScore(String.valueOf(record.getSideBScore()))
+                .setSideBTiebreakScore(scoreToString(record.getSideBTiebreakScore()));
+    }
+
+    private String scoreToString(Integer score) {
+        return score == null ? null : score.toString();
     }
 
     private String buildSignedUrl(String key) {

@@ -69,6 +69,10 @@ public class RecapDTO {
         private GenderEnum sideBPlayer2Gender;
         private Integer sideAScore;
         private Integer sideBScore;
+        /** A 侧抢七比分，无抢七时为 null */
+        private Integer sideATiebreakScore;
+        /** B 侧抢七比分，无抢七时为 null */
+        private Integer sideBTiebreakScore;
         /** 获胜边: A / B */
         private String winSide;
     }

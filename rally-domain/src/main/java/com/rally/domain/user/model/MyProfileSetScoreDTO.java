@@ -44,6 +44,7 @@ public class MyProfileSetScoreDTO {
         private String sideAPlayer2AvatarUrl;
         private GenderEnum sideAPlayer2Gender;
         private String sideAScore;
+        private String sideATiebreakScore;
         private String sideBPlayer1UserId;
         private String sideBPlayer1AvatarUrl;
         private GenderEnum sideBPlayer1Gender;
@@ -51,6 +52,7 @@ public class MyProfileSetScoreDTO {
         private String sideBPlayer2AvatarUrl;
         private GenderEnum sideBPlayer2Gender;
         private String sideBScore;
+        private String sideBTiebreakScore;
     }
 
 }

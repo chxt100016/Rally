@@ -113,6 +113,8 @@ public class ScoreAppService {
         ResultTypeEnum resultType = isWin(r, userId) ? ResultTypeEnum.WIN : ResultTypeEnum.LOSE;
         String myScore = userInSideA ? String.valueOf(r.getSideAScore()) : String.valueOf(r.getSideBScore());
         String opponentScore = userInSideA ? String.valueOf(r.getSideBScore()) : String.valueOf(r.getSideAScore());
+        String myTiebreakScore = scoreToString(userInSideA ? r.getSideATiebreakScore() : r.getSideBTiebreakScore());
+        String opponentTiebreakScore = scoreToString(userInSideA ? r.getSideBTiebreakScore() : r.getSideATiebreakScore());
         // 当前用户性别
         GenderEnum myGender = userInSideA ? (userId.equals(r.getSideAPlayer1()) ? r.getSideAPlayer1Gender() : r.getSideAPlayer2Gender()) : (userId.equals(r.getSideBPlayer1()) ? r.getSideBPlayer1Gender() : r.getSideBPlayer2Gender());
         // 队友（同侧的另一个人，双打才有）
@@ -142,6 +144,8 @@ public class ScoreAppService {
                 .setDate(r.getMeetupDate().format(DATE_FORMATTER))
                 .setMyScore(myScore)
                 .setOpponentScore(opponentScore)
+                .setMyTiebreakScore(myTiebreakScore)
+                .setOpponentTiebreakScore(opponentTiebreakScore)
                 .setMyGender(myGender)
                 .setTeammateId(mateId)
                 .setTeammateNickname(mateNickname)
@@ -155,6 +159,10 @@ public class ScoreAppService {
                 .setOpponent2Nickname(opp2Nickname)
                 .setOpponent2AvatarUrl(QiniuConfiguration.buildSignedUrl(opp2Avatar))
                 .setOpponent2Gender(opp2Gender);
+    }
+
+    private String scoreToString(Integer score) {
+        return score == null ? null : score.toString();
     }
 
     private String computeStreakType(List<ScoreRecordData> all, String userId) {

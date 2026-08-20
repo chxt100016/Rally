@@ -38,5 +38,7 @@ public class RecapDetailDTO {
         private String sideBPlayer2;
         private Integer sideAScore;
         private Integer sideBScore;
+        private Integer sideATiebreakScore;
+        private Integer sideBTiebreakScore;
     }
 }

@@ -21,6 +21,8 @@ public class ScoreItemDTO {
     private String date;
     private String myScore;
     private String opponentScore;
+    private String myTiebreakScore;
+    private String opponentTiebreakScore;
     private GenderEnum myGender;
     private String teammateId;
     private String teammateNickname;
