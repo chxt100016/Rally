@@ -1,5 +1,6 @@
 package com.rally.web.system;
 
+import com.rally.config.OptionalAuth;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
@@ -53,6 +54,7 @@ public class SystemController {
      * @return 启动页封面图的签名 URL
      */
     @GetMapping("/splash-cover")
+    @OptionalAuth
     public Result<String> getSplashCover() {
         String key = SystemConfig.getString(SystemConfigKey.SYSTEM_SPLASH_COVER_KEY.getKey());
         String url = QiniuConfiguration.buildSignedUrl(key);
