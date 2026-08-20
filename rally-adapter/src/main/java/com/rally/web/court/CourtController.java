@@ -1,6 +1,7 @@
 package com.rally.web.court;
 
 import com.rally.court.CourtQueryAppService;
+import com.rally.config.OptionalAuth;
 import com.rally.domain.court.model.CourtDTO;
 import com.rally.domain.court.model.CourtListCmd;
 import com.rally.domain.court.model.CourtSearchCmd;
@@ -23,11 +24,13 @@ public class CourtController {
     private CourtQueryAppService courtQueryAppService;
 
     @PostMapping("/list")
+    @OptionalAuth
     public Result<List<CourtDTO>> list(@Valid @RequestBody CourtListCmd cmd) {
         return Result.ok(courtQueryAppService.getAll(cmd));
     }
 
     @PostMapping("/search")
+    @OptionalAuth
     public Result<List<CourtDTO>> search(@Valid @RequestBody CourtSearchCmd cmd) {
         if (cmd.getQuery() == null || cmd.getQuery().length() < 2) {
             return Result.ok(Collections.emptyList());
