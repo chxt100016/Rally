@@ -121,11 +121,11 @@ public class HomeAppService {
         newPoster.setWechatUrl("/pages/tournament-detail/tournament-detail?id=2090434017251020802");
 
         PosterCardDisplayData.PosterCardItem newPoster2 = new PosterCardDisplayData.PosterCardItem();
-        newPoster.setType(PosterCardDisplayData.PosterType.NAVIGATE);
-        newPoster.setImageUrl(QiniuConfiguration.buildSignedUrl("rally-tournament/2090697501699190786.jpg"));
-        newPoster.setTitle("线上赛#3");
-        newPoster.setSubtitle("3.5 乐约拉力 · 找个势均力敌的对手");
-        newPoster.setWechatUrl("/pages/tournament-detail/tournament-detail?id=2090697501699190786");
+        newPoster2.setType(PosterCardDisplayData.PosterType.NAVIGATE);
+        newPoster2.setImageUrl(QiniuConfiguration.buildSignedUrl("rally-tournament/2090697501699190786.jpg"));
+        newPoster2.setTitle("线上赛#3");
+        newPoster2.setSubtitle("3.5 乐约拉力 · 找个势均力敌的对手");
+        newPoster2.setWechatUrl("/pages/tournament-detail/tournament-detail?id=2090697501699190786");
 
         data.setPosters(List.of(poster, newPoster, newPoster2));
         item.setData(data);
