@@ -86,7 +86,9 @@ public class TournamentPolicy {
      * 收集赛事未报名场景下的用户准入限制。
      * userProfile 为空表示用户未登录；网球档案未完善时由完善状态承接提示，不重复返回等级不符。
      */
-    public List<TournamentJoinRestrictionEnum> collectJoinRestrictions(String requiredNtrpLevel, UserProfile userProfile) {
+    public List<TournamentJoinRestrictionEnum> collectJoinRestrictions(String requiredNtrpLevel,
+                                                                        TournamentGenderLimitEnum genderLimit,
+                                                                        UserProfile userProfile) {
         List<TournamentJoinRestrictionEnum> restrictions = new ArrayList<>();
         if (userProfile == null) {
             restrictions.add(TournamentJoinRestrictionEnum.NOT_LOGGED_IN);
@@ -101,6 +103,9 @@ public class TournamentPolicy {
             restrictions.add(TournamentJoinRestrictionEnum.PROFILE_INCOMPLETE);
         } else if (profileIncomplete) {
             restrictions.add(TournamentJoinRestrictionEnum.ONBOARDING_INCOMPLETE);
+        }
+        if (!isGenderMatch(genderLimit, userProfile)) {
+            restrictions.add(TournamentJoinRestrictionEnum.GENDER_NOT_MATCH);
         }
         if (!profileIncomplete && !isNtrpLevelMatch(requiredNtrpLevel, userProfile)) {
             restrictions.add(TournamentJoinRestrictionEnum.LEVEL_NOT_MATCH);
@@ -136,18 +141,21 @@ public class TournamentPolicy {
     }
 
     private void assertGenderMatch(Tournament tournament, UserProfile userProfile) {
-        TournamentGenderLimitEnum genderLimit = tournament.getData().getGenderLimit();
-        if (genderLimit == TournamentGenderLimitEnum.ALL) {
-            return;
+        boolean genderMatch = isGenderMatch(tournament.getData().getGenderLimit(), userProfile);
+        Assert.isTrue(genderMatch, BizErrorCode.GENDER_NOT_MATCH);
+    }
+
+    private boolean isGenderMatch(TournamentGenderLimitEnum genderLimit, UserProfile userProfile) {
+        if (genderLimit == null || genderLimit == TournamentGenderLimitEnum.ALL) {
+            return true;
         }
         GenderEnum userGender = userProfile.getGender();
         if (userGender == null) {
-            return;
+            return true;
         }
         if (genderLimit == TournamentGenderLimitEnum.MALE) {
-            Assert.isTrue(userGender == GenderEnum.MALE, BizErrorCode.GENDER_NOT_MATCH);
-        } else if (genderLimit == TournamentGenderLimitEnum.FEMALE) {
-            Assert.isTrue(userGender == GenderEnum.FEMALE, BizErrorCode.GENDER_NOT_MATCH);
+            return userGender == GenderEnum.MALE;
         }
+        return userGender == GenderEnum.FEMALE;
     }
 }

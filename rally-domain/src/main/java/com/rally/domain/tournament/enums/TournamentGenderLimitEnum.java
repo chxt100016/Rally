@@ -10,8 +10,8 @@ import lombok.Getter;
 @Getter
 public enum TournamentGenderLimitEnum {
     ALL("不限"),
-    MALE("男子"),
-    FEMALE("女子");
+    MALE("限男生"),
+    FEMALE("限女生");
 
     public final String label;
 }

@@ -107,7 +107,8 @@ public class TournamentDetailAppService {
             detail.setRestrictions(tournamentPolicy.collectPhoneRestrictions(userProfile));
             return;
         }
-        List<TournamentJoinRestrictionEnum> restrictions = tournamentPolicy.collectJoinRestrictions(detail.getTournament().getNtrpLevel(), userProfile);
+        List<TournamentJoinRestrictionEnum> restrictions = tournamentPolicy.collectJoinRestrictions(
+                detail.getTournament().getNtrpLevel(), detail.getTournament().getGenderLimit(), userProfile);
         detail.setRestrictions(restrictions);
     }
 
