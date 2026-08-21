@@ -39,6 +39,7 @@ public class TournamentPO {
     private Integer qualifierRejectLimit;
     private Integer mainDrawRejectLimit;
     private String matchRuleDescription;
+    private String extData;
     private String status;
     private Integer currentFilledSlots;
     private String currentRound;

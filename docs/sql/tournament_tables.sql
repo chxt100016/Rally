@@ -29,6 +29,7 @@ CREATE TABLE `rally_tournament` (
     `qualifier_reject_limit` INT NOT NULL DEFAULT 1 COMMENT '资格赛阶段拒绝次数上限',
     `main_draw_reject_limit` INT NOT NULL DEFAULT 1 COMMENT '正赛阶段拒绝次数上限',
     `match_rule_description` TEXT DEFAULT NULL COMMENT '比赛规则描述，纯文本，支持\n换行',
+    `ext_data` JSON DEFAULT NULL COMMENT '赛事扩展数据，当前存储主题颜色：buttonColor、backgroundColor',
     `status` VARCHAR(16) NOT NULL DEFAULT 'DRAFT' COMMENT '状态：DRAFT/ACTIVE/ABANDONED',
     `current_filled_slots` INT NOT NULL DEFAULT 0 COMMENT '当前已支付锁定的正赛席位数',
     `current_round` VARCHAR(16) DEFAULT NULL COMMENT '当前进行中轮次：QUALIFIER/ROUND_64/ROUND_32/ROUND_16/ROUND_8/ROUND_4/FINAL，由结果确认推进',

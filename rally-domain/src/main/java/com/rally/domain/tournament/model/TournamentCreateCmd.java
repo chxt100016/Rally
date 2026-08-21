@@ -3,6 +3,7 @@ package com.rally.domain.tournament.model;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.tournament.enums.TournamentGenderLimitEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -27,6 +28,10 @@ public class TournamentCreateCmd {
 
     /** 微信群拉群二维码图片key（对象存储） */
     private String wechatGroupQrCodeKey;
+
+    /** 赛事落地页主题；未配置时使用前端默认主题。 */
+    @Valid
+    private TournamentThemeConfig theme;
 
     /** 类型：单打/双打 */
     @NotNull(message = "请选择单打还是双打")

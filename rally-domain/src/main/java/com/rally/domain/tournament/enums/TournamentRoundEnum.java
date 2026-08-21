@@ -14,7 +14,7 @@ public enum TournamentRoundEnum {
     ROUND_32("32强", 32),
     ROUND_16("16强", 16),
     ROUND_8("8强", 8),
-    ROUND_4("4强", 4),
+    ROUND_4("半决赛", 4),
     FINAL("决赛", 2);
 
     public final String label;

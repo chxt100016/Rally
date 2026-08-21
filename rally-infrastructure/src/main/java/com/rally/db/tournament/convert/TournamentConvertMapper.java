@@ -1,11 +1,13 @@
 package com.rally.db.tournament.convert;
 
+import com.alibaba.fastjson2.JSON;
 import com.rally.db.tournament.entity.TournamentPO;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.tournament.enums.TournamentGenderLimitEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.enums.TournamentStatusEnum;
 import com.rally.domain.tournament.model.TournamentData;
+import com.rally.domain.tournament.model.TournamentThemeConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -26,6 +28,7 @@ public interface TournamentConvertMapper {
     @Mapping(target = "matchType", source = "matchType", qualifiedByName = "strToMatchType")
     @Mapping(target = "currentRound", source = "currentRound", qualifiedByName = "strToRound")
     @Mapping(target = "offlineFromRound", source = "offlineFromRound", qualifiedByName = "strToRound")
+    @Mapping(target = "theme", source = "extData", qualifiedByName = "jsonToTheme")
     TournamentData toTournamentData(TournamentPO po);
 
     List<TournamentData> toTournamentDataList(List<TournamentPO> poList);
@@ -36,6 +39,7 @@ public interface TournamentConvertMapper {
     @Mapping(target = "matchType", source = "matchType", qualifiedByName = "matchTypeToStr")
     @Mapping(target = "currentRound", source = "currentRound", qualifiedByName = "roundToStr")
     @Mapping(target = "offlineFromRound", source = "offlineFromRound", qualifiedByName = "roundToStr")
+    @Mapping(target = "extData", source = "theme", qualifiedByName = "themeToJson")
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     TournamentPO toTournamentPO(TournamentData data);
@@ -78,5 +82,15 @@ public interface TournamentConvertMapper {
     @Named("statusToStr")
     static String statusToStr(TournamentStatusEnum value) {
         return value == null ? null : value.name();
+    }
+
+    @Named("jsonToTheme")
+    static TournamentThemeConfig jsonToTheme(String value) {
+        return value == null || value.isBlank() ? null : JSON.parseObject(value, TournamentThemeConfig.class);
+    }
+
+    @Named("themeToJson")
+    static String themeToJson(TournamentThemeConfig value) {
+        return value == null ? null : JSON.toJSONString(value);
     }
 }

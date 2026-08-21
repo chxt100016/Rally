@@ -112,8 +112,15 @@ public class HomeAppService {
         poster.setTitle("");
         poster.setSubtitle("");
         poster.setWechatUrl("/pages/tournament-detail/tournament-detail?id=2079439290926018562");
-        data.setPosters(List.of(poster));
 
+        PosterCardDisplayData.PosterCardItem newPoster = new PosterCardDisplayData.PosterCardItem();
+        newPoster.setType(PosterCardDisplayData.PosterType.NAVIGATE);
+        newPoster.setImageUrl(QiniuConfiguration.buildSignedUrl("rally-tournament/2090434017251020802.jpg"));
+        newPoster.setTitle("线上赛#2");
+        newPoster.setSubtitle("3.0 女子组 · 重在上场");
+        newPoster.setWechatUrl("/pages/tournament-detail/tournament-detail?id=2090434017251020802");
+
+        data.setPosters(List.of(poster, newPoster));
         item.setData(data);
         return item;
     }

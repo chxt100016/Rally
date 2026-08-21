@@ -20,6 +20,8 @@ public class TournamentDTO {
     /** 规则海报签名访问地址；未配置时为 null。 */
     private String rulePosterUrl;
     private String wechatGroupQrCodeUrl;
+    /** 赛事落地页主题；未配置时为 null。 */
+    private TournamentThemeConfig theme;
     private MatchTypeEnum matchType;
     private String matchTypeShow;
     private String cityName;

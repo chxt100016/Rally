@@ -16,6 +16,8 @@ public class TournamentAdminItemDTO {
     private String tournamentName;
     private String posterUrl;
     private String wechatGroupQrCodeUrl;
+    /** 赛事落地页主题，用于后台编辑回显。 */
+    private TournamentThemeConfig theme;
     private String cityCode;
     private String cityName;
     private String ntrpLevel;
