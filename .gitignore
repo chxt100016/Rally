@@ -42,3 +42,5 @@ start/docker/**
 /docs/plan
 
 cert/
+
+skills-lock.json
