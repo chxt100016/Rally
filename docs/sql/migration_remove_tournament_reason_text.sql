@@ -3,3 +3,4 @@ ALTER TABLE `rally_tournament_match`
     DROP COLUMN `reject_reason_text`,
     DROP COLUMN `last_rebook_reason_text`;
 
+
