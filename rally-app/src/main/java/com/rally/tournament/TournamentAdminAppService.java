@@ -47,7 +47,7 @@ public class TournamentAdminAppService {
     }
 
     /**
-     * 编辑草稿
+     * 编辑赛事配置
      */
     @Transactional
     public void update(TournamentUpdateCmd cmd) {

@@ -26,7 +26,7 @@ public interface TournamentDomainConvertMapper {
     TournamentData toTournamentData(TournamentCreateCmd cmd);
 
     /**
-     * 编辑草稿：覆盖除 bizId/status/currentFilledSlots 外的全部配置字段
+     * 编辑赛事：仅覆盖创建命令中定义的配置字段，保留状态与运营进度字段
      */
     void updateTournamentData(@org.mapstruct.MappingTarget TournamentData data, TournamentCreateCmd cmd);
 

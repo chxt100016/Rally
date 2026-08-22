@@ -22,15 +22,6 @@ public class Tournament {
         return this.data.getBizId();
     }
 
-    /** 仅 DRAFT 可编辑 */
-    public boolean canEdit() {
-        return this.data.getStatus() == TournamentStatusEnum.DRAFT;
-    }
-
-    public void assertCanEdit() {
-        Assert.isTrue(canEdit(), BizErrorCode.TOURNAMENT_STATUS_ILLEGAL);
-    }
-
     /** 仅 DRAFT 可激活 */
     public void assertCanActivate() {
         Assert.isTrue(this.data.getStatus() == TournamentStatusEnum.DRAFT, BizErrorCode.TOURNAMENT_STATUS_ILLEGAL);

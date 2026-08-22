@@ -40,11 +40,10 @@ public class TournamentAdminService {
     }
 
     /**
-     * 编辑草稿：仅 DRAFT 可改，校验后覆盖配置
+     * 编辑赛事：校验后覆盖配置，不改变赛事状态与运营进度
      */
     public void update(TournamentUpdateCmd cmd) {
         Tournament tournament = get(cmd.getTournamentId());
-        tournament.assertCanEdit();
         tournamentPolicy.assertParam(cmd);
         TournamentDomainConvertMapper.INSTANCE.updateTournamentData(tournament.getData(), cmd);
         tournamentRepository.save(tournament.getData());

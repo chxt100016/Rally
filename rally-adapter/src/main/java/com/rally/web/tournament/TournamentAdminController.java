@@ -6,6 +6,7 @@ import com.rally.domain.tournament.model.*;
 import com.rally.tournament.TournamentAdminAppService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -27,7 +28,7 @@ public class TournamentAdminController {
     }
 
     /**
-     * 编辑草稿
+     * 编辑赛事配置
      */
     @PostMapping("/update")
     public Result<Void> update(@Valid @RequestBody TournamentUpdateCmd cmd) {
@@ -60,7 +61,7 @@ public class TournamentAdminController {
     }
 
     /**
-     * 手动执行赛事匹配；不传参数时扫描全部到时赛事，传 manualGroups 时必须同时指定 tournamentId。
+     * 手动执行赛事匹配；不传参数时扫描全部到时赛事，传 tournamentId 时只处理指定赛事。
      */
     @PostMapping("/match/run")
     public Result<Void> runTournamentMatch(@RequestBody(required = false) TournamentMatchRunCmd cmd) {
@@ -68,6 +69,8 @@ public class TournamentAdminController {
             tournamentAdminAppService.runTournamentMatch(cmd.getTournamentId(), cmd.getManualGroups(), cmd.getExcludedEntryNos());
         } else if (cmd != null && cmd.getExcludedEntryNos() != null && !cmd.getExcludedEntryNos().isEmpty()) {
             tournamentAdminAppService.runTournamentMatchWithExcludedEntries(cmd.getTournamentId(), cmd.getExcludedEntryNos());
+        } else if (cmd != null && StringUtils.isNotBlank(cmd.getTournamentId())) {
+            tournamentAdminAppService.runTournamentMatchWithExcludedEntries(cmd.getTournamentId(), null);
         } else {
             tournamentAdminAppService.runTournamentMatch();
         }
