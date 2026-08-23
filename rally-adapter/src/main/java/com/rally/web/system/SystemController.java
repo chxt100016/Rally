@@ -4,7 +4,12 @@ import com.rally.config.OptionalAuth;
 import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
+import com.rally.domain.system.model.HomeConfigDTO;
+import com.rally.domain.system.model.HomeConfigUpdateCmd;
 import com.rally.domain.tour.model.Result;
+import com.rally.system.HomeConfigAdminAppService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +28,10 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping({"/system", "/wechat/system"})
+@RequiredArgsConstructor
 public class SystemController {
+
+    private final HomeConfigAdminAppService homeConfigAdminAppService;
 
     /**
      * 根据 key 查询配置值
@@ -77,6 +85,18 @@ public class SystemController {
             }
         }
         return Result.ok(result);
+    }
+
+    /** 获取运营后台可编辑的首页配置。 */
+    @GetMapping("/admin/home/config")
+    public Result<HomeConfigDTO> getHomeConfig() {
+        return Result.ok(homeConfigAdminAppService.get());
+    }
+
+    /** 更新首页配置并立即刷新当前实例的配置缓存。 */
+    @PostMapping("/admin/home/config/update")
+    public Result<HomeConfigDTO> updateHomeConfig(@Valid @RequestBody HomeConfigUpdateCmd cmd) {
+        return Result.ok(homeConfigAdminAppService.update(cmd));
     }
 
 

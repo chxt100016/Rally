@@ -103,31 +103,10 @@ public class HomeAppService {
         HomeDisplayItemDTO item = new HomeDisplayItemDTO();
         item.setDisplayType(DisplayType.POSTER_CARD);
         PosterCardDisplayData data = new PosterCardDisplayData();
-        data.setTitle("杭州线上赛");
-        data.setSubtitle("火热报名中");
-
-        PosterCardDisplayData.PosterCardItem poster = new PosterCardDisplayData.PosterCardItem();
-        poster.setType(PosterCardDisplayData.PosterType.NAVIGATE);
-        poster.setImageUrl(QiniuConfiguration.buildSignedUrl("rally-tournament/2079439290926018562.jpg"));
-        poster.setTitle("");
-        poster.setSubtitle("");
-        poster.setWechatUrl("/pages/tournament-detail/tournament-detail?id=2079439290926018562");
-
-        PosterCardDisplayData.PosterCardItem newPoster = new PosterCardDisplayData.PosterCardItem();
-        newPoster.setType(PosterCardDisplayData.PosterType.NAVIGATE);
-        newPoster.setImageUrl(QiniuConfiguration.buildSignedUrl("rally-tournament/2090434017251020802.jpg"));
-        newPoster.setTitle("线上赛#2");
-        newPoster.setSubtitle("3.0 女子组 · 重在上场");
-        newPoster.setWechatUrl("/pages/tournament-detail/tournament-detail?id=2090434017251020802");
-
-        PosterCardDisplayData.PosterCardItem newPoster2 = new PosterCardDisplayData.PosterCardItem();
-        newPoster2.setType(PosterCardDisplayData.PosterType.NAVIGATE);
-        newPoster2.setImageUrl(QiniuConfiguration.buildSignedUrl("rally-tournament/2090697501699190786.jpg"));
-        newPoster2.setTitle("线上赛#3");
-        newPoster2.setSubtitle("3.5 乐约拉力 · 找个势均力敌的对手");
-        newPoster2.setWechatUrl("/pages/tournament-detail/tournament-detail?id=2090697501699190786");
-
-        data.setPosters(List.of(poster, newPoster, newPoster2));
+        JSONObject config = parseObjectConfig(SystemConfigKey.HOME_TOURNAMENT_POSTER_CONFIG);
+        data.setTitle(config.getString("title"));
+        data.setSubtitle(config.getString("subtitle"));
+        data.setPosters(buildPosterItems(config.getJSONArray("posters"), null));
         item.setData(data);
         return item;
     }
@@ -270,30 +249,54 @@ public class HomeAppService {
         data.setTitle("附近球场");
         data.setSubtitle("寻找「" + CityConfig.getCityName(cityCode) + "」的球场");
 
+        JSONArray config = parseArrayConfig(SystemConfigKey.HOME_POSTER_CONFIG);
+        data.setPosters(buildPosterItems(config, cityCode));
+
+        item.setData(data);
+        return item;
+    }
+
+    private List<PosterCardDisplayData.PosterCardItem> buildPosterItems(JSONArray config, String cityCode) {
         List<PosterCardDisplayData.PosterCardItem> posters = new ArrayList<>();
-        String configJson = SystemConfig.getString(SystemConfigKey.HOME_POSTER_CONFIG.getKey());
+        if (config == null) {
+            return posters;
+        }
         try {
-            JSONArray jsonArray = JSON.parseArray(configJson);
-            for (int i = 0; i < jsonArray.size(); i++) {
-                JSONObject posterJson = jsonArray.getJSONObject(i);
+            for (int i = 0; i < config.size(); i++) {
+                JSONObject posterJson = config.getJSONObject(i);
                 PosterCardDisplayData.PosterCardItem poster = new PosterCardDisplayData.PosterCardItem();
                 poster.setType(PosterCardDisplayData.PosterType.valueOf(posterJson.getString("type")));
                 String imageKey = posterJson.getString("image");
                 poster.setImageUrl(QiniuConfiguration.buildSignedUrl(imageKey));
                 poster.setTitle(posterJson.getString("title"));
                 poster.setSubtitle(posterJson.getString("subtitle"));
-                poster.setWechatUrl(appendCityCode(posterJson.getString("wechatUrl"), cityCode));
-                poster.setAppUrl(appendCityCode(posterJson.getString("appUrl"), cityCode));
-                poster.setWebUrl(appendCityCode(posterJson.getString("webUrl"), cityCode));
+                poster.setWechatUrl(cityCode == null ? posterJson.getString("wechatUrl") : appendCityCode(posterJson.getString("wechatUrl"), cityCode));
+                poster.setAppUrl(cityCode == null ? posterJson.getString("appUrl") : appendCityCode(posterJson.getString("appUrl"), cityCode));
+                poster.setWebUrl(cityCode == null ? posterJson.getString("webUrl") : appendCityCode(posterJson.getString("webUrl"), cityCode));
                 posters.add(poster);
             }
         } catch (Exception e) {
             log.error("解析首页海报配置失败", e);
         }
-        data.setPosters(posters);
+        return posters;
+    }
 
-        item.setData(data);
-        return item;
+    private JSONObject parseObjectConfig(SystemConfigKey key) {
+        try {
+            return JSON.parseObject(SystemConfig.getString(key.getKey()));
+        } catch (Exception e) {
+            log.error("解析首页配置失败 key={}", key.getKey(), e);
+            return JSON.parseObject(key.getDefaultValue());
+        }
+    }
+
+    private JSONArray parseArrayConfig(SystemConfigKey key) {
+        try {
+            return JSON.parseArray(SystemConfig.getString(key.getKey()));
+        } catch (Exception e) {
+            log.error("解析首页配置失败 key={}", key.getKey(), e);
+            return JSON.parseArray(key.getDefaultValue());
+        }
     }
 
     private String appendCityCode(String url, String cityCode) {

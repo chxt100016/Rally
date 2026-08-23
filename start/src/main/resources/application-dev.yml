@@ -17,6 +17,10 @@ qiniu:
   bucket: rallyo
   domain: https://static.fantasticmonkey.top
 
+# 与 rally-admin/config/application-dev.ts 的 rallyApi.adminKey 保持一致。
+admin:
+  api-key: ""
+
 wechat:
   mini:
     # 联调期订阅消息跳转开发版；用体验版测试改为 trial

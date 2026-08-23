@@ -24,4 +24,12 @@ public class SysConfigRepository {
     public boolean updateById(SysConfigPO config) {
         return sysConfigService.updateById(config);
     }
+
+    public boolean save(SysConfigPO config) {
+        return sysConfigService.save(config);
+    }
+
+    public boolean updateValueIfVersion(Long id, String configValue, String description, int expectedVersion) {
+        return sysConfigService.updateValueIfVersion(id, configValue, description, expectedVersion);
+    }
 }

@@ -35,7 +35,7 @@ public class SystemConfig {
      * @return 配置值、枚举默认值或 null
      */
     public static String getString(String key) {
-        String val = systemConfigMap.get(key);
+        String val = getCachedValue(key);
         if (val != null) {
             return val;
         }
@@ -50,7 +50,7 @@ public class SystemConfig {
      * @return 配置值、枚举默认值或 0
      */
     public static int getInt(String key) {
-        String val = systemConfigMap.get(key);
+        String val = getCachedValue(key);
         if (val != null) {
             try {
                 return Integer.parseInt(val);
@@ -76,7 +76,7 @@ public class SystemConfig {
      * @return 配置值、枚举默认值或 0L
      */
     public static long getLong(String key) {
-        String val = systemConfigMap.get(key);
+        String val = getCachedValue(key);
         if (val != null) {
             try {
                 return Long.parseLong(val);
@@ -102,7 +102,7 @@ public class SystemConfig {
      * @return 配置值、枚举默认值或 0f
      */
     public static float getFloat(String key) {
-        String val = systemConfigMap.get(key);
+        String val = getCachedValue(key);
         if (val != null) {
             try {
                 return Float.parseFloat(val);
@@ -128,7 +128,7 @@ public class SystemConfig {
      * @return 配置值、枚举默认值或 BigDecimal.ZERO
      */
     public static BigDecimal getBigDecimal(String key) {
-        String val = systemConfigMap.get(key);
+        String val = getCachedValue(key);
         if (val != null) {
             return new BigDecimal(val);
         }
@@ -137,5 +137,10 @@ public class SystemConfig {
             return new BigDecimal(configKey.getDefaultValue());
         }
         return BigDecimal.ZERO;
+    }
+
+    private static String getCachedValue(String key) {
+        String value = systemConfigMap.get(key);
+        return value != null ? value : systemConfigMap.get("global|" + key);
     }
 }

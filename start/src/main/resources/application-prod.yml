@@ -17,6 +17,10 @@ qiniu:
   bucket: rallyo
   domain: https://static.fantasticmonkey.top
 
+# 与 rally-admin/config/application-prod.ts 的 rallyApi.adminKey 保持一致。
+admin:
+  api-key: ""
+
 job:
   tour:
     enabled: true

@@ -173,6 +173,8 @@ public enum SystemConfigKey {
 
     // ==================== 首页海报 ====================
 
+    /** 首页自办赛事海报区域配置 JSON，格式：{title,subtitle,posters:[{type,image,title,subtitle,wechatUrl,appUrl,webUrl}]} */
+    HOME_TOURNAMENT_POSTER_CONFIG("home.tournament.poster.config", "首页自办赛事海报配置 JSON", "{\"title\":\"杭州线上赛\",\"subtitle\":\"火热报名中\",\"posters\":[{\"type\":\"NAVIGATE\",\"image\":\"rally-tournament/2079439290926018562.jpg\",\"title\":\"\",\"subtitle\":\"\",\"wechatUrl\":\"/pages/tournament-detail/tournament-detail?id=2079439290926018562\"},{\"type\":\"NAVIGATE\",\"image\":\"rally-tournament/2090434017251020802.jpg\",\"title\":\"线上赛#2\",\"subtitle\":\"3.0 女子组 · 重在上场\",\"wechatUrl\":\"/pages/tournament-detail/tournament-detail?id=2090434017251020802\"},{\"type\":\"NAVIGATE\",\"image\":\"rally-tournament/2090697501699190786.jpg\",\"title\":\"线上赛#3\",\"subtitle\":\"3.5 乐约拉力 · 找个势均力敌的对手\",\"wechatUrl\":\"/pages/tournament-detail/tournament-detail?id=2090697501699190786\"}]}"),
     /** 首页海报配置 JSON，格式：[{type,image,title,subtitle,wechatUrl,appUrl,webUrl}] */
     HOME_POSTER_CONFIG("home.poster.config", "首页海报配置 JSON", "[{\"type\":\"NAVIGATE\",\"image\":\"default/court-map.jpg\",\"title\":\"球场地图\",\"subtitle\":\"查看本市所有球场\",\"wechatUrl\":\"/pages/court-map/court-map\"},{\"type\":\"NAVIGATE\",\"image\":\"default/court-search.jpg\",\"title\":\"找球场\",\"subtitle\":\"搜索你想去的球场\",\"wechatUrl\":\"/pages/court-search/court-search\"}]")
 

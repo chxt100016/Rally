@@ -24,12 +24,21 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Resource
     private ClientChannelInterceptor clientChannelInterceptor;
 
+    @Resource
+    private AdminApiKeyInterceptor adminApiKeyInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(clientChannelInterceptor)
                 .addPathPatterns("/**");
         registry.addInterceptor(userBehaviorInterceptor)
                 .addPathPatterns("/**");
+        registry.addInterceptor(adminApiKeyInterceptor)
+                .addPathPatterns(
+                        "/tournament/admin/**",
+                        "/system/admin/**",
+                        "/wechat/system/admin/**"
+                );
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
@@ -40,6 +49,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/test/**",
                         "/tour/collect/**",
                         "/tournament/admin/**",
+                        "/system/admin/**",
+                        "/wechat/system/admin/**",
 
                         "/tour/tournament/tournaments",
                         "/tour/match/upcoming",

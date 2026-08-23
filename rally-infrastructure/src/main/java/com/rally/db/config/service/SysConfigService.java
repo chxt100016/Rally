@@ -20,8 +20,18 @@ public class SysConfigService extends ServiceImpl<SysConfigMapper, SysConfigPO> 
         return this.lambdaQuery()
                 .eq(SysConfigPO::getConfigKey, configKey)
                 .eq(SysConfigPO::getScope, scope)
-                .eq(SysConfigPO::getEnabled, true)
                 .last("LIMIT 1")
                 .one();
+    }
+
+    public boolean updateValueIfVersion(Long id, String configValue, String description, int expectedVersion) {
+        return this.lambdaUpdate()
+                .eq(SysConfigPO::getId, id)
+                .eq(SysConfigPO::getVersion, expectedVersion)
+                .set(SysConfigPO::getConfigValue, configValue)
+                .set(SysConfigPO::getDescription, description)
+                .set(SysConfigPO::getEnabled, true)
+                .set(SysConfigPO::getVersion, expectedVersion + 1)
+                .update();
     }
 }
