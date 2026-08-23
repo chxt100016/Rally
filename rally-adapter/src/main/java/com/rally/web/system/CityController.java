@@ -1,5 +1,6 @@
 package com.rally.web.system;
 
+import com.rally.config.OptionalAuth;
 import com.rally.domain.tour.model.Result;
 import com.rally.system.CityAppService;
 import com.rally.system.model.CityDTO;
@@ -32,6 +33,7 @@ public class CityController {
      * 查询已开通城市
      */
     @GetMapping("/available")
+    @OptionalAuth
     public Result<List<CityDTO>> available() {
         return Result.ok(cityAppService.listAvailable());
     }
