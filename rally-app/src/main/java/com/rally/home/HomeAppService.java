@@ -58,31 +58,49 @@ public class HomeAppService {
     public HomePageDTO getHomePage(String cityCode) {
         HomePageDTO homePageDTO = new HomePageDTO();
         List<HomeDisplayItemDTO> displayItems = new ArrayList<>();
-
-        displayItems.add(buildMeetupDisplay());
-
-        displayItems.add(buildTournamentPosterDisplay());
-
-        HomeDisplayItemDTO matchDisplay = buildMatchDisplay();
-        if (matchDisplay != null) {
-            displayItems.add(matchDisplay);
-        }
-
         String effectiveCityCode = (cityCode == null || cityCode.trim().isEmpty()) ? DEFAULT_CITY_CODE : cityCode;
-        displayItems.add(buildPosterDisplay(effectiveCityCode));
-
-
-        displayItems.add(buildNewsDisplay());
+        JSONArray sections = parseArrayConfig(SystemConfigKey.HOME_LAYOUT_CONFIG);
+        for (int i = 0; i < sections.size(); i++) {
+            JSONObject section = sections.getJSONObject(i);
+            if (section == null || Boolean.FALSE.equals(section.getBoolean("enabled"))) {
+                continue;
+            }
+            try {
+                HomeDisplayItemDTO item = buildDisplayItem(section, effectiveCityCode);
+                if (item != null) {
+                    displayItems.add(item);
+                }
+            } catch (Exception e) {
+                log.error("构建首页区域失败 id={} type={}", section.getString("id"), section.getString("type"), e);
+            }
+        }
 
         homePageDTO.setDisplayItems(displayItems);
         return homePageDTO;
     }
 
-    private HomeDisplayItemDTO buildMeetupDisplay() {
+    private HomeDisplayItemDTO buildDisplayItem(JSONObject section, String cityCode) {
+        String type = section.getString("type");
+        if (type == null) {
+            return null;
+        }
+        return switch (type) {
+            case "MEETUP" -> buildMeetupDisplay(section);
+            case "TOURNAMENT_POSTER" -> buildTournamentPosterDisplay(section);
+            case "TOUR_MATCH" -> buildMatchDisplay(section);
+            case "COURT_POSTER" -> buildPosterDisplay(cityCode, section);
+            case "POSTER" -> buildCustomPosterDisplay(section, cityCode);
+            case "NEWS" -> buildNewsDisplay(section);
+            default -> null;
+        };
+    }
+
+    private HomeDisplayItemDTO buildMeetupDisplay(JSONObject section) {
         HomeDisplayItemDTO item = new HomeDisplayItemDTO();
         item.setDisplayType(DisplayType.MEETUP);
         MeetupDisplayData data = new MeetupDisplayData();
-        data.setTitle("我的约球");
+        data.setTitle(configuredText(section, "title", "我的约球"));
+        data.setSubtitle(section.getString("subtitle"));
         data.setMeetups(queryInProgressMeetups());
         item.setData(data);
         return item;
@@ -99,19 +117,19 @@ public class HomeAppService {
         return page.getList();
     }
 
-    private HomeDisplayItemDTO buildTournamentPosterDisplay() {
+    private HomeDisplayItemDTO buildTournamentPosterDisplay(JSONObject section) {
         HomeDisplayItemDTO item = new HomeDisplayItemDTO();
         item.setDisplayType(DisplayType.POSTER_CARD);
         PosterCardDisplayData data = new PosterCardDisplayData();
         JSONObject config = parseObjectConfig(SystemConfigKey.HOME_TOURNAMENT_POSTER_CONFIG);
-        data.setTitle(config.getString("title"));
-        data.setSubtitle(config.getString("subtitle"));
+        data.setTitle(configuredText(section, "title", config.getString("title")));
+        data.setSubtitle(configuredText(section, "subtitle", config.getString("subtitle")));
         data.setPosters(buildPosterItems(config.getJSONArray("posters"), null));
         item.setData(data);
         return item;
     }
 
-    private HomeDisplayItemDTO buildMatchDisplay() {
+    private HomeDisplayItemDTO buildMatchDisplay(JSONObject section) {
         List<TournamentGroupData> tournamentGroups = tourTournamentQueryDomainService.findValidCurrentTournamentGroups(LocalDate.now());
         if (CollectionUtils.isEmpty(tournamentGroups)) {
             return null;
@@ -134,8 +152,8 @@ public class HomeAppService {
         HomeDisplayItemDTO item = new HomeDisplayItemDTO();
         item.setDisplayType(DisplayType.TOUR_MATCH);
         MatchDisplayData data = new MatchDisplayData();
-        data.setTitle("巡回赛");
-        data.setSubtitle(buildTourSubtitle(displayedTournamentGroups));
+        data.setTitle(configuredText(section, "title", "巡回赛"));
+        data.setSubtitle(configuredText(section, "subtitle", buildTourSubtitle(displayedTournamentGroups)));
         data.setTournaments(tournamentDisplays);
         item.setData(data);
         return item;
@@ -242,16 +260,28 @@ public class HomeAppService {
         };
     }
 
-    private HomeDisplayItemDTO buildPosterDisplay(String cityCode) {
+    private HomeDisplayItemDTO buildPosterDisplay(String cityCode, JSONObject section) {
         HomeDisplayItemDTO item = new HomeDisplayItemDTO();
         item.setDisplayType(DisplayType.POSTER_CARD);
         PosterCardDisplayData data = new PosterCardDisplayData();
-        data.setTitle("附近球场");
-        data.setSubtitle("寻找「" + CityConfig.getCityName(cityCode) + "」的球场");
+        data.setTitle(configuredText(section, "title", "附近球场"));
+        data.setSubtitle(configuredText(section, "subtitle", "寻找「" + CityConfig.getCityName(cityCode) + "」的球场"));
 
         JSONArray config = parseArrayConfig(SystemConfigKey.HOME_POSTER_CONFIG);
         data.setPosters(buildPosterItems(config, cityCode));
 
+        item.setData(data);
+        return item;
+    }
+
+    private HomeDisplayItemDTO buildCustomPosterDisplay(JSONObject section, String cityCode) {
+        HomeDisplayItemDTO item = new HomeDisplayItemDTO();
+        item.setDisplayType(DisplayType.POSTER_CARD);
+        PosterCardDisplayData data = new PosterCardDisplayData();
+        data.setTitle(section.getString("title"));
+        data.setSubtitle(section.getString("subtitle"));
+        String posterCityCode = Boolean.TRUE.equals(section.getBoolean("cityAware")) ? cityCode : null;
+        data.setPosters(buildPosterItems(section.getJSONArray("posters"), posterCityCode));
         item.setData(data);
         return item;
     }
@@ -307,14 +337,19 @@ public class HomeAppService {
         return url + "?cityCode=" + cityCode + "&cityName=" + cityName + "&mode=view";
     }
 
-    private HomeDisplayItemDTO buildNewsDisplay() {
+    private HomeDisplayItemDTO buildNewsDisplay(JSONObject section) {
         HomeDisplayItemDTO item = new HomeDisplayItemDTO();
         item.setDisplayType(DisplayType.NEWS_TIMELINE);
         NewsTimelineDisplayData data = new NewsTimelineDisplayData();
-        data.setTitle("资讯");
-        data.setSubtitle("最新动态");
+        data.setTitle(configuredText(section, "title", "资讯"));
+        data.setSubtitle(configuredText(section, "subtitle", "最新动态"));
         data.setNewsItems(new ArrayList<>());
         item.setData(data);
         return item;
+    }
+
+    private String configuredText(JSONObject section, String key, String fallback) {
+        String value = section.getString(key);
+        return value == null || value.isBlank() ? fallback : value;
     }
 }

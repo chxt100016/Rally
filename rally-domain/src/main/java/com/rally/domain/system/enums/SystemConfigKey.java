@@ -173,6 +173,8 @@ public enum SystemConfigKey {
 
     // ==================== 首页海报 ====================
 
+    /** 首页区域布局 JSON；按数组顺序输出，支持动态区块和自定义海报区。 */
+    HOME_LAYOUT_CONFIG("home.layout.config", "首页区域、启用状态与顺序配置 JSON", "[{\"id\":\"meetup\",\"type\":\"MEETUP\",\"enabled\":true,\"title\":\"我的约球\"},{\"id\":\"tournament-poster\",\"type\":\"TOURNAMENT_POSTER\",\"enabled\":true},{\"id\":\"tour-match\",\"type\":\"TOUR_MATCH\",\"enabled\":true,\"title\":\"巡回赛\"},{\"id\":\"court-poster\",\"type\":\"COURT_POSTER\",\"enabled\":true},{\"id\":\"news\",\"type\":\"NEWS\",\"enabled\":true,\"title\":\"资讯\",\"subtitle\":\"最新动态\"}]"),
     /** 首页自办赛事海报区域配置 JSON，格式：{title,subtitle,posters:[{type,image,title,subtitle,wechatUrl,appUrl,webUrl}]} */
     HOME_TOURNAMENT_POSTER_CONFIG("home.tournament.poster.config", "首页自办赛事海报配置 JSON", "{\"title\":\"杭州线上赛\",\"subtitle\":\"火热报名中\",\"posters\":[{\"type\":\"NAVIGATE\",\"image\":\"rally-tournament/2079439290926018562.jpg\",\"title\":\"\",\"subtitle\":\"\",\"wechatUrl\":\"/pages/tournament-detail/tournament-detail?id=2079439290926018562\"},{\"type\":\"NAVIGATE\",\"image\":\"rally-tournament/2090434017251020802.jpg\",\"title\":\"线上赛#2\",\"subtitle\":\"3.0 女子组 · 重在上场\",\"wechatUrl\":\"/pages/tournament-detail/tournament-detail?id=2090434017251020802\"},{\"type\":\"NAVIGATE\",\"image\":\"rally-tournament/2090697501699190786.jpg\",\"title\":\"线上赛#3\",\"subtitle\":\"3.5 乐约拉力 · 找个势均力敌的对手\",\"wechatUrl\":\"/pages/tournament-detail/tournament-detail?id=2090697501699190786\"}]}"),
     /** 首页海报配置 JSON，格式：[{type,image,title,subtitle,wechatUrl,appUrl,webUrl}] */

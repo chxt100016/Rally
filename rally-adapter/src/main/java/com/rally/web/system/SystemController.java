@@ -99,5 +99,17 @@ public class SystemController {
         return Result.ok(homeConfigAdminAppService.update(cmd));
     }
 
+    /** 获取运营后台可编辑的全部系统配置。 */
+    @GetMapping("/admin/config")
+    public Result<HomeConfigDTO> getAllConfig() {
+        return Result.ok(homeConfigAdminAppService.getAll());
+    }
+
+    /** 更新任意已登记的系统配置并立即刷新当前实例缓存。 */
+    @PostMapping("/admin/config/update")
+    public Result<HomeConfigDTO> updateConfig(@Valid @RequestBody HomeConfigUpdateCmd cmd) {
+        return Result.ok(homeConfigAdminAppService.updateAny(cmd));
+    }
+
 
 }
