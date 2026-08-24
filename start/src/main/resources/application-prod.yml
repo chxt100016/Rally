@@ -19,7 +19,7 @@ qiniu:
 
 # 与 rally-admin/config/application-prod.ts 的 rallyApi.adminKey 保持一致。
 admin:
-  api-key: ""
+  api-key: "123456Aa."
 
 job:
   tour:
