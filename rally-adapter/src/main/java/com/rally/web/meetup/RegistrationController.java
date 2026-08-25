@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 对外接口仍使用 waitlist 路径
  */
 @RestController
-@RequestMapping({"/meetup/registration", "/wechat/meetup/registration"})
+@RequestMapping("/meetup/registration")
 public class RegistrationController {
 
     @Resource

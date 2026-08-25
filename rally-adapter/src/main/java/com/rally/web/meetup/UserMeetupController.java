@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
  * 用户约球列表接口（待处理/进行中/我发布/已完成）
  */
 @RestController
-@RequestMapping({"/meetup/user", "/wechat/meetup/user"})
+@RequestMapping("/meetup/user")
 public class UserMeetupController {
 
     @Resource

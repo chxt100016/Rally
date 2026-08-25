@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping({"/user/payment-code", "/wechat/user/payment-code"})
+@RequestMapping("/user/payment-code")
 public class PaymentCodeController {
 
     @Resource

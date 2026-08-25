@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 与登录渠道无关的认证后用户操作。
  */
 @RestController
-@RequestMapping({"/auth", "/wechat/auth"})
+@RequestMapping("/auth")
 public class AuthController {
 
     @Resource

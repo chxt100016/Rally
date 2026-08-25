@@ -36,8 +36,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(adminApiKeyInterceptor)
                 .addPathPatterns(
                         "/tournament/admin/**",
-                        "/system/admin/**",
-                        "/wechat/system/admin/**"
+                        "/system/admin/**"
                 );
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/**")
@@ -50,7 +49,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/tour/collect/**",
                         "/tournament/admin/**",
                         "/system/admin/**",
-                        "/wechat/system/admin/**",
 
                         "/tour/tournament/tournaments",
                         "/tour/match/upcoming",
@@ -58,14 +56,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/tour/player/players",
                         "/tour/player/tournament",
 
-                        "/wechat/tour/tournament/tournaments",
-                        "/wechat/tour/match/upcoming",
-                        "/wechat/tour/match/finished",
-                        "/wechat/tour/player/players",
-                        "/wechat/tour/player/tournament",
-
-                        "/meetup/list",
-                        "/wechat/meetup/list"
+                        "/meetup/list"
 
                 );
         registry.addInterceptor(logInterceptor)

@@ -18,7 +18,7 @@ import java.util.List;
  * 取拉起参数已内聚到各业务模块（如赛事报名 /tournament/entry/pay），不再提供独立 prepay 接口。
  */
 @RestController
-@RequestMapping({"/payment", "/wechat/payment"})
+@RequestMapping("/payment")
 public class PaymentController {
 
     @Resource

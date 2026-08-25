@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * 赛事报名（用户端）接口：报名/修改偏好/退出
  */
 @RestController
-@RequestMapping({"/tournament/entry", "/wechat/tournament/entry"})
+@RequestMapping("/tournament/entry")
 public class TournamentEntryController {
 
     @Resource

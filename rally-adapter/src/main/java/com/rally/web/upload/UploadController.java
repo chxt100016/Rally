@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @Slf4j
-@RequestMapping({"/upload", "/wechat/upload"})
+@RequestMapping("/upload")
 public class UploadController {
 
     @Resource

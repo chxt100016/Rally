@@ -27,7 +27,7 @@ import java.util.Map;
  * 前端传入 key，返回对应的配置值。
  */
 @RestController
-@RequestMapping({"/system", "/wechat/system"})
+@RequestMapping("/system")
 @RequiredArgsConstructor
 public class SystemController {
 

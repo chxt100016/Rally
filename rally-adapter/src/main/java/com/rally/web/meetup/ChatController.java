@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
  * 活动群聊Controller
  */
 @RestController
-@RequestMapping({"/meetup/chat", "/wechat/meetup/chat"})
+@RequestMapping("/meetup/chat")
 public class ChatController {
 
     @Resource

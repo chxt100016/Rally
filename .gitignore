@@ -38,6 +38,8 @@ start/docker/**
 **.ear
 **.class    
 
+.agents
+.claude
 
 /docs/plan
 

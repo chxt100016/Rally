@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping({"/recap/score", "/wechat/recap/score"})
+@RequestMapping("/recap/score")
 public class ScoreController {
 
     @Resource

@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping({"/court", "/wechat/court"})
+@RequestMapping("/court")
 public class CourtController {
 
     @Resource
