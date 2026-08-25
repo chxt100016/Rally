@@ -1,0 +1,21 @@
+CREATE TABLE `user_tennis_profile` (
+  `id`                BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`            VARCHAR(32)  NOT NULL COMMENT '雪花 ID（业务主键）',
+  `user_id`           VARCHAR(32)  NOT NULL COMMENT '关联 users.user_id',
+  `videos`            JSON         DEFAULT NULL COMMENT '打球视频列表 [{key,title}]，存储放宽最多 5，交互上限走配置 user.video.max_count 默认 3（裁定 D1）',
+  `ntrp_score`        DECIMAL(3,1) DEFAULT NULL COMMENT 'NTRP 自评 1.5~7.0 步长 0.5',
+  `utr_score`         DECIMAL(4,2) DEFAULT NULL COMMENT 'UTR 三方接入选填，MVP 预留不实现',
+  `ntrp_updated_at`   DATETIME     DEFAULT NULL COMMENT 'NTRP 最后修改时间，冷却期计算基准',
+  `status`            VARCHAR(16) NOT NULL DEFAULT 'tbc' COMMENT '档案状态（裁定 D2）：tbc 未填写 / normal 正常 / under_review 核查期',
+  `reputation_score`  int NOT NULL DEFAULT 0 COMMENT '信誉分',
+  `credibility_score` int NOT NULL DEFAULT 0  COMMENT '可信度',
+  `calibration_score` int NOT NULL DEFAULT 0 COMMENT '校准度',
+  `is_under_review`        TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '是否核查期，与 status=under_review 同步冗余，便于查询',
+  `review_remaining_matches` INT        DEFAULT NULL COMMENT '核查期剩余需完成场次，触发核查期时写入，每完成一场减 1，归零后解除',
+  `is_newbie`              TINYINT(1)   NOT NULL DEFAULT 1 COMMENT '新人角标，收到 >=3 次评价后置 0（score.newbie.min_reviews）',
+  `create_time`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  UNIQUE KEY `uk_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='球员网球档案表';

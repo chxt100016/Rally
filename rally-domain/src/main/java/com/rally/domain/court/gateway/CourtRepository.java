@@ -31,6 +31,18 @@ public interface CourtRepository {
     List<CourtData> fuzzySearchByName(String cityCode, String keyword);
 
     /**
+     * 按三方来源编号批量查询已收录的球场
+     */
+    List<CourtData> findBySourceIds(List<String> sourceIds);
+
+    /**
+     * 批量保存球场（按 bizId 判定新增还是更新）
+     *
+     * @return 实际写入成功的条数
+     */
+    int batchSave(List<CourtData> courts);
+
+    /**
      * 批量增加球场约球次数
      * @param courtIdCountMap 球场 bizId -> 增加次数
      */

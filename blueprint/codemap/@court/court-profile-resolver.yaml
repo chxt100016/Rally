@@ -1,0 +1,14 @@
+id: "@court.court-profile-resolver"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/court/service/CourtProfileResolverService.java
+    role: 主实现
+    symbols: [CourtProfileResolverService]
+    covers: [R1, R2, R3, R4, R5, R6, R7, R8, R9, R10]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtProfileResolveResult.java
+    role: 契约出参
+    symbols: [CourtProfileResolveResult]
+    covers: [R6, R7, R9]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtProfile.java
+    role: 展示资料值对象
+    symbols: [CourtProfile]
+    covers: [R10]

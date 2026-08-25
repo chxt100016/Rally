@@ -1,0 +1,30 @@
+id: court.court-collection.activity.fetch-amap-courts
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/FetchAmapCourtsActivity.java
+    role: 主实现
+    symbols: [FetchAmapCourtsActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/court/model/FetchedPois.java
+    role: 活动出参
+    symbols: [FetchedPois]
+    covers: [A4]
+  - path: rally-domain/src/main/java/com/rally/domain/court/gateway/CourtMapClient.java
+    role: 地图服务网关
+    symbols: [CourtMapClient]
+    covers: [A1]
+  - path: rally-infrastructure/src/main/java/com/rally/client/amap/AmapClient.java
+    role: 高德实现
+    symbols: [AmapClient]
+    covers: [A1, A3]
+  - path: rally-infrastructure/src/main/java/com/rally/client/amap/model/AmapPoiResponse.java
+    role: 高德响应体
+    symbols: [AmapPoiResponse]
+    covers: [A1]
+  - path: rally-infrastructure/src/main/java/com/rally/client/amap/convert/AmapPoiConvertMapper.java
+    role: 响应转领域模型
+    symbols: [AmapPoiConvertMapper]
+    covers: [A1]
+  - path: start/src/main/resources/application.yml
+    role: 高德凭据配置
+    symbols: []
+    covers: [A1]

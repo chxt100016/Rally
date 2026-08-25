@@ -19,6 +19,10 @@ deepseek:
     api-key: ${DEEPSEEK_API_KEY:dev}
     api-url: https://api.deepseek.com/chat/completions
 
+# 高德地图：球场数据抓取收录使用
+amap:
+    api-key: ${AMAP_API_KEY:}
+
 upload:
     tournament:
         compress-kb: 10

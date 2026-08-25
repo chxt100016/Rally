@@ -89,6 +89,13 @@
             <version>3.5.12</version>
         </dependency>
 
+        <!-- 拼音生成（球场名称拼音与首字母） -->
+        <dependency>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+            <version>2.5.1</version>
+        </dependency>
+
         <!-- Spring 事务注解 -->
         <dependency>
             <groupId>org.springframework</groupId>

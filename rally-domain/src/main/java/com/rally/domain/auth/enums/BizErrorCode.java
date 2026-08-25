@@ -93,6 +93,15 @@ public enum BizErrorCode {
 
     // ========== 球场域 44001-44999 ==========
     COURT_NOT_FOUND(44001, "球场不存在"),
+    COURT_CITY_NOT_FOUND(44002, "城市不存在"),
+    COURT_DISTRICT_NOT_FOUND(44003, "区域不存在"),
+    COURT_COLLECT_IN_PROGRESS(44004, "该城市正在抓取中，请稍后重试"),
+    COURT_COLLECT_FAILED(44005, "球场抓取失败"),
+    COURT_MAP_NOT_CONFIGURED(44006, "地图服务未配置"),
+    COURT_PINYIN_STALE(44007, "球场名称拼音与名称不一致"),
+    COURT_SOURCE_CONFLICT(44008, "球场来源与三方来源编号不匹配"),
+    COURT_BIZ_ID_IMMUTABLE(44009, "球场编号不可变更"),
+    COURT_LOCATION_INCOMPLETE(44010, "球场城市或区域信息不完整"),
 
     // ========== 赛后收集域 43001-43999 ==========
     RECAP_NOT_FOUND(43001, "赛后收集数据不存在"),

@@ -1,0 +1,18 @@
+id: "@system.location-catalog"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/system/service/LocationCatalogService.java
+    role: 主实现
+    symbols: [LocationCatalogService]
+    covers: [R1, R2, R3, R4, R5, R6]
+  - path: rally-domain/src/main/java/com/rally/domain/system/enums/LocationScopeEnum.java
+    role: 查询范围枚举
+    symbols: [LocationScopeEnum]
+    covers: [R1]
+  - path: rally-domain/src/main/java/com/rally/domain/system/model/LocationQuery.java
+    role: 契约入参
+    symbols: [LocationQuery]
+    covers: [R1]
+  - path: rally-domain/src/main/java/com/rally/domain/system/model/LocationResult.java
+    role: 契约出参
+    symbols: [LocationResult]
+    covers: [R2, R5]

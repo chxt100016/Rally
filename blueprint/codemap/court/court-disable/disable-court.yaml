@@ -1,0 +1,10 @@
+id: court.court-disable.activity.disable-court
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/DisableCourtActivity.java
+    role: 主实现
+    symbols: [DisableCourtActivity]
+    covers: [A1, A2, A3]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtDisableApiCmd.java
+    role: 接口入参
+    symbols: [CourtDisableApiCmd]
+    covers: [A1]

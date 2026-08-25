@@ -1,0 +1,325 @@
+{
+  "version": 5,
+  "blueprint_version": "1.0.0",
+  "services": {
+    "court.court-collection": {
+      "flow": {
+        "product_hash": "sha256:c6f389ad75e64fe9f28f0a7645f5175f914bc2696fe753c0207d0da0dec171b2",
+        "approved_at": "2026-08-25T11:17:56Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:200c56213e533deeb240a9a082b3331117ae4c134e04da4006544114f9baaafd",
+        "approved_at": "2026-08-25T11:24:13Z"
+      }
+    },
+    "court.court-create": {
+      "flow": {
+        "product_hash": "sha256:1f89f6efe9ee64d41c65ac9bcf1b9930ff57689db679f56b9fc72466243fe878",
+        "approved_at": "2026-08-25T11:17:56Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:fa0508a479c1dc2665aeab19aaa23080467731b99e64092f1d1bb455f63ab7c0",
+        "approved_at": "2026-08-25T11:24:13Z"
+      }
+    },
+    "court.court-update": {
+      "flow": {
+        "product_hash": "sha256:06534e3df987343ff646079720ab7a05429c7abb39b119ffe3c617fb884a541e",
+        "approved_at": "2026-08-25T11:17:56Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:afddffbcc98dc0136706b92d33bda88482db5923aa68f27fbcd821ea6d67c9be",
+        "approved_at": "2026-08-25T11:24:14Z"
+      }
+    },
+    "court.court-disable": {
+      "flow": {
+        "product_hash": "sha256:f9217d8108e29593f738080a6542b696f50f753b4d312424c3c4d987d986b517",
+        "approved_at": "2026-08-25T11:17:56Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:ec7107023feee11edb653c358d95f6456fe61143667bf60502a2831bbc3f5ab5",
+        "approved_at": "2026-08-25T11:24:14Z"
+      }
+    }
+  },
+  "flows": {
+    "court.court-collection.flow.collect-city-courts": {
+      "flow": {
+        "flow_hash": "sha256:bcf44a1d781b6752df35bd3bbed3b50ec94a91803499aa2233ed543aa264f8ed",
+        "approved_at": "2026-08-25T11:17:56Z"
+      }
+    },
+    "court.court-create.flow.create-court": {
+      "flow": {
+        "flow_hash": "sha256:2eb440b0e03b92824e8a3ee4340ae484a38b35569f1dba1fc144ed7534b48b3f",
+        "approved_at": "2026-08-25T11:17:56Z"
+      }
+    },
+    "court.court-update.flow.update-court": {
+      "flow": {
+        "flow_hash": "sha256:ee8d568279d62d660343f5e9e3868914c45e2967f9aa44667b70be726db9dee2",
+        "approved_at": "2026-08-25T11:17:56Z"
+      }
+    },
+    "court.court-disable.flow.disable-court": {
+      "flow": {
+        "flow_hash": "sha256:9623559876aa5d687175ebf03751d0d575121f065292801d5e78f1ab902c79e5",
+        "approved_at": "2026-08-25T11:17:56Z"
+      }
+    }
+  },
+  "activities": {
+    "court.court-collection.activity.fetch-amap-courts": {
+      "spec": {
+        "service": "court.court-collection",
+        "activity_hash": "sha256:05d7b29ed683d28fbcce52797466accc4a5065eeac10925e65b7972fef222bb2",
+        "approved_at": "2026-08-25T11:24:13Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:05d7b29ed683d28fbcce52797466accc4a5065eeac10925e65b7972fef222bb2",
+        "files": [
+          "rally-app/src/main/java/com/rally/court/activity/FetchAmapCourtsActivity.java",
+          "rally-app/src/main/java/com/rally/court/model/FetchedPois.java",
+          "rally-domain/src/main/java/com/rally/domain/court/gateway/CourtMapClient.java",
+          "rally-infrastructure/src/main/java/com/rally/client/amap/AmapClient.java",
+          "rally-infrastructure/src/main/java/com/rally/client/amap/model/AmapPoiResponse.java",
+          "rally-infrastructure/src/main/java/com/rally/client/amap/convert/AmapPoiConvertMapper.java",
+          "start/src/main/resources/application.yml"
+        ],
+        "verified_at": "2026-08-25T11:40:42Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "court.court-collection.activity.resolve-collect-scope": {
+      "spec": {
+        "service": "court.court-collection",
+        "activity_hash": "sha256:f26b0b38cb64b7e9f94b9000eca11f70d118144de5067ccd449d9c00547c0591",
+        "approved_at": "2026-08-25T11:24:13Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:f26b0b38cb64b7e9f94b9000eca11f70d118144de5067ccd449d9c00547c0591",
+        "files": [
+          "rally-app/src/main/java/com/rally/court/activity/ResolveCollectScopeActivity.java",
+          "rally-app/src/main/java/com/rally/court/model/CollectScope.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtCollectApiCmd.java"
+        ],
+        "verified_at": "2026-08-25T11:45:28Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "court.court-collection.activity.resolve-court-profile": {
+      "spec": {
+        "service": "court.court-collection",
+        "activity_hash": "sha256:01819f68c111527276cc76a47908a15ea7bba5a34c184d07e19880ed39f5a100",
+        "approved_at": "2026-08-25T11:24:13Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:01819f68c111527276cc76a47908a15ea7bba5a34c184d07e19880ed39f5a100",
+        "files": [
+          "rally-app/src/main/java/com/rally/court/activity/ResolveCourtProfileActivity.java",
+          "rally-app/src/main/java/com/rally/court/model/ResolvedCourts.java"
+        ],
+        "verified_at": "2026-08-25T11:41:00Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "court.court-collection.activity.screen-and-merge-pois": {
+      "spec": {
+        "service": "court.court-collection",
+        "activity_hash": "sha256:ef5604b49a7b2ede7fccd96f6b64152a9b307bc1eca6dbe849bf78c22c9e634b",
+        "approved_at": "2026-08-25T11:24:13Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:ef5604b49a7b2ede7fccd96f6b64152a9b307bc1eca6dbe849bf78c22c9e634b",
+        "files": [
+          "rally-app/src/main/java/com/rally/court/activity/ScreenAndMergePoisActivity.java"
+        ],
+        "verified_at": "2026-08-25T11:40:50Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "court.court-collection.activity.upsert-city-courts": {
+      "spec": {
+        "service": "court.court-collection",
+        "activity_hash": "sha256:34829fad7293f54a2592fef6ded9a27fdd3c3252f5aeac21a1514be27fdb6134",
+        "approved_at": "2026-08-25T11:24:13Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:34829fad7293f54a2592fef6ded9a27fdd3c3252f5aeac21a1514be27fdb6134",
+        "files": [
+          "rally-app/src/main/java/com/rally/court/activity/UpsertCityCourtsActivity.java",
+          "rally-app/src/main/java/com/rally/court/model/UpsertResult.java",
+          "rally-domain/src/main/java/com/rally/domain/court/gateway/CourtRepository.java",
+          "rally-infrastructure/src/main/java/com/rally/db/court/repository/CourtRepositoryImpl.java",
+          "rally-domain/src/main/java/com/rally/domain/court/enums/CourtCollectModeEnum.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtCollectResultDTO.java"
+        ],
+        "verified_at": "2026-08-25T11:45:36Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "court.court-create.activity.create-manual-court": {
+      "spec": {
+        "service": "court.court-create",
+        "activity_hash": "sha256:8e8ee5db4c9e86b3b7fce590e726e7e3f875970936590c18e3fbc638b39366f6",
+        "approved_at": "2026-08-25T11:24:13Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:8e8ee5db4c9e86b3b7fce590e726e7e3f875970936590c18e3fbc638b39366f6",
+        "files": [
+          "rally-app/src/main/java/com/rally/court/activity/CreateManualCourtActivity.java",
+          "rally-app/src/main/java/com/rally/court/CourtAdminAppService.java",
+          "rally-app/src/main/java/com/rally/court/convert/CourtAdminAppConvertMapper.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtCreateApiCmd.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtIdDTO.java",
+          "rally-adapter/src/main/java/com/rally/web/court/CourtAdminController.java",
+          "rally-adapter/src/main/java/com/rally/web/config/WebMvcConfig.java"
+        ],
+        "verified_at": "2026-08-25T11:44:43Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "court.court-create.activity.resolve-court-location": {
+      "spec": {
+        "service": "court.court-create",
+        "activity_hash": "sha256:95b89582e15c657970f6068998ee5da0bb08e634f82ba81a220d73b6441d1ef9",
+        "approved_at": "2026-08-25T11:24:13Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:95b89582e15c657970f6068998ee5da0bb08e634f82ba81a220d73b6441d1ef9",
+        "files": [
+          "rally-app/src/main/java/com/rally/court/activity/CreateResolveCourtLocationActivity.java"
+        ],
+        "verified_at": "2026-08-25T11:41:34Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "court.court-update.activity.resolve-court-location": {
+      "spec": {
+        "service": "court.court-update",
+        "activity_hash": "sha256:da4dc526b93cec7c4e430011df0dbe8b53b3291d3a06eee29639f11f938fe3cd",
+        "approved_at": "2026-08-25T11:24:14Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:da4dc526b93cec7c4e430011df0dbe8b53b3291d3a06eee29639f11f938fe3cd",
+        "files": [
+          "rally-app/src/main/java/com/rally/court/activity/UpdateResolveCourtLocationActivity.java"
+        ],
+        "verified_at": "2026-08-25T11:41:52Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "court.court-update.activity.update-court-profile": {
+      "spec": {
+        "service": "court.court-update",
+        "activity_hash": "sha256:4f66e9d103a0abba1be9f8d149a1f7769ab696ed2a5fbaf94d2194a1faa09bc2",
+        "approved_at": "2026-08-25T11:24:14Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:4f66e9d103a0abba1be9f8d149a1f7769ab696ed2a5fbaf94d2194a1faa09bc2",
+        "files": [
+          "rally-app/src/main/java/com/rally/court/activity/UpdateCourtProfileActivity.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtUpdateApiCmd.java"
+        ],
+        "verified_at": "2026-08-25T11:42:01Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "court.court-disable.activity.disable-court": {
+      "spec": {
+        "service": "court.court-disable",
+        "activity_hash": "sha256:31d806edcfa8680908162c04d433c45e2aa1ea9516af4e25ed9a89c9d975e1d0",
+        "approved_at": "2026-08-25T11:24:14Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:31d806edcfa8680908162c04d433c45e2aa1ea9516af4e25ed9a89c9d975e1d0",
+        "files": [
+          "rally-app/src/main/java/com/rally/court/activity/DisableCourtActivity.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtDisableApiCmd.java"
+        ],
+        "verified_at": "2026-08-25T11:42:09Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    }
+  },
+  "domains": {
+    "@court.court": {
+      "spec": {
+        "domain_hash": "sha256:8b6b894721b9af53039c70397e06cbe443d381491579e2f15d16b9c8c5aef7e3",
+        "approved_at": "2026-08-25T11:27:02Z",
+        "introduced_by": "court.court-collection"
+      },
+      "impl": {
+        "domain_hash": "sha256:8b6b894721b9af53039c70397e06cbe443d381491579e2f15d16b9c8c5aef7e3",
+        "files": [
+          "rally-domain/src/main/java/com/rally/domain/court/model/Court.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtData.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtCreateCmd.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtCollectCmd.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtUpdateCmd.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtLocation.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtProfile.java",
+          "rally-domain/src/main/java/com/rally/domain/court/util/PinyinUtils.java",
+          "rally-domain/src/main/java/com/rally/domain/auth/enums/BizErrorCode.java",
+          "rally-domain/pom.xml"
+        ],
+        "verified_at": "2026-08-25T11:31:09Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "@court.court-poi-screener": {
+      "spec": {
+        "domain_hash": "sha256:ef8aa28f6d7588d3fa4f19ea57a157640fdba6652f56e64847bbfe686242bd3d",
+        "approved_at": "2026-08-25T11:27:02Z",
+        "introduced_by": "court.court-collection"
+      },
+      "impl": {
+        "domain_hash": "sha256:ef8aa28f6d7588d3fa4f19ea57a157640fdba6652f56e64847bbfe686242bd3d",
+        "files": [
+          "rally-domain/src/main/java/com/rally/domain/court/service/CourtPoiScreenerService.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtPoi.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtPoiCluster.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtPoiScreenResult.java"
+        ],
+        "verified_at": "2026-08-25T11:33:17Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "@court.court-profile-resolver": {
+      "spec": {
+        "domain_hash": "sha256:04b83b505b8f051df303a52965ad19cdf7011e90ebb3b80ba23c67298de93d53",
+        "approved_at": "2026-08-25T11:27:02Z",
+        "introduced_by": "court.court-collection"
+      },
+      "impl": {
+        "domain_hash": "sha256:04b83b505b8f051df303a52965ad19cdf7011e90ebb3b80ba23c67298de93d53",
+        "files": [
+          "rally-domain/src/main/java/com/rally/domain/court/service/CourtProfileResolverService.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtProfileResolveResult.java",
+          "rally-domain/src/main/java/com/rally/domain/court/model/CourtProfile.java"
+        ],
+        "verified_at": "2026-08-25T11:33:58Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "@system.location-catalog": {
+      "spec": {
+        "domain_hash": "sha256:a1822014b6d9133bf98e8a3cb6c350dc6e6e2b84a2b9ad1e14c2db5a348e4432",
+        "approved_at": "2026-08-25T11:27:02Z",
+        "introduced_by": "court.court-collection"
+      },
+      "impl": {
+        "domain_hash": "sha256:a1822014b6d9133bf98e8a3cb6c350dc6e6e2b84a2b9ad1e14c2db5a348e4432",
+        "files": [
+          "rally-domain/src/main/java/com/rally/domain/system/service/LocationCatalogService.java",
+          "rally-domain/src/main/java/com/rally/domain/system/enums/LocationScopeEnum.java",
+          "rally-domain/src/main/java/com/rally/domain/system/model/LocationQuery.java",
+          "rally-domain/src/main/java/com/rally/domain/system/model/LocationResult.java"
+        ],
+        "verified_at": "2026-08-25T11:32:23Z",
+        "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    }
+  }
+}

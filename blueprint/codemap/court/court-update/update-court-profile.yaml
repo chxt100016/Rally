@@ -1,0 +1,10 @@
+id: court.court-update.activity.update-court-profile
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/UpdateCourtProfileActivity.java
+    role: 主实现
+    symbols: [UpdateCourtProfileActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtUpdateApiCmd.java
+    role: 接口入参
+    symbols: [CourtUpdateApiCmd]
+    covers: [A2, A3, A4]

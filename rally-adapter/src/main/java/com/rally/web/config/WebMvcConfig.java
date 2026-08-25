@@ -36,7 +36,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(adminApiKeyInterceptor)
                 .addPathPatterns(
                         "/tournament/admin/**",
-                        "/system/admin/**"
+                        "/system/admin/**",
+                        "/court/admin/**"
                 );
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/**")
@@ -49,6 +50,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/tour/collect/**",
                         "/tournament/admin/**",
                         "/system/admin/**",
+                        "/court/admin/**",
 
                         "/tour/tournament/tournaments",
                         "/tour/match/upcoming",

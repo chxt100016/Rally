@@ -1,0 +1,30 @@
+id: court.court-create.activity.create-manual-court
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/CreateManualCourtActivity.java
+    role: 主实现
+    symbols: [CreateManualCourtActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/court/CourtAdminAppService.java
+    role: 流程编排
+    symbols: [CourtAdminAppService]
+    covers: [A3]
+  - path: rally-app/src/main/java/com/rally/court/convert/CourtAdminAppConvertMapper.java
+    role: 出入参转换
+    symbols: [CourtAdminAppConvertMapper]
+    covers: [A1]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtCreateApiCmd.java
+    role: 接口入参
+    symbols: [CourtCreateApiCmd]
+    covers: [A1]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtIdDTO.java
+    role: 接口出参
+    symbols: [CourtIdDTO]
+    covers: [A3]
+  - path: rally-adapter/src/main/java/com/rally/web/court/CourtAdminController.java
+    role: 对外接口
+    symbols: [CourtAdminController]
+    covers: [A3]
+  - path: rally-adapter/src/main/java/com/rally/web/config/WebMvcConfig.java
+    role: 后台密钥拦截注册
+    symbols: [WebMvcConfig]
+    covers: [A3]

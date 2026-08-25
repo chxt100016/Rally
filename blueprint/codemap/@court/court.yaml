@@ -1,0 +1,42 @@
+id: "@court.court"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/Court.java
+    role: 主实现
+    symbols: [Court]
+    covers: [I1, I2, I3, I4, C1, C2, C3, C4, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtData.java
+    role: 聚合状态
+    symbols: [CourtData]
+    covers: [I2, I3, I4, C1, C2, C3, C4, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtCreateCmd.java
+    role: 命令入参
+    symbols: [CourtCreateCmd]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtCollectCmd.java
+    role: 命令入参
+    symbols: [CourtCollectCmd]
+    covers: [C2, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtUpdateCmd.java
+    role: 命令入参
+    symbols: [CourtUpdateCmd]
+    covers: [C3]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtLocation.java
+    role: 值对象
+    symbols: [CourtLocation]
+    covers: [I4, C1, C2, C3, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtProfile.java
+    role: 值对象
+    symbols: [CourtProfile]
+    covers: [C1, C2, C3, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/court/util/PinyinUtils.java
+    role: 拼音生成
+    symbols: [PinyinUtils]
+    covers: [I1]
+  - path: rally-domain/src/main/java/com/rally/domain/auth/enums/BizErrorCode.java
+    role: 错误码
+    symbols: [BizErrorCode]
+    covers: [I1, I2, I3, I4]
+  - path: rally-domain/pom.xml
+    role: 依赖
+    symbols: []
+    covers: [I1]

@@ -1,0 +1,26 @@
+id: court.court-collection.activity.upsert-city-courts
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/UpsertCityCourtsActivity.java
+    role: 主实现
+    symbols: [UpsertCityCourtsActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/court/model/UpsertResult.java
+    role: 活动出参
+    symbols: [UpsertResult]
+    covers: [A5]
+  - path: rally-domain/src/main/java/com/rally/domain/court/gateway/CourtRepository.java
+    role: 球场仓储网关
+    symbols: [CourtRepository]
+    covers: [A1, A3, A4]
+  - path: rally-infrastructure/src/main/java/com/rally/db/court/repository/CourtRepositoryImpl.java
+    role: 仓储实现
+    symbols: [CourtRepositoryImpl]
+    covers: [A1, A3, A4]
+  - path: rally-domain/src/main/java/com/rally/domain/court/enums/CourtCollectModeEnum.java
+    role: 抓取模式枚举
+    symbols: [CourtCollectModeEnum]
+    covers: [A2, A3]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtCollectResultDTO.java
+    role: 接口出参
+    symbols: [CourtCollectResultDTO]
+    covers: [A5]

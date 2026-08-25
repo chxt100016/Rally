@@ -1,0 +1,14 @@
+id: court.court-collection.activity.resolve-collect-scope
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/ResolveCollectScopeActivity.java
+    role: 主实现
+    symbols: [ResolveCollectScopeActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/court/model/CollectScope.java
+    role: 活动出参
+    symbols: [CollectScope]
+    covers: [A4]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtCollectApiCmd.java
+    role: 接口入参
+    symbols: [CourtCollectApiCmd]
+    covers: [A1]

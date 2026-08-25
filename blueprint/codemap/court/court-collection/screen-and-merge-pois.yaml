@@ -1,0 +1,6 @@
+id: court.court-collection.activity.screen-and-merge-pois
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/ScreenAndMergePoisActivity.java
+    role: 主实现
+    symbols: [ScreenAndMergePoisActivity]
+    covers: [A1, A2, A3, A4]

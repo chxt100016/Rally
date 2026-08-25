@@ -1,0 +1,6 @@
+id: court.court-update.activity.resolve-court-location
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/UpdateResolveCourtLocationActivity.java
+    role: 主实现
+    symbols: [UpdateResolveCourtLocationActivity]
+    covers: [A1, A2, A3]

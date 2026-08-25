@@ -31,6 +31,8 @@ public class CourtData {
     private String districtName;
     private String extData;
     private CourtSourceEnum source;
+    /** 三方来源编号，高德兴趣点编号 */
+    private String sourceId;
     private CourtStatusEnum status;
     private Integer meetupCount;
     private LocalDateTime createTime;

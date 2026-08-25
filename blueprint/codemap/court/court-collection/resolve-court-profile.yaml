@@ -1,0 +1,10 @@
+id: court.court-collection.activity.resolve-court-profile
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/ResolveCourtProfileActivity.java
+    role: 主实现
+    symbols: [ResolveCourtProfileActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/court/model/ResolvedCourts.java
+    role: 活动出参
+    symbols: [ResolvedCourts]
+    covers: [A4]

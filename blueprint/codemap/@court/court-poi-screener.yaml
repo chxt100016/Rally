@@ -1,0 +1,18 @@
+id: "@court.court-poi-screener"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/court/service/CourtPoiScreenerService.java
+    role: 主实现
+    symbols: [CourtPoiScreenerService]
+    covers: [R1, R2, R3, R4, R5, R6, R7]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtPoi.java
+    role: 契约入参
+    symbols: [CourtPoi]
+    covers: [R1, R2]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtPoiCluster.java
+    role: 契约出参
+    symbols: [CourtPoiCluster]
+    covers: [R6, R7]
+  - path: rally-domain/src/main/java/com/rally/domain/court/model/CourtPoiScreenResult.java
+    role: 契约出参
+    symbols: [CourtPoiScreenResult]
+    covers: [R3]
