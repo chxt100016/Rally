@@ -131,6 +131,11 @@ public class TournamentDetailService {
             tournamentDTO.setDisplayStatusShow(TournamentDisplayStatusEnum.ABANDONED.getLabel());
             return;
         }
+        if (tournamentData.getStatus() == TournamentStatusEnum.FINISHED) {
+            tournamentDTO.setDisplayStatus(TournamentDisplayStatusEnum.ENDED);
+            tournamentDTO.setDisplayStatusShow(TournamentDisplayStatusEnum.ENDED.getLabel());
+            return;
+        }
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime registrationStartTime = tournamentData.getRegistrationStartTime();
@@ -328,7 +333,11 @@ public class TournamentDetailService {
 
     TournamentActionStateEnum calculateActionState(TournamentData tournamentData, TournamentEntryData entry, TournamentMatch activeMatch, String userId) {
         TournamentEntryStatusEnum status = entry.getStatus();
-        if (tournamentData.getEndTime() != null && LocalDateTime.now().isAfter(tournamentData.getEndTime())) {
+        if (status == TournamentEntryStatusEnum.CHAMPION) {
+            return TournamentActionStateEnum.CHAMPION;
+        }
+        if (tournamentData.getStatus() == TournamentStatusEnum.FINISHED
+                || tournamentData.getEndTime() != null && LocalDateTime.now().isAfter(tournamentData.getEndTime())) {
             return TournamentActionStateEnum.END;
         }
         if (status == TournamentEntryStatusEnum.WITHDRAWN) {
@@ -347,6 +356,9 @@ public class TournamentDetailService {
             return TournamentActionStateEnum.AWAIT_PAYMENT;
         }
         if (status == TournamentEntryStatusEnum.WAITING) {
+            if (isAdvancedToLaterRound(tournamentData, entry)) {
+                return TournamentActionStateEnum.ADVANCED;
+            }
             if (tournamentData.getQualifierStartTime() == null || LocalDateTime.now().isBefore(tournamentData.getQualifierStartTime())) {
                 return TournamentActionStateEnum.AWAIT_QUALIFIER_START;
             }
@@ -382,6 +394,12 @@ public class TournamentDetailService {
             default:
                 return TournamentActionStateEnum.WAITING_MATCH;
         }
+    }
+
+    private boolean isAdvancedToLaterRound(TournamentData tournamentData, TournamentEntryData entry) {
+        TournamentRoundEnum tournamentRound = tournamentData.getCurrentRound();
+        TournamentRoundEnum entryRound = entry.getCurrentRound();
+        return tournamentRound != null && entryRound != null && entryRound.ordinal() > tournamentRound.ordinal();
     }
 
     private TournamentActionStateEnum calculateNotRegisteredActionState(TournamentData tournamentData) {

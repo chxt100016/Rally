@@ -3,7 +3,7 @@ id: tournament.tournament-detail.activity.assemble-tournament-detail
 depends_on: []
 reads:
   - name: rally_tournament
-    columns: [biz_id, tournament_name, poster_key, rule_poster_key, wechat_group_qr_code_key, match_type, city_code, city_name, ntrp_level, gender_limit, total_slots, offline_from_round, offline_meetup_id, qualifier_group_size, entry_fee, prize_money, registration_start_time, registration_end_time, qualifier_start_time, qualifier_end_time, end_time, qualifier_reject_limit, main_draw_reject_limit, match_rule_description, ext_data, status, current_filled_slots, current_round]
+    columns: [biz_id, tournament_name, poster_key, rule_poster_key, wechat_group_qr_code_key, match_type, city_code, city_name, ntrp_level, gender_limit, total_slots, offline_from_round, offline_meetup_id, qualifier_group_size, entry_fee, prize_money, registration_start_time, registration_end_time, qualifier_start_time, qualifier_end_time, end_time, qualifier_reject_limit, main_draw_reject_limit, match_rule_description, ext_data, status, current_filled_slots, current_round, champion_entry_no]
   - name: rally_tournament_entry
     columns: [biz_id, tournament_id, user_id, partner_id, entry_no, preferred_districts, court_ability, available_times, stage, status, current_round, qualifier_reject_count, main_draw_reject_count, last_visit_time]
   - name: rally_tournament_match
@@ -46,7 +46,7 @@ sequenceDiagram
 
 ## 活动契约
 
-赛事必须存在。匿名返回公开区块，登录未报名补报名动作，已报名补本人进度、时间线、未读、当前比赛、对手及赛约；图片地址有效一小时。
+赛事必须存在。匿名返回含冠军在内的公开区块，登录未报名补报名动作，已报名补本人进度、时间线、未读、当前比赛、对手及赛约；冠军显示 CHAMPION，已进入下一轮但赛事尚未推进时显示 ADVANCED；图片地址有效一小时。
 
 ## 异常分支
 
@@ -76,7 +76,7 @@ A5 补用户资料并签名图片
 2. 匿名仅公开区块和 NOT_LOGGED_IN；登录未报名给报名动作及个人限制，不创建报名。
 3. 已报名者补本人报名、时间线、评论未读；IN_MATCH 时取当前未完成/终止比赛，缺失则按等待匹配展示。
 4. 聚合参与者、确认进度、对手访问时间；只有本人参赛编号可唯一定位且关系允许时交付对手手机号，订场阶段补对手偏好。
-5. 根据赛事时间、报名、当前比赛和赛约推导动作；关联赛约/线下活动压缩为卡片。赛约缺失失败，球场缺失则用室外硬地与开始时段背景。
+5. 根据赛事时间、报名轮次、赛事当前轮次、当前比赛和赛约推导动作：CHAMPION 优先于赛事 END，WAITING 报名轮次晚于赛事当前轮次时为 ADVANCED，轮次相等时才为 WAITING_MATCH；关联赛约/线下活动压缩为卡片。赛约缺失失败，球场缺失则用室外硬地与开始时段背景。
 6. 批量补昵称、性别、NTRP、头像，资料缺失字段留空；赛事图与头像生成 3600 秒地址。未读查询不推进已读。
 
 ## 边界情况

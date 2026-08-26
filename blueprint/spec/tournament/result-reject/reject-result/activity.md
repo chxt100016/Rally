@@ -53,9 +53,9 @@ PENDING_CONFIRM 比赛参与者提交 `confirm=false` 和有效拒绝理由时�
 ### @meetup.meetup
 - 输入：关联赛约
 - 输出：仅 DRAFT 时关闭
-### @notification.subscription-delivery
-- 输入：授权与拒绝通知
-- 输出：尽力登记并异步发送
+### @notification.delivery
+- 输入：`TOURNAMENT_REJECTED:matchId` 事件、其他参与者和拒绝通知内容
+- 输出：按接收人与渠道去重后直接尝试发送，记录 `SENT/FAILED/SKIPPED`
 
 ## 业务动作
 
@@ -71,7 +71,7 @@ A5 提交后通知
 2. 依本人资格赛/正赛阶段选对应 rejectLimit，达到即拒绝；通过后对应计数加一。
 3. 本人确认改 REJECTED 并记时间，比赛改 REJECTED 并保存理由。
 4. 仅关闭 DRAFT 关联赛约；全体参与者报名中仅 IN_MATCH 改 WAITING，任一报名缺失整体失败。
-5. 比赛按版本与其他对象同事务保存；授权登记和提交后通知异常容错。
+5. 提交后向其他参与者直接尝试拒绝通知；触达日志唯一键阻止同事件、同接收人和同渠道重发。
 
 ## 边界情况
 

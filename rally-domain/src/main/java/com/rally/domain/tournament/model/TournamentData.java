@@ -40,6 +40,8 @@ public class TournamentData {
     private TournamentStatusEnum status;
     private Integer currentFilledSlots;
     private TournamentRoundEnum currentRound;
+    /** 冠军报名编号；双打时同队成员共用该编号。 */
+    private Integer championEntryNo;
     /** 线下赛活动 ID，创建线下赛活动后写入。 */
     private String offlineMeetupId;
     private LocalDateTime createTime;

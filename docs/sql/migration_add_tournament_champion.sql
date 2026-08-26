@@ -1,0 +1,8 @@
+-- 支持全程线上赛事，并在决赛完成后持久化冠军。
+ALTER TABLE `rally_tournament`
+    MODIFY COLUMN `offline_from_round` VARCHAR(16) DEFAULT NULL COMMENT '几强后转线下：ROUND_4/ROUND_8/ROUND_16；为空表示全程线上',
+    MODIFY COLUMN `status` VARCHAR(16) NOT NULL DEFAULT 'DRAFT' COMMENT '状态：DRAFT/ACTIVE/FINISHED/ABANDONED',
+    ADD COLUMN `champion_entry_no` INT DEFAULT NULL COMMENT '冠军报名编号，双打时表示冠军队伍' AFTER `current_round`;
+
+ALTER TABLE `rally_tournament_entry`
+    MODIFY COLUMN `status` VARCHAR(16) NOT NULL DEFAULT 'WAITING' COMMENT '状态：WAITING/FROZEN/IN_MATCH/PAYING/CHAMPION/ELIMINATED/WITHDRAWN';

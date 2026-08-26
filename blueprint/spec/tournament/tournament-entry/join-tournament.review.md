@@ -20,6 +20,6 @@
   > TournamentEntryAppService.join 以同一事务包含搭档反向关系、本人报名和讨论成员创建；任一步失败整体回滚。若已有聊天成员但无报名，加入讨论报 ALREADY_JOINED_CHAT，新报名和本次搭档关系不保留，既有孤立成员记录保持。
   → 已写入详细流程第 5-6 步、流程图与事务异常
 
-- [Q4] 初始报名状态和容量口径是什么，微信通知场景如何过滤且授权登记失败是否影响报名？
-  > 报名初始固定 QUALIFY/WAITING/QUALIFIER，两类拒赛次数为 0；不检查 totalSlots/currentFilledSlots，也不占正赛席位。只接受并去重 TOURNAMENT_MATCHED、TOURNAMENT_BOOKING_SUBMITTED、TOURNAMENT_REJECTED，其他值忽略；授权保存内部捕获异常，不向用户报错且报名继续成功。
-  → 已写入详细流程第 5、7 步、通知异常与服务边界
+- [Q4] 报名初始状态和正赛席位如何处理，是否登记或发送通知？
+  > 报名初始固定 QUALIFY/WAITING/QUALIFIER，两类拒赛次数为 0；不检查 totalSlots/currentFilledSlots，也不占正赛席位。本接口不接收订阅场景，不登记订阅额度，也不发送通知。
+  → 已写入详细流程第 5、7 步与服务边界

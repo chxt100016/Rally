@@ -29,7 +29,6 @@ facade: POST /meetup/registration/invite
 
 - register-invited-participant  校验发布者、名额和活动报名，新增已加入报名并重算当前人数
 - join-invited-participant-chat  为被邀请人建立初始未读数为零的约球群聊成员关系
-- dispatch-team-success-notification  满员时在提交后按既有订阅额度异步通知全部有效参与者
 
 ## 流程图
 
@@ -46,7 +45,7 @@ flowchart TD
     B --> C{邀请后是否满员}
     C -->|否| S([返回邀请成功])
     C -->|是且事务提交| D[dispatch-team-success-notification 异步通知]
-    D -->|无额度、已退出或发送失败| S2([保留邀请成功])
+    D -->|不可触达、已退出或发送失败| S2([保留邀请成功])
     D --> S2
 ```
 
@@ -73,7 +72,7 @@ flowchart TD
 | `ALREADY_JOINED_CHAT` | 被邀请人已有该约球群聊成员记录 | join-invited-participant-chat | 整体事务回滚新报名和当前人数 | 你已加入该聊天 |
 | `SYSTEM_ERROR` | 约球、报名、群聊成员读写或事务提交失败 | register-invited-participant / join-invited-participant-chat | 整体事务回滚本次报名、人数和群聊变更 | 系统异常，请稍后重试 |
 
-并发邀请基于各自加载的旧人数和报名集合判断，可能突破人数上限或形成重复报名。组团通知无可用额度、发送前已退出、接收身份缺失或微信发送失败时，只跳过或记录失败，不改变邀请结果；重复达到满员条件可能重复触发通知。
+并发邀请基于各自加载的旧人数和报名集合判断，可能突破人数上限或形成重复报名。组团通知微信不可触达、发送前已退出、接收身份缺失或微信发送失败时，只跳过或记录失败，不改变邀请结果；重复达到满员条件可能重复触发通知。
 
 ## 技术线索
 

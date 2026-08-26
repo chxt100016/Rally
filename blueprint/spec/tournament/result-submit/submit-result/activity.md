@@ -44,9 +44,6 @@ PENDING_PLAY 比赛的参与者提交本场有效 winnerEntryNo 时执行。
 ### @tournament.match
 - 输入：PENDING_PLAY 比赛、提交人、胜方与版本
 - 输出：PENDING_CONFIRM 比赛及重置确认
-### @notification.subscription-delivery
-- 输入：有效赛事通知授权
-- 输出：尽力登记额度
 
 ## 业务动作
 
@@ -54,7 +51,6 @@ A1 校验比赛和提交人
 A2 校验胜方属于对阵
 A3 记录赛果提交
 A4 重置全员确认状态
-A5 登记有效通知授权
 
 ## 详细流程
 
@@ -62,7 +58,7 @@ A5 登记有效通知授权
 2. winnerEntryNo 必须等于本场某参与单元编号，否则按未选胜方失败。
 3. 写 winnerEntryNo、submittedBy、submittedTime，比赛转 PENDING_CONFIRM。
 4. 提交人的 resultConfirmation=CONFIRMED 并记时间，其他人改 PENDING 且清原确认时间。
-5. 以版本条件同事务保存比赛和参与关系；过滤后有效赛事通知场景登记失败仅记录，不影响主流程。
+5. 以版本条件同事务保存比赛和参与关系；本活动不触发通知。
 
 ## 边界情况
 
@@ -71,5 +67,3 @@ A5 登记有效通知授权
 - 成功只表示进入待确认，尚未结算报名。
 
 ## 实现提示
-
-写活动 `reads` 为空；通知授权登记不是事务成功条件。

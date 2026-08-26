@@ -33,6 +33,8 @@ public class TournamentAdminItemDTO {
     private Integer qualifierRejectLimit;
     private Integer mainDrawRejectLimit;
     private TournamentStatusEnum status;
+    /** 冠军报名编号；赛事未结束时为 null。 */
+    private Integer championEntryNo;
     /** 当前已支付锁定的正赛席位数 */
     private Integer currentFilledSlots;
     private LocalDateTime createTime;

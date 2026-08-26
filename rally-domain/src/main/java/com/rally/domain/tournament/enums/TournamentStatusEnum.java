@@ -11,6 +11,7 @@ import lombok.Getter;
 public enum TournamentStatusEnum {
     DRAFT("草稿"),
     ACTIVE("已激活"),
+    FINISHED("已结束"),
     ABANDONED("已废弃");
 
     public final String label;

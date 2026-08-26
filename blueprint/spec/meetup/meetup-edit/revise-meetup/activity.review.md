@@ -17,5 +17,5 @@
   → 已写入领域依赖、业务动作 A2-A3、详细流程第 3、5 步与边界情况
 
 - [Q3] MapStruct 整体更新的空值、费用与已知字段覆盖缺陷如何记录？
-  > nullValue IGNORE 通常保留 null 入参字段；costItems null 保留、空列表清空；districtCode/acceptedNoticeScenes 不保存，hourlyAllocations 不在命令。重算 endTime 依赖 startTime+duration。命中 courtData 时生成映射会额外把 meetup.bizId、cityName、createTime、updateTime 覆盖为球场值，随后 save 可能按被覆盖 bizId 更新错误目标；这是当前真实实现，报/不报取决于仓储，不能在文档中修正。
+  > nullValue IGNORE 通常保留 null 入参字段；costItems null 保留、空列表清空；districtCode 不保存，hourlyAllocations 不在命令。重算 endTime 依赖 startTime+duration。命中 courtData 时生成映射会额外把 meetup.bizId、cityName、createTime、updateTime 覆盖为球场值，随后 save 可能按被覆盖 bizId 更新错误目标；这是当前真实实现，报错与否取决于仓储。
   → 已写入业务动作 A4-A5、详细流程第 6-9 步、边界情况与实现提示

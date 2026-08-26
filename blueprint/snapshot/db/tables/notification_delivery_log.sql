@@ -1,0 +1,23 @@
+CREATE TABLE `notification_delivery_log` (
+  `id`                   BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `biz_id`               VARCHAR(32)  NOT NULL COMMENT '触达流水ID',
+  `event_id`             VARCHAR(128) NOT NULL COMMENT '稳定业务事件标识',
+  `biz_type`             VARCHAR(32)  NOT NULL COMMENT '业务方向:MEETUP/TOURNAMENT',
+  `ref_biz_id`           VARCHAR(32)  NOT NULL COMMENT '关联业务对象ID',
+  `notice_scene`         VARCHAR(64)  NOT NULL COMMENT '通知场景',
+  `recipient_id`         VARCHAR(64)  NOT NULL COMMENT '接收人内部标识',
+  `channel`              VARCHAR(32)  NOT NULL COMMENT '触达渠道:WECHAT_SUBSCRIBE/SMS/EMAIL',
+  `provider_template_id` VARCHAR(128) DEFAULT NULL COMMENT '渠道模板标识快照',
+  `status`               VARCHAR(16)  NOT NULL COMMENT '状态:SENDING/SENT/FAILED/SKIPPED',
+  `provider_message_id`  VARCHAR(128) DEFAULT NULL COMMENT '渠道消息标识',
+  `error_code`           VARCHAR(64)  DEFAULT NULL COMMENT '渠道错误码或内部错误标识',
+  `fail_reason`          VARCHAR(255) DEFAULT NULL COMMENT '失败或跳过原因摘要',
+  `send_time`            DATETIME     DEFAULT NULL COMMENT '触达结束时间',
+  `create_time`          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_biz_id` (`biz_id`),
+  UNIQUE KEY `uk_event_recipient_channel` (`event_id`, `recipient_id`, `channel`),
+  KEY `idx_ref_scene_status` (`biz_type`, `ref_biz_id`, `notice_scene`, `status`),
+  KEY `idx_recipient_time` (`recipient_id`, `create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='通知触达日志';

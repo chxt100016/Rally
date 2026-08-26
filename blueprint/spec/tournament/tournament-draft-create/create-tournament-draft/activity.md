@@ -29,7 +29,7 @@ sequenceDiagram
 
 ## 活动契约
 
-校验签位、线下轮次、数值、奖金和时间关系，解析城市名称，生成唯一 bizId，并初始化 DRAFT、QUALIFIER 和零锁位。
+校验签位、可选线下轮次、数值、奖金和时间关系，解析城市名称，生成唯一 bizId，并初始化 DRAFT、QUALIFIER 和零锁位；未配置线下轮次表示全程线上。
 
 ## 异常分支
 
@@ -57,17 +57,17 @@ A5 保存并返回编号
 
 ## 详细流程
 
-1. 校验名称、图片、主题、类型、城市、NTRP、性别、签位、线下轮次、组人数、费用、奖金、时间、上限和规则。
-2. totalSlots 必须 2–64 的 2 次方，线下轮次签位小于总签位；费用/上限非负，资格赛组至少 2 人。
+1. 校验名称、图片、主题、类型、城市、NTRP、性别、签位、可选线下轮次、组人数、费用、奖金、时间、上限和规则。
+2. totalSlots 必须 2–64 的 2 次方；offlineFromRound 非空时其签位小于总签位，为空时全部轮次线上完成；费用/上限非负，资格赛组至少 2 人。
 3. 报名开始早于资格赛开始，各截止不早于对应开始；奖金为逗号分隔非负整数，枚举必须可转换。
 4. 按 cityCode 查 cityName，缺城市当前以未处理异常收敛为 OPERATION_FAILED。
-5. 生成 bizId，写全部配置，初始化 status=DRAFT、currentRound=QUALIFIER、currentFilledSlots=0，endTime/offlineMeetupId 为空。
+5. 生成 bizId，写全部配置，初始化 status=DRAFT、currentRound=QUALIFIER、currentFilledSlots=0，championEntryNo/endTime/offlineMeetupId 为空。
 6. 单事务保存；成功仅返回编号，不激活、不创建报名或比赛。
 
 ## 边界情况
 
 - 城市缺失没有专用业务错误。
-- 总签位 2 也合法，只要线下轮次规则满足。
+- 总签位 2 也合法；未配置线下轮次时全程线上。
 - 草稿可包含未来才会被激活校验发现的其他运营风险。
 
 ## 实现提示

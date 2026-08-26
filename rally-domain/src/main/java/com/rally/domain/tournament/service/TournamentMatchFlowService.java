@@ -266,8 +266,7 @@ public class TournamentMatchFlowService {
         }
 
         if (match.getData().getStatus() == TournamentMatchStatusEnum.COMPLETED) {
-            updateEntryStatusOnComplete(match);
-            tournamentRoundProgressService.advanceIfReady(match.getData().getTournamentId());
+            settleCompletedMatch(match);
         }
     }
 
@@ -316,8 +315,7 @@ public class TournamentMatchFlowService {
             throw new BusinessException(BizErrorCode.TOURNAMENT_MATCH_VERSION_CONFLICT);
         }
         matchRepository.saveParticipants(match.getParticipants());
-        updateEntryStatusOnComplete(match);
-        tournamentRoundProgressService.advanceIfReady(match.getData().getTournamentId());
+        settleCompletedMatch(match);
     }
 
     private Tournament getTournament(String tournamentId) {
@@ -372,6 +370,24 @@ public class TournamentMatchFlowService {
             entry.getData().setMainDrawRejectCount(entry.getData().getMainDrawRejectCount() + 1);
         }
         entryRepository.save(entry.getData());
+    }
+
+    /**
+     * 已完成比赛的统一结算入口。普通轮次推进报名与赛事轮次；决赛记录冠军并结束赛事。
+     */
+    private void settleCompletedMatch(TournamentMatch match) {
+        updateEntryStatusOnComplete(match);
+        if (match.getData().getRound() == TournamentRoundEnum.FINAL) {
+            finishTournament(match);
+            return;
+        }
+        tournamentRoundProgressService.advanceIfReady(match.getData().getTournamentId());
+    }
+
+    private void finishTournament(TournamentMatch match) {
+        Tournament tournament = getTournament(match.getData().getTournamentId());
+        tournament.finish(match.getData().getWinnerEntryNo(), match.getData().getCompletedTime());
+        tournamentRepository.save(tournament.getData());
     }
 
     private void updateEntryStatusOnComplete(TournamentMatch match) {

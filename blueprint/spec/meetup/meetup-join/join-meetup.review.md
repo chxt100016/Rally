@@ -20,8 +20,8 @@
   > 按 Java 实现确认：RegistrationData 新建时不设置 bizId，聚合保存路径也不补业务编号，仅数据库自增 id；接口返回 Result<Void>，不会返回报名编号或 JOINED/PENDING，只有应用内部用状态决定后续分支。
   → 已落入成功响应和详细流程。
 
-- [Q4] 订阅授权场景如何过滤，授权登记或通知失败是否影响报名事务？
-  > 按 Java 实现确认：parseScenes 对所有 NoticeScene 名称开放，非法名称忽略，重复不去重。直接加入并满员时只过滤 JOIN_SUCCESS。grant 内部吞掉异常；notify 注册提交后异步任务并吞掉触发/发送异常，二者均不回滚报名。
+- [Q4] 报名后选择哪种通知，通知失败是否回滚报名？
+  > 直接加入且未满员向报名人发送 JOIN_SUCCESS，满员时只向全部有效参与者发送 TEAM_SUCCESS，待审批时向发布者发送 PENDING_APPROVAL。通知按报名事件在提交后异步尝试，未订阅记 SKIPPED，渠道失败记 FAILED，均不回滚报名。
   → 已落入请求参数、详细流程和异常分支后的通知说明。
 
 - [Q5] 补充检查 RegistrationData 构造器后，用户报名是否实际生成业务报名编号？

@@ -4,13 +4,14 @@ import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.notify.enums.NoticeScene;
 import com.rally.domain.notify.enums.NotifyBizType;
-import com.rally.domain.notify.service.NotifySubscribeService;
+import com.rally.domain.notify.service.NotificationDeliveryService;
 import com.rally.domain.tour.model.Result;
 import com.rally.domain.tournament.gateway.TournamentMatchRepository;
 import com.rally.domain.tournament.gateway.TournamentRepository;
 import com.rally.domain.tournament.model.*;
 import com.rally.domain.tournament.service.TournamentMatchFlowService;
 import com.rally.notify.TournamentNotifyAssembler;
+import com.rally.notify.NotificationEventId;
 import com.rally.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class TournamentMatchAppService {
     private final TournamentMatchRepository matchRepository;
     private final TournamentRepository tournamentRepository;
     private final MeetupRepository meetupRepository;
-    private final NotifySubscribeService notifySubscribeService;
+    private final NotificationDeliveryService notificationDeliveryService;
 
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> selectCourtBooker(SelectCourtBookerCmd cmd) {
@@ -44,8 +45,12 @@ public class TournamentMatchAppService {
         TournamentMatch match = getMatch(cmd.getMatchId());
         TournamentData tournament = getTournament(match.getData().getTournamentId());
         MeetupData booking = meetupRepository.findByBizId(meetupId);
-        notifySubscribeService.notify(NotifyBizType.TOURNAMENT, tournament.getBizId(),
-                NoticeScene.TOURNAMENT_BOOKING_SUBMITTED, otherParticipantIds(match, userId),
+        Object submissionRef = match.getData().getScheduleSubmittedTime() == null
+                ? meetupId : match.getData().getScheduleSubmittedTime().withNano(0);
+        notificationDeliveryService.notify(NotificationEventId.of(NoticeScene.TOURNAMENT_BOOKING_SUBMITTED,
+                        match.getMatchId(), submissionRef),
+                NotifyBizType.TOURNAMENT, tournament.getBizId(), NoticeScene.TOURNAMENT_BOOKING_SUBMITTED,
+                otherParticipantIds(match, userId),
                 TournamentNotifyAssembler.bookingSubmittedData(tournament.getTournamentName(), booking.getStartTime(), booking.getCourtName()));
         return Result.ok(meetupId);
     }
@@ -96,7 +101,6 @@ public class TournamentMatchAppService {
     public Result<Void> submitResult(SubmitResultCmd cmd) {
         String userId = UserContext.get();
         matchFlowService.submitResult(cmd.getMatchId(), userId, cmd.getWinnerEntryNo());
-        grantTournamentNotices(cmd.getMatchId(), userId, cmd.getAcceptedNoticeScenes());
         return Result.ok();
     }
 
@@ -104,24 +108,18 @@ public class TournamentMatchAppService {
     public Result<Void> confirmResult(ResultConfirmCmd cmd) {
         String userId = UserContext.get();
         matchFlowService.handleResultConfirm(cmd.getMatchId(), userId, cmd.getConfirm(), cmd.getRejectReason());
-        grantTournamentNotices(cmd.getMatchId(), userId, cmd.getAcceptedNoticeScenes());
         if (!cmd.getConfirm()) {
             notifyRejected(cmd.getMatchId(), userId);
         }
         return Result.ok();
     }
 
-    private void grantTournamentNotices(String matchId, String userId, List<String> acceptedNoticeScenes) {
-        TournamentMatch match = getMatch(matchId);
-        notifySubscribeService.grant(userId, NotifyBizType.TOURNAMENT, match.getData().getTournamentId(),
-                TournamentNotifyAssembler.parseScenes(acceptedNoticeScenes));
-    }
-
     private void notifyRejected(String matchId, String rejecterUserId) {
         TournamentMatch match = getMatch(matchId);
         TournamentData tournament = getTournament(match.getData().getTournamentId());
-        notifySubscribeService.notify(NotifyBizType.TOURNAMENT, tournament.getBizId(),
-                NoticeScene.TOURNAMENT_REJECTED, otherParticipantIds(match, rejecterUserId),
+        notificationDeliveryService.notify(NotificationEventId.of(NoticeScene.TOURNAMENT_REJECTED, matchId),
+                NotifyBizType.TOURNAMENT, tournament.getBizId(), NoticeScene.TOURNAMENT_REJECTED,
+                otherParticipantIds(match, rejecterUserId),
                 TournamentNotifyAssembler.rejectedData(tournament.getTournamentName()));
     }
 

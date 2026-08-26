@@ -52,7 +52,7 @@ R4 资格赛场数已满足但 currentFilledSlots 为空或小于 totalSlots 时
 R5 资格赛完成且锁位数大于等于 totalSlots 时，从 R1 的正赛首轮开始逐轮检查；正赛轮次所需完成场数为该轮签位数除以 2。
 R6 遇到第一个未完成的正赛轮次即停止；该轮之前最后一个可达轮次是 targetRound。若正赛首轮尚未完成，targetRound 仍是正赛首轮。
 R7 轮次顺序固定为 `QUALIFIER→ROUND_64→ROUND_32→ROUND_16→ROUND_8→ROUND_4→FINAL`。输出只有晚于 currentRound 才是 ADVANCE；相等或更早一律 STAY，禁止回退。
-R8 FINAL 完成后仍以 FINAL 为 targetRound 并给出 FINAL_REMAINS；本服务不推导赛事完成状态、冠军终态或 endTime。
+R8 本服务不承担决赛收口。若被传入 FINAL 完成快照，仍以 FINAL 为 targetRound 并给出 FINAL_REMAINS；正常完成链路由比赛结算直接产生冠军和赛事 FINISHED，不再调用本服务推导终态。
 R9 服务只读并返回判定，不得通过仓储更新 currentRound 或批量更新报名。
 
 ## 边界情况
@@ -62,7 +62,7 @@ R9 服务只读并返回判定，不得通过仓储更新 currentRound 或批量
 - currentFilledSlots 大于 totalSlots：按已满处理，但不在本服务修复超占。
 - 历史数据 currentRound 已晚于计算 targetRound：返回 STAY，不回退。
 - 较早轮次未完成、较晚轮次却已有 COMPLETED 比赛：在首个缺口停止，不越级推进。
-- FINAL 已完成：仍返回 FINAL，不修改赛事状态或报名冠军状态。
+- FINAL 已完成：本服务仍返回 FINAL，不修改赛事状态或报名冠军状态；调用活动应改走决赛统一结算。
 - 读取后又有比赛完成或席位变化：本次结论不补算，后续触发重新评估。
 
 ## 实现提示

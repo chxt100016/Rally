@@ -20,6 +20,6 @@
   > 按 Java 实现确认：报名与 currentPlayers 先在事务中保存，再 ChatDomainService.join；已有成员报 ALREADY_JOINED_CHAT，事务回滚前述变更。新聊天成员 unreadCount=0、lastReadMessageId=null，审批前历史消息不会计入初始未读。
   → 已落入详细流程、流程图和异常分支。
 
-- [Q4] 满员通知、报名成功通知和发布者授权额度的触发、去重及失败边界是什么？
-  > 按 Java 实现确认：审批后 isFull（>=上限）就只触发 TEAM_SUCCESS 给全体有效参与者，否则 JOIN_SUCCESS 给申请人；不判断首次满员。通知提交后异步且失败不回滚。随后 grant 发布者本次 parseScenes 结果，接受全部已知场景、非法忽略、重复不去重，grant 异常被吞掉。
+- [Q4] 审批后如何选择通知，重复触达和渠道失败如何处理？
+  > 审批后 isFull（>=上限）时只触发 TEAM_SUCCESS 给全体有效参与者，否则触发 JOIN_SUCCESS 给申请人。事件使用本次报名编号并在提交后异步发送；同一事件重复触发被日志唯一键跳过，未订阅或渠道失败不回滚审批。
   → 已落入详细流程、流程图和异常分支后的通知说明。

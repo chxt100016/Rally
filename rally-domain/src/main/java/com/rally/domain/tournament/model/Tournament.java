@@ -33,9 +33,10 @@ public class Tournament {
         }
     }
 
-    /** ABANDONED 不可逆，任意非终止态可废弃 */
+    /** 仅草稿或进行中的赛事可废弃，FINISHED/ABANDONED 均为终态。 */
     public void assertCanAbandon() {
-        Assert.isTrue(this.data.getStatus() != TournamentStatusEnum.ABANDONED, BizErrorCode.TOURNAMENT_STATUS_ILLEGAL);
+        Assert.isTrue(this.data.getStatus() == TournamentStatusEnum.DRAFT
+                || this.data.getStatus() == TournamentStatusEnum.ACTIVE, BizErrorCode.TOURNAMENT_STATUS_ILLEGAL);
     }
 
     public void activate() {
@@ -46,6 +47,16 @@ public class Tournament {
     public void abandon() {
         assertCanAbandon();
         this.data.setStatus(TournamentStatusEnum.ABANDONED);
+    }
+
+    /** 决赛完成后记录冠军并结束赛事。 */
+    public void finish(Integer championEntryNo, java.time.LocalDateTime completedTime) {
+        Assert.isTrue(this.data.getStatus() == TournamentStatusEnum.ACTIVE, BizErrorCode.TOURNAMENT_STATUS_ILLEGAL);
+        Assert.notNull(championEntryNo, BizErrorCode.TOURNAMENT_RESULT_WINNER_REQUIRED);
+        Assert.notNull(completedTime, BizErrorCode.PARAM_ERROR);
+        this.data.setChampionEntryNo(championEntryNo);
+        this.data.setEndTime(completedTime);
+        this.data.setStatus(TournamentStatusEnum.FINISHED);
     }
 
     public boolean isSlotsFull() {

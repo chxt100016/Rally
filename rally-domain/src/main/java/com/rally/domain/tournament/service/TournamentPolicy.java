@@ -24,13 +24,13 @@ import java.util.List;
 public class TournamentPolicy {
 
     /**
-     * 创建/编辑参数校验：签位数为 2 到 64 的 2 次方、offlineFromRound 对应签位数 < totalSlots、entryFee ≥ 0、时间点先后
+     * 创建/编辑参数校验：签位数为 2 到 64 的 2 次方；可选的 offlineFromRound 对应签位数 < totalSlots；entryFee ≥ 0；时间点先后合法。
      */
     public void assertParam(TournamentCreateCmd cmd) {
         if (!isSupportedPowerOfTwo(cmd.getTotalSlots())) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "正赛签位数只能是2到64的2次方");
         }
-        if (cmd.getOfflineFromRound().getSlotCount() >= cmd.getTotalSlots()) {
+        if (cmd.getOfflineFromRound() != null && cmd.getOfflineFromRound().getSlotCount() >= cmd.getTotalSlots()) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "转线下轮次必须小于正赛签位数");
         }
         if (cmd.getEntryFee() < 0) {

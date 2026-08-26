@@ -14,7 +14,7 @@ facade: POST /tournament/match/submit-result
 
 ## 接口契约
 
-请求体必须包含非空 `matchId` 和 `winnerEntryNo`，`acceptedNoticeScenes` 可选。成功返回无数据响应。
+请求体包含非空 `matchId` 和非空 `winnerEntryNo`；后端不接收订阅相关字段。成功返回无数据响应。
 
 ## 业务活动
 
@@ -31,12 +31,12 @@ flowchart TD
 
 ## 详细流程
 
-1. 识别当前登录用户，接收非空比赛编号、获胜方参赛编号与可选通知授权。
+1. 识别当前登录用户，接收比赛编号和获胜方参赛编号。
 2. 取得比赛及全部参与者，确认比赛为 `PENDING_PLAY`。
 3. 确认当前用户属于比赛参与者，且获胜方参赛编号属于本场对阵。
 4. 保存获胜方、提交人和提交时间，将比赛改为 `PENDING_CONFIRM`。
 5. 将提交人的赛果确认改为 `CONFIRMED` 并记录时间，其他参与者改为 `PENDING` 并清空原确认时间，事务性保存。
-6. 登记过滤后的有效赛事通知授权，返回无数据成功响应。
+6. 返回成功；本流程不登记订阅信息，也不发送通知。
 
 ## 异常分支
 
@@ -48,7 +48,6 @@ flowchart TD
 | `TOURNAMENT_RESULT_WINNER_REQUIRED` | 获胜方参赛编号不属于本场对阵 | submit-result | 不修改 | 请选择获胜方 |
 | `TOURNAMENT_MATCH_VERSION_CONFLICT` | 保存前比赛已被并发修改 | submit-result | 事务回滚，保留先保存结果 | 比赛状态已变更，请刷新后重试 |
 | `OPERATION_FAILED` | 比赛或参与关系保存失败 | submit-result | 事务回滚，不交付部分赛果 | 系统异常，请稍后重试 |
-| 无对外失败 | 授权场景空、无效或登记失败 | submit-result | 忽略无效值或记录异常，不影响赛果 | 提交成功 |
 
 ## 技术线索
 
@@ -56,4 +55,3 @@ flowchart TD
 - 请求：`SubmitResultCmd`
 - 调用：`TournamentMatchAppService.submitResult()` → `TournamentMatchFlowService.submitResult()` → `TournamentMatch.submitResult()`
 - 并发：`TournamentMatchRepository.updateWithVersion()`
-- 事务：应用与领域流程均 `@Transactional(rollbackFor = Exception.class)`；通知授权登记内部容错

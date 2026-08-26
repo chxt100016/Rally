@@ -13,6 +13,7 @@ public enum TournamentEntryStatusEnum {
     FROZEN("冻结"),
     IN_MATCH("比赛中"),
     PAYING("待支付"),
+    CHAMPION("冠军"),
     ELIMINATED("已淘汰"),
     WITHDRAWN("已退赛");
 

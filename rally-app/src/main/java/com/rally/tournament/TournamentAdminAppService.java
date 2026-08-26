@@ -3,13 +3,14 @@ package com.rally.tournament;
 import com.rally.domain.meetup.model.PageDTO;
 import com.rally.domain.notify.enums.NoticeScene;
 import com.rally.domain.notify.enums.NotifyBizType;
-import com.rally.domain.notify.service.NotifySubscribeService;
+import com.rally.domain.notify.service.NotificationDeliveryService;
 import com.rally.domain.tournament.model.*;
 import com.rally.domain.tournament.service.TournamentAdminService;
 import com.rally.domain.tournament.service.TournamentBatchMatchService;
 import com.rally.domain.tournament.service.TournamentEntryService;
 import com.rally.domain.tournament.service.TournamentOfflineMeetupService;
 import com.rally.notify.TournamentNotifyAssembler;
+import com.rally.notify.NotificationEventId;
 import com.rally.tournament.convert.TournamentAppConvertMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ public class TournamentAdminAppService {
 
     private final TournamentEntryService tournamentEntryService;
 
-    private final NotifySubscribeService notifySubscribeService;
+    private final NotificationDeliveryService notificationDeliveryService;
 
     /**
      * 创建赛事草稿
@@ -124,14 +125,15 @@ public class TournamentAdminAppService {
         if (matches.isEmpty()) {
             return;
         }
-        List<String> userIds = matches.stream()
-                .flatMap(match -> match.getParticipants().stream())
-                .map(MatchParticipantData::getUserId)
-                .distinct()
-                .toList();
-        notifySubscribeService.notify(NotifyBizType.TOURNAMENT, tournament.getBizId(),
-                NoticeScene.TOURNAMENT_MATCHED, userIds,
-                TournamentNotifyAssembler.matchedData(tournament.getTournamentName()));
+        for (TournamentMatch match : matches) {
+            List<String> userIds = match.getParticipants().stream()
+                    .map(MatchParticipantData::getUserId)
+                    .distinct()
+                    .toList();
+            notificationDeliveryService.notify(NotificationEventId.of(NoticeScene.TOURNAMENT_MATCHED, match.getMatchId()),
+                    NotifyBizType.TOURNAMENT, tournament.getBizId(), NoticeScene.TOURNAMENT_MATCHED,
+                    userIds, TournamentNotifyAssembler.matchedData(tournament.getTournamentName()));
+        }
     }
 
     /**

@@ -33,6 +33,4 @@ public class TournamentJoinCmd {
     @NotEmpty(message = "请至少选择一个可比赛时间")
     private List<String> availableTimes;
 
-    /** 本次微信订阅授权成功的赛事通知场景 */
-    private List<String> acceptedNoticeScenes;
 }

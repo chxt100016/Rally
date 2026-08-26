@@ -53,8 +53,7 @@ public class TournamentCreateCmd {
     @NotNull(message = "请选择正赛签位数")
     private Integer totalSlots;
 
-    /** 几强后转线下 */
-    @NotNull(message = "请填写转线下轮次")
+    /** 几强后转线下；为空表示全部轮次在线上完成 */
     private TournamentRoundEnum offlineFromRound;
 
     /** 资格赛每组人数，默认2 */

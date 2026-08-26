@@ -21,7 +21,6 @@ facade: POST /meetup/registration/join
 | `meetupId` | 字符串 | 是 | 不可为空白，目标约球编号 |
 | `autoWithdrawAt` | 日期时间 | 否 | 原样保存；当前不校验时间范围或加入模式 |
 | `shareUserId` | 字符串 | 否 | 当前仅记录日志，不保存分享归因 |
-| `acceptedNoticeScenes` | 字符串列表 | 否 | 可识别的通知场景会登记额度；非法项忽略，重复项不去重 |
 
 ### 成功响应
 
@@ -31,8 +30,7 @@ facade: POST /meetup/registration/join
 
 - register-meetup-participant  校验用户资料和约球准入，按加入模式建立报名并重算当前人数
 - join-direct-participant-chat  对直接加入报名建立本人群聊成员关系
-- grant-meetup-notification-quota  按本次已授权场景尽力登记可用通知额度
-- dispatch-meetup-registration-notification  在提交后按报名结果异步发送报名、组团或待审批通知
+- dispatch-meetup-registration-notification  在提交后按报名事件异步发送报名、组团或待审批通知，以触达日志去重
 
 ## 流程图
 
@@ -46,10 +44,9 @@ flowchart TD
     A --> B{报名是否直接 JOINED}
     B -->|是| C[join-direct-participant-chat 建立群聊成员]
     C -->|已在群聊或保存失败| E6[回滚报名]
-    B -->|否 PENDING| D[grant-meetup-notification-quota 登记授权额度]
-    C --> D
-    D --> E[dispatch-meetup-registration-notification 提交后异步通知]
-    E -->|授权或通知失败| S([保留报名并返回成功])
+    B -->|否 PENDING| E[dispatch-meetup-registration-notification 提交后异步通知]
+    C --> E
+    E -->|通知失败或不可触达| S([保留报名并返回成功])
     E --> S
 ```
 
@@ -62,9 +59,9 @@ flowchart TD
 5. 建立报名并原样保存可选自动撤回时间，不校验其先后范围，也没有本服务配套的自动撤回执行入口；直接加入模式置为 `JOINED`，审批模式置为 `PENDING`。
 6. 创建报名对象时由构造器生成雪花业务报名编号，整体保存约球与报名并重算当前人数；接口不返回编号或本次终态。
 7. 直接加入时建立本人群聊成员关系；已存在群聊成员或保存失败时回滚本次报名、人数和群聊变更。待审批不加入群聊、不占已加入人数。
-8. 解析本次订阅授权场景并尝试登记额度；无法识别的场景忽略，重复或与约球无关的已知场景仍可登记。直接加入且满员时排除 `JOIN_SUCCESS`，其他场景照常登记。
-9. 事务提交后异步通知：直接加入未满员时通知本人报名成功；满员时只向全部有效参与者通知组团成功；待审批时通知发布者有新申请。
-10. 返回报名成功；授权或通知失败不撤销报名。
+8. 事务提交后异步通知：直接加入未满员时以报名编号构造事件并通知本人报名成功；满员时也以本次报名编号构造组团事件，只向全部有效参与者通知组团成功；待审批时以报名编号构造审批提醒事件。
+9. 每个事件按接收人和渠道建立唯一触达日志后直接调用渠道；未订阅记为 `SKIPPED`，其他失败记为 `FAILED`。
+10. 返回报名成功；通知失败或不可触达不撤销报名。
 
 ## 异常分支
 
@@ -82,7 +79,7 @@ flowchart TD
 | `ALREADY_JOINED_CHAT` | 直接加入时本人已有群聊成员记录 | join-direct-participant-chat | 整体事务回滚报名和当前人数 | 你已加入该聊天 |
 | `SYSTEM_ERROR` | 报名、约球、群聊成员读写或事务提交失败 | register-meetup-participant / join-direct-participant-chat | 整体事务回滚本次报名、人数和群聊变更 | 系统异常，请稍后重试 |
 
-草稿状态当前不被拒绝。`REJECTED`、`WITHDRAWN`、`QUIT` 历史不阻止新报名；并发请求可能超员或产生重复活动报名。授权解析、额度登记和提交后通知的失败被吞掉并记录日志，不改变报名；待审批不占名额，也不加入群聊。
+草稿状态当前不被拒绝。`REJECTED`、`WITHDRAWN`、`QUIT` 历史不阻止新报名；并发请求可能超员或产生重复活动报名。提交后通知的失败或不可触达只写触达日志，不改变报名；待审批不占名额，也不加入群聊。
 
 ## 技术线索
 

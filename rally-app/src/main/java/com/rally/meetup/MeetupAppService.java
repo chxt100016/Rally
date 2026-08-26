@@ -10,11 +10,12 @@ import com.rally.domain.meetup.service.MeetupPolicy;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.notify.enums.NoticeScene;
 import com.rally.domain.notify.enums.NotifyBizType;
-import com.rally.domain.notify.service.NotifySubscribeService;
+import com.rally.domain.notify.service.NotificationDeliveryService;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import com.rally.notify.MeetupNotifyAssembler;
+import com.rally.notify.NotificationEventId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class MeetupAppService {
 
     private final ChatDomainService chatDomainService;
 
-    private final NotifySubscribeService notifySubscribeService;
+    private final NotificationDeliveryService notificationDeliveryService;
 
     private final UserProfileDomainService userProfileDomainService;
 
@@ -59,8 +60,6 @@ public class MeetupAppService {
         // 加入群聊
         chatDomainService.join(meetupId, userId);
 
-        // 创建人订阅授权建额度（需审批活动前端可含 PENDING_APPROVAL）
-        notifySubscribeService.grant(userId, NotifyBizType.MEETUP, meetupId, MeetupNotifyAssembler.parseScenes(cmd.getAcceptedNoticeScenes()));
     }
 
     /**
@@ -116,7 +115,10 @@ public class MeetupAppService {
         }
 
         // 4. 发送取消通知给全体已加入参与人（创建人除外）
-        notifySubscribeService.notify(NotifyBizType.MEETUP, meetupId, NoticeScene.MEETUP_CANCEL, meetup.getActiveParticipantIds(userId), MeetupNotifyAssembler.meetupCancelData(data), uid -> meetupDomainService.shouldNotice(meetupId, uid));
+        notificationDeliveryService.notify(NotificationEventId.of(NoticeScene.MEETUP_CANCEL, meetupId),
+                NotifyBizType.MEETUP, meetupId, NoticeScene.MEETUP_CANCEL,
+                meetup.getActiveParticipantIds(userId), MeetupNotifyAssembler.meetupCancelData(data),
+                uid -> meetupDomainService.shouldNotice(meetupId, uid));
         log.info("约球已关闭: meetupId={}", meetupId);
     }
 

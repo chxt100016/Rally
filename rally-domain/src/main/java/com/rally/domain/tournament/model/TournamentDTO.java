@@ -37,6 +37,8 @@ public class TournamentDTO {
     private LocalDateTime qualifierEndTime;
     private TournamentRoundEnum offlineFromRound;
     private String offlineFromRoundShow;
+    /** 冠军报名编号；赛事未结束时为 null。 */
+    private Integer championEntryNo;
     private String matchRuleDescription;
     private TournamentDisplayStatusEnum displayStatus;
     private String displayStatusShow;

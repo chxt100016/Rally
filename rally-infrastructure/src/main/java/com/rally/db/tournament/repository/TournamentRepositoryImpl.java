@@ -33,7 +33,11 @@ public class TournamentRepositoryImpl implements TournamentRepository {
     @Override
     public void save(TournamentData data) {
         TournamentPO po = MAPPER.toTournamentPO(data);
-        boolean updated = po.getBizId() != null && tournamentService.lambdaUpdate().eq(TournamentPO::getBizId, po.getBizId()).update(po);
+        boolean updated = po.getBizId() != null && tournamentService.lambdaUpdate()
+                .eq(TournamentPO::getBizId, po.getBizId())
+                // 全线上赛事以 null 表示不转线下，配置更新时必须允许显式清空该列。
+                .set(TournamentPO::getOfflineFromRound, po.getOfflineFromRound())
+                .update(po);
         if (!updated) {
             tournamentService.save(po);
         }

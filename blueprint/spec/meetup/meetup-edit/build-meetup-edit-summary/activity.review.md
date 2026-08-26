@@ -9,7 +9,7 @@
 ## 已确认
 
 - [Q1] 摘要基于请求、原对象还是保存后的内存对象，返回哪些范围？
-  > 基于 revise 后同一个 MeetupData 内存对象组装；返回约球基本编辑字段、存储状态和创建时间，不含参与者、actionState、recap、人时分摊或通知授权。若映射缺陷覆盖 bizId/cityName/createTime，摘要也返回覆盖后的值。
+  > 基于 revise 后同一个 MeetupData 内存对象组装；返回约球基本编辑字段、存储状态和创建时间，不含参与者、actionState、recap 或人时分摊。若映射缺陷覆盖 bizId/cityName/createTime，摘要也返回覆盖后的值。
   → 已写入活动契约、业务动作 A1/A3、详细流程第 1-3 步与边界情况
 
 - [Q2] 背景如何解析，球场缺失、天气与时段如何降级？

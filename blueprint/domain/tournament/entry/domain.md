@@ -49,12 +49,13 @@ tables:
 |---|---|---|---|
 | `WAITING` | 位于当前轮次匹配池 | `FROZEN/IN_MATCH/ELIMINATED/WITHDRAWN` | `C3/C4/C8/C9` |
 | `FROZEN` | 暂停匹配 | `WAITING/WITHDRAWN` | `C3/C9` |
-| `IN_MATCH` | 已被一场进行中比赛占用 | `WAITING/PAYING/ELIMINATED/WITHDRAWN` | `C5/C6/C9` |
+| `IN_MATCH` | 已被一场进行中比赛占用 | `WAITING/PAYING/CHAMPION/ELIMINATED/WITHDRAWN` | `C5/C6/C9` |
 | `PAYING` | 资格赛胜出，等待锁定正赛席位 | `WAITING/WITHDRAWN` | `C7/C9` |
+| `CHAMPION` | 已赢得完成的决赛 | `CHAMPION` | 无 |
 | `ELIMINATED` | 已被赛事淘汰 | `ELIMINATED` | 无 |
 | `WITHDRAWN` | 用户主动退出 | `WITHDRAWN` | 无 |
 
-`PAYING→WAITING` 必须与 `QUALIFY→MAIN`、首轮设置和 paidTime 同时发生；终态不可恢复或重新报名。
+`PAYING→WAITING` 必须与 `QUALIFY→MAIN`、首轮设置和 paidTime 同时发生；`CHAMPION/ELIMINATED/WITHDRAWN` 终态不可恢复或重新报名。
 
 ## 不变量
 
@@ -66,25 +67,26 @@ tables:
 | I4 | 赛段只接受 `QUALIFY/MAIN`，轮次只接受 `QUALIFIER/ROUND_64/ROUND_32/ROUND_16/ROUND_8/ROUND_4/FINAL`；MAIN 不得处于 QUALIFIER，QUALIFY 不得处于正赛轮次 | 报名根、晋级进度 | 状态、赛段和轮次必须原子迁移，避免进入错误匹配池 | `TOURNAMENT_ENTRY_PROGRESS_INVALID` |
 | I5 | 两类拒绝次数均非负且只在对应赛段拒赛成功时加一；达到赛事配置限额时拒绝整条拒赛命令 | 报名根、拒绝计数 | 次数和比赛拒绝结果必须同成同败，不能超限后再补偿 | `TOURNAMENT_REJECT_LIMIT_REACHED` |
 | I6 | 当前命令不得臆造 qualifiedTime；paidTime 只随 PAYING 成功晋级 MAIN 首次设置；lastVisitTime 不得被更早时刻覆盖 | 报名根、晋级进度、访问时间 | 未启用字段与已发生的支付、访问事实必须清晰区分 | `TOURNAMENT_ENTRY_TIME_CONFLICT` |
+| I7 | 只有已完成决赛的胜方才能进入 CHAMPION；冠军保持 currentRound=FINAL，且同 entryNo 的双打成员必须在同一结算事务一起成为冠军 | 报名根、晋级进度 | 冠军必须与决赛胜方和赛事冠军编号一致 | `TOURNAMENT_ENTRY_PROGRESS_INVALID` |
 
 ## 命令
 
 | 编号 | 命令 | 前置状态 | 入参 | 后置状态 | 拒绝情形 |
 |---|---|---|---|---|---|
 | C1 | 创建资格赛报名 | 同赛事用户无任意状态旧报名 | 用户、赛事、正数 entryNo、可选搭档、完整偏好 | `QUALIFY/WAITING/QUALIFIER`，计数为 0 | 重复报名；搭档冲突；偏好非法 |
-| C2 | 整组替换匹配偏好 | 非 `ELIMINATED/WITHDRAWN` | 地区集合、courtAbility、时间集合 | 状态与进度不变，三组偏好一起替换 | 任一组缺失或格式非法；报名已终止 |
+| C2 | 整组替换匹配偏好 | 非 `CHAMPION/ELIMINATED/WITHDRAWN` | 地区集合、courtAbility、时间集合 | 状态与进度不变，三组偏好一起替换 | 任一组缺失或格式非法；报名已终止 |
 | C3 | 冻结或解冻 | `WAITING` 或 `FROZEN` | 明确目标状态 | `WAITING→FROZEN` 或 `FROZEN→WAITING` | 来源状态不精确；重复操作 |
 | C4 | 锁入比赛 | `WAITING` 且轮次与赛事当前轮次一致 | matchId 所代表的匹配意图 | `IN_MATCH` | 已冻结/占用/终止；轮次不一致 |
 | C5 | 释放回匹配池 | `IN_MATCH` | 比赛拒绝、超时或未订场取消事实；可选本赛段拒绝计数递增 | `WAITING`，按需把对应计数加一 | 非在赛；计数已达限额；赛段非法 |
-| C6 | 结算比赛结果 | `IN_MATCH` | 胜负、是否决赛及完成时间 | 资格胜方 `PAYING`、资格负方 `WAITING`；正赛胜方 `WAITING` 并按需晋级，负方 `ELIMINATED` | 结果不明确；赛段/轮次非法 |
+| C6 | 结算比赛结果 | `IN_MATCH` | 胜负、比赛轮次及完成时间 | 资格胜方 `PAYING`、资格负方 `WAITING`；非决赛正赛胜方 `WAITING` 并晋级，负方 `ELIMINATED`；决赛胜方 `CHAMPION` | 结果不明确；赛段/轮次非法 |
 | C7 | 锁定正赛席位 | `QUALIFY/PAYING` | paidTime、由总签位映射的正赛首轮 | `MAIN/WAITING/首轮` | 非待支付；首轮映射非法；席位未原子占用 |
 | C8 | 淘汰未晋级报名 | `QUALIFY/WAITING` | 资格赛完成且正赛席位已满事实 | `ELIMINATED` | 条件未满足；非资格等待报名 |
-| C9 | 主动退赛 | 任意非终态 | 当前用户退赛意图 | `WITHDRAWN`，其他字段保留 | 已 `WITHDRAWN/ELIMINATED`；报名不存在 |
+| C9 | 主动退赛 | 任意非终态 | 当前用户退赛意图 | `WITHDRAWN`，其他字段保留 | 已 `CHAMPION/WITHDRAWN/ELIMINATED`；报名不存在 |
 | C10 | 记录赛事访问 | 任意状态 | 本次访问时间 | 状态不变，保留较晚 lastVisitTime | 时间缺失；不得以更早时间回退 |
 
 ## 边界情况
 
-- `WITHDRAWN/ELIMINATED` 旧报名仍阻止同用户重新报名。
+- `CHAMPION/WITHDRAWN/ELIMINATED` 旧报名仍阻止同用户重新报名。
 - 双打搭档可先有单边报名；新成员复用其 entryNo，并在应用事务中补齐双方 partnerId。
 - 比赛拒绝、超时或未订场取消时，只把仍为 IN_MATCH 的报名释放到 WAITING，其他状态跳过。
 - 资格赛胜方先进入 PAYING；取得预支付参数不改变报名，只有有效支付推进才进入 MAIN。
@@ -94,6 +96,7 @@ tables:
 - 冻结只允许 WAITING，解冻只允许 FROZEN，重复调用均返回状态非法。
 - 冻结、比赛中或待支付报名仍可改未来匹配偏好；终态不可修改偏好。
 - 详情访问是读取链路中的独立写入，后续详情拼装失败不回滚已记录时间。
+- WAITING 报名的 currentRound 晚于赛事 currentRound 时已经晋级但尚未进入匹配池，详情动作显示“已晋级”；只有两者相等时显示“匹配中”。
 
 ## 实现提示
 

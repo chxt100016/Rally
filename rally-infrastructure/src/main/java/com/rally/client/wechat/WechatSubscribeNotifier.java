@@ -37,33 +37,41 @@ public class WechatSubscribeNotifier implements Notifier {
 
     @Override
     public NotifyResult send(NotifyMessage message) {
+        WechatSubscribeTemplate template = WechatSubscribeTemplate.from(message.getScene());
+        if (template == null) {
+            return NotifyResult.failed("TEMPLATE_NOT_CONFIGURED", "微信订阅模板未配置: " + message.getScene(), null);
+        }
         String openid = resolveOpenid(message.getUserId());
         if (StringUtils.isBlank(openid)) {
-            return NotifyResult.fail("用户无微信openid: " + message.getUserId());
+            return NotifyResult.skipped("OPENID_NOT_FOUND", "用户无微信openid: " + message.getUserId(), template.templateId());
         }
         String token = accessTokenClient.getAccessToken();
         if (StringUtils.isBlank(token)) {
-            return NotifyResult.fail("获取access_token失败");
+            return NotifyResult.failed("ACCESS_TOKEN_UNAVAILABLE", "获取access_token失败", template.templateId());
         }
 
         Map<String, Object> body = new HashMap<>();
         body.put("touser", openid);
-        body.put("template_id", message.getTemplateId());
-        body.put("page", message.getPage());
+        body.put("template_id", template.templateId());
+        body.put("page", template.page(message.getRefBizId()));
         // 跳转版本：开发/体验测试需设为 developer/trial，否则默认 formal 会去打开正式版导致跳不到详情
         body.put("miniprogram_state", StringUtils.isNotBlank(properties.getSubscribeMiniprogramState()) ? properties.getSubscribeMiniprogramState() : "formal");
-        body.put("data", wrapData(message.getData()));
+        body.put("data", wrapData(template.mapData(message.getData())));
 
         String url = properties.getSubscribeSendUrl() + "?access_token=" + token;
         SubscribeSendResponse resp = Http.uri(url).jsonHeader().entity(body).doPost().result(SubscribeSendResponse.class);
         if (resp == null) {
-            return NotifyResult.fail("订阅消息发送无响应");
+            return NotifyResult.failed("NO_RESPONSE", "订阅消息发送无响应", template.templateId());
         }
         if (resp.getErrcode() != 0) {
-            log.warn("订阅消息发送失败: openid={}, template={}, errcode={}, errmsg={}", openid, message.getTemplateId(), resp.getErrcode(), resp.getErrmsg());
-            return NotifyResult.fail("errcode=" + resp.getErrcode() + ",errmsg=" + resp.getErrmsg());
+            if (resp.getErrcode() == 43101) {
+                return NotifyResult.skipped("43101", resp.getErrmsg(), template.templateId());
+            }
+            log.warn("订阅消息发送失败: openid={}, template={}, errcode={}, errmsg={}",
+                    openid, template.templateId(), resp.getErrcode(), resp.getErrmsg());
+            return NotifyResult.failed(String.valueOf(resp.getErrcode()), resp.getErrmsg(), template.templateId());
         }
-        return NotifyResult.ok();
+        return NotifyResult.sent(resp.getMsgid(), template.templateId());
     }
 
     /** 将原始 key->value 包装为微信要求的 key->{value:v} 结构 */
@@ -89,5 +97,6 @@ public class WechatSubscribeNotifier implements Notifier {
     private static class SubscribeSendResponse {
         private int errcode;
         private String errmsg;
+        private String msgid;
     }
 }

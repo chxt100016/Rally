@@ -1,5 +1,6 @@
 package com.rally.domain.notify.model;
 
+import com.rally.domain.notify.enums.NotifyDeliveryStatus;
 import lombok.Data;
 
 /**
@@ -8,19 +9,35 @@ import lombok.Data;
 @Data
 public class NotifyResult {
 
-    private boolean success;
+    private NotifyDeliveryStatus status;
+    private String providerMessageId;
+    private String providerTemplateId;
+    private String errorCode;
     private String failReason;
 
-    public static NotifyResult ok() {
+    public static NotifyResult sent(String providerMessageId, String providerTemplateId) {
         NotifyResult result = new NotifyResult();
-        result.setSuccess(true);
+        result.setStatus(NotifyDeliveryStatus.SENT);
+        result.setProviderMessageId(providerMessageId);
+        result.setProviderTemplateId(providerTemplateId);
         return result;
     }
 
-    public static NotifyResult fail(String reason) {
+    public static NotifyResult failed(String errorCode, String reason, String providerTemplateId) {
         NotifyResult result = new NotifyResult();
-        result.setSuccess(false);
+        result.setStatus(NotifyDeliveryStatus.FAILED);
+        result.setErrorCode(errorCode);
         result.setFailReason(reason);
+        result.setProviderTemplateId(providerTemplateId);
+        return result;
+    }
+
+    public static NotifyResult skipped(String errorCode, String reason, String providerTemplateId) {
+        NotifyResult result = new NotifyResult();
+        result.setStatus(NotifyDeliveryStatus.SKIPPED);
+        result.setErrorCode(errorCode);
+        result.setFailReason(reason);
+        result.setProviderTemplateId(providerTemplateId);
         return result;
     }
 }

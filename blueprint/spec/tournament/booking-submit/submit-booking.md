@@ -38,7 +38,7 @@ flowchart TD
 3. 未传 `meetupId` 时，确认比赛为 `BOOKING` 且本人是订场人，新建 `DRAFT` 赛约并将全部比赛参与者保存为 `JOINED`。
 4. 传入 `meetupId` 时，确认赛约存在、与比赛当前关联一致、本人为赛约创建人，且比赛为 `BOOKING` 或 `SCHEDULED`，然后更新赛约资料。
 5. 从 `BOOKING` 提交时，将比赛改为 `SCHEDULED`并写提交时间，订场人确认、其他人待确认；`SCHEDULED` 内更新时保留原确认状态。
-6. 事务保存赛约、比赛和参与关系，在提交后向其他参与者尝试发送订场通知，返回赛约编号。
+6. 事务保存赛约、比赛和参与关系；从 `BOOKING` 提交后，以比赛编号和本次提交时间构造稳定事件，向其他参与者尝试发送订场通知，最后返回赛约编号。`SCHEDULED` 内仅修改资料时不会重复通知。
 
 ## 异常分支
 
@@ -52,7 +52,7 @@ flowchart TD
 | `MEETUP_NOT_FOUND` / `TOURNAMENT_BOOKING_MEETUP_MISMATCH` / `NOT_CREATOR` | 更新的赛约不存在、不是比赛当前关联，或本人非创建人 | save-booking | 不修改 | 约球不存在／约球与比赛不匹配／仅发布者可操作 |
 | `MEETUP_TOURNAMENT_EDIT_FORBIDDEN` | 更新时比赛非 `BOOKING/SCHEDULED` | save-booking | 不修改 | 双方已确认赛约，赛事信息无法修改 |
 | `TOURNAMENT_MATCH_VERSION_CONFLICT` | `BOOKING` 提交时比赛被并发修改 | save-booking | 事务回滚，保留先保存结果 | 比赛状态已变更，请刷新后重试 |
-| 无 | `TEXT/MAP` 的 `courtId` 查不到，或通知无额度/发送失败 | save-booking | 场地降级使用请求资料；通知提交后容错 | 正常成功 |
+| 无 | `TEXT/MAP` 的 `courtId` 查不到，或通知不可触达/发送失败 | save-booking | 场地降级使用请求资料；通知提交后容错 | 正常成功 |
 | `OPERATION_FAILED` | 赛约、比赛或参与关系未完整保存 | save-booking | 事务回滚，不交付赛约编号 | 系统异常，请稍后重试 |
 
 ## 技术线索

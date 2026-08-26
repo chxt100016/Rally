@@ -72,7 +72,7 @@ A5 提交后尝试通知
 3. meetupId 非空时要求赛约存在、与比赛当前关联一致、本人为创建人，比赛为 BOOKING 或 SCHEDULED，然后更新资料。
 4. BOOKING 提交时比赛进入 SCHEDULED、记录提交时间，订场人 CONFIRMED、其他人 PENDING；SCHEDULED 内更新不重置现有确认状态。
 5. 同一事务保存赛约、比赛和参与关系。只有 BOOKING→SCHEDULED 使用比赛版本条件；SCHEDULED 内修改不比较比赛版本。
-6. 提交后向其他参与者异步尝试订场通知；无额度或发送失败不影响成功，返回赛约 bizId。
+6. 从 BOOKING 提交后，以 `matchId + scheduleSubmittedTime` 构造 `TOURNAMENT_BOOKING_SUBMITTED` 事件，向其他参与者异步尝试订场通知；不可触达或发送失败不影响成功。SCHEDULED 内仅修改资料时复用原事件并被触达日志跳过，最后返回赛约 bizId。
 
 ## 边界情况
 

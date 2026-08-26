@@ -113,6 +113,4 @@ public class SubmitBookingCmd {
     /** 场地索引，前端透传存储 */
     private String courtIndex;
 
-    /** 本次微信订阅授权成功的通知场景 */
-    private List<String> acceptedNoticeScenes;
 }

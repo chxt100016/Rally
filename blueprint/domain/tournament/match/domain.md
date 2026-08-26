@@ -95,6 +95,7 @@ tables:
 - 用户拒绝、超时或退赛可把任意在途比赛终止为 REJECTED；退赛场景允许拒绝审计字段为空。
 - 运营物理取消严格限于 MATCHED/BOOKING，SCHEDULED 及以后禁止删除。
 - 终止或删除后的报名释放、草稿赛约关闭以及完成后的报名结算属于跨聚合应用事务。
+- `round=FINAL` 且进入 `COMPLETED` 后，由跨聚合结算把胜方报名置为 CHAMPION，并以 winnerEntryNo 和 completedTime 结束所属赛事；仅 currentRound=FINAL 不足以产生冠军。
 
 ## 实现提示
 

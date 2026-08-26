@@ -15,20 +15,16 @@ public class NotifyMessage {
     private String userId;
     /** 场景 */
     private NoticeScene scene;
-    /** 模板ID */
-    private String templateId;
-    /** 跳转页面 */
-    private String page;
-    /** 模板字段数据（key 为模板字段名，value 为原始值，由渠道实现包装） */
+    /** 关联业务对象 ID，供渠道生成跳转链接或内容 */
+    private String refBizId;
+    /** 渠道无关的语义化内容变量，由渠道适配器转换为具体模板字段 */
     private Map<String, Object> data;
 
-    public static NotifyMessage of(NotifySubscribe subscribe, Map<String, Object> data) {
+    public static NotifyMessage of(String userId, String refBizId, NoticeScene scene, Map<String, Object> data) {
         NotifyMessage message = new NotifyMessage();
-        message.setUserId(subscribe.getUserId());
-        message.setScene(subscribe.getNoticeScene());
-        message.setTemplateId(subscribe.getNoticeScene().getTemplateId());
-        // 跳转到对应业务详情页（refBizId 由业务类型决定，详情页参数名为 id）
-        message.setPage(subscribe.getNoticeScene().getPage() + "?id=" + subscribe.getRefBizId());
+        message.setUserId(userId);
+        message.setRefBizId(refBizId);
+        message.setScene(scene);
         message.setData(data);
         return message;
     }

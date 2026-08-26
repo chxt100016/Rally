@@ -16,8 +16,8 @@
   > 按 Java 实现确认：不复用 assertPublish。Bean Validation 只约束必填、长度、人数范围、经纬度和 NTRP 单值范围；不拒绝过去开始时间、任意持续时长、模式所需边界缺失、上下界关系或非 0.5 步长。
   → 已落入请求参数和详细流程。
 
-- [Q3] 费用明细为空值或空列表，以及通知授权和区县编码字段，实际如何保存？
-  > 按 Java 生成映射确认：costItems 为 null 时保留原列表，空列表时清空；acceptedNoticeScenes 不进入映射也不创建通知额度；districtCode 不保存，districtName 由命中球场库的区县名或最终地址解析。hourlyAllocations 不在编辑命令中，原按人时资料随现有 CostData 结构保留。
+- [Q3] 费用明细为空值或空列表，以及区县编码字段，实际如何保存？
+  > 按 Java 生成映射确认：costItems 为 null 时保留原列表，空列表时清空；districtCode 不保存，districtName 由命中球场库的区县名或最终地址解析。hourlyAllocations 不在编辑命令中，原按人时资料随现有 CostData 结构保留。
   → 已落入请求参数、详细流程和服务边界。
 
 - [Q4] 文字或地图模式命中球场库后，哪些约球身份和审计字段会被球场数据覆盖，保存结果是什么？

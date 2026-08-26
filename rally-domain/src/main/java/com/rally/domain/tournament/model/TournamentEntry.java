@@ -43,10 +43,11 @@ public class TournamentEntry {
         return new TournamentEntry(data);
     }
 
-    /** 已退出或已淘汰的报名不可修改偏好 */
+    /** 已退出、已淘汰或已夺冠的报名不可修改偏好 */
     public void assertCanUpdatePreference() {
         Assert.isTrue(this.data.getStatus() != TournamentEntryStatusEnum.WITHDRAWN
-                && this.data.getStatus() != TournamentEntryStatusEnum.ELIMINATED, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
+                && this.data.getStatus() != TournamentEntryStatusEnum.ELIMINATED
+                && this.data.getStatus() != TournamentEntryStatusEnum.CHAMPION, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
     }
 
     public void updatePreference(java.util.List<String> preferredDistricts, com.rally.domain.tournament.enums.CourtAbilityEnum courtAbility, java.util.List<String> availableTimes) {
@@ -68,7 +69,8 @@ public class TournamentEntry {
 
     public void assertCanWithdraw() {
         Assert.isTrue(this.data.getStatus() != TournamentEntryStatusEnum.WITHDRAWN
-                && this.data.getStatus() != TournamentEntryStatusEnum.ELIMINATED, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
+                && this.data.getStatus() != TournamentEntryStatusEnum.ELIMINATED
+                && this.data.getStatus() != TournamentEntryStatusEnum.CHAMPION, BizErrorCode.TOURNAMENT_ENTRY_STATUS_ILLEGAL);
     }
 
     public void withdraw() {
@@ -106,18 +108,19 @@ public class TournamentEntry {
     }
 
     /**
-     * 比赛获胜后推进报名状态。资格赛胜者进入待支付；正赛胜者进入下一轮等待匹配。
-     * 决赛没有下一轮，冠军保留在 FINAL。
+     * 比赛获胜后推进报名状态。资格赛胜者进入待支付；正赛胜者进入下一轮等待匹配；决赛胜者成为冠军。
      */
     public void advanceAfterWin(TournamentRoundEnum completedRound) {
         if (this.data.getStage() == TournamentEntryStageEnum.QUALIFY) {
             this.data.setStatus(TournamentEntryStatusEnum.PAYING);
             return;
         }
-        this.data.setStatus(TournamentEntryStatusEnum.WAITING);
         TournamentRoundEnum nextRound = completedRound.nextRound();
-        if (nextRound != null) {
-            this.data.setCurrentRound(nextRound);
+        if (nextRound == null) {
+            this.data.setStatus(TournamentEntryStatusEnum.CHAMPION);
+            return;
         }
+        this.data.setStatus(TournamentEntryStatusEnum.WAITING);
+        this.data.setCurrentRound(nextRound);
     }
 }
