@@ -1,0 +1,21 @@
+# platform-config.all-config-query.activity.query-all-config-view 澄清记录
+
+<!-- 本文件由 bp review 命令维护,请勿手工编辑 -->
+
+## 待答复
+
+## 已答复
+
+## 已确认
+
+- [Q1] 返回配置的名录、顺序和数量由什么决定？
+  > 只遍历 SystemConfigKey 枚举，按声明顺序返回，当前64项；数据库中未注册 key 不进入结果。
+  → 已写入活动契约、业务动作 A1、详细流程第 1 步与边界情况
+
+- [Q2] 记录不存在、停用和启用时当前值与 overridden 如何确定？
+  > 只查 global；存在且启用用库值、overridden=true，不存在或停用回退枚举默认值并标记 false。
+  → 已写入业务动作 A2-A3 与详细流程第 2-3 步
+
+- [Q3] version 与非法配置值如何返回？
+  > 无记录 version=0；有记录返回库内 version，即使停用。值不解析、不校验、不修复，启用非法值也原样展示。
+  → 已写入详细流程第 4-5 步与边界情况

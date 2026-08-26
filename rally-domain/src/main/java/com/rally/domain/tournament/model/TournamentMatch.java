@@ -167,7 +167,10 @@ public class TournamentMatch {
         participant.setConfirmStatus(ConfirmStatusEnum.REJECTED);
         participant.setConfirmTime(now);
         data.setStatus(TournamentMatchStatusEnum.REJECTED);
+        data.setRejectPhase(TournamentRejectPhaseEnum.SCHEDULE_REJECT);
         data.setRejectReasonCode(rejectReason.getCode());
+        data.setRejectedBy(participant.getUserId());
+        data.setRejectedTime(now);
     }
 
     /**
@@ -211,7 +214,10 @@ public class TournamentMatch {
             participant.setConfirmStatus(ConfirmStatusEnum.REJECTED);
             participant.setConfirmTime(now);
             data.setStatus(TournamentMatchStatusEnum.REJECTED);
+            data.setRejectPhase(TournamentRejectPhaseEnum.SCHEDULE_REJECT);
             data.setRejectReasonCode(rejectReason.getCode());
+            data.setRejectedBy(userId);
+            data.setRejectedTime(now);
         } else if (!confirm && rebookReason != null) {
             Assert.notNull(rebookReason, BizErrorCode.TOURNAMENT_REBOOK_REASON_REQUIRED);
             participant.setConfirmStatus(ConfirmStatusEnum.REJECTED);
@@ -278,7 +284,10 @@ public class TournamentMatch {
             participant.setResultConfirmStatus(ConfirmStatusEnum.REJECTED);
             participant.setResultConfirmTime(now);
             data.setStatus(TournamentMatchStatusEnum.REJECTED);
+            data.setRejectPhase(TournamentRejectPhaseEnum.RESULT_REJECT);
             data.setRejectReasonCode(rejectReason.getCode());
+            data.setRejectedBy(userId);
+            data.setRejectedTime(now);
         } else {
             participant.setResultConfirmStatus(ConfirmStatusEnum.CONFIRMED);
             participant.setResultConfirmTime(now);

@@ -1,6 +1,7 @@
 package com.rally.domain.tournament.model;
 
 import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
+import com.rally.domain.tournament.enums.TournamentRejectPhaseEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import lombok.Data;
 
@@ -24,7 +25,10 @@ public class TournamentMatchData {
     private Integer winnerEntryNo;
     private String submitterUserId;
     private LocalDateTime submittedTime;
+    private TournamentRejectPhaseEnum rejectPhase;
     private String rejectReasonCode;
+    private String rejectedBy;
+    private LocalDateTime rejectedTime;
     /** 最近一次打回重订的用户及理由，用于订场人重新提交时展示原因。 */
     private String lastRebookBy;
     private String lastRebookReasonCode;

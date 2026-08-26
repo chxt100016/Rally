@@ -1,0 +1,21 @@
+# meetup.meetup-publish.activity.join-publisher-chat 澄清记录
+
+<!-- 本文件由 bp review 命令维护,请勿手工编辑 -->
+
+## 待答复
+
+## 已答复
+
+## 已确认
+
+- [Q1] 发布者成员的初始字段和历史消息如何处理？
+  > 生成雪花成员编号，refId 为新约球、userId 为发布者，unreadCount=0、joinedAt=当前时间，lastReadMessageId/lastReadAt 为空；不读取历史消息。
+  → 已写入领域依赖、业务动作 A1-A2、详细流程第 1-3 步与边界情况
+
+- [Q2] 成员已存在或唯一冲突时是否视为幂等成功？
+  > 不视为幂等成功。existsByRefIdAndUserId 命中抛 ALREADY_JOINED_CHAT，并发唯一冲突按保存失败处理。
+  → 已写入异常分支、详细流程第 1 步与边界情况
+
+- [Q3] 群聊写入与约球、报名的事务边界是什么？
+  > 群聊成员与新 OPEN 约球、发布者 JOINED 报名处于同一应用事务；成员检查或保存失败会回滚全部发布写入。
+  → 已写入触发条件、业务动作 A3、详细流程第 4 步与实现提示

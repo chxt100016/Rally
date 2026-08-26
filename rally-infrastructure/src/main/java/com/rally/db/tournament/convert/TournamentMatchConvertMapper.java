@@ -2,6 +2,7 @@ package com.rally.db.tournament.convert;
 
 import com.rally.db.tournament.entity.TournamentMatchPO;
 import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
+import com.rally.domain.tournament.enums.TournamentRejectPhaseEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.model.TournamentMatchData;
 import org.mapstruct.Mapper;
@@ -19,12 +20,14 @@ public interface TournamentMatchConvertMapper {
 
     @Mapping(target = "round", source = "round", qualifiedByName = "strToRound")
     @Mapping(target = "status", source = "status", qualifiedByName = "strToMatchStatus")
+    @Mapping(target = "rejectPhase", source = "rejectPhase", qualifiedByName = "strToRejectPhase")
     @Mapping(target = "submitterUserId", source = "submittedBy")
     TournamentMatchData toTournamentMatchData(TournamentMatchPO po);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "round", source = "round", qualifiedByName = "roundToStr")
     @Mapping(target = "status", source = "status", qualifiedByName = "matchStatusToStr")
+    @Mapping(target = "rejectPhase", source = "rejectPhase", qualifiedByName = "rejectPhaseToStr")
     @Mapping(target = "submittedBy", source = "submitterUserId")
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
@@ -47,6 +50,16 @@ public interface TournamentMatchConvertMapper {
 
     @Named("matchStatusToStr")
     static String matchStatusToStr(TournamentMatchStatusEnum value) {
+        return value == null ? null : value.name();
+    }
+
+    @Named("strToRejectPhase")
+    static TournamentRejectPhaseEnum strToRejectPhase(String value) {
+        return value == null ? null : TournamentRejectPhaseEnum.valueOf(value);
+    }
+
+    @Named("rejectPhaseToStr")
+    static String rejectPhaseToStr(TournamentRejectPhaseEnum value) {
         return value == null ? null : value.name();
     }
 }

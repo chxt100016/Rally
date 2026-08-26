@@ -46,3 +46,7 @@ start/docker/**
 cert/
 
 skills-lock.json
+
+# blueprint
+blueprint/context/db.yaml
+blueprint/lock.json.tmp

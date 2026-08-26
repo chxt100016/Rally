@@ -4,8 +4,8 @@
   "services": {
     "court.court-collection": {
       "flow": {
-        "product_hash": "sha256:c6f389ad75e64fe9f28f0a7645f5175f914bc2696fe753c0207d0da0dec171b2",
-        "approved_at": "2026-08-25T11:17:56Z"
+        "product_hash": "sha256:ca33ce1791465edaa8676b4d67bb31622c90129105bc838d36bcd1f8240f1256",
+        "approved_at": "2026-08-25T17:14:02Z"
       },
       "activity": {
         "flows_hash": "sha256:200c56213e533deeb240a9a082b3331117ae4c134e04da4006544114f9baaafd",
@@ -14,8 +14,8 @@
     },
     "court.court-create": {
       "flow": {
-        "product_hash": "sha256:1f89f6efe9ee64d41c65ac9bcf1b9930ff57689db679f56b9fc72466243fe878",
-        "approved_at": "2026-08-25T11:17:56Z"
+        "product_hash": "sha256:0b027f667daf8d732c6b67ccff5f790c1b48695c4369fe5a19409ebbff382c7b",
+        "approved_at": "2026-08-25T17:14:02Z"
       },
       "activity": {
         "flows_hash": "sha256:fa0508a479c1dc2665aeab19aaa23080467731b99e64092f1d1bb455f63ab7c0",
@@ -24,8 +24,8 @@
     },
     "court.court-update": {
       "flow": {
-        "product_hash": "sha256:06534e3df987343ff646079720ab7a05429c7abb39b119ffe3c617fb884a541e",
-        "approved_at": "2026-08-25T11:17:56Z"
+        "product_hash": "sha256:74fa89fcf62d3c3aac6913ff3309b5221de2bdca0c52afd48659ac2803260cf5",
+        "approved_at": "2026-08-25T17:14:02Z"
       },
       "activity": {
         "flows_hash": "sha256:afddffbcc98dc0136706b92d33bda88482db5923aa68f27fbcd821ea6d67c9be",
@@ -34,12 +34,1112 @@
     },
     "court.court-disable": {
       "flow": {
-        "product_hash": "sha256:f9217d8108e29593f738080a6542b696f50f753b4d312424c3c4d987d986b517",
-        "approved_at": "2026-08-25T11:17:56Z"
+        "product_hash": "sha256:d8f89c178a9cee0ddab6b69d9ce502fb10db2cf6b56df27e842e9f552fc644db",
+        "approved_at": "2026-08-25T17:14:02Z"
       },
       "activity": {
         "flows_hash": "sha256:ec7107023feee11edb653c358d95f6456fe61143667bf60502a2831bbc3f5ab5",
         "approved_at": "2026-08-25T11:24:14Z"
+      }
+    },
+    "content-production.daily-schedule-copy": {
+      "flow": {
+        "product_hash": "sha256:2af3559068e058c7d2653626286f2471e9fe4df971b92da7944dde2492baeaf1",
+        "approved_at": "2026-08-25T17:05:12Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:f11bb5173413e9dc54079de2998554e2545f09078b233507e1cc98d142f67a97",
+        "approved_at": "2026-08-25T20:20:24Z"
+      }
+    },
+    "content-production.generic-image-upload": {
+      "flow": {
+        "product_hash": "sha256:3f64436f4584c4d523619991ce4cf8903f1021d9fc9adc42453d96c3606f59c0",
+        "approved_at": "2026-08-25T17:05:49Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a82b06bf2cbce94db7240700044d3804023fd3e2e6014bd6c81758eb4a2de0a1",
+        "approved_at": "2026-08-25T20:21:51Z"
+      }
+    },
+    "content-production.instant-text-translation": {
+      "flow": {
+        "product_hash": "sha256:85525282cad361eca15c1ebb69f3228ab778830afce753b8800bb455363ac49a",
+        "approved_at": "2026-08-25T17:06:39Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:4f44c663df0467b876db2442823fd5fefa4839d6fb59406bcb8d6596b6bba84d",
+        "approved_at": "2026-08-25T20:24:20Z"
+      }
+    },
+    "content-production.pending-poster-list": {
+      "flow": {
+        "product_hash": "sha256:5a791bb4574dc2a2ba7e368eae54dba02f6ff54fc18194fe3edee570823a1653",
+        "approved_at": "2026-08-25T17:07:20Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:41716bcea3893e139f13ee476df8616c0d1e5787025a16edc93e4909cf2408f0",
+        "approved_at": "2026-08-25T20:25:42Z"
+      }
+    },
+    "content-production.pending-translation-batch": {
+      "flow": {
+        "product_hash": "sha256:dbc013a63515b8356f290e054bf196e6903c5e21b826280b17287a9b9f8c28a9",
+        "approved_at": "2026-08-25T17:08:03Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:5bfef2999f910bc7fa53f1f4d23f71542cb605187ffaebe354672f7a6bdd53df",
+        "approved_at": "2026-08-25T20:26:57Z"
+      }
+    },
+    "content-production.seed-list-copy": {
+      "flow": {
+        "product_hash": "sha256:6524a3307b0b65794543f9da7bc82ffd21be57158b9ab12c27be7a24c892b89d",
+        "approved_at": "2026-08-25T17:08:43Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:0ae02a138066afa7c023f0b94f24b43cf6d3f17fe82b61b5895351608c51d5b9",
+        "approved_at": "2026-08-25T20:28:45Z"
+      }
+    },
+    "content-production.tournament-image-maintenance": {
+      "flow": {
+        "product_hash": "sha256:3b38ca42e8ccc8983b4d7a3a964dc84f6efa25b6770b424ad86ff7ec14dd6c0c",
+        "approved_at": "2026-08-25T17:10:00Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:feb8703d00e086fc31ca7af1921f83e134a1f8e37f60228af475e28976acde8e",
+        "approved_at": "2026-08-25T20:30:10Z"
+      }
+    },
+    "content-production.tournament-poster-prompt": {
+      "flow": {
+        "product_hash": "sha256:e07a093818f36082c9231a2c0268b61a398d13e22700157dc282d4cae2c0cc56",
+        "approved_at": "2026-08-25T17:11:09Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:d1c0b541cacdad0105c920a035727116bc75679a5995fc237bed9be04f4b23e0",
+        "approved_at": "2026-08-25T20:31:28Z"
+      }
+    },
+    "court.city-court-list": {
+      "flow": {
+        "product_hash": "sha256:6548599c5f1f4140dce0b0ca868469240bb65923e03e50b07175f4884f82378a",
+        "approved_at": "2026-08-25T17:13:06Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:bea81d33c5384054b3a72f05208c3be04fbfbbe04eb64e6d699a5897c565fd32",
+        "approved_at": "2026-08-25T20:32:33Z"
+      }
+    },
+    "court.court-name-search": {
+      "flow": {
+        "product_hash": "sha256:a91aad3b5f836e2d19e24c98150b63b2b5357bae24d3833d4ec4bee453b16f65",
+        "approved_at": "2026-08-25T17:13:06Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:724337fb4c91906464adbf2fdc099474838bf099a570679df080e24da05740f4",
+        "approved_at": "2026-08-25T20:34:22Z"
+      }
+    },
+    "court.court-activity-heat-settlement": {
+      "flow": {
+        "product_hash": "sha256:47efb3d55b0bfce0bf1fea334e11c295b72f3838cf2b29a72f39a69b48dde3af",
+        "approved_at": "2026-08-25T17:13:50Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:937d5aca6bbd5583abbbf49baea3c04e3c210da29b8a054737b05f659d5acd47",
+        "approved_at": "2026-08-25T20:33:35Z"
+      }
+    },
+    "identity-account.account-login": {
+      "flow": {
+        "product_hash": "sha256:7d858572e187df21508abf50d07c1ee4f07741feba786ac0b338966435c27dba",
+        "approved_at": "2026-08-25T17:15:01Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:b2de6ada0abd5783cb8170566c88ea15d1b85b4cedeeb2fe1c5c2b1c7c386e55",
+        "approved_at": "2026-08-25T20:36:03Z"
+      }
+    },
+    "identity-account.phone-binding": {
+      "flow": {
+        "product_hash": "sha256:8373d6129c74347e778f17b6c3567791ebce53a1910f55cc9d90052192ee6a03",
+        "approved_at": "2026-08-25T17:15:43Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:fbbbfa3e1c5397f24130f658041cb4df988d4193d56b9fd449f2476ce55b9d76",
+        "approved_at": "2026-08-25T20:37:14Z"
+      }
+    },
+    "identity-account.registration-profile-completion": {
+      "flow": {
+        "product_hash": "sha256:bce0818c8369d293f21e1f9c5dddc8b0453ff57b313a44c8a3008c9c882167b4",
+        "approved_at": "2026-08-25T17:16:26Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:6f80538a6628bdc8acf6a2cbaf9a8d4f16aa6b5ff0f6d988ae378cc347099fc2",
+        "approved_at": "2026-08-25T20:38:28Z"
+      }
+    },
+    "meetup.chat-message-pull": {
+      "flow": {
+        "product_hash": "sha256:e37870c70e4605a4a17a207169b8ad5c95eb8f99ee1ecbcb6b79de4a3eef6a42",
+        "approved_at": "2026-08-25T17:20:38Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:d1c908946a7cb6e8452d11d3af5882aa5b0a8183d6df8df8591c9aeb22dbf63e",
+        "approved_at": "2026-08-25T20:40:34Z"
+      }
+    },
+    "meetup.chat-message-send": {
+      "flow": {
+        "product_hash": "sha256:5e3b8c35046b04f3e7fe2f83924d1e3c3b1971ba7b77d8cf2f956b6663f58197",
+        "approved_at": "2026-08-25T17:22:01Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:ec8c9e4aa8cd28fa4d1c4744050b5395c0b2ee881777ee075c7826cf4902a320",
+        "approved_at": "2026-08-25T20:41:55Z"
+      }
+    },
+    "meetup.meetup-close": {
+      "flow": {
+        "product_hash": "sha256:0b614751fee8781d41def65d17566eacecc4d7e072edfc6b6a555cdcbc48b673",
+        "approved_at": "2026-08-25T17:23:32Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:9331b4faa3271489e1c47a2e81ada35a0c1b3d29a0f7a8ec6d1653e895b66c16",
+        "approved_at": "2026-08-25T20:43:55Z"
+      }
+    },
+    "meetup.meetup-cost-update": {
+      "flow": {
+        "product_hash": "sha256:001f7510f3dc2744ad1a93d9e5b6f2a68277c859262650a8839983a31444cefb",
+        "approved_at": "2026-08-25T17:24:54Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:9b81ece0e0fb5c777ca65dd0374bd903e0ed82c384728e1a3cdda83bc44f5d15",
+        "approved_at": "2026-08-25T20:44:56Z"
+      }
+    },
+    "meetup.meetup-detail": {
+      "flow": {
+        "product_hash": "sha256:da70afd1959c0373dbec4c5852ee23f208f9101053304a205eccc1d207a8f966",
+        "approved_at": "2026-08-25T17:26:31Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:6a5f7946a1f3ceaa950c5058810fbeb133a4ca758dc912c54c765a10cd888a10",
+        "approved_at": "2026-08-25T20:48:50Z"
+      }
+    },
+    "meetup.meetup-edit": {
+      "flow": {
+        "product_hash": "sha256:d3561a555fec395872a8468da0822b47031b1cd5143e3ac4dbe6f2824c73f75f",
+        "approved_at": "2026-08-25T17:29:22Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:873aed41b78fc88e277e91848a39b8398ea6bf9d2063e812261168685b055bde",
+        "approved_at": "2026-08-25T20:50:39Z"
+      }
+    },
+    "meetup.meetup-finish-settlement": {
+      "flow": {
+        "product_hash": "sha256:b3e665e5dcfd466bbb5558589d49218fc0c22e8b1b7f6e13bc42ddaff0cd52d6",
+        "approved_at": "2026-08-25T17:30:31Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:c13b3c4b8ecc7c46fff2234147caecfb4b3b6385fe72bf9ed07c204519b6f824",
+        "approved_at": "2026-08-25T20:51:47Z"
+      }
+    },
+    "meetup.meetup-invite": {
+      "flow": {
+        "product_hash": "sha256:e9aeec61f649ef9b57d3bd2af4c28821018be7580c784ed1ecba1b61c59522f4",
+        "approved_at": "2026-08-25T17:38:16Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:bedb58106e1608b5e8dadb7cd1a916cab2070a7cc2f8a8b6e118efa582baf853",
+        "approved_at": "2026-08-25T20:53:45Z"
+      }
+    },
+    "meetup.meetup-join": {
+      "flow": {
+        "product_hash": "sha256:2cbc500b9da8f97f37a68de268290f699e07fd6a2e51c2b64b522b03986efe0e",
+        "approved_at": "2026-08-25T17:38:44Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a6447111dbba6141112380a6b33e659e69a99277c951f918a558b9391f79ba7b",
+        "approved_at": "2026-08-25T21:00:11Z"
+      }
+    },
+    "meetup.meetup-publish": {
+      "flow": {
+        "product_hash": "sha256:6959494c725e1f67151de8055ba4b4efae8c4ebe4fdac128c71b0ac9428ef171",
+        "approved_at": "2026-08-25T17:36:14Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:e4d23ec57da02ad75f93179e03625d6ee0d106a5e1dc7ea9f5fbed8aa6ff3b71",
+        "approved_at": "2026-08-25T21:02:42Z"
+      }
+    },
+    "meetup.meetup-quit": {
+      "flow": {
+        "product_hash": "sha256:d48cfeefac7d10b7646ffa573a20a5cfac36a2dbfd648677c22adb1e822b43e0",
+        "approved_at": "2026-08-25T17:37:39Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:945c8df616e177208372c6a1c250c59d3a45cdb86fda7526fcff348000130841",
+        "approved_at": "2026-08-25T21:04:48Z"
+      }
+    },
+    "meetup.meetup-square-list": {
+      "flow": {
+        "product_hash": "sha256:00dc806e5b5c9e434df2bd46a87d326a917dcea80d5fb6a059889ce832c3fc03",
+        "approved_at": "2026-08-25T17:40:40Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:96a9ccb4fa6982c852c1da8de19bcfd2e002e7df68d7ca5b29dbab0bc9cdd953",
+        "approved_at": "2026-08-25T21:07:43Z"
+      }
+    },
+    "meetup.my-meetups": {
+      "flow": {
+        "product_hash": "sha256:788d94d876f2ecb9dd0fd6a7321674fdb4dba6268c19e0d225f7eade2a47115f",
+        "approved_at": "2026-08-25T17:42:32Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:eb2f4537513ec3545fc9c6399f1415043511aa907dc9c6b9b4fb53b31bf53121",
+        "approved_at": "2026-08-25T21:11:07Z"
+      }
+    },
+    "meetup.peer-review-submit": {
+      "flow": {
+        "product_hash": "sha256:b4fce6ba96d1bef8ec4eefa12ffb09dd26c4ed17538bc5c4b95f4f1f5bc74cdb",
+        "approved_at": "2026-08-25T17:44:19Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a88ef70bb7588e97c0e69d16c808d62ee9eb3677f82ed484a33f58adf1a1396d",
+        "approved_at": "2026-08-25T21:13:02Z"
+      }
+    },
+    "meetup.registration-approve": {
+      "flow": {
+        "product_hash": "sha256:bdbc110cf560cc3d9352d949d764996f980f05c2be0fc470e1b332567be20d22",
+        "approved_at": "2026-08-25T17:46:10Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:c9a93b44619784768a659198af0e050153d04581d47e0e53bd119a827a5cda40",
+        "approved_at": "2026-08-25T21:15:13Z"
+      }
+    },
+    "meetup.registration-reject": {
+      "flow": {
+        "product_hash": "sha256:6cefd3442b2c3be7622d467d8f4e952dac091a263a70474103fc0e72e5ed4192",
+        "approved_at": "2026-08-25T17:47:52Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:8a1bcb407e2e727588a181b3b9b4bb026b734a894c7f08aaf4b0fc850094c187",
+        "approved_at": "2026-08-25T21:16:26Z"
+      }
+    },
+    "meetup.registration-withdraw": {
+      "flow": {
+        "product_hash": "sha256:ead0b73e967fb7e3c79519694597e9ed0b1f8740a1dc67ac99af50c69e2cd3f0",
+        "approved_at": "2026-08-25T17:49:05Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:46894e963be11223ab9b54b8ace8199377622467dc68ab8d8e766897550f73de",
+        "approved_at": "2026-08-25T21:17:09Z"
+      }
+    },
+    "meetup.review-skip": {
+      "flow": {
+        "product_hash": "sha256:7caa9da6cae4397372faeab40f7b393ebffd1296de2fc802ad0384669a2d6055",
+        "approved_at": "2026-08-25T17:51:33Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:2fcac7756aa2532f78cbaf9474278054dd7656b6be21614e3e976d3f842326ea",
+        "approved_at": "2026-08-25T21:17:52Z"
+      }
+    },
+    "meetup.score-add": {
+      "flow": {
+        "product_hash": "sha256:3b3baf4067f1636d2e78fe5accfe6e513e761eea0b31c510fd6d4796a7abe179",
+        "approved_at": "2026-08-25T17:53:37Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:81a5e4606ae0f5a37345f53a6291cf76004f91eea58e2af0eb099949c938cdb7",
+        "approved_at": "2026-08-25T21:18:51Z"
+      }
+    },
+    "meetup.score-delete": {
+      "flow": {
+        "product_hash": "sha256:8edb5ed97459de6c110a1d8782e45aad95033b9b3f2cced6e092221bf0e9dcdf",
+        "approved_at": "2026-08-25T17:54:57Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:76009e4027eb643eef26cd50bb8355d926e6b690a584db6edf03f95e3895368a",
+        "approved_at": "2026-08-25T21:19:35Z"
+      }
+    },
+    "meetup.score-update": {
+      "flow": {
+        "product_hash": "sha256:9115df8271b216a190c76d2e356a79eed1fd82c55984879293ed58a64b280ac5",
+        "approved_at": "2026-08-25T17:57:12Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:84c2d2a7fd76a69fb90e1462e37ed003baa2fe25da686d82caf1f79c5f12507f",
+        "approved_at": "2026-08-25T21:20:27Z"
+      }
+    },
+    "personal-profile.basic-profile-update": {
+      "flow": {
+        "product_hash": "sha256:b9249d01229fab09905b2861968777a1cf821f3b687a223384f8583b8f51932d",
+        "approved_at": "2026-08-25T17:59:17Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:6dda399391c9fba9caeaf7aa4c36e312b56552b9c62a9aa25208e299f645cf47",
+        "approved_at": "2026-08-25T21:21:55Z"
+      }
+    },
+    "personal-profile.gender-update": {
+      "flow": {
+        "product_hash": "sha256:4d87967a2225fc9457147b74f6fc55a13cbbbeb64b26ac53d46ad7b9c336e254",
+        "approved_at": "2026-08-25T18:00:21Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:bc73d5733cc8582701cbbe26a65a9eedb0e61ebff668fdd29ed86125bb15e84e",
+        "approved_at": "2026-08-25T21:23:03Z"
+      }
+    },
+    "personal-profile.initial-profile-submission": {
+      "flow": {
+        "product_hash": "sha256:fe8564c2bc693e52e11ca423964fe1225cf7151d9beb7620b1d5c143ad4628d0",
+        "approved_at": "2026-08-25T18:02:17Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:da012c92fa6c5bcddaa64afc61f002ec5aa89d80f853bbb724b5a731a90db1ca",
+        "approved_at": "2026-08-25T21:24:20Z"
+      }
+    },
+    "personal-profile.my-performance-stats": {
+      "flow": {
+        "product_hash": "sha256:d77ecf2571a4ee120e1811aa72a84b592ec8493645c62fec47bc4ddab3d820ad",
+        "approved_at": "2026-08-25T18:03:35Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a1b70a5e43e78cf799a47c620d6c4f74248f1091c4a012afa034e2ffb4c44d5d",
+        "approved_at": "2026-08-25T21:25:03Z"
+      }
+    },
+    "personal-profile.my-profile": {
+      "flow": {
+        "product_hash": "sha256:767d40aaea48f9c95dec251c88bb003e360e94da2a312f88bef5a49376795296",
+        "approved_at": "2026-08-25T18:05:01Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:e7f39651c7ad469bcb475af09fa744f7059613e001613e281be2711d67603ff0",
+        "approved_at": "2026-08-25T21:26:46Z"
+      }
+    },
+    "personal-profile.my-review-summary": {
+      "flow": {
+        "product_hash": "sha256:fd04ed480731a8a67d053f7f35588f47f7c9a7b0ec9a03f52064c149b81814e9",
+        "approved_at": "2026-08-25T18:06:19Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:909e6355a31d35da2ece8d31bd663d588e34c1f643a84188fd37cbc672d22abc",
+        "approved_at": "2026-08-25T21:27:34Z"
+      }
+    },
+    "personal-profile.my-scores": {
+      "flow": {
+        "product_hash": "sha256:4a5e6f70b87055600649e47db1b69d4a80683b7fc7c9f7e17511b1ce8b3d6eac",
+        "approved_at": "2026-08-25T18:07:57Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:ae49b41387a8be1cf0fd64faed7d08e59e4ed1d8f15b21b38a338480d8eb22f1",
+        "approved_at": "2026-08-25T21:28:28Z"
+      }
+    },
+    "personal-profile.onboarding-status": {
+      "flow": {
+        "product_hash": "sha256:74e323a45dd9af54de058ae2b7105a67328f271f2d7bad0586e2ef132ca78609",
+        "approved_at": "2026-08-25T18:09:21Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:54aa0d39fed7171c688525f6c57f49ab64b19ffe9d5fe420a8b93e61d225fa66",
+        "approved_at": "2026-08-25T21:29:38Z"
+      }
+    },
+    "personal-profile.payment-code-delete": {
+      "flow": {
+        "product_hash": "sha256:5aef945ed53cdf6ae0b9dd985d189cfd4767f02e409f9f4ab6c82184f3e20294",
+        "approved_at": "2026-08-25T18:10:55Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:fdac2254de798e02aa7c393c27ee651e433136b1176f22bcfbfab5c650d0fd0b",
+        "approved_at": "2026-08-25T21:30:40Z"
+      }
+    },
+    "personal-profile.payment-code-get": {
+      "flow": {
+        "product_hash": "sha256:20536cfa334bce728a5abcf2633cedd6b48b8604c6f7ebb8112e7dc217430695",
+        "approved_at": "2026-08-25T18:12:08Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:ebea25a4a473dc78a4255e8f131aface23b384fe6b45c5791b898a741a2f9088",
+        "approved_at": "2026-08-25T21:31:19Z"
+      }
+    },
+    "personal-profile.payment-code-save": {
+      "flow": {
+        "product_hash": "sha256:dd28bad9d2456e3f31b9ea5e2fd0aca63b8bb2ffbd9f2464acba183a1f36a3a7",
+        "approved_at": "2026-08-25T18:13:35Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:35ddb1d90dc95953297838c9425463745612eb0db9ab6730897439c6c13c184b",
+        "approved_at": "2026-08-25T21:32:03Z"
+      }
+    },
+    "personal-profile.player-home": {
+      "flow": {
+        "product_hash": "sha256:4aa9140d2b4c48a2121c5aff71ea5724744576b047c58250de565b24bc1caa6f",
+        "approved_at": "2026-08-25T18:15:47Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:282e8b12d8c704be57b3024f6a0344ca319616ac5d750eb920cfd694e82296f4",
+        "approved_at": "2026-08-25T21:34:35Z"
+      }
+    },
+    "personal-profile.profile-video-add": {
+      "flow": {
+        "product_hash": "sha256:944288333df8d3b451310bdf72ccc8b06854c60b43c177377531a4f79648ab00",
+        "approved_at": "2026-08-25T18:17:13Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:34c50272e1ce45c145884838a3c27a23bf8dda3a9c51ef885aa47f036b68176e",
+        "approved_at": "2026-08-25T21:35:45Z"
+      }
+    },
+    "personal-profile.profile-video-delete": {
+      "flow": {
+        "product_hash": "sha256:2eaa35d36475d6561ff501367a985ba05b9ac434803697cfc09a8f765c9f5cab",
+        "approved_at": "2026-08-25T18:19:16Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:1c4373bf3443199da05598cd46e39a8c066b47f62e33dca70b7aba9c06cdea40",
+        "approved_at": "2026-08-25T21:37:36Z"
+      }
+    },
+    "personal-profile.profile-video-update": {
+      "flow": {
+        "product_hash": "sha256:1b1bcae2e7f3bde1d856e3e63e91749c7ef7f73e6b4d819a0e35da5b0eb2d224",
+        "approved_at": "2026-08-25T18:21:00Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:52bb7dc4087e7d4985a86b86bdafc719267f0603adb787027921847c053bcad9",
+        "approved_at": "2026-08-25T21:38:34Z"
+      }
+    },
+    "personal-profile.self-rating-update": {
+      "flow": {
+        "product_hash": "sha256:373c90ba084d5115440926b5aab5d33e378378983182f3213c5f5cb08b6857c4",
+        "approved_at": "2026-08-25T18:22:51Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:ebbe8c70af0e081cd4c00687a39cd0914bb78d3fbd11a3ee84304b113f5080f3",
+        "approved_at": "2026-08-25T21:40:28Z"
+      }
+    },
+    "personal-profile.user-image-upload-authorization": {
+      "flow": {
+        "product_hash": "sha256:868fef64cb0d5d0caa789a64793331c495f23c84b68c67f6287fbb2b460cd9ff",
+        "approved_at": "2026-08-25T18:24:24Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:277b1c8b13a941a70e49ebcaa53afa6c19cb1c629832ac948d87458ace1a596e",
+        "approved_at": "2026-08-25T21:41:57Z"
+      }
+    },
+    "personal-profile.video-upload-authorization": {
+      "flow": {
+        "product_hash": "sha256:738a14c2e0ae1b54aad6a678ecd99f21f8fd6b22ea13ab4fc032e95bab37a3d4",
+        "approved_at": "2026-08-25T18:25:39Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a91dd2cd1ca0b87f07a2e4246a700d104d653586b88928370045c1ff0a41202c",
+        "approved_at": "2026-08-25T21:41:57Z"
+      }
+    },
+    "platform-config.all-config-query": {
+      "flow": {
+        "product_hash": "sha256:fb60e4ccba4b7435a99ddef675fc8c3b6322fd1e0258bfdcdffdf0b0be1ff087",
+        "approved_at": "2026-08-25T18:28:58Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:ed06f92effc1df7ab86a17d7139d3466233bed37a2618d309b504a60b30475dd",
+        "approved_at": "2026-08-25T21:42:41Z"
+      }
+    },
+    "platform-config.available-cities-query": {
+      "flow": {
+        "product_hash": "sha256:5cdde0113fb66ed5c6941af24b1c827b77ef8bf0e44147698f1967c0f91f0472",
+        "approved_at": "2026-08-25T18:30:48Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:c06a541d96619a1bdbace2e02f375150e391338e5b510d3d582a1f062714d490",
+        "approved_at": "2026-08-25T21:43:35Z"
+      }
+    },
+    "platform-config.city-catalog-query": {
+      "flow": {
+        "product_hash": "sha256:779c755e0a31725a0f45ab178a3886505989592514120dcc17811c414be366af",
+        "approved_at": "2026-08-25T18:32:29Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:54d72d3056439fc1d2125a57854697c14b72db3e05b7d28a4d6d4d57bcdc2bc3",
+        "approved_at": "2026-08-25T21:43:36Z"
+      }
+    },
+    "platform-config.global-config-update": {
+      "flow": {
+        "product_hash": "sha256:dbfa74bc6d640c3e5931567596fa7edda9e4e4b235e054a77400b431885f128a",
+        "approved_at": "2026-08-25T18:35:34Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:49a5994e729be806b870c5729cd1b838f6141c8ca75c4005e066d6872f90669e",
+        "approved_at": "2026-08-25T21:44:35Z"
+      }
+    },
+    "platform-config.group-chat-entry-query": {
+      "flow": {
+        "product_hash": "sha256:7262a7a4d15ecf08f24dcb220a78d100dd1817c2e1696ac32d86d5dca6ba6b00",
+        "approved_at": "2026-08-25T18:37:20Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:3886aa3400b471c5800d634d5b136ee91959011ae97a83dd36d7c7ac46c6b9f3",
+        "approved_at": "2026-08-25T21:45:11Z"
+      }
+    },
+    "platform-config.home-config-query": {
+      "flow": {
+        "product_hash": "sha256:dd9064874bb289b9febf9fd2386aff0fbc0aa5f0c85541c76b75daa07b3b66eb",
+        "approved_at": "2026-08-25T18:38:47Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:5fcddffb28d53d3f27f4c3ef3fc7e85d09931a7e941ad923f5a0bc08bc071010",
+        "approved_at": "2026-08-25T21:46:30Z"
+      }
+    },
+    "platform-config.home-config-update": {
+      "flow": {
+        "product_hash": "sha256:fb9483596f437a41486abe21301264c662eef38f9bbcbd9911b02f1e1c4f80cd",
+        "approved_at": "2026-08-25T18:41:23Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:afe7bb8f35ac66a343f7034f092d137ef716cad8f4fd0bd2594542882a848898",
+        "approved_at": "2026-08-25T21:46:30Z"
+      }
+    },
+    "platform-config.home-content-query": {
+      "flow": {
+        "product_hash": "sha256:69ebc96828e34a73d67f757d9ea7fa7d6bd70a38e4813b6f3e7269223ba5a61f",
+        "approved_at": "2026-08-25T18:46:55Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:94f840eadb220ed5fe9914250aa669117fb7c40cee446ece76386461c92c3f68",
+        "approved_at": "2026-08-25T21:48:52Z"
+      }
+    },
+    "platform-config.public-config-query": {
+      "flow": {
+        "product_hash": "sha256:9c3be79eaf9e4d6d8edbd0755d04ce51942a24e77cc3298d13fac483e259fb3d",
+        "approved_at": "2026-08-25T18:50:21Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:e26a6b9b15daa31cf058a08e85c581948d5a1c9b646277d10855723988f9ef21",
+        "approved_at": "2026-08-25T21:49:50Z"
+      }
+    },
+    "platform-config.splash-cover-query": {
+      "flow": {
+        "product_hash": "sha256:8ecd38a7f3907f0f1fd196ccb3b0f0d9bb19e938271da72affd72d96244076b9",
+        "approved_at": "2026-08-25T18:52:09Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:f5d585f43720cfb0495f147ce5d88582672b74f4858ae37956d909e58ef1a3d5",
+        "approved_at": "2026-08-25T21:50:28Z"
+      }
+    },
+    "pro-tour-data.finished-matches-query": {
+      "flow": {
+        "product_hash": "sha256:7ada454c421109ba5b788a0146dccf6cb4921215218034f9b2a398eb1c9ab966",
+        "approved_at": "2026-08-25T18:56:00Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:331793520ec54775a1ae0a3f6221ea036cbd2c51e7fe1c2c571ed4ba883a928a",
+        "approved_at": "2026-08-25T21:52:28Z"
+      }
+    },
+    "pro-tour-data.player-query": {
+      "flow": {
+        "product_hash": "sha256:cf603bba1b289cf45b4b25a6e7b50ea5ab5373bca1a18f0a99699bb2f0d70cdd",
+        "approved_at": "2026-08-25T19:00:03Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:46a2c020f50cfa838c23b3d21c0ea5d2823db1bc60c100b4ef20963349584e6f",
+        "approved_at": "2026-08-25T21:52:28Z"
+      }
+    },
+    "pro-tour-data.player-ranking-collect": {
+      "flow": {
+        "product_hash": "sha256:215d90a762efa11a96fce3274edb951fa7e642afe5772c897797d3cf4418be89",
+        "approved_at": "2026-08-25T19:04:37Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:38539b6442d71095e3637eab0e2911d3a9c775c8dc6bae7f101a1a334cc3722f",
+        "approved_at": "2026-08-25T21:53:32Z"
+      }
+    },
+    "pro-tour-data.player-tournament-path-query": {
+      "flow": {
+        "product_hash": "sha256:31c5860c937be42392adbc7131441aee2c707a19d8be94101ff0271af5c39f93",
+        "approved_at": "2026-08-25T19:06:43Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a8d0f877d7b99a4fc79a93bf1df47073b6f5d07515423a473e7430426920869f",
+        "approved_at": "2026-08-25T21:54:59Z"
+      }
+    },
+    "pro-tour-data.tournament-catalog-collect": {
+      "flow": {
+        "product_hash": "sha256:04dab564ec6d5f19e4cee239fd93494552534be5110c7763be102ff6d272daa0",
+        "approved_at": "2026-08-25T19:08:03Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:688040943abd49b72d44248d40f2f62a343d2dad8bc8e79994e6243d5c9b41c5",
+        "approved_at": "2026-08-25T21:56:01Z"
+      }
+    },
+    "pro-tour-data.tournament-draw-collect": {
+      "flow": {
+        "product_hash": "sha256:58299297be2cda778626b69afd7b2d22acf9874b56a122c9941f339ef8481a0f",
+        "approved_at": "2026-08-25T19:10:54Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:e9d8a47da3824657ea3edc2239952d31cbc59b302ddf12aba471ca9b25238ab2",
+        "approved_at": "2026-08-25T21:57:33Z"
+      }
+    },
+    "pro-tour-data.tournament-live-collect": {
+      "flow": {
+        "product_hash": "sha256:508e1f65cca6afb8b02920aecc8be47893b602d5b8ce77425e97a526828fe5c0",
+        "approved_at": "2026-08-25T19:12:42Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:05b91b68fa0c77daee3475170e37371f1df1594cbf11f0ddc44699987aa59be6",
+        "approved_at": "2026-08-25T22:00:24Z"
+      }
+    },
+    "pro-tour-data.tournament-query": {
+      "flow": {
+        "product_hash": "sha256:afc3c492d32d5c0a8b4cd43e858ba0b1e2de1b2a08b4fe2f536563337e0b038e",
+        "approved_at": "2026-08-25T19:14:09Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:7d66085b800b5753ef3b509ed802ab577161bc9b83c52798b36a215cd8390d31",
+        "approved_at": "2026-08-25T22:02:31Z"
+      }
+    },
+    "pro-tour-data.tournament-result-collect": {
+      "flow": {
+        "product_hash": "sha256:af788ab6dc261d5463007be630a826d9f1f6969803420c643bf25d9c021f1a3e",
+        "approved_at": "2026-08-25T19:15:34Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:341dbbe058b36a3036bfd71b376ad99569b5ee2b484547c45b6ba1a22e1e4908",
+        "approved_at": "2026-08-25T22:03:21Z"
+      }
+    },
+    "pro-tour-data.tournament-schedule-collect": {
+      "flow": {
+        "product_hash": "sha256:706ec9de4c4fbd3aaf7bcdd60861981043294c2037a26c84489f06c385266969",
+        "approved_at": "2026-08-25T19:17:24Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:bd0ccebcb5101664efe07f49b3b3a8b4c3221c071f2f1938d8155d4edfe9ecc2",
+        "approved_at": "2026-08-25T22:05:20Z"
+      }
+    },
+    "pro-tour-data.upcoming-matches-query": {
+      "flow": {
+        "product_hash": "sha256:81f64fc7d76d34812d06427947620ba9c3e4ea418805c7948b6943aa41d493f2",
+        "approved_at": "2026-08-25T19:19:06Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a5970799922ae36038f0f771a88f4604907fa0cdbf7daf4ae12ff457c6896b6a",
+        "approved_at": "2026-08-25T22:06:32Z"
+      }
+    },
+    "social-relations.follow-create": {
+      "flow": {
+        "product_hash": "sha256:ed2d4a2e21de3ed01ecbc48b6d2bddb902a7aeb89c76e64cf6775bfe3f52a575",
+        "approved_at": "2026-08-25T19:20:24Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:40cbf38ac574d4a1ae7abec18e225d1560295a1784336e95618a21acb43faf67",
+        "approved_at": "2026-08-25T22:09:09Z"
+      }
+    },
+    "social-relations.follow-remove": {
+      "flow": {
+        "product_hash": "sha256:179ba344654cfa910aad33f451bb2464416a0fc8569954a20bfdd8988c27bc1d",
+        "approved_at": "2026-08-25T19:21:11Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:201fcfe3072d669a68af0f9a25b5378d086adae5cac2c53b0eff2dbf72bce86a",
+        "approved_at": "2026-08-25T22:09:09Z"
+      }
+    },
+    "social-relations.followers-list": {
+      "flow": {
+        "product_hash": "sha256:3b2c118ad948995183d904a95e095bf5d3a53db26f69df4b0e2835b1680b5f12",
+        "approved_at": "2026-08-25T19:22:42Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:e79abe4fbf4765f4555a9bf3c116f95b145fe0ca60d502bb2abb1842689a5541",
+        "approved_at": "2026-08-25T22:09:10Z"
+      }
+    },
+    "social-relations.following-list": {
+      "flow": {
+        "product_hash": "sha256:ea9d2a5fcf0bc363055a6ce233ba91fc077c5835a3cd9e7e29336b3ff29c35cb",
+        "approved_at": "2026-08-25T19:22:42Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:651f5fc5205b62ba9cf9c225e4b1064892c151c2c523976a4ec3b732a4be6807",
+        "approved_at": "2026-08-25T22:09:10Z"
+      }
+    },
+    "tournament.tournament-draft-create": {
+      "flow": {
+        "product_hash": "sha256:a3d684a5a0b4b964195728b83607c42c4f80363518e05a1a773e9bcec6085a33",
+        "approved_at": "2026-08-25T19:23:55Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a2fc65a48433743607a087dd31ac36271165368bf1698db9234c7cdf4ac173c9",
+        "approved_at": "2026-08-25T22:21:28Z"
+      }
+    },
+    "tournament.tournament-config-update": {
+      "flow": {
+        "product_hash": "sha256:d91e5d92d2b228c1ab8c71c4eb3bf77c9c8a8113023128c7f1ca4d86458f92c1",
+        "approved_at": "2026-08-25T19:25:36Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:22b9ad91bb2c35bb6a7ed6386c5662e4bf00bd6b03d8eee3bcd1839b9f2ed55f",
+        "approved_at": "2026-08-25T22:21:27Z"
+      }
+    },
+    "tournament.tournament-activate": {
+      "flow": {
+        "product_hash": "sha256:24eea070404405d91fecbe17c079590fe25e83ba3f77ecbdc87c74aec09133c0",
+        "approved_at": "2026-08-25T19:27:02Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:ba1037fb65b194fce77fb9600bddc5dfaeee41e3b48de10fd019b77576afaa81",
+        "approved_at": "2026-08-25T22:21:27Z"
+      }
+    },
+    "tournament.tournament-abandon": {
+      "flow": {
+        "product_hash": "sha256:300fe77107996417221ca3000bfe96b39d15fb66c4de3072d471a982a871fe30",
+        "approved_at": "2026-08-25T19:27:02Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:c8608cd7ad30a79d4e1308df3f9aeca491411e7a867bf55fb36448d4490b9d02",
+        "approved_at": "2026-08-25T22:21:27Z"
+      }
+    },
+    "tournament.tournament-list": {
+      "flow": {
+        "product_hash": "sha256:cf1bb62e97ba5e40c4172b7b363967002b376fe70369690863bdf2604d51ce45",
+        "approved_at": "2026-08-25T19:28:04Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:5f96696feba6b35bdd4f071d5a9c66a02ada763307c1fbcd6149e5e86e7b33b8",
+        "approved_at": "2026-08-25T22:24:19Z"
+      }
+    },
+    "tournament.entry-freeze": {
+      "flow": {
+        "product_hash": "sha256:ba2b30422f4e31c7d25d83990e8a0543ac873bbfae6e0302426cf3dee7fec3d5",
+        "approved_at": "2026-08-25T19:30:49Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:f99926ab0b736ae9533651bb9c0777bdb43c6d5157bc0e7354fb6a5274173338",
+        "approved_at": "2026-08-25T22:16:32Z"
+      }
+    },
+    "tournament.entry-payment-initiate": {
+      "flow": {
+        "product_hash": "sha256:44c130496ec5126a7becaed12a0199ad2ccdc22110162ff7703993aad739d52f",
+        "approved_at": "2026-08-25T19:32:36Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:dd92e0cbf7cb09524f3d007fa1dcb34877f46c89c74c6c6129b61d8e2bb623d5",
+        "approved_at": "2026-08-25T22:16:32Z"
+      }
+    },
+    "tournament.entry-preference-update": {
+      "flow": {
+        "product_hash": "sha256:bc27ab4922b4b045927e5b3b9a86e14e7d6cc8e533d17aea32b66cbe5920fc39",
+        "approved_at": "2026-08-25T19:33:58Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:edd8a7309788b0bd0639a712ba321199165444001b1812028452d357c9308008",
+        "approved_at": "2026-08-25T22:16:33Z"
+      }
+    },
+    "tournament.entry-unfreeze": {
+      "flow": {
+        "product_hash": "sha256:ed3649c0e9e0fc35d3d2252721d735c8faad716f9f0559cdef91e1713cedd26d",
+        "approved_at": "2026-08-25T19:35:26Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:859632a16ff2c562ac55ae42a18331efb24568e831e3c6860c4ad32802dae2c5",
+        "approved_at": "2026-08-25T22:16:33Z"
+      }
+    },
+    "tournament.offline-meetup-create": {
+      "flow": {
+        "product_hash": "sha256:45644e31b4c0d2cf6fc7cb9541d942cb7625b690111821948b8075e16d94ab11",
+        "approved_at": "2026-08-25T19:37:28Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:aafc27c7bea2040e5e148909e15ab289efd554c3bdc197a740cece157224d7f0",
+        "approved_at": "2026-08-25T22:18:50Z"
+      }
+    },
+    "tournament.result-confirm": {
+      "flow": {
+        "product_hash": "sha256:1502b19eaf856563ef1a75f2a18995638706bd39a1813017f71c2e41ca844334",
+        "approved_at": "2026-08-25T19:39:29Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:e57e29d8aaa521a71b762722d46efbec08c61a7ac75986bd6fe2c605ec420070",
+        "approved_at": "2026-08-25T22:18:51Z"
+      }
+    },
+    "tournament.result-reject": {
+      "flow": {
+        "product_hash": "sha256:def7686458aba6629ccc0bbf2e4b340b703aa8989b6837fc872bfed88871ebe5",
+        "approved_at": "2026-08-25T19:41:13Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a35fd7f6b701b5463e103cd2256bf447dce30ca501713e2c6049449fbde0a8b9",
+        "approved_at": "2026-08-25T22:18:51Z"
+      }
+    },
+    "tournament.result-submit": {
+      "flow": {
+        "product_hash": "sha256:89f0e41b50a9ddb833b1123279ddae319e426b4be4adb81dfceab1b8a73ad423",
+        "approved_at": "2026-08-25T19:42:43Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:bc7331c78c9ecfe0d5d5a4a337b4aae03d0549325ee9bd122833941e05f05d9e",
+        "approved_at": "2026-08-25T22:18:50Z"
+      }
+    },
+    "tournament.result-confirmation-timeout": {
+      "flow": {
+        "product_hash": "sha256:cec052ed15f883eced46dfbc108526f7bf0c598036693e73b5b78fcb832b3436",
+        "approved_at": "2026-08-25T19:44:28Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:7edae0f66804449106e16c615633da6c7b97ec729e28cb773ed26506c61a8f80",
+        "approved_at": "2026-08-25T22:18:51Z"
+      }
+    },
+    "tournament.comment-publish": {
+      "flow": {
+        "product_hash": "sha256:35ed3c7b88ee68af9a6440ff38b37e0d327919031abfc445082a29d471a183f3",
+        "approved_at": "2026-08-25T19:46:02Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:7578062c2cfcfd65eeb9851d1009b6e283f1a854ad30b100e33f8a778e3e90b3",
+        "approved_at": "2026-08-25T22:14:21Z"
+      }
+    },
+    "tournament.comment-pull": {
+      "flow": {
+        "product_hash": "sha256:2074a866003a1a45edc68c3670a8088b3fbe8606eea93d25a10268d390da1f9b",
+        "approved_at": "2026-08-25T19:47:33Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:1ea4890e33a459de656f589d0ee5479403f9776ba61d19387e14445565c6b790",
+        "approved_at": "2026-08-25T22:14:21Z"
+      }
+    },
+    "tournament.court-booker-select": {
+      "flow": {
+        "product_hash": "sha256:b83ee01c9dc6705586d7dd435a46e492e1bfb2f874006c822dc792a7e159912c",
+        "approved_at": "2026-08-25T19:48:57Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:652545ed0315d528b7e7e3869fc2e555d35ae84458ec5776d6f77fdb1825eaaa",
+        "approved_at": "2026-08-25T22:14:22Z"
+      }
+    },
+    "tournament.court-booker-selection-timeout": {
+      "flow": {
+        "product_hash": "sha256:c6b75c4306fe8c59f59b1d826ea4b754ce9e6320c6e2aa0422ecf8da3912f740",
+        "approved_at": "2026-08-25T19:50:29Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a2189c1ab856513811b2df8fc2cb59b26ec180ef9170fa8bdf66f07cd771ca60",
+        "approved_at": "2026-08-25T22:14:22Z"
+      }
+    },
+    "tournament.booking-submit": {
+      "flow": {
+        "product_hash": "sha256:fb15c22e7c71d8dd793a5f4ac6d6950594e1641baa0928dfa8e9a6dfb3cba3d7",
+        "approved_at": "2026-08-25T19:52:34Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:428f456ef33f39e2bf07945231ddbedc61b43d9e99ee204f29ab14234b223e1f",
+        "approved_at": "2026-08-25T22:12:39Z"
+      }
+    },
+    "tournament.booking-confirm": {
+      "flow": {
+        "product_hash": "sha256:8a8ccdb4d3761a36f06e31dabc08f040d9e0ce9074c7d12caa40d01c5a20a9b7",
+        "approved_at": "2026-08-25T19:54:08Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:15d5c37173c9542980d2a0a559afe115e7b3a2ea9ac01304cf99698df80f926d",
+        "approved_at": "2026-08-25T22:12:38Z"
+      }
+    },
+    "tournament.booking-reschedule-request": {
+      "flow": {
+        "product_hash": "sha256:aadc8581bac3130cb52e409e1469703cb86b500c5558d25f5481232e17745899",
+        "approved_at": "2026-08-25T19:55:45Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:4454eee61eed5a6a6492c3a66cbadf7fffacb9fe6c6fb49d99b1df32f9e56717",
+        "approved_at": "2026-08-25T22:12:38Z"
+      }
+    },
+    "tournament.booking-reject": {
+      "flow": {
+        "product_hash": "sha256:276974bef2fc24f0ae6cdc901130ae7221b037128980db178f7d3ecd3dafdb34",
+        "approved_at": "2026-08-25T20:01:08Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:6faa89c6620966d0bf11fd74e2c197eed822b5faa6ae0e0e4401a05ac6babb17",
+        "approved_at": "2026-08-25T22:12:38Z"
+      }
+    },
+    "tournament.current-round-matching": {
+      "flow": {
+        "product_hash": "sha256:ef28cb993690b3d77e4eb545589f59ad46e996f6f7a8bb25158ebf2357f39f61",
+        "approved_at": "2026-08-25T20:03:53Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:173b88ec071d9cef37c1f9815444433eba62022b2a3a0be97425c5d25f91c2f2",
+        "approved_at": "2026-08-25T22:16:32Z"
+      }
+    },
+    "tournament.tournament-detail": {
+      "flow": {
+        "product_hash": "sha256:278faaf6434bfcf686333a9b52fef611f0d8ce4486c2a9b09f69127db6ea52d7",
+        "approved_at": "2026-08-25T20:05:16Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:b02ecaeb15fc5d0ecb79352f354a4bbfc47fc74c79bf704a1697a9d5073a52c6",
+        "approved_at": "2026-08-25T22:21:28Z"
+      }
+    },
+    "tournament.tournament-entry": {
+      "flow": {
+        "product_hash": "sha256:15de05d65b7a779c4ea82fa32ccc0446e2b7a387a2922a1daa8949de4ed123a3",
+        "approved_at": "2026-08-25T20:07:14Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:4cc8957ed611d32a9fe3259ce7d1cd1c086fa91c8643ed631c309c1b93da109f",
+        "approved_at": "2026-08-25T22:24:19Z"
+      }
+    },
+    "tournament.tournament-withdraw": {
+      "flow": {
+        "product_hash": "sha256:152b7bad16a5d4e4a5b6903506bd9f72c819bda2bf2d0ee694a4b2621174bdd1",
+        "approved_at": "2026-08-25T20:08:37Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:d69f3e593c6f082c5165bf40480623624f636ed1d6c9c8ad241fc3ccc1f49be0",
+        "approved_at": "2026-08-25T22:24:20Z"
+      }
+    },
+    "tournament.unbooked-match-cancel": {
+      "flow": {
+        "product_hash": "sha256:f8e06a6024bf54024aaaa976e321f17d132d0ae7f9250ab4838b9b3ff39c8efd",
+        "approved_at": "2026-08-25T20:09:44Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:7d51b4acb3cdb1ba6b1408070281f5d1b91a0c4102ea668953da7dba08de5990",
+        "approved_at": "2026-08-25T22:24:20Z"
+      }
+    },
+    "transaction-payment.payment-result-receipt": {
+      "flow": {
+        "product_hash": "sha256:fe93c6c8c22974b4758c28fa4dede4f11ba9142d36b6fee4aa8e0b42039db243",
+        "approved_at": "2026-08-25T20:12:02Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:a36a48f0c36889fec8d9e9ab47851765db8fc160462ce164271f12c8578fe929",
+        "approved_at": "2026-08-25T22:29:11Z"
+      }
+    },
+    "transaction-payment.payment-status-sync": {
+      "flow": {
+        "product_hash": "sha256:b5bed4c4709a095d02956d68c50a74b88a7e25fb6451d06fd506d9bae8ee0f96",
+        "approved_at": "2026-08-25T20:13:23Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:569f655483c2f0da61afa6cc8f5f00620933996936aa5fb1cc7e2208a349ec81",
+        "approved_at": "2026-08-25T22:29:12Z"
+      }
+    },
+    "transaction-payment.pending-orders-query": {
+      "flow": {
+        "product_hash": "sha256:8a019726bb50ff7b917fd96a2dab29200184807ab835a510f0c363faffbf6095",
+        "approved_at": "2026-08-25T20:14:20Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:46c71557ea9555e69f04dabe3795fb92330b8c83988d9b201a072c44c6353975",
+        "approved_at": "2026-08-25T22:29:12Z"
+      }
+    },
+    "transaction-payment.receipt-recovery": {
+      "flow": {
+        "product_hash": "sha256:2a48adb0726bf76765d1a0fba3af834f769d4f53e7a23efc9cf3b87c1e702dbb",
+        "approved_at": "2026-08-25T20:15:42Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:f3e66ccb8893ffa870dd958eaf11775d81ec1b19230bc0a8bfff8d6797f3af57",
+        "approved_at": "2026-08-25T22:29:12Z"
+      }
+    },
+    "transaction-payment.timeout-order-close": {
+      "flow": {
+        "product_hash": "sha256:f3b50f4e33a8c5675028700ef591e7bdc3a00a800feee8035a46fd6321a1963e",
+        "approved_at": "2026-08-25T20:17:00Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:43c92a4b5223575248a92df98346fba9512e5c66af1871e129c67868cdf1dc1b",
+        "approved_at": "2026-08-25T22:29:13Z"
       }
     }
   },
@@ -66,6 +1166,756 @@
       "flow": {
         "flow_hash": "sha256:9623559876aa5d687175ebf03751d0d575121f065292801d5e78f1ab902c79e5",
         "approved_at": "2026-08-25T11:17:56Z"
+      }
+    },
+    "content-production.daily-schedule-copy.flow.generate-daily-schedule-copy": {
+      "flow": {
+        "flow_hash": "sha256:67a7c2cb486fde2336b9d4f0de4bffd8581f91bee3a46ee561c9b65a81d0fcc4",
+        "approved_at": "2026-08-25T17:05:12Z"
+      }
+    },
+    "content-production.generic-image-upload.flow.upload-image": {
+      "flow": {
+        "flow_hash": "sha256:e63fce87a528b5f09d95ccad9fda1d832f6358f7c2ade5af44fc34aea3d189fe",
+        "approved_at": "2026-08-25T17:05:49Z"
+      }
+    },
+    "content-production.instant-text-translation.flow.translate-texts": {
+      "flow": {
+        "flow_hash": "sha256:4ed51f05fe79783feb48e01c7586da612fb5a8ecb7e0c664e69b96b89d9e3b1e",
+        "approved_at": "2026-08-25T17:06:39Z"
+      }
+    },
+    "content-production.pending-poster-list.flow.list-pending-poster-prompts": {
+      "flow": {
+        "flow_hash": "sha256:baf8a67c08eca012efbdebf7d35e5b318352428ab09be2769332da4b14a273ef",
+        "approved_at": "2026-08-25T17:07:20Z"
+      }
+    },
+    "content-production.pending-translation-batch.flow.translate-pending-content": {
+      "flow": {
+        "flow_hash": "sha256:a736d21182ee4e88e4e86793ac332b603de5725f2f307b03799f72e5e7c1886f",
+        "approved_at": "2026-08-25T17:08:03Z"
+      }
+    },
+    "content-production.seed-list-copy.flow.generate-seed-list-copy": {
+      "flow": {
+        "flow_hash": "sha256:a226d93c53fe08811e81a060c351bcebc0e7376331370255ea310951fad20f47",
+        "approved_at": "2026-08-25T17:08:43Z"
+      }
+    },
+    "content-production.tournament-image-maintenance.flow.maintain-images": {
+      "flow": {
+        "flow_hash": "sha256:62bdd3cf7b280c139e3982be423c58be2490ee4dc3d9a442f2910aee0bcb5ef1",
+        "approved_at": "2026-08-25T17:10:00Z"
+      }
+    },
+    "content-production.tournament-image-maintenance.flow.maintain-images-with-sync-statement": {
+      "flow": {
+        "flow_hash": "sha256:e38668d21ab692c3e24233c4c59f6fd74ce1d524cf1868800a6d3090f0c43c83",
+        "approved_at": "2026-08-25T17:10:00Z"
+      }
+    },
+    "content-production.tournament-poster-prompt.flow.generate-cartoon-poster-prompt": {
+      "flow": {
+        "flow_hash": "sha256:8ec3e9db8a5ee8aea5e7a215ed56c7d977251ac7abd32a9eeb86b8c9eb002c52",
+        "approved_at": "2026-08-25T17:11:09Z"
+      }
+    },
+    "content-production.tournament-poster-prompt.flow.generate-standard-poster-prompt": {
+      "flow": {
+        "flow_hash": "sha256:99b5a2f749570f5607cefe4baebf7789ddde01485238a5065afb1e7827bd8e74",
+        "approved_at": "2026-08-25T17:11:09Z"
+      }
+    },
+    "court.city-court-list.flow.list-city-courts": {
+      "flow": {
+        "flow_hash": "sha256:9a0a588fea1d0aaf16f305ef3a20b98795e11dd17ad8e3217150af122588a0ab",
+        "approved_at": "2026-08-25T17:13:06Z"
+      }
+    },
+    "court.court-name-search.flow.search-courts-by-name": {
+      "flow": {
+        "flow_hash": "sha256:cb752e5c3312229c7fd82790b69fe9fc3f9fc24da9d81cdd93c3cb18afb818cc",
+        "approved_at": "2026-08-25T17:13:06Z"
+      }
+    },
+    "court.court-activity-heat-settlement.flow.settle-yesterday-court-heat": {
+      "flow": {
+        "flow_hash": "sha256:677307353472a0a03d5903fa9636f081354dd674de6c38a67aa1f31036980f8f",
+        "approved_at": "2026-08-25T17:13:50Z"
+      }
+    },
+    "identity-account.account-login.flow.login-with-wechat": {
+      "flow": {
+        "flow_hash": "sha256:f2bcc2a8a247ca85ccfd6d24fb4a070e9400e1b119efe73dffc71582c6e099b7",
+        "approved_at": "2026-08-25T17:15:01Z"
+      }
+    },
+    "identity-account.phone-binding.flow.bind-wechat-phone": {
+      "flow": {
+        "flow_hash": "sha256:577d65dc26e2d39a17a465ccc202d0993a26738e36668eec4365fedd2295bbe6",
+        "approved_at": "2026-08-25T17:15:43Z"
+      }
+    },
+    "identity-account.registration-profile-completion.flow.complete-registration-profile": {
+      "flow": {
+        "flow_hash": "sha256:dc357ff3ae84d3f4f4d6c873372fa0e6716cbe9c3d7a46c3bab33f34032fb433",
+        "approved_at": "2026-08-25T17:16:26Z"
+      }
+    },
+    "meetup.chat-message-pull.flow.pull-chat-messages": {
+      "flow": {
+        "flow_hash": "sha256:b289a090cc509e6dfd1a5a46aa190d708018e2f83a4d3568ad4d423cb25191da",
+        "approved_at": "2026-08-25T17:20:38Z"
+      }
+    },
+    "meetup.chat-message-send.flow.send-chat-message": {
+      "flow": {
+        "flow_hash": "sha256:546210e9a376b84c0da7ecf5d1d53b8ddfdb799a7c0bcfe5db6c860c753bf3ac",
+        "approved_at": "2026-08-25T17:22:01Z"
+      }
+    },
+    "meetup.meetup-close.flow.close-meetup": {
+      "flow": {
+        "flow_hash": "sha256:9e4e5d1516faba41508fce7194e00a07b3488916716a61185b176bf247d3e195",
+        "approved_at": "2026-08-25T17:23:32Z"
+      }
+    },
+    "meetup.meetup-cost-update.flow.update-meetup-cost": {
+      "flow": {
+        "flow_hash": "sha256:a42bdbc215cbae1ad33c27d2c3b6e774ecde0d2709391880215d5ab02d0a85d3",
+        "approved_at": "2026-08-25T17:24:54Z"
+      }
+    },
+    "meetup.meetup-detail.flow.get-meetup-detail": {
+      "flow": {
+        "flow_hash": "sha256:d3e6e6ba583df97f0de4328cca779db89a8583e0453e40190c4fce118ec4ffed",
+        "approved_at": "2026-08-25T17:26:31Z"
+      }
+    },
+    "meetup.meetup-edit.flow.edit-meetup": {
+      "flow": {
+        "flow_hash": "sha256:313742606ebb6c060c1cb2f2f868ee66eb115f8e6ae23bdf1396b57bc09d4732",
+        "approved_at": "2026-08-25T17:29:22Z"
+      }
+    },
+    "meetup.meetup-finish-settlement.flow.settle-finished-meetups": {
+      "flow": {
+        "flow_hash": "sha256:66817ef2a9fdeb604607bf23649b2ee04b02a062ea66413c38ba55a58ab353cb",
+        "approved_at": "2026-08-25T17:30:31Z"
+      }
+    },
+    "meetup.meetup-invite.flow.invite-meetup-participant": {
+      "flow": {
+        "flow_hash": "sha256:77420b5e8fd7648fbaadeb53be3503a81bcea6ea7151a6c8edf064f1efa55849",
+        "approved_at": "2026-08-25T17:38:16Z"
+      }
+    },
+    "meetup.meetup-join.flow.join-meetup": {
+      "flow": {
+        "flow_hash": "sha256:481d01d2553ba9b6d4b1e8dcfa37a0b1bc4d6e7d0a0da6041a8becceb9818ace",
+        "approved_at": "2026-08-25T17:38:44Z"
+      }
+    },
+    "meetup.meetup-publish.flow.publish-meetup": {
+      "flow": {
+        "flow_hash": "sha256:950265d1b912575ffbffa5a51b1201b5c8a050496e39f0276f6404d9ea4b5b35",
+        "approved_at": "2026-08-25T17:36:14Z"
+      }
+    },
+    "meetup.meetup-quit.flow.quit-meetup": {
+      "flow": {
+        "flow_hash": "sha256:0db9c51cfb49a6a346a11f94717acd93748229191f6f2f72a1f5993abdc55bb9",
+        "approved_at": "2026-08-25T17:37:39Z"
+      }
+    },
+    "meetup.meetup-square-list.flow.list-meetup-square": {
+      "flow": {
+        "flow_hash": "sha256:0fa35ed5c130294e662068d6c93047870b75b46a364b83dc274706054b84ec26",
+        "approved_at": "2026-08-25T17:40:40Z"
+      }
+    },
+    "meetup.my-meetups.flow.list-my-meetups": {
+      "flow": {
+        "flow_hash": "sha256:8764ce8e372965b753097af0e1660ac9e3233597b348513fdbc9c7ecdd4a889c",
+        "approved_at": "2026-08-25T17:42:32Z"
+      }
+    },
+    "meetup.peer-review-submit.flow.submit-peer-review": {
+      "flow": {
+        "flow_hash": "sha256:f550c04e5ada7910db84e4536be3c6bfe0e2826768e85e41ab0d8042bb29832d",
+        "approved_at": "2026-08-25T17:44:19Z"
+      }
+    },
+    "meetup.registration-approve.flow.approve-registration": {
+      "flow": {
+        "flow_hash": "sha256:db718149d730336f9ba206260b5d55f7251f545a6ae7524ca2b1284e506eb24d",
+        "approved_at": "2026-08-25T17:46:10Z"
+      }
+    },
+    "meetup.registration-reject.flow.reject-registration": {
+      "flow": {
+        "flow_hash": "sha256:eacefda25fa241721308ae3617b9f9357d7c8e33aeba7794189dcd4eb5f8b51e",
+        "approved_at": "2026-08-25T17:47:52Z"
+      }
+    },
+    "meetup.registration-withdraw.flow.withdraw-registration": {
+      "flow": {
+        "flow_hash": "sha256:ccb0c38f7d4f890984494792ee5685e034bb3ac6f17601460e1d39dafccbefe5",
+        "approved_at": "2026-08-25T17:49:05Z"
+      }
+    },
+    "meetup.review-skip.flow.skip-meetup-review": {
+      "flow": {
+        "flow_hash": "sha256:9f42ed32739deda85afab297c214359a521665d04a73b2537193cdb0bc98ef81",
+        "approved_at": "2026-08-25T17:51:33Z"
+      }
+    },
+    "meetup.score-add.flow.add-score-record": {
+      "flow": {
+        "flow_hash": "sha256:1f37394c256f59030be17a0e033fd0477b2523f5204021a4459a2db2fe176246",
+        "approved_at": "2026-08-25T17:53:37Z"
+      }
+    },
+    "meetup.score-delete.flow.delete-score-record": {
+      "flow": {
+        "flow_hash": "sha256:eac678c67614ce0f83970c75f2e7a70d0f8928be2f7ea78cd4bdea5cc2278036",
+        "approved_at": "2026-08-25T17:54:57Z"
+      }
+    },
+    "meetup.score-update.flow.update-score-record": {
+      "flow": {
+        "flow_hash": "sha256:d6caf8c1c48894bd06cf90afd0ba957782500365abcdfeb89fe6623368163056",
+        "approved_at": "2026-08-25T17:57:12Z"
+      }
+    },
+    "personal-profile.basic-profile-update.flow.update-basic-profile": {
+      "flow": {
+        "flow_hash": "sha256:3eb6025680c746f1b1ec785f7c3f8cc9891fe702b6a3bc2308a682c9e1bff6af",
+        "approved_at": "2026-08-25T17:59:17Z"
+      }
+    },
+    "personal-profile.gender-update.flow.update-gender": {
+      "flow": {
+        "flow_hash": "sha256:9be5d9c37c23c5379a96794e8e03592c22f4a66e99187a782fd313a58923ea98",
+        "approved_at": "2026-08-25T18:00:21Z"
+      }
+    },
+    "personal-profile.initial-profile-submission.flow.submit-initial-profile": {
+      "flow": {
+        "flow_hash": "sha256:c3f49e9bac1d23c40615a4e89e41e8f15a9c8b465035e7378ed42b846fb1caf4",
+        "approved_at": "2026-08-25T18:02:17Z"
+      }
+    },
+    "personal-profile.my-performance-stats.flow.query-my-performance-stats": {
+      "flow": {
+        "flow_hash": "sha256:8ba1d7ec333edac5fbd163a17f605ae33337bd9f348282101179c158c27133b3",
+        "approved_at": "2026-08-25T18:03:35Z"
+      }
+    },
+    "personal-profile.my-profile.flow.query-my-profile": {
+      "flow": {
+        "flow_hash": "sha256:693e1f4cf4e86fa83a3d7280010d4d3e9f629780cf62751c1dd55a1452f0d7ee",
+        "approved_at": "2026-08-25T18:05:01Z"
+      }
+    },
+    "personal-profile.my-review-summary.flow.query-my-review-summary": {
+      "flow": {
+        "flow_hash": "sha256:2b8f4ed73c6c96ef93b0ae4e9ed5787fa9ff27a45989e20d5eab3182da9227db",
+        "approved_at": "2026-08-25T18:06:19Z"
+      }
+    },
+    "personal-profile.my-scores.flow.query-my-scores": {
+      "flow": {
+        "flow_hash": "sha256:76dc199cb0f6f847ec1c4cf9073aa66710a6c6dd5ba1e17fb3f1df8a8361a883",
+        "approved_at": "2026-08-25T18:07:57Z"
+      }
+    },
+    "personal-profile.onboarding-status.flow.query-onboarding-status": {
+      "flow": {
+        "flow_hash": "sha256:64dd069de604656df3ad1cccea1cc3687e76195df376ec250026281d6081514e",
+        "approved_at": "2026-08-25T18:09:21Z"
+      }
+    },
+    "personal-profile.payment-code-delete.flow.delete-payment-code": {
+      "flow": {
+        "flow_hash": "sha256:d2bb06078ab8277aacba188145cb200bd21e7893be3a2df7f4fab3495864af3d",
+        "approved_at": "2026-08-25T18:10:55Z"
+      }
+    },
+    "personal-profile.payment-code-get.flow.query-payment-code": {
+      "flow": {
+        "flow_hash": "sha256:a1867f067d40327b81edad1a13830f219a8f0f494cb62b23c283adeb882bf3e9",
+        "approved_at": "2026-08-25T18:12:08Z"
+      }
+    },
+    "personal-profile.payment-code-save.flow.save-payment-code": {
+      "flow": {
+        "flow_hash": "sha256:9552759986ff0896e1f9c57f1e5e660722cb8703396c600d3433da20bce4f585",
+        "approved_at": "2026-08-25T18:13:35Z"
+      }
+    },
+    "personal-profile.player-home.flow.query-player-home": {
+      "flow": {
+        "flow_hash": "sha256:17468851216e0f59b1a5820a9b72a5a40e1be77740a11f8ce25f9ed2af07b89c",
+        "approved_at": "2026-08-25T18:15:47Z"
+      }
+    },
+    "personal-profile.profile-video-add.flow.add-profile-video": {
+      "flow": {
+        "flow_hash": "sha256:a0c1d19d972d87419935775bc9bf9e2cc0a8ff21fb836f5e34fc50b8f89d2fc3",
+        "approved_at": "2026-08-25T18:17:13Z"
+      }
+    },
+    "personal-profile.profile-video-delete.flow.delete-profile-video": {
+      "flow": {
+        "flow_hash": "sha256:ed6264af1b82ed7e5ceb4f54d931afef744a9cfb1fa4a5135ef31740fe1c3244",
+        "approved_at": "2026-08-25T18:19:16Z"
+      }
+    },
+    "personal-profile.profile-video-delete.flow.delete-uploaded-video": {
+      "flow": {
+        "flow_hash": "sha256:4641353a7ce555eaf63e459b202fce0b975ea286c92c979c838ed66ca3ecb58e",
+        "approved_at": "2026-08-25T18:19:16Z"
+      }
+    },
+    "personal-profile.profile-video-update.flow.update-profile-video-title": {
+      "flow": {
+        "flow_hash": "sha256:d59292ec11af01f04efa6cdb966d4a450280c5d504d996381c6dfebf0c3c832d",
+        "approved_at": "2026-08-25T18:21:00Z"
+      }
+    },
+    "personal-profile.self-rating-update.flow.update-self-rating": {
+      "flow": {
+        "flow_hash": "sha256:e81f94cfe4cd6eaa1301a07931f775a1f4e53161a7ef3fc19f3c0a8bc656624b",
+        "approved_at": "2026-08-25T18:22:51Z"
+      }
+    },
+    "personal-profile.user-image-upload-authorization.flow.authorize-avatar-upload": {
+      "flow": {
+        "flow_hash": "sha256:cc0eb2e6297e22267a4b192c05b1376502f565e48b5d328985aff2b983c24025",
+        "approved_at": "2026-08-25T18:24:24Z"
+      }
+    },
+    "personal-profile.user-image-upload-authorization.flow.authorize-user-image-upload": {
+      "flow": {
+        "flow_hash": "sha256:1a068051a7b9a3a0a14f5ea6876566685211f4891b79be7d117207e474275ee1",
+        "approved_at": "2026-08-25T18:24:24Z"
+      }
+    },
+    "personal-profile.video-upload-authorization.flow.authorize-video-upload": {
+      "flow": {
+        "flow_hash": "sha256:ce4d575b3923f517b1ca5c07da9e702df8392ca5636a14e3feada6ddd674db96",
+        "approved_at": "2026-08-25T18:25:39Z"
+      }
+    },
+    "platform-config.all-config-query.flow.query-all-config": {
+      "flow": {
+        "flow_hash": "sha256:f15583e29df1c64634981600567498b09379e31e645541e30cddc0d42e222efb",
+        "approved_at": "2026-08-25T18:28:58Z"
+      }
+    },
+    "platform-config.available-cities-query.flow.query-available-cities": {
+      "flow": {
+        "flow_hash": "sha256:2a78b1e9c9e207b35dbce7dcc01cfb98d193053aa6caa73d7e889801be3739c6",
+        "approved_at": "2026-08-25T18:30:48Z"
+      }
+    },
+    "platform-config.city-catalog-query.flow.query-city-catalog": {
+      "flow": {
+        "flow_hash": "sha256:cc62cb8e3e353b42a23f504ceaa51f8893894d1575c40efe31067495ae97c3c7",
+        "approved_at": "2026-08-25T18:32:29Z"
+      }
+    },
+    "platform-config.global-config-update.flow.update-global-config": {
+      "flow": {
+        "flow_hash": "sha256:2e2510a96521e65121036e4bd1782fba6a2acee5617560fb220afa6960c2835c",
+        "approved_at": "2026-08-25T18:35:34Z"
+      }
+    },
+    "platform-config.group-chat-entry-query.flow.query-group-chat-entry": {
+      "flow": {
+        "flow_hash": "sha256:774a3fe801a4df0041fa0c849636e9333f1af4e2aa7840c51bbc7857b9e17cb2",
+        "approved_at": "2026-08-25T18:37:20Z"
+      }
+    },
+    "platform-config.home-config-query.flow.query-home-config": {
+      "flow": {
+        "flow_hash": "sha256:9fffa40ffada2f84d1865f43b2909827375fd7c026e6dd7316234b2332ab9afc",
+        "approved_at": "2026-08-25T18:38:47Z"
+      }
+    },
+    "platform-config.home-config-update.flow.update-home-config": {
+      "flow": {
+        "flow_hash": "sha256:5214c2fa12512fac6bc3d00a4a9d6571834d4d3d9f9421928a0083cd6d3c0072",
+        "approved_at": "2026-08-25T18:41:23Z"
+      }
+    },
+    "platform-config.home-content-query.flow.query-home-content": {
+      "flow": {
+        "flow_hash": "sha256:0d3e41fa369bf7a80037058b149abb911d4cadb5c4b24eb6c2c22a11f0ab96a7",
+        "approved_at": "2026-08-25T18:46:55Z"
+      }
+    },
+    "platform-config.public-config-query.flow.query-config-value": {
+      "flow": {
+        "flow_hash": "sha256:fe66833287ec028520e8e40e730ae9f791112dcbdee0186f4889bd5e61c08298",
+        "approved_at": "2026-08-25T18:50:21Z"
+      }
+    },
+    "platform-config.public-config-query.flow.query-config-values": {
+      "flow": {
+        "flow_hash": "sha256:5855c88811167d60cba152f933197d2fb8b4716e5c2206405b9f5b2ee4d48c53",
+        "approved_at": "2026-08-25T18:50:21Z"
+      }
+    },
+    "platform-config.splash-cover-query.flow.query-splash-cover": {
+      "flow": {
+        "flow_hash": "sha256:f8c4bed341eaaa22f034256901cbaa604f8731ea663f9ea8161fe434586f8c9a",
+        "approved_at": "2026-08-25T18:52:09Z"
+      }
+    },
+    "pro-tour-data.finished-matches-query.flow.query-finished-matches": {
+      "flow": {
+        "flow_hash": "sha256:e18b4ef063c78f3402fa174f2a7260842647e982f6d5252bbb8c847049f6f86b",
+        "approved_at": "2026-08-25T18:56:00Z"
+      }
+    },
+    "pro-tour-data.player-query.flow.query-ranked-players": {
+      "flow": {
+        "flow_hash": "sha256:d3b8af0ca4fc771eeddd14d8877cfb429a3014e17038dd94c871f2c09be5aeb9",
+        "approved_at": "2026-08-25T19:00:03Z"
+      }
+    },
+    "pro-tour-data.player-ranking-collect.flow.collect-player-rankings-manually": {
+      "flow": {
+        "flow_hash": "sha256:33183591a01f9c353ee310cfdb53592d4408096b7efee8bfd909d0b90af3b938",
+        "approved_at": "2026-08-25T19:04:37Z"
+      }
+    },
+    "pro-tour-data.player-ranking-collect.flow.collect-player-rankings-scheduled": {
+      "flow": {
+        "flow_hash": "sha256:a4fc3692bd1239c4c2908b5d3b140dc150b60efaae7b9efc864923d3e3393742",
+        "approved_at": "2026-08-25T19:04:37Z"
+      }
+    },
+    "pro-tour-data.player-tournament-path-query.flow.query-player-tournament-path": {
+      "flow": {
+        "flow_hash": "sha256:6ea30efe05d6a2d85037c9b45feff161da2e4341110c0e5915e46c8cee0be5a2",
+        "approved_at": "2026-08-25T19:06:43Z"
+      }
+    },
+    "pro-tour-data.tournament-catalog-collect.flow.collect-annual-tournament-catalog": {
+      "flow": {
+        "flow_hash": "sha256:aa6fdeeb660747e039a3133688839a6080642f125a9026c285e587bfb2624c06",
+        "approved_at": "2026-08-25T19:08:03Z"
+      }
+    },
+    "pro-tour-data.tournament-draw-collect.flow.collect-current-tournament-draws": {
+      "flow": {
+        "flow_hash": "sha256:48f12cf10a80d8973d5b57835cc9e6f63555a3eb73f56aa0c9516bee7b4e928d",
+        "approved_at": "2026-08-25T19:10:54Z"
+      }
+    },
+    "pro-tour-data.tournament-draw-collect.flow.collect-one-tournament-draw": {
+      "flow": {
+        "flow_hash": "sha256:bae75b2b07e1d4c0dfe5d9210629b0ec9e73c9a10db60da8bb5b91c1081c93f8",
+        "approved_at": "2026-08-25T19:10:54Z"
+      }
+    },
+    "pro-tour-data.tournament-draw-collect.flow.collect-tournament-draws-scheduled": {
+      "flow": {
+        "flow_hash": "sha256:2af328411870001c91cffca09f35502a90450e8650e1fcaad2ea18ac29c52db0",
+        "approved_at": "2026-08-25T19:10:54Z"
+      }
+    },
+    "pro-tour-data.tournament-live-collect.flow.collect-current-live-matches": {
+      "flow": {
+        "flow_hash": "sha256:21a094876a68f5de9b7ca3effc4066b5c56d60d14f815232c15f34ca65ecc575",
+        "approved_at": "2026-08-25T19:12:42Z"
+      }
+    },
+    "pro-tour-data.tournament-live-collect.flow.collect-live-matches-scheduled": {
+      "flow": {
+        "flow_hash": "sha256:6b364b8ca2c7d04978d051b7721648f54f263c0d19fb850b0f505030b6557f0c",
+        "approved_at": "2026-08-25T19:12:42Z"
+      }
+    },
+    "pro-tour-data.tournament-query.flow.query-tournament-catalog": {
+      "flow": {
+        "flow_hash": "sha256:ad4b7c629cef5e30d132587c15e4e38fe543c7b251141e8be7933f23b8bc78ed",
+        "approved_at": "2026-08-25T19:14:09Z"
+      }
+    },
+    "pro-tour-data.tournament-result-collect.flow.collect-completed-match-results": {
+      "flow": {
+        "flow_hash": "sha256:fc141a3c81a5fcfb8dccc55bda24f0e86e44abbdf25dfe37c6b45b3a020f67b8",
+        "approved_at": "2026-08-25T19:15:34Z"
+      }
+    },
+    "pro-tour-data.tournament-schedule-collect.flow.collect-current-match-schedules": {
+      "flow": {
+        "flow_hash": "sha256:de9016af0a57ced340297c9bdf16f1c3d49e826091da4be318cd869550d5e7ad",
+        "approved_at": "2026-08-25T19:17:24Z"
+      }
+    },
+    "pro-tour-data.tournament-schedule-collect.flow.collect-match-schedules-scheduled": {
+      "flow": {
+        "flow_hash": "sha256:443fce465fcc78aba5b521d77e3a6f37567c979496eaa60efb6e07d96a3a1ac1",
+        "approved_at": "2026-08-25T19:17:24Z"
+      }
+    },
+    "pro-tour-data.upcoming-matches-query.flow.query-upcoming-match-groups": {
+      "flow": {
+        "flow_hash": "sha256:caa142706f8c3477f4d4d2c39229cdee96501c13164c8559c89a7736e1eb1de3",
+        "approved_at": "2026-08-25T19:19:06Z"
+      }
+    },
+    "social-relations.follow-create.flow.follow-user": {
+      "flow": {
+        "flow_hash": "sha256:015750d7551dcd4b9f3161291f9b1985af457090431efa8749562497b784de78",
+        "approved_at": "2026-08-25T19:20:24Z"
+      }
+    },
+    "social-relations.follow-remove.flow.unfollow-user": {
+      "flow": {
+        "flow_hash": "sha256:2966d4bf010d82f5e9731f36395d6a593acac5d0d3fe5f39d3511b225cf3bfb0",
+        "approved_at": "2026-08-25T19:21:11Z"
+      }
+    },
+    "social-relations.followers-list.flow.query-followers": {
+      "flow": {
+        "flow_hash": "sha256:c5fa1958ca86d0d23eb8b570781c27a541993e3d77a6480df4334ab1fefd5838",
+        "approved_at": "2026-08-25T19:22:42Z"
+      }
+    },
+    "social-relations.following-list.flow.query-following": {
+      "flow": {
+        "flow_hash": "sha256:41d2315df2d3971c74e245399c4076aaaef29770d8b5ba7b88b00f2cad57520c",
+        "approved_at": "2026-08-25T19:22:42Z"
+      }
+    },
+    "tournament.tournament-draft-create.flow.create-tournament-draft": {
+      "flow": {
+        "flow_hash": "sha256:eb699c74cffffb052a4546992f3717f7553d7bf61fc85775bfca6fa911e375f8",
+        "approved_at": "2026-08-25T19:23:55Z"
+      }
+    },
+    "tournament.tournament-config-update.flow.update-tournament-config": {
+      "flow": {
+        "flow_hash": "sha256:b726b62102b4a70f0441a66a56b677cc085245b11222983aac1710a5a0327e1f",
+        "approved_at": "2026-08-25T19:25:36Z"
+      }
+    },
+    "tournament.tournament-activate.flow.activate-tournament": {
+      "flow": {
+        "flow_hash": "sha256:ff38457cfcccde1a3f9a1054fb84823738cabac86a9a3d6ae0eb73158deb45aa",
+        "approved_at": "2026-08-25T19:27:02Z"
+      }
+    },
+    "tournament.tournament-abandon.flow.abandon-tournament": {
+      "flow": {
+        "flow_hash": "sha256:a0ab0e6a726ea295ec127b559f15850480e3363a94e1408ef6effbff55928747",
+        "approved_at": "2026-08-25T19:27:02Z"
+      }
+    },
+    "tournament.tournament-list.flow.query-tournament-admin-list": {
+      "flow": {
+        "flow_hash": "sha256:60d840623f2fedc6da8f12718319453a415e51092590bb7baf1ae9c8c012d445",
+        "approved_at": "2026-08-25T19:28:04Z"
+      }
+    },
+    "tournament.entry-freeze.flow.freeze-entry": {
+      "flow": {
+        "flow_hash": "sha256:5c5af45c13df201ebb6d4f41530c684c297a7355b542e94948cb2c9a1592edd5",
+        "approved_at": "2026-08-25T19:30:49Z"
+      }
+    },
+    "tournament.entry-payment-initiate.flow.initiate-entry-payment": {
+      "flow": {
+        "flow_hash": "sha256:4e15ffcf50fefad3d1ba1ec8dd48bc9785f22231c2ad306957e040b89b65bdd3",
+        "approved_at": "2026-08-25T19:32:36Z"
+      }
+    },
+    "tournament.entry-preference-update.flow.update-entry-preference": {
+      "flow": {
+        "flow_hash": "sha256:094f5d4af2d7a37204595b7340506f713fa3723e435458465f0f3f6d240dd50e",
+        "approved_at": "2026-08-25T19:33:58Z"
+      }
+    },
+    "tournament.entry-unfreeze.flow.unfreeze-entry": {
+      "flow": {
+        "flow_hash": "sha256:e22399d4e6cc5f77c30389d84f7d962b4cb16dcbb6cb54eb2ee1f33f40676ea3",
+        "approved_at": "2026-08-25T19:35:26Z"
+      }
+    },
+    "tournament.offline-meetup-create.flow.create-offline-meetup": {
+      "flow": {
+        "flow_hash": "sha256:f0c32fbf28fc78743ebb14552f4d533e489351527942a9117918de5a36dc05c3",
+        "approved_at": "2026-08-25T19:37:28Z"
+      }
+    },
+    "tournament.result-confirm.flow.confirm-result": {
+      "flow": {
+        "flow_hash": "sha256:415c93675c7878095e8cb96fb4137a42d18d523ae5c520380380da00d3a5337b",
+        "approved_at": "2026-08-25T19:39:29Z"
+      }
+    },
+    "tournament.result-reject.flow.reject-result": {
+      "flow": {
+        "flow_hash": "sha256:d35f27493faa7247a915f6a8d604c489483c4c350b919d4314b0df773d0dfb91",
+        "approved_at": "2026-08-25T19:41:13Z"
+      }
+    },
+    "tournament.result-submit.flow.submit-result": {
+      "flow": {
+        "flow_hash": "sha256:67d91568aac9cec024d8749b7e03f28a46a5956cc4e9f73b57aa08a4ed87d00f",
+        "approved_at": "2026-08-25T19:42:43Z"
+      }
+    },
+    "tournament.result-confirmation-timeout.flow.complete-timeout-results": {
+      "flow": {
+        "flow_hash": "sha256:573080b3f348a7001cad3796bde7131f7e84e81791cd9e263fff0b5d5f863941",
+        "approved_at": "2026-08-25T19:44:28Z"
+      }
+    },
+    "tournament.comment-publish.flow.publish-comment": {
+      "flow": {
+        "flow_hash": "sha256:7518bb216ae8d63b1049efd86bc94995b6f6316dfa8e8e6afbbef324fdfb0a82",
+        "approved_at": "2026-08-25T19:46:02Z"
+      }
+    },
+    "tournament.comment-pull.flow.list-comments": {
+      "flow": {
+        "flow_hash": "sha256:bcace7f6d8e2eb080a635456df1485242cfae1a6dd08fc89aaaf7a99348c6f12",
+        "approved_at": "2026-08-25T19:47:33Z"
+      }
+    },
+    "tournament.court-booker-select.flow.select-court-booker": {
+      "flow": {
+        "flow_hash": "sha256:dc5e9606dc0a5a0bf12c6382697bdc53ecc339f4031146d360a4c6f651e3489a",
+        "approved_at": "2026-08-25T19:48:57Z"
+      }
+    },
+    "tournament.court-booker-selection-timeout.flow.reject-timeout-matches": {
+      "flow": {
+        "flow_hash": "sha256:bfade0ad34eca069b6dcd2357dca8044fa8c2c10142466586594ee1ca81dfebf",
+        "approved_at": "2026-08-25T19:50:29Z"
+      }
+    },
+    "tournament.booking-submit.flow.submit-booking": {
+      "flow": {
+        "flow_hash": "sha256:8012484cb8d2d2224a8cfdc92b86ce5ae5d52fbac92d1e2dd6cce940ae2d96b8",
+        "approved_at": "2026-08-25T19:52:34Z"
+      }
+    },
+    "tournament.booking-confirm.flow.confirm-booking": {
+      "flow": {
+        "flow_hash": "sha256:ad8ff64194a4acd3fb06dcdfcf9a30f859a70538721a1d1d58ff10619c900e33",
+        "approved_at": "2026-08-25T19:54:08Z"
+      }
+    },
+    "tournament.booking-reschedule-request.flow.request-rebooking": {
+      "flow": {
+        "flow_hash": "sha256:7ee025045a3b1f761296bb7337ff54feb3ffa3c8ded5ba12d3f83b350cb3204e",
+        "approved_at": "2026-08-25T19:55:45Z"
+      }
+    },
+    "tournament.booking-reject.flow.reject-await-booking-by-booker": {
+      "flow": {
+        "flow_hash": "sha256:c160250417e4b5fc75386ad9ebf7c01547631e55f58bd490f54ed865a0688422",
+        "approved_at": "2026-08-25T20:01:08Z"
+      }
+    },
+    "tournament.booking-reject.flow.reject-await-booking-by-opponent": {
+      "flow": {
+        "flow_hash": "sha256:ca806bd5b56e1b9f4e5264c4ca4eb6f7864c81e1814d0f898eb5c14a34405ba4",
+        "approved_at": "2026-08-25T20:01:08Z"
+      }
+    },
+    "tournament.booking-reject.flow.reject-await-court-booker": {
+      "flow": {
+        "flow_hash": "sha256:4401fcd652aa0b2c0d612311b73c4d16fca577ae31bd55d054349c5930938f80",
+        "approved_at": "2026-08-25T20:01:08Z"
+      }
+    },
+    "tournament.booking-reject.flow.reject-await-schedule-confirm": {
+      "flow": {
+        "flow_hash": "sha256:0ef2d09ac6fa1c355feac79293cb12c6870d60bd8300148d29eeb98f3c0dbe52",
+        "approved_at": "2026-08-25T20:01:08Z"
+      }
+    },
+    "tournament.booking-reject.flow.reject-booking-on-confirm": {
+      "flow": {
+        "flow_hash": "sha256:42277a96a524e0b60a6af597ad2c62fc2eabbbf178d46aec3909f431ba3d1c38",
+        "approved_at": "2026-08-25T20:01:08Z"
+      }
+    },
+    "tournament.current-round-matching.flow.run-matching-daily": {
+      "flow": {
+        "flow_hash": "sha256:18bea15ce60efa457185e6844cd66a7956a2b9ca9ef46bcd2c6ed9f9df0a4385",
+        "approved_at": "2026-08-25T20:03:53Z"
+      }
+    },
+    "tournament.current-round-matching.flow.run-matching": {
+      "flow": {
+        "flow_hash": "sha256:9fd2ca1b291852f6a1630f655e5b7ab9a69b14637cacd1db755d40ffae4a47aa",
+        "approved_at": "2026-08-25T20:03:53Z"
+      }
+    },
+    "tournament.tournament-detail.flow.get-tournament-detail": {
+      "flow": {
+        "flow_hash": "sha256:96a0b7faf73109087e898b5ebf6cc0938a2e24e454ea6ad632301b5d9c68593f",
+        "approved_at": "2026-08-25T20:05:16Z"
+      }
+    },
+    "tournament.tournament-entry.flow.join-tournament": {
+      "flow": {
+        "flow_hash": "sha256:950501151cbc5934c8277d66543518731da96da86adea67ef6fc507efeeed4ff",
+        "approved_at": "2026-08-25T20:07:14Z"
+      }
+    },
+    "tournament.tournament-withdraw.flow.withdraw-tournament": {
+      "flow": {
+        "flow_hash": "sha256:7866ebf90ad90e5424e211bd2bc328c92d69d3658815767c581ecef623745706",
+        "approved_at": "2026-08-25T20:08:37Z"
+      }
+    },
+    "tournament.unbooked-match-cancel.flow.cancel-unbooked-matches": {
+      "flow": {
+        "flow_hash": "sha256:6222417ce139cbecba79e89b3fa7c21966390ce270f67141c36573ae845f728a",
+        "approved_at": "2026-08-25T20:09:44Z"
+      }
+    },
+    "transaction-payment.payment-result-receipt.flow.receive-wechat-payment-result": {
+      "flow": {
+        "flow_hash": "sha256:a431a4314059ffd928af12534fa34bc713c17d800a1f493b9bcd7d7d56f0ccf2",
+        "approved_at": "2026-08-25T20:12:02Z"
+      }
+    },
+    "transaction-payment.payment-status-sync.flow.sync-payment-status": {
+      "flow": {
+        "flow_hash": "sha256:0cc6ca95d4edbde6da8018ef5b586063b1e1386ea15d8fb12ca227d562a78c92",
+        "approved_at": "2026-08-25T20:13:23Z"
+      }
+    },
+    "transaction-payment.pending-orders-query.flow.list-my-pending-orders": {
+      "flow": {
+        "flow_hash": "sha256:0ccbc6ef947de054d71d4c54fc1f5947235873b608d0f969cdf1cad75c05ff5d",
+        "approved_at": "2026-08-25T20:14:20Z"
+      }
+    },
+    "transaction-payment.receipt-recovery.flow.recover-stalled-receipts": {
+      "flow": {
+        "flow_hash": "sha256:7f293c7ab3042afbf071cdfa33358cd078053ff911c7e451a6d45a5333bb4b71",
+        "approved_at": "2026-08-25T20:15:42Z"
+      }
+    },
+    "transaction-payment.timeout-order-close.flow.close-expired-orders": {
+      "flow": {
+        "flow_hash": "sha256:4663181b50eb79a3903e9d72e50baa621bd8d75fcedd7f21d299846c85203199",
+        "approved_at": "2026-08-25T20:17:00Z"
       }
     }
   },
@@ -241,6 +2091,1434 @@
         "verified_at": "2026-08-25T11:42:09Z",
         "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
       }
+    },
+    "content-production.daily-schedule-copy.activity.compose-daily-schedule-copy": {
+      "spec": {
+        "service": "content-production.daily-schedule-copy",
+        "activity_hash": "sha256:d2feb12969593a6b650124f2df7be31c2b2b2d78c7ff75d6a4ac8e09723e82af",
+        "approved_at": "2026-08-25T20:20:24Z"
+      }
+    },
+    "content-production.daily-schedule-copy.activity.register-missing-translations": {
+      "spec": {
+        "service": "content-production.daily-schedule-copy",
+        "activity_hash": "sha256:95a4ff853c639e7631f4f625b6c25c75129b8c51ad3a8ccf57ba83dc2ddd66f5",
+        "approved_at": "2026-08-25T20:20:24Z"
+      }
+    },
+    "content-production.generic-image-upload.activity.store-generic-image": {
+      "spec": {
+        "service": "content-production.generic-image-upload",
+        "activity_hash": "sha256:ac9dbfc2dafa90a051e36bd6eb0c30d75ce6413454bec79dda80bc9a1d4bd916",
+        "approved_at": "2026-08-25T20:21:51Z"
+      }
+    },
+    "content-production.instant-text-translation.activity.translate-submitted-texts": {
+      "spec": {
+        "service": "content-production.instant-text-translation",
+        "activity_hash": "sha256:b1277bc550a3ff71b76af17443e4f07c6706f8dca585bacab1260c529bc5500e",
+        "approved_at": "2026-08-25T20:24:20Z"
+      }
+    },
+    "content-production.pending-poster-list.activity.list-pending-poster-prompts": {
+      "spec": {
+        "service": "content-production.pending-poster-list",
+        "activity_hash": "sha256:f28c456def54feb56e7ee03646c8850a3669578d75481baf33a2653ba74b4a94",
+        "approved_at": "2026-08-25T20:25:42Z"
+      }
+    },
+    "content-production.pending-translation-batch.activity.translate-pending-content": {
+      "spec": {
+        "service": "content-production.pending-translation-batch",
+        "activity_hash": "sha256:a10c881bdd7a052ea7c0b99423311afe75a830351b24e24cb73dda8d00fde1ea",
+        "approved_at": "2026-08-25T20:26:57Z"
+      }
+    },
+    "content-production.seed-list-copy.activity.compose-seed-list-copy": {
+      "spec": {
+        "service": "content-production.seed-list-copy",
+        "activity_hash": "sha256:d9322672afbca9c51c3046d701a14de6cf9f765b15e8f09a2bb79cd41c493c54",
+        "approved_at": "2026-08-25T20:28:45Z"
+      }
+    },
+    "content-production.seed-list-copy.activity.register-missing-translations": {
+      "spec": {
+        "service": "content-production.seed-list-copy",
+        "activity_hash": "sha256:77fee2492243642d8121d36b6b2745568470ad77c10aad7acc6a904110a74f27",
+        "approved_at": "2026-08-25T20:28:45Z"
+      }
+    },
+    "content-production.tournament-image-maintenance.activity.bind-tournament-images": {
+      "spec": {
+        "service": "content-production.tournament-image-maintenance",
+        "activity_hash": "sha256:abfe82c65c6810810ea42dcaa1c1e1d4fd641e9e999d40e03c0a63ba2d2c30f7",
+        "approved_at": "2026-08-25T20:30:10Z"
+      }
+    },
+    "content-production.tournament-image-maintenance.activity.generate-tournament-images": {
+      "spec": {
+        "service": "content-production.tournament-image-maintenance",
+        "activity_hash": "sha256:c327e0f03506d3d466ed96ef048c9fe9d174e5cfdb74ab50758887e66e61b64c",
+        "approved_at": "2026-08-25T20:30:10Z"
+      }
+    },
+    "content-production.tournament-poster-prompt.activity.generate-cartoon-poster-prompt": {
+      "spec": {
+        "service": "content-production.tournament-poster-prompt",
+        "activity_hash": "sha256:89100e3bee875aab64cf741fb1633b6b95721565f27f373c6b2fcf96ee4f6522",
+        "approved_at": "2026-08-25T20:31:28Z"
+      }
+    },
+    "content-production.tournament-poster-prompt.activity.generate-standard-poster-prompt": {
+      "spec": {
+        "service": "content-production.tournament-poster-prompt",
+        "activity_hash": "sha256:781dd48a655f108d0030461444668b48325e3be8ff084fb76cde7ca0bd10af37",
+        "approved_at": "2026-08-25T20:31:28Z"
+      }
+    },
+    "court.city-court-list.activity.list-city-courts": {
+      "spec": {
+        "service": "court.city-court-list",
+        "activity_hash": "sha256:ac75babd7df51e20d268168b42d3fe699b95d36adf1540c04764c3352df766ca",
+        "approved_at": "2026-08-25T20:32:33Z"
+      }
+    },
+    "court.court-activity-heat-settlement.activity.settle-court-heat": {
+      "spec": {
+        "service": "court.court-activity-heat-settlement",
+        "activity_hash": "sha256:3d255724bc1dfbfcd6bdd3f734fdc737b452d42557396b092c8eb5e4a787371d",
+        "approved_at": "2026-08-25T20:33:35Z"
+      }
+    },
+    "court.court-name-search.activity.search-courts-by-name": {
+      "spec": {
+        "service": "court.court-name-search",
+        "activity_hash": "sha256:32d2fadd57e9342a714f5843e22a3859bc5799dc93f47806e492fd39a6b9a258",
+        "approved_at": "2026-08-25T20:34:22Z"
+      }
+    },
+    "identity-account.account-login.activity.establish-wechat-account": {
+      "spec": {
+        "service": "identity-account.account-login",
+        "activity_hash": "sha256:28140bb8dbac40d8e2408e8d5e3622da0fd79c1e2813c28803c6a0380cf5e238",
+        "approved_at": "2026-08-25T20:36:03Z"
+      }
+    },
+    "identity-account.account-login.activity.issue-login-credential": {
+      "spec": {
+        "service": "identity-account.account-login",
+        "activity_hash": "sha256:9d45645c5f953735e96d97d8ccc247a1b0d06d432252a6b8153b38e1be8a09b6",
+        "approved_at": "2026-08-25T20:36:03Z"
+      }
+    },
+    "identity-account.account-login.activity.verify-wechat-identity": {
+      "spec": {
+        "service": "identity-account.account-login",
+        "activity_hash": "sha256:cfa536d0f06f25d72e89a45f5f71e0ac8df5540a6fc115617395b4c94a6cdfe3",
+        "approved_at": "2026-08-25T20:36:03Z"
+      }
+    },
+    "identity-account.phone-binding.activity.bind-user-phone": {
+      "spec": {
+        "service": "identity-account.phone-binding",
+        "activity_hash": "sha256:271f62fe30de590002f4e8f3e26790fe985f964357832051d5be752cc3b31916",
+        "approved_at": "2026-08-25T20:37:14Z"
+      }
+    },
+    "identity-account.phone-binding.activity.resolve-authorized-phone": {
+      "spec": {
+        "service": "identity-account.phone-binding",
+        "activity_hash": "sha256:27e34618e8f502fbce2bcd7650bf7df9f14f7fe4efec3cb1dd0fcfb09995f186",
+        "approved_at": "2026-08-25T20:37:14Z"
+      }
+    },
+    "identity-account.registration-profile-completion.activity.complete-registration-profile": {
+      "spec": {
+        "service": "identity-account.registration-profile-completion",
+        "activity_hash": "sha256:9bc732d8b81c77e3864fde9457781ce3855ad8b861326aaf1f511763f26c0702",
+        "approved_at": "2026-08-25T20:38:28Z"
+      }
+    },
+    "meetup.chat-message-pull.activity.list-unread-chat-users": {
+      "spec": {
+        "service": "meetup.chat-message-pull",
+        "activity_hash": "sha256:59001447975020fef232192b1b0b306057e63dfcf07ba98f4b4b77bfff843b94",
+        "approved_at": "2026-08-25T20:40:34Z"
+      }
+    },
+    "meetup.chat-message-pull.activity.pull-chat-messages": {
+      "spec": {
+        "service": "meetup.chat-message-pull",
+        "activity_hash": "sha256:2fdbb0d1d6316c57b6b04e1fc54c90f9d3e9e5613f258444c8b417b47fb0f02b",
+        "approved_at": "2026-08-25T20:40:34Z"
+      }
+    },
+    "meetup.chat-message-send.activity.advance-chat-read-state": {
+      "spec": {
+        "service": "meetup.chat-message-send",
+        "activity_hash": "sha256:f95439ae24013158e67a80f6e3c8589bf6b887936ead6abc27fe4041eb995a5d",
+        "approved_at": "2026-08-25T20:41:55Z"
+      }
+    },
+    "meetup.chat-message-send.activity.publish-chat-message": {
+      "spec": {
+        "service": "meetup.chat-message-send",
+        "activity_hash": "sha256:054686915815a62ea0489b7d7743b736c2f4c368fbbb033adaa98281ae41be00",
+        "approved_at": "2026-08-25T20:41:55Z"
+      }
+    },
+    "meetup.meetup-close.activity.close-meetup": {
+      "spec": {
+        "service": "meetup.meetup-close",
+        "activity_hash": "sha256:b4e3936044350bf246b05f3c162381427101035561fd6ea2acb7adb7f746078e",
+        "approved_at": "2026-08-25T20:43:55Z"
+      }
+    },
+    "meetup.meetup-close.activity.dispatch-meetup-cancel-notifications": {
+      "spec": {
+        "service": "meetup.meetup-close",
+        "activity_hash": "sha256:e2c167245bae40ac1805c9e1c227347cc074b08e432306b85613ec574d1011d7",
+        "approved_at": "2026-08-25T20:43:55Z"
+      }
+    },
+    "meetup.meetup-cost-update.activity.replace-meetup-cost": {
+      "spec": {
+        "service": "meetup.meetup-cost-update",
+        "activity_hash": "sha256:724c65fb725e9e8484f595f022001a9f042dc7d20fd178e2d274467d93fae197",
+        "approved_at": "2026-08-25T20:44:56Z"
+      }
+    },
+    "meetup.meetup-detail.activity.assemble-meetup-overview": {
+      "spec": {
+        "service": "meetup.meetup-detail",
+        "activity_hash": "sha256:47f338207cc49db71379511043495b7d3c29100411fcdf7b00fdd2ee6eda8f77",
+        "approved_at": "2026-08-25T20:48:50Z"
+      }
+    },
+    "meetup.meetup-detail.activity.assemble-meetup-recap": {
+      "spec": {
+        "service": "meetup.meetup-detail",
+        "activity_hash": "sha256:78082e3918c7d497a388152182bb3a1d9e42f05a84a592cb3051d343905d2822",
+        "approved_at": "2026-08-25T20:48:50Z"
+      }
+    },
+    "meetup.meetup-detail.activity.calculate-meetup-payment": {
+      "spec": {
+        "service": "meetup.meetup-detail",
+        "activity_hash": "sha256:2c1b092a3c390e07f2b45afef211953f266c5663c76b3882795d4febcb4d7146",
+        "approved_at": "2026-08-25T20:48:50Z"
+      }
+    },
+    "meetup.meetup-detail.activity.evaluate-meetup-action": {
+      "spec": {
+        "service": "meetup.meetup-detail",
+        "activity_hash": "sha256:d6c3d531b4f090388cb5aa548b2c9e44ce75f51ccbcd95eedaaf295285f940c1",
+        "approved_at": "2026-08-25T20:48:50Z"
+      }
+    },
+    "meetup.meetup-detail.activity.query-meetup-chat-unread": {
+      "spec": {
+        "service": "meetup.meetup-detail",
+        "activity_hash": "sha256:b71bf5a87322611b27a7b087e9704afb13850a2f93d102a6c2eb5f0d82047f92",
+        "approved_at": "2026-08-25T20:48:50Z"
+      }
+    },
+    "meetup.meetup-edit.activity.build-meetup-edit-summary": {
+      "spec": {
+        "service": "meetup.meetup-edit",
+        "activity_hash": "sha256:a2b9a545863c674a64975cf4b8203d9d5038a8376ae480927d203307fe2b70ad",
+        "approved_at": "2026-08-25T20:50:39Z"
+      }
+    },
+    "meetup.meetup-edit.activity.revise-meetup": {
+      "spec": {
+        "service": "meetup.meetup-edit",
+        "activity_hash": "sha256:8c5f6cfad63a7c7628364c199ec3e6653faa59712fa82b238a1375d95aca0c09",
+        "approved_at": "2026-08-25T20:50:39Z"
+      }
+    },
+    "meetup.meetup-finish-settlement.activity.settle-finished-meetups": {
+      "spec": {
+        "service": "meetup.meetup-finish-settlement",
+        "activity_hash": "sha256:61b0011ca68a287ad32e3b34145bcc63b7a11e4d4b3529f5b9b75f6a20b606b5",
+        "approved_at": "2026-08-25T20:51:47Z"
+      }
+    },
+    "meetup.meetup-invite.activity.dispatch-team-success-notification": {
+      "spec": {
+        "service": "meetup.meetup-invite",
+        "activity_hash": "sha256:24c25afecf20395dfd96e46038296226029aae45b46f05b9f5f5550d26728361",
+        "approved_at": "2026-08-25T20:53:45Z"
+      }
+    },
+    "meetup.meetup-invite.activity.join-invited-participant-chat": {
+      "spec": {
+        "service": "meetup.meetup-invite",
+        "activity_hash": "sha256:195774070a329cc419ae106c9e0395b541150b3c3767c30e8ca496453e030a98",
+        "approved_at": "2026-08-25T20:53:45Z"
+      }
+    },
+    "meetup.meetup-invite.activity.register-invited-participant": {
+      "spec": {
+        "service": "meetup.meetup-invite",
+        "activity_hash": "sha256:4bf10a57de5d5a8e32759ef08fec6ba927ea42797ccaf986373c439f98f76f14",
+        "approved_at": "2026-08-25T20:53:45Z"
+      }
+    },
+    "meetup.meetup-join.activity.dispatch-meetup-registration-notification": {
+      "spec": {
+        "service": "meetup.meetup-join",
+        "activity_hash": "sha256:0014cced269820f3ac3292eb23cdb7c26b676638edc3bbad28c427128401ac48",
+        "approved_at": "2026-08-25T21:00:11Z"
+      }
+    },
+    "meetup.meetup-join.activity.grant-meetup-notification-quota": {
+      "spec": {
+        "service": "meetup.meetup-join",
+        "activity_hash": "sha256:072ea5ac1221553b4e93a39e256e2776c3628600ba4e0652378f2b68000d0e96",
+        "approved_at": "2026-08-25T21:00:11Z"
+      }
+    },
+    "meetup.meetup-join.activity.join-direct-participant-chat": {
+      "spec": {
+        "service": "meetup.meetup-join",
+        "activity_hash": "sha256:746a7c6ba47953b3a34abdc3dfaeeb3e3a6207e6e82863b32adaf8b69cc91999",
+        "approved_at": "2026-08-25T21:00:11Z"
+      }
+    },
+    "meetup.meetup-join.activity.register-meetup-participant": {
+      "spec": {
+        "service": "meetup.meetup-join",
+        "activity_hash": "sha256:8bb46888142ed3bbc60abbca2a520b0a97cc9e116dc414f77305349c354a1fc1",
+        "approved_at": "2026-08-25T21:00:11Z"
+      }
+    },
+    "meetup.meetup-publish.activity.create-open-meetup": {
+      "spec": {
+        "service": "meetup.meetup-publish",
+        "activity_hash": "sha256:d0fd3b6493b56ce59d61b6760db544ae4fab4c38c89ae00d0c59d0a05ef56e20",
+        "approved_at": "2026-08-25T21:02:42Z"
+      }
+    },
+    "meetup.meetup-publish.activity.grant-publisher-notification-quota": {
+      "spec": {
+        "service": "meetup.meetup-publish",
+        "activity_hash": "sha256:29e52714e3fee26302c0e48c576c0610297e07b1ef27a3119e27826d4b5273b7",
+        "approved_at": "2026-08-25T21:02:42Z"
+      }
+    },
+    "meetup.meetup-publish.activity.join-publisher-chat": {
+      "spec": {
+        "service": "meetup.meetup-publish",
+        "activity_hash": "sha256:8a1df22785c64dad5f95181a574568722b3b502556cefb1ac58e9e030234fa42",
+        "approved_at": "2026-08-25T21:02:42Z"
+      }
+    },
+    "meetup.meetup-quit.activity.dispatch-member-quit-notification": {
+      "spec": {
+        "service": "meetup.meetup-quit",
+        "activity_hash": "sha256:55ffb6487865bc51726bb3b0a7289ce518979c2106d346e360cd2a08a02869c6",
+        "approved_at": "2026-08-25T21:04:48Z"
+      }
+    },
+    "meetup.meetup-quit.activity.leave-meetup-chat": {
+      "spec": {
+        "service": "meetup.meetup-quit",
+        "activity_hash": "sha256:ed732dac7d304033dba6424a938ac584c74c4a08993f6bd28ef8aa064c8c249e",
+        "approved_at": "2026-08-25T21:04:48Z"
+      }
+    },
+    "meetup.meetup-quit.activity.quit-meetup-participant": {
+      "spec": {
+        "service": "meetup.meetup-quit",
+        "activity_hash": "sha256:207fe3349319a51cf484e72896e8b022e1f6d5ff5da08b5f3228b96fe2d9c142",
+        "approved_at": "2026-08-25T21:04:48Z"
+      }
+    },
+    "meetup.meetup-square-list.activity.pack-meetup-square-cards": {
+      "spec": {
+        "service": "meetup.meetup-square-list",
+        "activity_hash": "sha256:b4aeaaca0e7c3193cb96c21f83ccbf81a08f0f0abc73938e83fae57500829c6c",
+        "approved_at": "2026-08-25T21:07:43Z"
+      }
+    },
+    "meetup.meetup-square-list.activity.search-available-meetups-by-distance": {
+      "spec": {
+        "service": "meetup.meetup-square-list",
+        "activity_hash": "sha256:20550059583b562f69d012f1280be420e1e3181ace380eeeb88d1d1ac0b0c2a8",
+        "approved_at": "2026-08-25T21:07:43Z"
+      }
+    },
+    "meetup.meetup-square-list.activity.search-available-meetups-by-time": {
+      "spec": {
+        "service": "meetup.meetup-square-list",
+        "activity_hash": "sha256:dd4f2ac04e99a02f31cd2e91fbd7e94532310a096f5047ca58bc376019274858",
+        "approved_at": "2026-08-25T21:07:43Z"
+      }
+    },
+    "meetup.my-meetups.activity.pack-user-meetup-cards": {
+      "spec": {
+        "service": "meetup.my-meetups",
+        "activity_hash": "sha256:8f3b132d668002d60425a3a45995407818cf572ac4c525423fd319351dbd01b0",
+        "approved_at": "2026-08-25T21:11:07Z"
+      }
+    },
+    "meetup.my-meetups.activity.query-completed-meetups": {
+      "spec": {
+        "service": "meetup.my-meetups",
+        "activity_hash": "sha256:fc8404a69b75cce1bc1648e81fe14faafac5ef84325f299eb689fba443604d6b",
+        "approved_at": "2026-08-25T21:11:07Z"
+      }
+    },
+    "meetup.my-meetups.activity.query-in-progress-meetups": {
+      "spec": {
+        "service": "meetup.my-meetups",
+        "activity_hash": "sha256:2e99998497539192bf15169b4419f6fc043813ba6eacb25398c358a1082176eb",
+        "approved_at": "2026-08-25T21:11:07Z"
+      }
+    },
+    "meetup.my-meetups.activity.query-pending-meetups": {
+      "spec": {
+        "service": "meetup.my-meetups",
+        "activity_hash": "sha256:e818fa3ec5a34396f984b6e62ba09989a298f9aad51db9b3b4e929ee93367d53",
+        "approved_at": "2026-08-25T21:11:07Z"
+      }
+    },
+    "meetup.my-meetups.activity.query-published-meetups": {
+      "spec": {
+        "service": "meetup.my-meetups",
+        "activity_hash": "sha256:a80a8da8f5761b17234212a12c57553a086622a1ff49a74b265568c6fe01491d",
+        "approved_at": "2026-08-25T21:11:07Z"
+      }
+    },
+    "meetup.my-meetups.activity.query-recent-meetups": {
+      "spec": {
+        "service": "meetup.my-meetups",
+        "activity_hash": "sha256:75b37928a999c4c390a142f993a2e0860688057ac3df50bc158987cec31ec341",
+        "approved_at": "2026-08-25T21:11:07Z"
+      }
+    },
+    "meetup.peer-review-submit.activity.complete-peer-review-coverage": {
+      "spec": {
+        "service": "meetup.peer-review-submit",
+        "activity_hash": "sha256:12df85515f405a0f81e0fe212f3ee0171b3c99c54cbf09e10a70b9c75f611d34",
+        "approved_at": "2026-08-25T21:13:02Z"
+      }
+    },
+    "meetup.peer-review-submit.activity.upsert-peer-review-items": {
+      "spec": {
+        "service": "meetup.peer-review-submit",
+        "activity_hash": "sha256:9db7301e09fc0f384e27179a1e87e226d2767d1f8367319210240720839cbb6a",
+        "approved_at": "2026-08-25T21:13:02Z"
+      }
+    },
+    "meetup.registration-approve.activity.approve-pending-registration": {
+      "spec": {
+        "service": "meetup.registration-approve",
+        "activity_hash": "sha256:4d0e887baff0e14b695feb91a50f626db20b694e183e88e2fccfa8a04e588928",
+        "approved_at": "2026-08-25T21:15:13Z"
+      }
+    },
+    "meetup.registration-approve.activity.dispatch-registration-approved-notification": {
+      "spec": {
+        "service": "meetup.registration-approve",
+        "activity_hash": "sha256:a3d770a5152e15bce7df325b30d0cc1b544d922f1019e95eed35f09c58bac628",
+        "approved_at": "2026-08-25T21:15:13Z"
+      }
+    },
+    "meetup.registration-approve.activity.grant-approver-notification-quota": {
+      "spec": {
+        "service": "meetup.registration-approve",
+        "activity_hash": "sha256:a6a238ae94ac460dd5fbe53f98ea75d2500513b7ffe1d692aca7be38d456ae98",
+        "approved_at": "2026-08-25T21:15:13Z"
+      }
+    },
+    "meetup.registration-approve.activity.join-approved-participant-chat": {
+      "spec": {
+        "service": "meetup.registration-approve",
+        "activity_hash": "sha256:dcbf1630064705b6953568aaf567a5ef10a12403b8ed05dd5ea831f8a9dd4968",
+        "approved_at": "2026-08-25T21:15:13Z"
+      }
+    },
+    "meetup.registration-reject.activity.grant-rejector-notification-quota": {
+      "spec": {
+        "service": "meetup.registration-reject",
+        "activity_hash": "sha256:ddaa01882aa92e52e29a0267f5c84171c2d43df59ce7524e4eba6ec603177b96",
+        "approved_at": "2026-08-25T21:16:26Z"
+      }
+    },
+    "meetup.registration-reject.activity.reject-pending-registration": {
+      "spec": {
+        "service": "meetup.registration-reject",
+        "activity_hash": "sha256:e8ae403f6318cfb3be697c842057a0e69c6bc25375622a24ec6168b9f654c680",
+        "approved_at": "2026-08-25T21:16:26Z"
+      }
+    },
+    "meetup.registration-withdraw.activity.withdraw-pending-registration": {
+      "spec": {
+        "service": "meetup.registration-withdraw",
+        "activity_hash": "sha256:5fd0b9fff2ec8cee5471d6def4b96ca8aedf7d3b06c4de6e9ca32bbf42316032",
+        "approved_at": "2026-08-25T21:17:09Z"
+      }
+    },
+    "meetup.review-skip.activity.skip-meetup-review": {
+      "spec": {
+        "service": "meetup.review-skip",
+        "activity_hash": "sha256:56e7da1969a9f89819c1ef87a683b9821397916ecd649fa78d65ec84d3a94c37",
+        "approved_at": "2026-08-25T21:17:52Z"
+      }
+    },
+    "meetup.score-add.activity.add-score-record": {
+      "spec": {
+        "service": "meetup.score-add",
+        "activity_hash": "sha256:aed124f1e6f9854af42df65776d01e8b3a52003a5739afe4b46c638b8e6c388b",
+        "approved_at": "2026-08-25T21:18:51Z"
+      }
+    },
+    "meetup.score-delete.activity.delete-score-record": {
+      "spec": {
+        "service": "meetup.score-delete",
+        "activity_hash": "sha256:29895d15ea436a0e5b04a1db430ffa8624c2f4db2ae356a8dd21b3c04acf0e55",
+        "approved_at": "2026-08-25T21:19:35Z"
+      }
+    },
+    "meetup.score-update.activity.update-score-record": {
+      "spec": {
+        "service": "meetup.score-update",
+        "activity_hash": "sha256:5cfa8fb70c2b9ddfd13905bf96d3292817a0b4ae47357f7623c2635e8fc68d00",
+        "approved_at": "2026-08-25T21:20:27Z"
+      }
+    },
+    "personal-profile.basic-profile-update.activity.assemble-my-profile": {
+      "spec": {
+        "service": "personal-profile.basic-profile-update",
+        "activity_hash": "sha256:5ff34a1339c354d7ca8613154ea161caa9d8ba4cac2e8d56fce1059ec4c217f4",
+        "approved_at": "2026-08-25T21:21:55Z"
+      }
+    },
+    "personal-profile.basic-profile-update.activity.update-basic-profile": {
+      "spec": {
+        "service": "personal-profile.basic-profile-update",
+        "activity_hash": "sha256:787151c98a322239e45d9fa40ac87b1d4c66a76dac08f9a6311de1eb0fbe8b0f",
+        "approved_at": "2026-08-25T21:21:55Z"
+      }
+    },
+    "personal-profile.gender-update.activity.assemble-my-profile": {
+      "spec": {
+        "service": "personal-profile.gender-update",
+        "activity_hash": "sha256:12e2e1eab9ec2b233be95fdc421bbc1968865005a3dc7f7d6f73c3d4178a18c4",
+        "approved_at": "2026-08-25T21:23:03Z"
+      }
+    },
+    "personal-profile.gender-update.activity.update-gender": {
+      "spec": {
+        "service": "personal-profile.gender-update",
+        "activity_hash": "sha256:3f18cec8dd47acb0a9467ac8c41658a0e1bca6b5b502d2ee7317c9c0877edad9",
+        "approved_at": "2026-08-25T21:23:03Z"
+      }
+    },
+    "personal-profile.initial-profile-submission.activity.assemble-my-profile": {
+      "spec": {
+        "service": "personal-profile.initial-profile-submission",
+        "activity_hash": "sha256:bcfd3058faf819e96b4801e790022716db42fa47e009cd1f39c259cc4455b8aa",
+        "approved_at": "2026-08-25T21:24:20Z"
+      }
+    },
+    "personal-profile.initial-profile-submission.activity.complete-initial-profile": {
+      "spec": {
+        "service": "personal-profile.initial-profile-submission",
+        "activity_hash": "sha256:66883edf4422314add1103d89a2d917ca15fcec54f71a312b64103086f2f107d",
+        "approved_at": "2026-08-25T21:24:20Z"
+      }
+    },
+    "personal-profile.my-performance-stats.activity.calculate-my-performance-stats": {
+      "spec": {
+        "service": "personal-profile.my-performance-stats",
+        "activity_hash": "sha256:e62736495373e7b30c9a55bbf715e357b6841933954f72107b90094a538d3454",
+        "approved_at": "2026-08-25T21:25:03Z"
+      }
+    },
+    "personal-profile.my-profile.activity.assemble-my-profile": {
+      "spec": {
+        "service": "personal-profile.my-profile",
+        "activity_hash": "sha256:4e09c19c250cd517e2072d942763e8c2baa1ebb34c56dc66e8031d739ae4835e",
+        "approved_at": "2026-08-25T21:26:46Z"
+      }
+    },
+    "personal-profile.my-review-summary.activity.aggregate-my-review-summary": {
+      "spec": {
+        "service": "personal-profile.my-review-summary",
+        "activity_hash": "sha256:f787f761dcddc366e5e58ab9458f16c6faffeac64d1c515e201ae1094848c61b",
+        "approved_at": "2026-08-25T21:27:34Z"
+      }
+    },
+    "personal-profile.my-scores.activity.query-my-score-page": {
+      "spec": {
+        "service": "personal-profile.my-scores",
+        "activity_hash": "sha256:6a156cdfd7577fec1da4ca5e5a3e8c981b8ebdbf135742c0d88b1016fcbcfe7f",
+        "approved_at": "2026-08-25T21:28:28Z"
+      }
+    },
+    "personal-profile.onboarding-status.activity.initialize-pending-profile": {
+      "spec": {
+        "service": "personal-profile.onboarding-status",
+        "activity_hash": "sha256:9bed9675575d2d96e7c9ab8e73c5fd7325c4b215d5c836c1ebf72916aa6d726a",
+        "approved_at": "2026-08-25T21:29:38Z"
+      }
+    },
+    "personal-profile.onboarding-status.activity.inspect-onboarding-status": {
+      "spec": {
+        "service": "personal-profile.onboarding-status",
+        "activity_hash": "sha256:6de11040a1608d4184fd4658c03b7e89253359140ea4384a45c2331a020d802f",
+        "approved_at": "2026-08-25T21:29:38Z"
+      }
+    },
+    "personal-profile.payment-code-delete.activity.delete-payment-code-image": {
+      "spec": {
+        "service": "personal-profile.payment-code-delete",
+        "activity_hash": "sha256:9b27b1c2668200174073ac613b0e199003ed095cb46d57e4f5e55aa56371d08f",
+        "approved_at": "2026-08-25T21:30:40Z"
+      }
+    },
+    "personal-profile.payment-code-delete.activity.remove-payment-code-record": {
+      "spec": {
+        "service": "personal-profile.payment-code-delete",
+        "activity_hash": "sha256:d623cc1e78412383a7be6844feedea6e067699ad7fb69220eea849c3d7777ab3",
+        "approved_at": "2026-08-25T21:30:40Z"
+      }
+    },
+    "personal-profile.payment-code-get.activity.query-payment-code": {
+      "spec": {
+        "service": "personal-profile.payment-code-get",
+        "activity_hash": "sha256:5959c2fdc38ba8af1326ea47db6fb826e6c79fa215c26844f46a255500b22999",
+        "approved_at": "2026-08-25T21:31:19Z"
+      }
+    },
+    "personal-profile.payment-code-save.activity.upsert-payment-code-record": {
+      "spec": {
+        "service": "personal-profile.payment-code-save",
+        "activity_hash": "sha256:97e30bbdaae2f0a7b63234652dc32ea27181b85cf7abf244a6695d9ce0ef74c9",
+        "approved_at": "2026-08-25T21:32:03Z"
+      }
+    },
+    "personal-profile.player-home.activity.query-player-follow-summary": {
+      "spec": {
+        "service": "personal-profile.player-home",
+        "activity_hash": "sha256:b6a0b8d1eacb5cb1eb00e4cf24921101829f27c1f4f9382a166e3c655df6ec2f",
+        "approved_at": "2026-08-25T21:34:35Z"
+      }
+    },
+    "personal-profile.player-home.activity.query-player-meetup-summary": {
+      "spec": {
+        "service": "personal-profile.player-home",
+        "activity_hash": "sha256:7c4a21d61bcb8e361634b05a8f59f848b36532719665210d8151c49dfe714aff",
+        "approved_at": "2026-08-25T21:34:35Z"
+      }
+    },
+    "personal-profile.player-home.activity.query-player-public-profile": {
+      "spec": {
+        "service": "personal-profile.player-home",
+        "activity_hash": "sha256:a023c97d7202d94b8c5f9b6956091c2afa82858aabf1f4c5348733f81f5ad36d",
+        "approved_at": "2026-08-25T21:34:35Z"
+      }
+    },
+    "personal-profile.player-home.activity.query-player-review-summary": {
+      "spec": {
+        "service": "personal-profile.player-home",
+        "activity_hash": "sha256:468f45aa79dbcdd7119f73c24e73260008f99db3099cac50c5ccf8627bdb49f8",
+        "approved_at": "2026-08-25T21:34:35Z"
+      }
+    },
+    "personal-profile.player-home.activity.query-player-score-summary": {
+      "spec": {
+        "service": "personal-profile.player-home",
+        "activity_hash": "sha256:b42c0576c115360f0b8cc0bc9b2f50cdc66f4fcd5a4c842f783452db84687918",
+        "approved_at": "2026-08-25T21:34:35Z"
+      }
+    },
+    "personal-profile.profile-video-add.activity.append-profile-video": {
+      "spec": {
+        "service": "personal-profile.profile-video-add",
+        "activity_hash": "sha256:9026e15b66c521e5798c1a454cc930d67308192877340de8cd37564b094add75",
+        "approved_at": "2026-08-25T21:35:45Z"
+      }
+    },
+    "personal-profile.profile-video-add.activity.assemble-my-profile": {
+      "spec": {
+        "service": "personal-profile.profile-video-add",
+        "activity_hash": "sha256:5eeffbd31ceebec7a1029099d14ba2d848ad59fba09960e66a4876adbe55f036",
+        "approved_at": "2026-08-25T21:35:45Z"
+      }
+    },
+    "personal-profile.profile-video-delete.activity.assemble-my-profile": {
+      "spec": {
+        "service": "personal-profile.profile-video-delete",
+        "activity_hash": "sha256:4f666643b92407bd0461fc7110f1167d674e31135a6b3efa20836a2942cd7b00",
+        "approved_at": "2026-08-25T21:37:36Z"
+      }
+    },
+    "personal-profile.profile-video-delete.activity.delete-profile-video-file": {
+      "spec": {
+        "service": "personal-profile.profile-video-delete",
+        "activity_hash": "sha256:93c093e0f1dc48c3244f37767d1232e9eeb5608d4d3c3cf948b89aba1ec10655",
+        "approved_at": "2026-08-25T21:37:36Z"
+      }
+    },
+    "personal-profile.profile-video-delete.activity.delete-uploaded-video-file": {
+      "spec": {
+        "service": "personal-profile.profile-video-delete",
+        "activity_hash": "sha256:ea9665dbcfed35d6d7b05aa3d495dd7ef0857d50e3e650443c07c40f7f48f155",
+        "approved_at": "2026-08-25T21:37:36Z"
+      }
+    },
+    "personal-profile.profile-video-delete.activity.remove-profile-video-items": {
+      "spec": {
+        "service": "personal-profile.profile-video-delete",
+        "activity_hash": "sha256:e7508ee102d51dc87b0af423e35542d50301c2f232a0a82136cc0fa21656e066",
+        "approved_at": "2026-08-25T21:37:36Z"
+      }
+    },
+    "personal-profile.profile-video-delete.activity.remove-uploaded-video-items": {
+      "spec": {
+        "service": "personal-profile.profile-video-delete",
+        "activity_hash": "sha256:1a7197daff0c20212d40b7e56481598b845c74b878d31908ba0c83eeda9f9dfe",
+        "approved_at": "2026-08-25T21:37:36Z"
+      }
+    },
+    "personal-profile.profile-video-update.activity.assemble-my-profile": {
+      "spec": {
+        "service": "personal-profile.profile-video-update",
+        "activity_hash": "sha256:7997f1730f710123dce9f955d8572b5fbc7f96d77d68e6a3c962454823e67c22",
+        "approved_at": "2026-08-25T21:38:34Z"
+      }
+    },
+    "personal-profile.profile-video-update.activity.update-profile-video-title": {
+      "spec": {
+        "service": "personal-profile.profile-video-update",
+        "activity_hash": "sha256:556e11e03dc4c6760bc4d89361ab08b177531805bce610c5eaf24973a768f472",
+        "approved_at": "2026-08-25T21:38:34Z"
+      }
+    },
+    "personal-profile.self-rating-update.activity.assemble-my-profile": {
+      "spec": {
+        "service": "personal-profile.self-rating-update",
+        "activity_hash": "sha256:c0da1a4703a916132cbbcd34a79fff381989dcbaeee5e61199d9cb0a7c2f9cc3",
+        "approved_at": "2026-08-25T21:40:28Z"
+      }
+    },
+    "personal-profile.self-rating-update.activity.record-review-trigger": {
+      "spec": {
+        "service": "personal-profile.self-rating-update",
+        "activity_hash": "sha256:d5ea7155f0bbc5583625425d6aa51d3b2d4cc5a49d35f9f735df50d63b7b4aee",
+        "approved_at": "2026-08-25T21:40:28Z"
+      }
+    },
+    "personal-profile.self-rating-update.activity.record-self-rating-change": {
+      "spec": {
+        "service": "personal-profile.self-rating-update",
+        "activity_hash": "sha256:da56b708e78ea885ac86522cb16d3280218893bc963f6c943cda04bdcdf250ea",
+        "approved_at": "2026-08-25T21:40:28Z"
+      }
+    },
+    "personal-profile.self-rating-update.activity.update-self-rating-profile": {
+      "spec": {
+        "service": "personal-profile.self-rating-update",
+        "activity_hash": "sha256:94f0052f0ada50604aaa656b149f9a7a3ea6242f298f1b5a749df5705f4f0d08",
+        "approved_at": "2026-08-25T21:40:28Z"
+      }
+    },
+    "personal-profile.user-image-upload-authorization.activity.issue-avatar-upload-authorization": {
+      "spec": {
+        "service": "personal-profile.user-image-upload-authorization",
+        "activity_hash": "sha256:cb568f5e3c506de4377293bf8cd1a0deee436439a5a1fe0c6b71781f1fd80c31",
+        "approved_at": "2026-08-25T21:41:57Z"
+      }
+    },
+    "personal-profile.user-image-upload-authorization.activity.issue-user-image-upload-authorization": {
+      "spec": {
+        "service": "personal-profile.user-image-upload-authorization",
+        "activity_hash": "sha256:0ed6595786e038a549e3a3a8f08da6aed51f795ab7a9cfdb23485199cf9ca091",
+        "approved_at": "2026-08-25T21:41:57Z"
+      }
+    },
+    "personal-profile.video-upload-authorization.activity.issue-video-upload-authorization": {
+      "spec": {
+        "service": "personal-profile.video-upload-authorization",
+        "activity_hash": "sha256:461e58aef9d64d5f9ff29f27845f5149c45118ef3817f03030ef08f28df7badf",
+        "approved_at": "2026-08-25T21:41:57Z"
+      }
+    },
+    "platform-config.all-config-query.activity.query-all-config-view": {
+      "spec": {
+        "service": "platform-config.all-config-query",
+        "activity_hash": "sha256:997357de53aadf2bed00211862b6afd0ca080347c84856c1e324482a5902d279",
+        "approved_at": "2026-08-25T21:42:41Z"
+      }
+    },
+    "platform-config.available-cities-query.activity.query-available-city-list": {
+      "spec": {
+        "service": "platform-config.available-cities-query",
+        "activity_hash": "sha256:7b6bf0a9cd26039d7fc07a4170b5d75a0f85a0b97f22d096e6e49a7a60d3a1ad",
+        "approved_at": "2026-08-25T21:43:35Z"
+      }
+    },
+    "platform-config.city-catalog-query.activity.query-city-catalog": {
+      "spec": {
+        "service": "platform-config.city-catalog-query",
+        "activity_hash": "sha256:03eac67f8d7a566adc7cd751293d018717fd2db1e895b120576e9625e269e362",
+        "approved_at": "2026-08-25T21:43:36Z"
+      }
+    },
+    "platform-config.global-config-update.activity.publish-global-config": {
+      "spec": {
+        "service": "platform-config.global-config-update",
+        "activity_hash": "sha256:420ad2abc3c34e54dc683df0441aeb3154c628c1a35d257ce5967bbdc48022d4",
+        "approved_at": "2026-08-25T21:44:35Z"
+      }
+    },
+    "platform-config.global-config-update.activity.query-all-config-view": {
+      "spec": {
+        "service": "platform-config.global-config-update",
+        "activity_hash": "sha256:d5fcd98c08831df6a68d217e2558bbcd4e4c87f62dc5ee7b9cd0a88ee40ffa03",
+        "approved_at": "2026-08-25T21:44:35Z"
+      }
+    },
+    "platform-config.group-chat-entry-query.activity.issue-group-chat-entry-url": {
+      "spec": {
+        "service": "platform-config.group-chat-entry-query",
+        "activity_hash": "sha256:c28810068456f542e790d63cf06bd59729774ab5f7b3e9e6e48a80b9ca04cb18",
+        "approved_at": "2026-08-25T21:45:11Z"
+      }
+    },
+    "platform-config.home-config-query.activity.query-home-config-view": {
+      "spec": {
+        "service": "platform-config.home-config-query",
+        "activity_hash": "sha256:bfc6ad688213627e63136b3c2d3939eb053e1a4c8168d0bb418e1d8640e61c0b",
+        "approved_at": "2026-08-25T21:46:30Z"
+      }
+    },
+    "platform-config.home-config-update.activity.publish-home-config": {
+      "spec": {
+        "service": "platform-config.home-config-update",
+        "activity_hash": "sha256:73dfd4e80e3a5f2cf998a9764029e61d084941b8e1f786b02d27903c11025068",
+        "approved_at": "2026-08-25T21:46:30Z"
+      }
+    },
+    "platform-config.home-config-update.activity.query-home-config-view": {
+      "spec": {
+        "service": "platform-config.home-config-update",
+        "activity_hash": "sha256:07a30faca5c03fb75b69b88ea9efc4feb6f0497145f629a3314612de00724e0d",
+        "approved_at": "2026-08-25T21:46:30Z"
+      }
+    },
+    "platform-config.home-content-query.activity.query-home-meetup-section": {
+      "spec": {
+        "service": "platform-config.home-content-query",
+        "activity_hash": "sha256:5c4bcbab8d3b7f1ebff4c6df923da158ba367224f6449ddd4fda7f7b91e61d32",
+        "approved_at": "2026-08-25T21:48:52Z"
+      }
+    },
+    "platform-config.home-content-query.activity.query-home-news-section": {
+      "spec": {
+        "service": "platform-config.home-content-query",
+        "activity_hash": "sha256:d47c67b1722373ce48e06da88291eb1b3af11774d9ef2f4a159dea23209d45b4",
+        "approved_at": "2026-08-25T21:48:52Z"
+      }
+    },
+    "platform-config.home-content-query.activity.query-home-poster-section": {
+      "spec": {
+        "service": "platform-config.home-content-query",
+        "activity_hash": "sha256:99442f510e43d46c173ff53cde6de6988c4d8849245aa7df6871a32f3964de82",
+        "approved_at": "2026-08-25T21:48:52Z"
+      }
+    },
+    "platform-config.home-content-query.activity.query-home-tour-section": {
+      "spec": {
+        "service": "platform-config.home-content-query",
+        "activity_hash": "sha256:231aa1ffa4deb0a108923a9217960c9ddddae9ff57ca1c6c27552d17849dbd5c",
+        "approved_at": "2026-08-25T21:48:52Z"
+      }
+    },
+    "platform-config.home-content-query.activity.register-missing-tour-translations": {
+      "spec": {
+        "service": "platform-config.home-content-query",
+        "activity_hash": "sha256:52d5cf48c5e98a2b7bbd2e2593e6f2b24f358ac511b3b6f72bd896fff6c27761",
+        "approved_at": "2026-08-25T21:48:52Z"
+      }
+    },
+    "platform-config.public-config-query.activity.query-public-config-map": {
+      "spec": {
+        "service": "platform-config.public-config-query",
+        "activity_hash": "sha256:47389841a51ab11381e97ce8431c66fbbdd873bc82062141ce6d0865d213abd9",
+        "approved_at": "2026-08-25T21:49:50Z"
+      }
+    },
+    "platform-config.public-config-query.activity.query-public-config-value": {
+      "spec": {
+        "service": "platform-config.public-config-query",
+        "activity_hash": "sha256:bf2b905cea3fd73c7bc208fdef8ba9b8db7535142a5cd22c9e3aad458b566834",
+        "approved_at": "2026-08-25T21:49:50Z"
+      }
+    },
+    "platform-config.splash-cover-query.activity.issue-splash-cover-url": {
+      "spec": {
+        "service": "platform-config.splash-cover-query",
+        "activity_hash": "sha256:cf99b76278463e07cf299bba0914afe7e9a4d68b16586c299664cc5d6619a67a",
+        "approved_at": "2026-08-25T21:50:28Z"
+      }
+    },
+    "pro-tour-data.finished-matches-query.activity.query-finished-round-groups": {
+      "spec": {
+        "service": "pro-tour-data.finished-matches-query",
+        "activity_hash": "sha256:5aa6753ba3908c4e392b082957d338a3e9483be1167e5628dcc0c4df4d64add0",
+        "approved_at": "2026-08-25T21:52:28Z"
+      }
+    },
+    "pro-tour-data.finished-matches-query.activity.query-finished-seed-groups": {
+      "spec": {
+        "service": "pro-tour-data.finished-matches-query",
+        "activity_hash": "sha256:f01b82dc16a703d6003867b456736a1cf2b4adb16ac3ca6972053c3b27dd096c",
+        "approved_at": "2026-08-25T21:52:28Z"
+      }
+    },
+    "pro-tour-data.finished-matches-query.activity.register-missing-tour-translations": {
+      "spec": {
+        "service": "pro-tour-data.finished-matches-query",
+        "activity_hash": "sha256:bc26e90b76773c345578c8db0e6b4e66f21a7fc4394f3482219e081cd2b5cef7",
+        "approved_at": "2026-08-25T21:52:28Z"
+      }
+    },
+    "pro-tour-data.player-query.activity.query-ranked-tour-players": {
+      "spec": {
+        "service": "pro-tour-data.player-query",
+        "activity_hash": "sha256:f51c10ffd5cc4f7d25ff992a97d9af578cef95859316aba2379f4898518c641b",
+        "approved_at": "2026-08-25T21:52:28Z"
+      }
+    },
+    "pro-tour-data.player-query.activity.register-missing-tour-translations": {
+      "spec": {
+        "service": "pro-tour-data.player-query",
+        "activity_hash": "sha256:cda6d81682cc82e0dd80de495be4516b1c1834d5ddeea5d31388ffb3b32a24d5",
+        "approved_at": "2026-08-25T21:52:28Z"
+      }
+    },
+    "pro-tour-data.player-ranking-collect.activity.collect-atp-player-rankings": {
+      "spec": {
+        "service": "pro-tour-data.player-ranking-collect",
+        "activity_hash": "sha256:854be3c0d7608983cd0884bb4a0cee09d9d4a108bf6d58939b3f80df95455413",
+        "approved_at": "2026-08-25T21:53:32Z"
+      }
+    },
+    "pro-tour-data.player-ranking-collect.activity.collect-wta-player-rankings": {
+      "spec": {
+        "service": "pro-tour-data.player-ranking-collect",
+        "activity_hash": "sha256:f225ca1b627ec27bf368dfcfcb59e367e23a7d1ece3058137a135b53978f1d7c",
+        "approved_at": "2026-08-25T21:53:32Z"
+      }
+    },
+    "pro-tour-data.player-tournament-path-query.activity.query-player-tournament-path": {
+      "spec": {
+        "service": "pro-tour-data.player-tournament-path-query",
+        "activity_hash": "sha256:38e2f9ce1cc6774c81d1cb673a8cd63ae86180882de1e4244a29f4136df9738c",
+        "approved_at": "2026-08-25T21:54:59Z"
+      }
+    },
+    "pro-tour-data.player-tournament-path-query.activity.register-missing-tour-translations": {
+      "spec": {
+        "service": "pro-tour-data.player-tournament-path-query",
+        "activity_hash": "sha256:21aa22402ad6d1fb2f3f976c3ed8daecbcb7c3907ef7ae2b58c052e95eb55a44",
+        "approved_at": "2026-08-25T21:54:59Z"
+      }
+    },
+    "pro-tour-data.tournament-catalog-collect.activity.collect-atp-tournament-catalog": {
+      "spec": {
+        "service": "pro-tour-data.tournament-catalog-collect",
+        "activity_hash": "sha256:5f051852486f333ce987a851ea66a1860f760ed3fb6b2a48d43c10423c1de096",
+        "approved_at": "2026-08-25T21:56:01Z"
+      }
+    },
+    "pro-tour-data.tournament-catalog-collect.activity.collect-wta-tournament-catalog": {
+      "spec": {
+        "service": "pro-tour-data.tournament-catalog-collect",
+        "activity_hash": "sha256:4395cc99971611488ce48d1613d50ec14a7993fca49105ce7335231832745aa2",
+        "approved_at": "2026-08-25T21:56:01Z"
+      }
+    },
+    "pro-tour-data.tournament-draw-collect.activity.upsert-draw-entries": {
+      "spec": {
+        "service": "pro-tour-data.tournament-draw-collect",
+        "activity_hash": "sha256:2067b21c86fba95b76b1cc798030152f1534055559c33ef67da6cd44d7d32fa3",
+        "approved_at": "2026-08-25T21:57:33Z"
+      }
+    },
+    "pro-tour-data.tournament-draw-collect.activity.upsert-draw-matches": {
+      "spec": {
+        "service": "pro-tour-data.tournament-draw-collect",
+        "activity_hash": "sha256:d0a236b76426bb684ae558b01a400c2da92b2e723d0b6dfb337e76890c890c77",
+        "approved_at": "2026-08-25T21:57:33Z"
+      }
+    },
+    "pro-tour-data.tournament-draw-collect.activity.upsert-draw-players": {
+      "spec": {
+        "service": "pro-tour-data.tournament-draw-collect",
+        "activity_hash": "sha256:bde1a16c7113290a7764032f979a009ed870d0cf4c6750531a1fe066ba1612ba",
+        "approved_at": "2026-08-25T21:57:33Z"
+      }
+    },
+    "pro-tour-data.tournament-draw-collect.activity.upsert-tournament-draw": {
+      "spec": {
+        "service": "pro-tour-data.tournament-draw-collect",
+        "activity_hash": "sha256:ced18e43c150e17bd4b36659cf6c77036866f1e952ab5f426c081376d87e7012",
+        "approved_at": "2026-08-25T21:57:33Z"
+      }
+    },
+    "pro-tour-data.tournament-live-collect.activity.upsert-live-match-snapshots": {
+      "spec": {
+        "service": "pro-tour-data.tournament-live-collect",
+        "activity_hash": "sha256:4a96efbba22e9acbb4503f8362eaf99fff3a5a9ecd4a6fcc3e955f732c17cdbe",
+        "approved_at": "2026-08-25T22:00:24Z"
+      }
+    },
+    "pro-tour-data.tournament-live-collect.activity.upsert-tournament-draw": {
+      "spec": {
+        "service": "pro-tour-data.tournament-live-collect",
+        "activity_hash": "sha256:cd4c929f6a29797b947c76dd950c96754141f8d17158d3bae7b658341596b6ec",
+        "approved_at": "2026-08-25T22:00:24Z"
+      }
+    },
+    "pro-tour-data.tournament-query.activity.query-tournament-catalog": {
+      "spec": {
+        "service": "pro-tour-data.tournament-query",
+        "activity_hash": "sha256:ec98ec3733672f5f6355783ff09890760e53a67d3e8dc25fd4e2939d0a76188c",
+        "approved_at": "2026-08-25T22:02:31Z"
+      }
+    },
+    "pro-tour-data.tournament-query.activity.register-missing-tour-translations": {
+      "spec": {
+        "service": "pro-tour-data.tournament-query",
+        "activity_hash": "sha256:f9592711b8c282d7e1aaf22d61de3022f06a528f0f1d002a5173c781aa767218",
+        "approved_at": "2026-08-25T22:02:31Z"
+      }
+    },
+    "pro-tour-data.tournament-result-collect.activity.collect-completed-match-results": {
+      "spec": {
+        "service": "pro-tour-data.tournament-result-collect",
+        "activity_hash": "sha256:384e44774b6adcbe3f260921776f83e6593924cd0169a4bb3bdc6fcd864fd04b",
+        "approved_at": "2026-08-25T22:03:21Z"
+      }
+    },
+    "pro-tour-data.tournament-schedule-collect.activity.upsert-match-schedules": {
+      "spec": {
+        "service": "pro-tour-data.tournament-schedule-collect",
+        "activity_hash": "sha256:792cac7a7ecc6170a49f18360e2009ca3374a16f8a5d5f0765bcfddd93ffd67b",
+        "approved_at": "2026-08-25T22:05:20Z"
+      }
+    },
+    "pro-tour-data.tournament-schedule-collect.activity.upsert-schedule-draw": {
+      "spec": {
+        "service": "pro-tour-data.tournament-schedule-collect",
+        "activity_hash": "sha256:9b71e0b482a905850cf552be690c443c4a99c0fd29af342e58ba7cd0fc5a057b",
+        "approved_at": "2026-08-25T22:05:20Z"
+      }
+    },
+    "pro-tour-data.tournament-schedule-collect.activity.upsert-schedule-entries": {
+      "spec": {
+        "service": "pro-tour-data.tournament-schedule-collect",
+        "activity_hash": "sha256:88b1d7f80e8c5fddf43ea2612204cb84c89636d69d86f8f68ac64793b5823d8a",
+        "approved_at": "2026-08-25T22:05:20Z"
+      }
+    },
+    "pro-tour-data.tournament-schedule-collect.activity.upsert-schedule-players": {
+      "spec": {
+        "service": "pro-tour-data.tournament-schedule-collect",
+        "activity_hash": "sha256:81301ae7ce8843158bd0b7bd1bb2800466ca80bb5b141c9ca6747fef576bab6b",
+        "approved_at": "2026-08-25T22:05:20Z"
+      }
+    },
+    "pro-tour-data.upcoming-matches-query.activity.query-upcoming-match-groups": {
+      "spec": {
+        "service": "pro-tour-data.upcoming-matches-query",
+        "activity_hash": "sha256:2fd3f5ee1d2ca99dc3acde0853414320d15658348a50c711a551e18ce080097a",
+        "approved_at": "2026-08-25T22:06:32Z"
+      }
+    },
+    "pro-tour-data.upcoming-matches-query.activity.register-missing-tour-translations": {
+      "spec": {
+        "service": "pro-tour-data.upcoming-matches-query",
+        "activity_hash": "sha256:a41f76715fb7147285e55bfad166a8303fd5c8b0564c1adeb206a0ac6117f009",
+        "approved_at": "2026-08-25T22:06:32Z"
+      }
+    },
+    "social-relations.follow-create.activity.establish-user-follow": {
+      "spec": {
+        "service": "social-relations.follow-create",
+        "activity_hash": "sha256:9628c4ab12bd6779d1b94b9e68b65befcff35a5d374aa060b6b6605cbf35321e",
+        "approved_at": "2026-08-25T22:09:09Z"
+      }
+    },
+    "social-relations.follow-remove.activity.remove-user-follow": {
+      "spec": {
+        "service": "social-relations.follow-remove",
+        "activity_hash": "sha256:3932fbe5272f175f6cddd4c9660d7cb4401cd93418b5a5ca468a51ec32dacf84",
+        "approved_at": "2026-08-25T22:09:09Z"
+      }
+    },
+    "social-relations.followers-list.activity.query-followers-page": {
+      "spec": {
+        "service": "social-relations.followers-list",
+        "activity_hash": "sha256:3260729fa905be293a32599a8b001e20f63f6890cec2a84d4b73301ab8dc0bc3",
+        "approved_at": "2026-08-25T22:09:10Z"
+      }
+    },
+    "social-relations.following-list.activity.query-following-page": {
+      "spec": {
+        "service": "social-relations.following-list",
+        "activity_hash": "sha256:3e9e87a4ffde831fa94a7de56d006f4c06f5c4c1f6995a426d4c1c489ae428ac",
+        "approved_at": "2026-08-25T22:09:10Z"
+      }
+    },
+    "tournament.booking-confirm.activity.confirm-booking": {
+      "spec": {
+        "service": "tournament.booking-confirm",
+        "activity_hash": "sha256:511f1b00efd923317070c39f2dde8619218f6ddb9856b6d1e180572d29745077",
+        "approved_at": "2026-08-25T22:12:38Z"
+      }
+    },
+    "tournament.booking-reject.activity.reject-await-booking-by-booker": {
+      "spec": {
+        "service": "tournament.booking-reject",
+        "activity_hash": "sha256:80bbf33448d2a97b140b411b566aeb1e71aa6e6ac06958ddb0f70eb42f27637f",
+        "approved_at": "2026-08-25T22:12:38Z"
+      }
+    },
+    "tournament.booking-reject.activity.reject-await-booking-by-opponent": {
+      "spec": {
+        "service": "tournament.booking-reject",
+        "activity_hash": "sha256:746c733f47fd3d18ad49031af6903d9facb97796501519fe987aa232d753a7f9",
+        "approved_at": "2026-08-25T22:12:38Z"
+      }
+    },
+    "tournament.booking-reject.activity.reject-await-court-booker": {
+      "spec": {
+        "service": "tournament.booking-reject",
+        "activity_hash": "sha256:42196baf2cfca7ae174237221c10fc06bc1ef14686d05f0060a51a0c4baf1106",
+        "approved_at": "2026-08-25T22:12:38Z"
+      }
+    },
+    "tournament.booking-reject.activity.reject-await-schedule-confirm": {
+      "spec": {
+        "service": "tournament.booking-reject",
+        "activity_hash": "sha256:2c0a646269d1c42624f3971681866873f20e8194d8cae7e5e955dd1583708d30",
+        "approved_at": "2026-08-25T22:12:38Z"
+      }
+    },
+    "tournament.booking-reject.activity.reject-booking-on-confirm": {
+      "spec": {
+        "service": "tournament.booking-reject",
+        "activity_hash": "sha256:1137e8dbb765f8cc46c1446b40dceda6e7374a84eff1b032bc5ef7aa3657197b",
+        "approved_at": "2026-08-25T22:12:38Z"
+      }
+    },
+    "tournament.booking-reschedule-request.activity.request-rebooking": {
+      "spec": {
+        "service": "tournament.booking-reschedule-request",
+        "activity_hash": "sha256:2534828f271db98327f34b300a074a1443399f2baecbe2f056f0b156bf5b80f5",
+        "approved_at": "2026-08-25T22:12:38Z"
+      }
+    },
+    "tournament.booking-submit.activity.save-booking": {
+      "spec": {
+        "service": "tournament.booking-submit",
+        "activity_hash": "sha256:782e433e6fe7619e767a1c8dbbb49901c5e56371db9307040e4b9c4bb7e1bc4c",
+        "approved_at": "2026-08-25T22:12:39Z"
+      }
+    },
+    "tournament.comment-publish.activity.publish-comment": {
+      "spec": {
+        "service": "tournament.comment-publish",
+        "activity_hash": "sha256:3c1db1f0ae73e8623e2fb1f8939021e947f0ceffd8cae83a2f305c68621323bd",
+        "approved_at": "2026-08-25T22:14:21Z"
+      }
+    },
+    "tournament.comment-pull.activity.list-comments": {
+      "spec": {
+        "service": "tournament.comment-pull",
+        "activity_hash": "sha256:f7a20d30c9aa58cc817e20b20a192f2c8cc09b119a77c822ef14d120b8386bf8",
+        "approved_at": "2026-08-25T22:14:21Z"
+      }
+    },
+    "tournament.court-booker-select.activity.select-court-booker": {
+      "spec": {
+        "service": "tournament.court-booker-select",
+        "activity_hash": "sha256:5e86b453729f36df3957a69834dc4916a247f6305d2abed1ad509630eefb0821",
+        "approved_at": "2026-08-25T22:14:22Z"
+      }
+    },
+    "tournament.court-booker-selection-timeout.activity.reject-timeout-match": {
+      "spec": {
+        "service": "tournament.court-booker-selection-timeout",
+        "activity_hash": "sha256:623b7fa29602a24d33ea4f9b2dfa506f272fdd9c4b39d7f4ca0286e498a2f445",
+        "approved_at": "2026-08-25T22:14:22Z"
+      }
+    },
+    "tournament.current-round-matching.activity.run-current-round-matching": {
+      "spec": {
+        "service": "tournament.current-round-matching",
+        "activity_hash": "sha256:4155055c50dd01651722955cf0b37c1d8f632196fbbfb650e67e85defc974c18",
+        "approved_at": "2026-08-25T22:16:32Z"
+      }
+    },
+    "tournament.entry-freeze.activity.freeze-entry": {
+      "spec": {
+        "service": "tournament.entry-freeze",
+        "activity_hash": "sha256:1336eb38abe154f27f3d4aae23d8e9a98ed68a14cbc2618f99f4447aa69ed469",
+        "approved_at": "2026-08-25T22:16:32Z"
+      }
+    },
+    "tournament.entry-payment-initiate.activity.prepare-entry-payment": {
+      "spec": {
+        "service": "tournament.entry-payment-initiate",
+        "activity_hash": "sha256:b6817df454a420d2dce7555f28fd6d78bebd8c8c2015496ce3cd4be26d139ee5",
+        "approved_at": "2026-08-25T22:16:32Z"
+      }
+    },
+    "tournament.entry-preference-update.activity.replace-entry-preference": {
+      "spec": {
+        "service": "tournament.entry-preference-update",
+        "activity_hash": "sha256:2d9e1ba4905338cd40ce6d758f2c9bbd064cf6e963d2bc1b286c4d089ec21774",
+        "approved_at": "2026-08-25T22:16:33Z"
+      }
+    },
+    "tournament.entry-unfreeze.activity.unfreeze-entry": {
+      "spec": {
+        "service": "tournament.entry-unfreeze",
+        "activity_hash": "sha256:5a00311be79df17e72e9e0b3923ca8ef68cb0fd06f99fcf7d157974dd49d3263",
+        "approved_at": "2026-08-25T22:16:33Z"
+      }
+    },
+    "tournament.offline-meetup-create.activity.create-offline-meetup": {
+      "spec": {
+        "service": "tournament.offline-meetup-create",
+        "activity_hash": "sha256:d82a523388081980ac9b179976072d2c6c26372800730925eb0a9a2cead3c883",
+        "approved_at": "2026-08-25T22:18:50Z"
+      }
+    },
+    "tournament.result-submit.activity.submit-result": {
+      "spec": {
+        "service": "tournament.result-submit",
+        "activity_hash": "sha256:8ed58b01b4f9550ca963a32b1341a23eca3a805b9e92bd659bedf4026014cd05",
+        "approved_at": "2026-08-25T22:18:50Z"
+      }
+    },
+    "tournament.result-confirm.activity.confirm-result": {
+      "spec": {
+        "service": "tournament.result-confirm",
+        "activity_hash": "sha256:e296fc686b47e14adf50e187a3e6ad194f58ebfdd7fa142dfc94f1bfc0252d48",
+        "approved_at": "2026-08-25T22:18:51Z"
+      }
+    },
+    "tournament.result-confirmation-timeout.activity.complete-timeout-result": {
+      "spec": {
+        "service": "tournament.result-confirmation-timeout",
+        "activity_hash": "sha256:86e13924de2fc8e3e722e62e8a09ba83e00ddd68a5e43eb189c909566567fc5e",
+        "approved_at": "2026-08-25T22:18:51Z"
+      }
+    },
+    "tournament.result-reject.activity.reject-result": {
+      "spec": {
+        "service": "tournament.result-reject",
+        "activity_hash": "sha256:37971653ecea0239fcd86ad58f1c2382aa257a7dc146349e599dec48b70067cf",
+        "approved_at": "2026-08-25T22:18:51Z"
+      }
+    },
+    "tournament.tournament-abandon.activity.abandon-tournament": {
+      "spec": {
+        "service": "tournament.tournament-abandon",
+        "activity_hash": "sha256:20b927783e6e57591375f4ff55449e9f94afbd8350bc6ba5be21746b6e1d5518",
+        "approved_at": "2026-08-25T22:21:27Z"
+      }
+    },
+    "tournament.tournament-activate.activity.activate-tournament": {
+      "spec": {
+        "service": "tournament.tournament-activate",
+        "activity_hash": "sha256:9322197cc2feb6c8aa52140ba9ae51de701c906ffcb9dca96fd053b8ebf5a5a2",
+        "approved_at": "2026-08-25T22:21:27Z"
+      }
+    },
+    "tournament.tournament-config-update.activity.update-tournament-config": {
+      "spec": {
+        "service": "tournament.tournament-config-update",
+        "activity_hash": "sha256:a4cdbfd79756b83077f6e6ec8ef7d26b592df4fc3e56067e08129e62c6f1032e",
+        "approved_at": "2026-08-25T22:21:27Z"
+      }
+    },
+    "tournament.tournament-detail.activity.assemble-tournament-detail": {
+      "spec": {
+        "service": "tournament.tournament-detail",
+        "activity_hash": "sha256:79c6115c51675758b62a88ad36bfbecd3fd8dda2cf6c9df29f23c5677174e33f",
+        "approved_at": "2026-08-25T22:21:28Z"
+      }
+    },
+    "tournament.tournament-detail.activity.record-tournament-visit": {
+      "spec": {
+        "service": "tournament.tournament-detail",
+        "activity_hash": "sha256:1e9d0c01dccd44503e38bb2ccdb836dcd976fa506f059756aa5f8924de216017",
+        "approved_at": "2026-08-25T22:21:28Z"
+      }
+    },
+    "tournament.tournament-draft-create.activity.create-tournament-draft": {
+      "spec": {
+        "service": "tournament.tournament-draft-create",
+        "activity_hash": "sha256:06aa4e12dfb89ade19e01de6efcf90268a1f15180a884b839099e16e42bea689",
+        "approved_at": "2026-08-25T22:21:28Z"
+      }
+    },
+    "tournament.tournament-entry.activity.grant-tournament-notice-subscription": {
+      "spec": {
+        "service": "tournament.tournament-entry",
+        "activity_hash": "sha256:1476b2c2d4d114020acd306cbcc408d4746ba363392fd07ae0e801d8acaf6e38",
+        "approved_at": "2026-08-25T22:24:19Z"
+      }
+    },
+    "tournament.tournament-entry.activity.join-tournament-discussion": {
+      "spec": {
+        "service": "tournament.tournament-entry",
+        "activity_hash": "sha256:e1a4bd82e32a6d99f793c2d8994c6a572e9cf312f7fd7a8e481010a916572211",
+        "approved_at": "2026-08-25T22:24:19Z"
+      }
+    },
+    "tournament.tournament-entry.activity.register-tournament-entry": {
+      "spec": {
+        "service": "tournament.tournament-entry",
+        "activity_hash": "sha256:ca07cdca190782e091a6f5dcb775fdf60912d0a2947456fe206b3b0b928231e3",
+        "approved_at": "2026-08-25T22:24:19Z"
+      }
+    },
+    "tournament.tournament-list.activity.query-tournament-admin-list": {
+      "spec": {
+        "service": "tournament.tournament-list",
+        "activity_hash": "sha256:0aa32ff7704a2623773cbe1c737beeca2ed48dab5844057c55df1cd5b095de2c",
+        "approved_at": "2026-08-25T22:24:19Z"
+      }
+    },
+    "tournament.tournament-withdraw.activity.leave-tournament-discussion": {
+      "spec": {
+        "service": "tournament.tournament-withdraw",
+        "activity_hash": "sha256:34fbabbb3b867cce9c343ba25d7a9e2b39bc092e93e8e7046285a01ee560aa2a",
+        "approved_at": "2026-08-25T22:24:20Z"
+      }
+    },
+    "tournament.tournament-withdraw.activity.terminate-withdrawn-match": {
+      "spec": {
+        "service": "tournament.tournament-withdraw",
+        "activity_hash": "sha256:f8af9979d1e3ca01ab5044f12c72eccbbae53fc9bae065db5cf452c8831d5694",
+        "approved_at": "2026-08-25T22:24:20Z"
+      }
+    },
+    "tournament.tournament-withdraw.activity.withdraw-tournament-entry": {
+      "spec": {
+        "service": "tournament.tournament-withdraw",
+        "activity_hash": "sha256:5bc200ebafeaa854cbd580f5bb5a68e7772e4ec08e09539cd5987b97bb9e5f33",
+        "approved_at": "2026-08-25T22:24:20Z"
+      }
+    },
+    "tournament.unbooked-match-cancel.activity.cancel-unbooked-matches": {
+      "spec": {
+        "service": "tournament.unbooked-match-cancel",
+        "activity_hash": "sha256:1b0b25f988099eeb33a0cdc3f25acca52ece25ba7fbf7fbb7bd50e12eed26203",
+        "approved_at": "2026-08-25T22:24:20Z"
+      }
+    },
+    "transaction-payment.payment-result-receipt.activity.advance-paid-business": {
+      "spec": {
+        "service": "transaction-payment.payment-result-receipt",
+        "activity_hash": "sha256:41b50b82294ace5aa2f5fd6b9d0b08b1d54570e5a79da67877cf44b55085a099",
+        "approved_at": "2026-08-25T22:29:11Z"
+      }
+    },
+    "transaction-payment.payment-result-receipt.activity.confirm-payment": {
+      "spec": {
+        "service": "transaction-payment.payment-result-receipt",
+        "activity_hash": "sha256:d0a98861adece5cc0f81013970814a8a7c8ac00de257659bebc6a70d6671acbb",
+        "approved_at": "2026-08-25T22:29:11Z"
+      }
+    },
+    "transaction-payment.payment-result-receipt.activity.record-payment-receipt": {
+      "spec": {
+        "service": "transaction-payment.payment-result-receipt",
+        "activity_hash": "sha256:da020076e7920f2076180b179e27bcc70eff7e9830a0662a103df2aa2b145c3f",
+        "approved_at": "2026-08-25T22:29:11Z"
+      }
+    },
+    "transaction-payment.payment-status-sync.activity.advance-paid-business": {
+      "spec": {
+        "service": "transaction-payment.payment-status-sync",
+        "activity_hash": "sha256:2990021c4114ade780a278d328d70fcb6580cdf804051a275137f349933fe69b",
+        "approved_at": "2026-08-25T22:29:12Z"
+      }
+    },
+    "transaction-payment.payment-status-sync.activity.deliver-payment-summary": {
+      "spec": {
+        "service": "transaction-payment.payment-status-sync",
+        "activity_hash": "sha256:75646111ae3d48d6e7f20bf2a9c010a06e4e2addea5c1457cecf4d9335dfbc60",
+        "approved_at": "2026-08-25T22:29:12Z"
+      }
+    },
+    "transaction-payment.payment-status-sync.activity.reconcile-payment-status": {
+      "spec": {
+        "service": "transaction-payment.payment-status-sync",
+        "activity_hash": "sha256:da743b00f4e676fa3f053abb5049163455bca74e5e31b5cbdb0a12aaa30953e9",
+        "approved_at": "2026-08-25T22:29:12Z"
+      }
+    },
+    "transaction-payment.pending-orders-query.activity.deliver-pending-orders": {
+      "spec": {
+        "service": "transaction-payment.pending-orders-query",
+        "activity_hash": "sha256:df335d68ceb13595fefd2347ff9a20699da2b7128b8a34ab7256ae376e0e1c79",
+        "approved_at": "2026-08-25T22:29:12Z"
+      }
+    },
+    "transaction-payment.receipt-recovery.activity.advance-paid-business": {
+      "spec": {
+        "service": "transaction-payment.receipt-recovery",
+        "activity_hash": "sha256:fd507131331c51e4c2fc60240dd32403bcb7c90ff055d8086fe341980f938333",
+        "approved_at": "2026-08-25T22:29:12Z"
+      }
+    },
+    "transaction-payment.receipt-recovery.activity.finalize-payment-receipt": {
+      "spec": {
+        "service": "transaction-payment.receipt-recovery",
+        "activity_hash": "sha256:3c59585e19d7c330f697195dc9089b6c68edf0e6bb08aa3638f2e31de9a148e7",
+        "approved_at": "2026-08-25T22:29:12Z"
+      }
+    },
+    "transaction-payment.receipt-recovery.activity.reconcile-payment-status": {
+      "spec": {
+        "service": "transaction-payment.receipt-recovery",
+        "activity_hash": "sha256:c9a25070b9eb6d4a5b4d9ea6dec1f8d9ada09fc810992f0b2f367241113a9f74",
+        "approved_at": "2026-08-25T22:29:12Z"
+      }
+    },
+    "transaction-payment.timeout-order-close.activity.advance-paid-business": {
+      "spec": {
+        "service": "transaction-payment.timeout-order-close",
+        "activity_hash": "sha256:b7f5726427120919a01da132e0946183aac9013a150300c9cb5aba7a891c496e",
+        "approved_at": "2026-08-25T22:29:13Z"
+      }
+    },
+    "transaction-payment.timeout-order-close.activity.close-expired-payment": {
+      "spec": {
+        "service": "transaction-payment.timeout-order-close",
+        "activity_hash": "sha256:295fa3fde4867ff595496beae97ce190ba1ba9d5db90672b02cb9ad475d66fad",
+        "approved_at": "2026-08-25T22:29:13Z"
+      }
+    },
+    "transaction-payment.timeout-order-close.activity.reconcile-expired-payment": {
+      "spec": {
+        "service": "transaction-payment.timeout-order-close",
+        "activity_hash": "sha256:8b6719bf9c29072ac7b230f306c839716e3612d77f14c2bc9ef0aeb942ebe38f",
+        "approved_at": "2026-08-25T22:29:13Z"
+      }
     }
   },
   "domains": {
@@ -319,6 +3597,202 @@
         ],
         "verified_at": "2026-08-25T11:32:23Z",
         "base_commit": "d396346b81c376662cb7f30b22f29ad8258dbbd1"
+      }
+    },
+    "@content.tournament-image-asset": {
+      "spec": {
+        "domain_hash": "sha256:94580af27a0fca7bd6c01b02408fc5c9ea1282f2e8267d3e1eea4ea45a97d2c0",
+        "approved_at": "2026-08-26T00:29:21Z",
+        "introduced_by": "content-production.tournament-image-maintenance"
+      }
+    },
+    "@content.translation-entry": {
+      "spec": {
+        "domain_hash": "sha256:d2c7735002cebc9ab2c578474155947d7bf67dd67c0a08ea18d663aa66714f05",
+        "approved_at": "2026-08-26T00:31:17Z",
+        "introduced_by": "content-production.daily-schedule-copy"
+      }
+    },
+    "@identity.account": {
+      "spec": {
+        "domain_hash": "sha256:e70febba3cf6bd626df098441fb0a9d04b0781f20d502e5846d1128c76d6c0b5",
+        "approved_at": "2026-08-26T00:32:23Z",
+        "introduced_by": "identity-account.account-login"
+      }
+    },
+    "@identity.profile-change-log": {
+      "spec": {
+        "domain_hash": "sha256:8e090c61fea28120e0de2f2189525839d844d7a9d9c2435da4963d885821a913",
+        "approved_at": "2026-08-26T00:33:41Z",
+        "introduced_by": "personal-profile.self-rating-update"
+      }
+    },
+    "@identity.user": {
+      "spec": {
+        "domain_hash": "sha256:0efdd05c4d0e26dbd6e558d81c34ea3f6a988411c14b21940c1c9539f5e4b3ce",
+        "approved_at": "2026-08-26T00:36:26Z",
+        "introduced_by": "identity-account.account-login"
+      }
+    },
+    "@identity.user-extension": {
+      "spec": {
+        "domain_hash": "sha256:427f016d473377047ab342bc41d5f0935bfa49877fa92a000c1a236532eea162",
+        "approved_at": "2026-08-26T00:37:43Z",
+        "introduced_by": "personal-profile.payment-code-delete"
+      }
+    },
+    "@media.asset-storage": {
+      "spec": {
+        "domain_hash": "sha256:1d6b1bced40ffb16034a916b7e02f400887427f2d01656e8a1c464de093be959",
+        "approved_at": "2026-08-26T00:39:03Z",
+        "introduced_by": "personal-profile.profile-video-delete"
+      }
+    },
+    "@meetup.chat-member": {
+      "spec": {
+        "domain_hash": "sha256:3e5050908c215b65a58c8f8de313c4c62b277ccb9b8cf17f38ec87ca03eac753",
+        "approved_at": "2026-08-26T00:41:12Z",
+        "introduced_by": "meetup.chat-message-pull"
+      }
+    },
+    "@meetup.chat-message": {
+      "spec": {
+        "domain_hash": "sha256:2fabdeba025388c06e2a5ae3dc99a0cd1198439261d79cd7cba4caecc705fb15",
+        "approved_at": "2026-08-26T00:42:18Z",
+        "introduced_by": "meetup.chat-message-send"
+      }
+    },
+    "@meetup.finish-settlement": {
+      "spec": {
+        "domain_hash": "sha256:15a29469d79e231598ac87d5fa575ef381168cc34c9091601e961d67ce8f2a2c",
+        "approved_at": "2026-08-26T00:43:36Z",
+        "introduced_by": "meetup.meetup-finish-settlement"
+      }
+    },
+    "@meetup.meetup": {
+      "spec": {
+        "domain_hash": "sha256:c8e1b7e1b62f423c3986c23dc8cfe993fee9c88a741da13454121e33dac7a18b",
+        "approved_at": "2026-08-26T00:46:44Z",
+        "introduced_by": "meetup.chat-message-pull"
+      }
+    },
+    "@meetup.peer-review": {
+      "spec": {
+        "domain_hash": "sha256:8f9305928d3f2d265c6e2eee4ee0883d39badacef20e354d3fb21d0f7bd34545",
+        "approved_at": "2026-08-26T00:48:04Z",
+        "introduced_by": "meetup.peer-review-submit"
+      }
+    },
+    "@meetup.score-record": {
+      "spec": {
+        "domain_hash": "sha256:44a00f6f5d1c8b4685d39728631e990893588642743dd4ac6f88aff92e803a04",
+        "approved_at": "2026-08-26T00:49:44Z",
+        "introduced_by": "meetup.score-add"
+      }
+    },
+    "@notification.subscription-delivery": {
+      "spec": {
+        "domain_hash": "sha256:24d95fdcf29244d7036588af2779ccde5d1a33d99886b73dff9fe9f6ff6febf7",
+        "approved_at": "2026-08-26T00:51:50Z",
+        "introduced_by": "meetup.meetup-close"
+      }
+    },
+    "@payment.payment-order": {
+      "spec": {
+        "domain_hash": "sha256:709afbf2ea6c50e816446b57f97ed5babd1e7a106d37f48e2f1e6fd384333c1e",
+        "approved_at": "2026-08-26T00:53:34Z",
+        "introduced_by": "tournament.entry-payment-initiate"
+      }
+    },
+    "@payment.receipt-log": {
+      "spec": {
+        "domain_hash": "sha256:3280f6b0b16f9dd80e37d818b4555d88969ff1c2a5c9629192feb11feb630511",
+        "approved_at": "2026-08-26T00:54:48Z",
+        "introduced_by": "transaction-payment.payment-result-receipt"
+      }
+    },
+    "@social.user-follow": {
+      "spec": {
+        "domain_hash": "sha256:a89463bdf579bbdae52e89a3d7e87995d7959269753d152e82269ffd6d387c80",
+        "approved_at": "2026-08-26T00:55:42Z",
+        "introduced_by": "social-relations.follow-create"
+      }
+    },
+    "@system.platform-config": {
+      "spec": {
+        "domain_hash": "sha256:f4ea2352de6994e6f807628e31b635aa47273ffe28ffa4f1fc208eac50a4df36",
+        "approved_at": "2026-08-26T00:56:47Z",
+        "introduced_by": "platform-config.global-config-update"
+      }
+    },
+    "@tour.draw": {
+      "spec": {
+        "domain_hash": "sha256:39910210b2e2d9c904f0d69d35515f2dfecf2d2b25d93611cb319e010fa69825",
+        "approved_at": "2026-08-26T00:58:30Z",
+        "introduced_by": "pro-tour-data.tournament-draw-collect"
+      }
+    },
+    "@tour.match": {
+      "spec": {
+        "domain_hash": "sha256:d6ff0d3b793e9604cc29f8a896e1dc0fadd9b89c6e4967add9b54a71f35b070c",
+        "approved_at": "2026-08-26T02:23:50Z",
+        "introduced_by": "pro-tour-data.tournament-draw-collect"
+      }
+    },
+    "@tour.player": {
+      "spec": {
+        "domain_hash": "sha256:03099a77184275015b31240ebcc9332edbf376520621953b815891ecfbec4150",
+        "approved_at": "2026-08-26T02:24:59Z",
+        "introduced_by": "pro-tour-data.player-ranking-collect"
+      }
+    },
+    "@tour.tournament": {
+      "spec": {
+        "domain_hash": "sha256:d859f2bf08a29b34e8b8e41a476f094205bf7b977addf15f251d23ed0c170fd0",
+        "approved_at": "2026-08-26T02:26:08Z",
+        "introduced_by": "content-production.tournament-image-maintenance"
+      }
+    },
+    "@tour.tournament-entry": {
+      "spec": {
+        "domain_hash": "sha256:7d5bccb150589d5dbc7363ee0f081d13b87250c6b4b8c690e1859fab413e677a",
+        "approved_at": "2026-08-26T02:27:16Z",
+        "introduced_by": "pro-tour-data.tournament-draw-collect"
+      }
+    },
+    "@tournament.entry": {
+      "spec": {
+        "domain_hash": "sha256:f6bc19385dc57ea4a4f23d4636ba151b80e8eae00691d945ac74910c17abfca2",
+        "approved_at": "2026-08-26T02:39:02Z",
+        "introduced_by": "tournament.booking-confirm"
+      }
+    },
+    "@tournament.match": {
+      "spec": {
+        "domain_hash": "sha256:fdb93cd8cd459411d43ca35bf0141e8e78c3c1ef5108a369f5a2c8a872c1087b",
+        "approved_at": "2026-08-26T02:32:14Z",
+        "introduced_by": "meetup.meetup-edit"
+      }
+    },
+    "@tournament.matchmaking": {
+      "spec": {
+        "domain_hash": "sha256:843d38d8cff6475848c3f39375f44c7c16b222fa0a8bf64762b07eb1ac66b1e9",
+        "approved_at": "2026-08-26T02:33:34Z",
+        "introduced_by": "tournament.current-round-matching"
+      }
+    },
+    "@tournament.round-progress": {
+      "spec": {
+        "domain_hash": "sha256:06f6c8847a4dfd3d4fda804b8bf14bb608142f89ecffac842b810c2b405a8f11",
+        "approved_at": "2026-08-26T02:35:29Z",
+        "introduced_by": "tournament.result-confirm"
+      }
+    },
+    "@tournament.tournament": {
+      "spec": {
+        "domain_hash": "sha256:e99b0ae71b3452b4fb1f22b96ec7c5d4a85e1c76d3e6874f2ca426ae4bcd6844",
+        "approved_at": "2026-08-26T02:38:30Z",
+        "introduced_by": "tournament.entry-payment-initiate"
       }
     }
   }
