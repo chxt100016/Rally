@@ -62,11 +62,11 @@ public class LocationCatalogService {
             // R2 城市编码本身未命中时不再推导
             return LocationResult.miss();
         }
-        // R5 一个区县都推不出的城市给空列表，命中结论仍为真
+        // R6 一个区县都推不出的城市给空列表，命中结论仍为真
         return LocationResult.of(city.getName(), districtsOf(cityCode));
     }
 
-    /** R3 R4 R6 按编码前缀归属推导下属区县 */
+    /** R3 R4 R7 按编码前缀归属推导下属区县 */
     private List<Location> districtsOf(String cityCode) {
         Map<String, List<Location>> index = districtsByCity;
         if (index == null) {
@@ -82,7 +82,7 @@ public class LocationCatalogService {
 
     private Map<String, List<Location>> buildIndex() {
         Map<String, List<Location>> index = new HashMap<>();
-        // R6 同一编码重复出现时只取第一条
+        // R7 同一编码重复出现时只取第一条
         Set<String> seen = new LinkedHashSet<>();
         List<Location> all = new ArrayList<>(CityConfig.districts.values());
         for (Location district : all) {
@@ -94,7 +94,7 @@ public class LocationCatalogService {
             index.computeIfAbsent(code.substring(0, MUNICIPALITY_PREFIX_LENGTH), k -> new ArrayList<>()).add(district);
             index.computeIfAbsent(code.substring(0, CITY_PREFIX_LENGTH), k -> new ArrayList<>()).add(district);
         }
-        // R6 下属区县按区县编码升序给出
+        // R7 下属区县按区县编码升序给出
         for (List<Location> list : index.values()) {
             list.sort(Comparator.comparing(Location::getCode));
         }

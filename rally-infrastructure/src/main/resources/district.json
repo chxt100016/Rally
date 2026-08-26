@@ -4872,18 +4872,6 @@
     "pinyin": "shangchengqu"
   },
   {
-    "code": "330103",
-    "name": "下城区",
-    "initials": "xcq",
-    "pinyin": "xiachengqu"
-  },
-  {
-    "code": "330104",
-    "name": "江干区",
-    "initials": "jgq",
-    "pinyin": "jiangganqu"
-  },
-  {
     "code": "330105",
     "name": "拱墅区",
     "initials": "gsq",
@@ -4924,6 +4912,18 @@
     "name": "临安区",
     "initials": "laq",
     "pinyin": "linanqu"
+  },
+  {
+    "code": "330113",
+    "name": "临平区",
+    "initials": "lpq",
+    "pinyin": "linpingqu"
+  },
+  {
+    "code": "330114",
+    "name": "钱塘区",
+    "initials": "qtq",
+    "pinyin": "qiantangqu"
   },
   {
     "code": "330122",
@@ -6174,16 +6174,16 @@
     "pinyin": "xianyouxian"
   },
   {
-    "code": "350402",
-    "name": "梅列区",
-    "initials": "mlq",
-    "pinyin": "meiliequ"
-  },
-  {
-    "code": "350403",
+    "code": "350404",
     "name": "三元区",
     "initials": "syq",
     "pinyin": "sanyuanqu"
+  },
+  {
+    "code": "350405",
+    "name": "沙县区",
+    "initials": "sxq",
+    "pinyin": "shaxianqu"
   },
   {
     "code": "350421",
@@ -6214,12 +6214,6 @@
     "name": "尤溪县",
     "initials": "yxx",
     "pinyin": "youxixian"
-  },
-  {
-    "code": "350427",
-    "name": "沙县",
-    "initials": "sx",
-    "pinyin": "shaxian"
   },
   {
     "code": "350428",
@@ -6330,6 +6324,18 @@
     "pinyin": "longwenqu"
   },
   {
+    "code": "350604",
+    "name": "龙海区",
+    "initials": "lhq",
+    "pinyin": "longhaiqu"
+  },
+  {
+    "code": "350605",
+    "name": "长泰区",
+    "initials": "ctq",
+    "pinyin": "changtaiqu"
+  },
+  {
     "code": "350622",
     "name": "云霄县",
     "initials": "yxx",
@@ -6346,12 +6352,6 @@
     "name": "诏安县",
     "initials": "zax",
     "pinyin": "zhaoanxian"
-  },
-  {
-    "code": "350625",
-    "name": "长泰县",
-    "initials": "ztx",
-    "pinyin": "zhangtaixian"
   },
   {
     "code": "350626",
@@ -6376,12 +6376,6 @@
     "name": "华安县",
     "initials": "hax",
     "pinyin": "huaanxian"
-  },
-  {
-    "code": "350681",
-    "name": "龙海市",
-    "initials": "lhs",
-    "pinyin": "longhaishi"
   },
   {
     "code": "350702",
@@ -8106,22 +8100,22 @@
     "pinyin": "jianxiqu"
   },
   {
-    "code": "410306",
-    "name": "吉利区",
-    "initials": "jlq",
-    "pinyin": "jiliqu"
+    "code": "410307",
+    "name": "偃师区",
+    "initials": "ysq",
+    "pinyin": "yanshiqu"
+  },
+  {
+    "code": "410308",
+    "name": "孟津区",
+    "initials": "mjq",
+    "pinyin": "mengjinqu"
   },
   {
     "code": "410311",
     "name": "洛龙区",
     "initials": "llq",
     "pinyin": "luolongqu"
-  },
-  {
-    "code": "410322",
-    "name": "孟津县",
-    "initials": "mjx",
-    "pinyin": "mengjinxian"
   },
   {
     "code": "410323",
@@ -8164,12 +8158,6 @@
     "name": "伊川县",
     "initials": "ycx",
     "pinyin": "yichuanxian"
-  },
-  {
-    "code": "410381",
-    "name": "偃师市",
-    "initials": "yss",
-    "pinyin": "yanshishi"
   },
   {
     "code": "410402",
@@ -8898,12 +8886,6 @@
     "pinyin": "xincaixian"
   },
   {
-    "code": "419001",
-    "name": "济源市",
-    "initials": "jys",
-    "pinyin": "jiyuanshi"
-  },
-  {
     "code": "420102",
     "name": "江岸区",
     "initials": "jaq",
@@ -9498,30 +9480,6 @@
     "pinyin": "hefengxian"
   },
   {
-    "code": "429004",
-    "name": "仙桃市",
-    "initials": "xts",
-    "pinyin": "xiantaoshi"
-  },
-  {
-    "code": "429005",
-    "name": "潜江市",
-    "initials": "qjs",
-    "pinyin": "qianjiangshi"
-  },
-  {
-    "code": "429006",
-    "name": "天门市",
-    "initials": "tms",
-    "pinyin": "tianmenshi"
-  },
-  {
-    "code": "429021",
-    "name": "神农架林区",
-    "initials": "snjlq",
-    "pinyin": "shennongjialinqu"
-  },
-  {
     "code": "430102",
     "name": "芙蓉区",
     "initials": "frq",
@@ -10050,12 +10008,6 @@
     "pinyin": "lengshuitanqu"
   },
   {
-    "code": "431121",
-    "name": "祁阳县",
-    "initials": "qyx",
-    "pinyin": "qiyangxian"
-  },
-  {
     "code": "431122",
     "name": "东安县",
     "initials": "dax",
@@ -10102,6 +10054,12 @@
     "name": "江华瑶族自治县",
     "initials": "jhyzzzx",
     "pinyin": "jianghuayaozuzizhixian"
+  },
+  {
+    "code": "431181",
+    "name": "祁阳市",
+    "initials": "qys",
+    "pinyin": "qiyangshi"
   },
   {
     "code": "431202",
@@ -11052,10 +11010,10 @@
     "pinyin": "binyangxian"
   },
   {
-    "code": "450127",
-    "name": "横县",
-    "initials": "hx",
-    "pinyin": "hengxian"
+    "code": "450181",
+    "name": "横州市",
+    "initials": "hzs",
+    "pinyin": "hengzhoushi"
   },
   {
     "code": "450202",
@@ -11698,96 +11656,6 @@
     "name": "崖州区",
     "initials": "yzq",
     "pinyin": "yazhouqu"
-  },
-  {
-    "code": "469001",
-    "name": "五指山市",
-    "initials": "wzss",
-    "pinyin": "wuzhishanshi"
-  },
-  {
-    "code": "469002",
-    "name": "琼海市",
-    "initials": "qhs",
-    "pinyin": "qionghaishi"
-  },
-  {
-    "code": "469005",
-    "name": "文昌市",
-    "initials": "wcs",
-    "pinyin": "wenchangshi"
-  },
-  {
-    "code": "469006",
-    "name": "万宁市",
-    "initials": "wns",
-    "pinyin": "wanningshi"
-  },
-  {
-    "code": "469007",
-    "name": "东方市",
-    "initials": "dfs",
-    "pinyin": "dongfangshi"
-  },
-  {
-    "code": "469021",
-    "name": "定安县",
-    "initials": "dax",
-    "pinyin": "dinganxian"
-  },
-  {
-    "code": "469022",
-    "name": "屯昌县",
-    "initials": "tcx",
-    "pinyin": "tunchangxian"
-  },
-  {
-    "code": "469023",
-    "name": "澄迈县",
-    "initials": "cmx",
-    "pinyin": "chengmaixian"
-  },
-  {
-    "code": "469024",
-    "name": "临高县",
-    "initials": "lgx",
-    "pinyin": "lingaoxian"
-  },
-  {
-    "code": "469025",
-    "name": "白沙黎族自治县",
-    "initials": "bslzzzx",
-    "pinyin": "baishalizuzizhixian"
-  },
-  {
-    "code": "469026",
-    "name": "昌江黎族自治县",
-    "initials": "cjlzzzx",
-    "pinyin": "changjianglizuzizhixian"
-  },
-  {
-    "code": "469027",
-    "name": "乐东黎族自治县",
-    "initials": "ldlzzzx",
-    "pinyin": "ledonglizuzizhixian"
-  },
-  {
-    "code": "469028",
-    "name": "陵水黎族自治县",
-    "initials": "lslzzzx",
-    "pinyin": "lingshuilizuzizhixian"
-  },
-  {
-    "code": "469029",
-    "name": "保亭黎族苗族自治县",
-    "initials": "btlzmzzzx",
-    "pinyin": "baotinglizumiaozuzizhixian"
-  },
-  {
-    "code": "469030",
-    "name": "琼中黎族苗族自治县",
-    "initials": "qzlzmzzzx",
-    "pinyin": "qiongzhonglizumiaozuzizhixian"
   },
   {
     "code": "500101",
@@ -13020,6 +12888,12 @@
     "pinyin": "xichangshi"
   },
   {
+    "code": "513402",
+    "name": "会理市",
+    "initials": "hls",
+    "pinyin": "huilishi"
+  },
+  {
     "code": "513422",
     "name": "木里藏族自治县",
     "initials": "mlzzzzx",
@@ -13036,12 +12910,6 @@
     "name": "德昌县",
     "initials": "dcx",
     "pinyin": "dechangxian"
-  },
-  {
-    "code": "513425",
-    "name": "会理县",
-    "initials": "hlx",
-    "pinyin": "huilixian"
   },
   {
     "code": "513426",
@@ -13332,12 +13200,6 @@
     "pinyin": "dafangxian"
   },
   {
-    "code": "520522",
-    "name": "黔西县",
-    "initials": "qxx",
-    "pinyin": "qianxixian"
-  },
-  {
     "code": "520523",
     "name": "金沙县",
     "initials": "jsx",
@@ -13366,6 +13228,12 @@
     "name": "赫章县",
     "initials": "hzx",
     "pinyin": "hezhangxian"
+  },
+  {
+    "code": "520581",
+    "name": "黔西市",
+    "initials": "qxs",
+    "pinyin": "qianxishi"
   },
   {
     "code": "520602",
@@ -14076,6 +13944,12 @@
     "pinyin": "chuxiongshi"
   },
   {
+    "code": "532302",
+    "name": "禄丰市",
+    "initials": "lfs",
+    "pinyin": "lufengshi"
+  },
+  {
     "code": "532322",
     "name": "双柏县",
     "initials": "sbx",
@@ -14122,12 +13996,6 @@
     "name": "武定县",
     "initials": "wdx",
     "pinyin": "wudingxian"
-  },
-  {
-    "code": "532331",
-    "name": "禄丰县",
-    "initials": "lfx",
-    "pinyin": "lufengxian"
   },
   {
     "code": "532501",
@@ -14652,12 +14520,6 @@
     "pinyin": "gongbujiangdaxian"
   },
   {
-    "code": "540422",
-    "name": "米林县",
-    "initials": "mlx",
-    "pinyin": "milinxian"
-  },
-  {
     "code": "540423",
     "name": "墨脱县",
     "initials": "mtx",
@@ -14680,6 +14542,12 @@
     "name": "朗县",
     "initials": "lx",
     "pinyin": "langxian"
+  },
+  {
+    "code": "540481",
+    "name": "米林市",
+    "initials": "mls",
+    "pinyin": "milinshi"
   },
   {
     "code": "540502",
@@ -14742,16 +14610,16 @@
     "pinyin": "longzixian"
   },
   {
-    "code": "540530",
-    "name": "错那县",
-    "initials": "cnx",
-    "pinyin": "cuonaxian"
-  },
-  {
     "code": "540531",
     "name": "浪卡子县",
     "initials": "lqzx",
     "pinyin": "langqiazixian"
+  },
+  {
+    "code": "540581",
+    "name": "错那市",
+    "initials": "cns",
+    "pinyin": "cuonashi"
   },
   {
     "code": "540602",
@@ -14982,10 +14850,10 @@
     "pinyin": "chencangqu"
   },
   {
-    "code": "610322",
-    "name": "凤翔县",
-    "initials": "fxx",
-    "pinyin": "fengxiangxian"
+    "code": "610305",
+    "name": "凤翔区",
+    "initials": "fxq",
+    "pinyin": "fengxiangqu"
   },
   {
     "code": "610323",
@@ -15450,16 +15318,16 @@
     "pinyin": "zhenpingxian"
   },
   {
-    "code": "610928",
-    "name": "旬阳县",
-    "initials": "xyx",
-    "pinyin": "xunyangxian"
-  },
-  {
     "code": "610929",
     "name": "白河县",
     "initials": "bhx",
     "pinyin": "baihexian"
+  },
+  {
+    "code": "610981",
+    "name": "旬阳市",
+    "initials": "xys",
+    "pinyin": "xunyangshi"
   },
   {
     "code": "611002",
@@ -16920,16 +16788,16 @@
     "pinyin": "wusushi"
   },
   {
+    "code": "654203",
+    "name": "沙湾市",
+    "initials": "sws",
+    "pinyin": "shawanshi"
+  },
+  {
     "code": "654221",
     "name": "额敏县",
     "initials": "emx",
     "pinyin": "eminxian"
-  },
-  {
-    "code": "654223",
-    "name": "沙湾县",
-    "initials": "swx",
-    "pinyin": "shawanxian"
   },
   {
     "code": "654224",
@@ -16990,65 +16858,5 @@
     "name": "吉木乃县",
     "initials": "jmnx",
     "pinyin": "jimunaixian"
-  },
-  {
-    "code": "659001",
-    "name": "石河子市",
-    "initials": "shzs",
-    "pinyin": "shihezishi"
-  },
-  {
-    "code": "659002",
-    "name": "阿拉尔市",
-    "initials": "ales",
-    "pinyin": "alaershi"
-  },
-  {
-    "code": "659003",
-    "name": "图木舒克市",
-    "initials": "tmsks",
-    "pinyin": "tumushukeshi"
-  },
-  {
-    "code": "659004",
-    "name": "五家渠市",
-    "initials": "wjqs",
-    "pinyin": "wujiaqushi"
-  },
-  {
-    "code": "659005",
-    "name": "北屯市",
-    "initials": "bts",
-    "pinyin": "beitunshi"
-  },
-  {
-    "code": "659006",
-    "name": "铁门关市",
-    "initials": "tmgs",
-    "pinyin": "tiemenguanshi"
-  },
-  {
-    "code": "659007",
-    "name": "双河市",
-    "initials": "shs",
-    "pinyin": "shuangheshi"
-  },
-  {
-    "code": "659008",
-    "name": "可克达拉市",
-    "initials": "kkdls",
-    "pinyin": "kekedalashi"
-  },
-  {
-    "code": "659009",
-    "name": "昆玉市",
-    "initials": "kys",
-    "pinyin": "kunyushi"
-  },
-  {
-    "code": "659010",
-    "name": "胡杨河市",
-    "initials": "hyhs",
-    "pinyin": "huyangheshi"
   }
 ]

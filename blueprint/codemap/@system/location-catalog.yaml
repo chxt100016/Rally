@@ -3,7 +3,7 @@ files:
   - path: rally-domain/src/main/java/com/rally/domain/system/service/LocationCatalogService.java
     role: 主实现
     symbols: [LocationCatalogService]
-    covers: [R1, R2, R3, R4, R5, R6]
+    covers: [R1, R2, R3, R4, R6, R7]
   - path: rally-domain/src/main/java/com/rally/domain/system/enums/LocationScopeEnum.java
     role: 查询范围枚举
     symbols: [LocationScopeEnum]
@@ -15,4 +15,14 @@ files:
   - path: rally-domain/src/main/java/com/rally/domain/system/model/LocationResult.java
     role: 契约出参
     symbols: [LocationResult]
-    covers: [R2, R5]
+    covers: [R2, R6]
+  - path: rally-infrastructure/src/main/resources/city.json
+    role: 城市名录数据
+    covers: [R5]
+  - path: rally-infrastructure/src/main/resources/district.json
+    role: 区县名录数据
+    covers: [R5]
+  - path: rally-infrastructure/src/main/java/com/rally/config/ResourceConfigLoader.java
+    role: 名录加载
+    symbols: [ResourceConfigLoader]
+    covers: [R5]
