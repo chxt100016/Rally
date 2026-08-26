@@ -70,6 +70,7 @@ tables:
 | I4 | confirmStatus 与 resultConfirmStatus 分别只接受 `PENDING/CONFIRMED/REJECTED`，各自非 PENDING 时必须有对应时间 | 参与者实体 | 两条确认链必须独立且状态时间一致 | `TOURNAMENT_MATCH_CONFIRMATION_INVALID` |
 | I5 | 进入 PENDING_CONFIRM 必须同时记录合法胜方、参与者提交人和提交时间；进入 COMPLETED 必须有胜方及完成时间 | 比赛根、赛果提交、参与者 | 赛果事实与生命周期推进必须原子提交 | `TOURNAMENT_RESULT_WINNER_REQUIRED` |
 | I6 | 根及参与者的任何修改都必须以 version 条件保护，成功后 version 递增；版本不符不得部分保存 | 比赛根、全部参与者 | 订场认领、确认和超时任务存在并发竞争 | `TOURNAMENT_MATCH_VERSION_CONFLICT` |
+| I7 | 关联赛约可读取时，接受赛约确认的时间必须早于赛约开始时间 | 比赛根、订场委派；时间事实来自 `@meetup.meetup` | 已开始的赛约不能被全员确认并推进比赛；该外部约束由应用事务协调后再执行比赛命令 | `MEETUP_EXPIRED` |
 
 ## 命令
 
@@ -78,7 +79,7 @@ tables:
 | C1 | 创建匹配比赛 | 不存在 | 赛事、轮次、matchNo、完整参与者、matchedTime、可选唯一订场人 | 有唯一订场人时 `BOOKING`，否则 `MATCHED`；两套确认均 PENDING | 身份重复；对阵不完整；订场人非法 |
 | C2 | 认领订场人 | `MATCHED` | 参与者 userId、当前时间、version | `BOOKING` 并记录订场人/选定时间 | 非参与者；已被认领；版本冲突 |
 | C3 | 提交或修改赛约 | `BOOKING/SCHEDULED` | 订场人、meetupId、提交时间、version | BOOKING 时转 `SCHEDULED`，订场人 CONFIRMED、其余 PENDING；SCHEDULED 修改保持确认 | 操作者/赛约不符；阶段非法；版本冲突 |
-| C4 | 确认赛约 | `SCHEDULED` | 参与者 userId、确认时间、version | 本人 CONFIRMED；全员确认时 `PENDING_PLAY` | 非参与者；阶段非法；版本冲突 |
+| C4 | 确认赛约 | `SCHEDULED` | 参与者 userId、确认时间、version、关联赛约未过期结论 | 本人 CONFIRMED；全员确认时 `PENDING_PLAY` | 关联赛约已开始（`MEETUP_EXPIRED`）；非参与者；阶段非法；版本冲突 |
 | C5 | 请求重订 | `SCHEDULED` | 参与者、重订理由与时间、version | `BOOKING`，记录最新重订并重置全员赛约确认为 PENDING | 非参与者；理由非法；版本冲突 |
 | C6 | 提交赛果 | `PENDING_PLAY` | 参与者提交人、合法 winnerEntryNo、时间、version | `PENDING_CONFIRM`；提交人赛果确认 CONFIRMED，其余重置 PENDING | 非参与者；胜方不在本场；版本冲突 |
 | C7 | 确认或自动完成赛果 | `PENDING_CONFIRM` | 确认参与者或超时事实、确认时间、version | 按需更新确认；全员已确认或超时完成时 `COMPLETED` | 缺胜方；非参与者；版本冲突 |
@@ -89,6 +90,7 @@ tables:
 
 - 恰有一个可订场参与者的匹配可直接创建为 BOOKING；否则从 MATCHED 等待首次认领。
 - BOOKING 提交赛约会重置赛约确认；SCHEDULED 内只修改赛约资料时保留已确认结果。
+- 赛约过期只阻止 `confirm=true` 的接受确认；拒绝和请求重订仍允许。为兼容历史数据，未关联 meetupId 或关联赛约记录缺失时由原流程继续处理。
 - 请求重订保留订场人、原 meetupId 和原提交时间，只覆盖最近一次重订记录并重置赛约确认。
 - 赛约重复确认可刷新本人时间；全员确认后即进入表注释遗漏但流程必需的 PENDING_PLAY。
 - 提交赛果会清除其他参与者残留的赛果确认；超时自动完成只把仍 PENDING 的确认补为 CONFIRMED。

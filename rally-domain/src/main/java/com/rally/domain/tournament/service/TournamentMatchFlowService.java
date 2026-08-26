@@ -171,6 +171,9 @@ public class TournamentMatchFlowService {
     public void handleScheduleConfirm(String matchId, String userId, boolean confirm, ScheduleRejectReasonEnum rejectReason, RebookReasonEnum rebookReason) {
         TournamentMatch match = matchRepository.findByBizIdWithParticipants(matchId);
         Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+        if (confirm && match.getData().getStatus() == TournamentMatchStatusEnum.SCHEDULED) {
+            assertBookingNotExpired(match);
+        }
 
         Tournament tournament = getTournament(match.getData().getTournamentId());
         TournamentEntry userEntry = getUserEntry(match.getData().getTournamentId(), userId);
@@ -197,6 +200,22 @@ public class TournamentMatchFlowService {
             // 全员确认赛约，草稿约球转为正常报名状态（DRAFT -> OPEN）
             activateDraftMeetup(match.getData().getMeetupId());
         }
+    }
+
+    /**
+     * 仅接受赛约时校验时间；拒赛和申请重订仍允许处理已过期赛约。
+     * 保留历史兼容：比赛未关联赛约或关联记录缺失时，仍由原流程继续处理。
+     */
+    private void assertBookingNotExpired(TournamentMatch match) {
+        String meetupId = match.getData().getMeetupId();
+        if (meetupId == null) {
+            return;
+        }
+        MeetupData meetupData = meetupRepository.findByBizId(meetupId);
+        if (meetupData == null) {
+            return;
+        }
+        new Meetup(meetupData, List.of()).assertNotExpired();
     }
 
     /**

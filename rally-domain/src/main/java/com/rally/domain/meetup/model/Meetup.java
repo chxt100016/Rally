@@ -67,6 +67,13 @@ public class Meetup {
         return data.getStartTime().isBefore(LocalDateTime.now());
     }
 
+    /** 开始时间已过的约球不能再接受赛约确认。 */
+    public void assertNotExpired() {
+        if (isExpired()) {
+            throw new BusinessException(BizErrorCode.MEETUP_EXPIRED);
+        }
+    }
+
     /** 是否为活跃状态（非终态） */
     public boolean isActive() {
         MeetupStatusEnum realStatus = getRealStatus();
