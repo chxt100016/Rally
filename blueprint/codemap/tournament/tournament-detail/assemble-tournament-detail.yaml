@@ -1,7 +1,7 @@
 id: tournament.tournament-detail.activity.assemble-tournament-detail
 files:
   - path: rally-app/src/main/java/com/rally/tournament/tournamentdetail/activity/AssembleTournamentDetailActivity.java
-    role: 聚合公开赛事与个人进度、补比赛对手及限制、推导动作和活动卡片、批量填充资料并签名图片
+    role: 聚合公开赛事与个人进度、统一正赛可晋级和已晋级名额、补比赛对手及限制、推导动作和活动卡片、批量填充资料并签名图片
     symbols: [AssembleTournamentDetailActivity]
     covers: [A1, A2, A3, A4, A5]
   - path: rally-app/src/main/java/com/rally/tournament/TournamentDetailAppService.java

@@ -8,6 +8,7 @@ import com.rally.domain.tournament.enums.TournamentEntryStatusEnum;
 import com.rally.domain.tournament.enums.TournamentActionStateEnum;
 import com.rally.domain.tournament.enums.TournamentJoinRestrictionEnum;
 import com.rally.domain.tournament.enums.RebookReasonEnum;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.model.MatchOpponentDTO;
 import com.rally.domain.tournament.model.MatchParticipantDTO;
 import com.rally.domain.tournament.model.MyCurrentMatchDTO;
@@ -57,6 +58,7 @@ public class AssembleTournamentDetailActivity {
      */
     public TournamentDetailDTO execute(String tournamentId, String userId) {
         TournamentDetailDTO detail = tournamentDetailService.assembleDetail(tournamentId, userId);
+        fillProgress(detail);
         fillCommentState(detail, tournamentId, userId);
         if (detail.getTournament() != null) {
             detail.getTournament().setPosterUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getPosterUrl()));
@@ -78,6 +80,21 @@ public class AssembleTournamentDetailActivity {
         fillMeetupCard(detail);
         fillOfflineMeetupCard(detail);
         return detail;
+    }
+
+    /**
+     * 正赛每场产生一个晋级席位，因此可晋级名额取本轮签位数的一半，
+     * 已晋级名额取本轮已完成比赛数；资格赛仍沿用支付锁位后的报名统计。
+     */
+    private void fillProgress(TournamentDetailDTO detail) {
+        if (detail.getProgress() == null
+                || detail.getProgress().getCurrentRound() == null
+                || detail.getProgress().getCurrentRound() == TournamentRoundEnum.QUALIFIER) {
+            return;
+        }
+        TournamentRoundEnum currentRound = detail.getProgress().getCurrentRound();
+        detail.getProgress().setCurrentRoundAdvanceableSlots(currentRound.getSlotCount() / 2);
+        detail.getProgress().setCurrentRoundAdvancedCount(detail.getProgress().getCurrentRoundCompletedMatches());
     }
 
     /** 详情只展示未读数，不推进评论的已读位置。 */
