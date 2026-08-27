@@ -925,11 +925,11 @@
     "tournament.result-confirm": {
       "flow": {
         "product_hash": "sha256:7ec55fc4c6c3837031dc37c574ef02b8b2d2afd25f0cb7938ba49cbb11664af6",
-        "approved_at": "2026-08-26T11:35:57Z"
+        "approved_at": "2026-08-27T10:40:49Z"
       },
       "activity": {
-        "flows_hash": "sha256:b74bf616a06f463592602960d7f6ee0ec79b9537f917583a12a6d93abe11c55c",
-        "approved_at": "2026-08-26T11:53:13Z"
+        "flows_hash": "sha256:c67247d4e4f3d24e3cc04af0cb61e13935fe77071e9c09430d2a248c406388ba",
+        "approved_at": "2026-08-27T10:42:08Z"
       }
     },
     "tournament.result-reject": {
@@ -955,11 +955,11 @@
     "tournament.result-confirmation-timeout": {
       "flow": {
         "product_hash": "sha256:048ff94b0717349b08def383da38ea825592ff5decabcd3a3069bb51a9ee87dd",
-        "approved_at": "2026-08-26T11:36:23Z"
+        "approved_at": "2026-08-27T10:41:06Z"
       },
       "activity": {
-        "flows_hash": "sha256:02f70748517b6993ff9859876c96f56409354452c20711d27ae7dcb2b98ce335",
-        "approved_at": "2026-08-26T11:54:10Z"
+        "flows_hash": "sha256:ea7e75463bb0cd3fafa60b6fc8d404437841f3a8036fcb376a454336e49560c5",
+        "approved_at": "2026-08-27T10:42:25Z"
       }
     },
     "tournament.comment-publish": {
@@ -1045,11 +1045,11 @@
     "tournament.current-round-matching": {
       "flow": {
         "product_hash": "sha256:7205baee87945c09ca2cf38150fb2c799661d3fd03cd63e5e4af7532292d8acf",
-        "approved_at": "2026-08-26T11:35:31Z"
+        "approved_at": "2026-08-27T10:40:12Z"
       },
       "activity": {
-        "flows_hash": "sha256:ddbca42c17f75ce7d270cd96fcb43b490508701de81c33ee2833261647f501f2",
-        "approved_at": "2026-08-26T11:52:08Z"
+        "flows_hash": "sha256:5c2225ba53de5568b58ab7e85d5865e5a9d8bdba02df3215b943cf9e33a8a5d2",
+        "approved_at": "2026-08-27T10:41:50Z"
       }
     },
     "tournament.tournament-detail": {
@@ -1758,8 +1758,8 @@
     },
     "tournament.result-confirm.flow.confirm-result": {
       "flow": {
-        "flow_hash": "sha256:e9c88dd79e5e007f51312adba8e763dffc21309740a415a68bc7f001f80050fa",
-        "approved_at": "2026-08-26T11:35:57Z"
+        "flow_hash": "sha256:c898f77f1de08a846a77cfcdc3a8621cdcdcb830a0d0a8a2d70cb295a73135d5",
+        "approved_at": "2026-08-27T10:40:49Z"
       }
     },
     "tournament.result-reject.flow.reject-result": {
@@ -1776,8 +1776,8 @@
     },
     "tournament.result-confirmation-timeout.flow.complete-timeout-results": {
       "flow": {
-        "flow_hash": "sha256:73f112115f24191c7357cffd0da18f8f7003ad1beff0e723a8b47b85cfb4726c",
-        "approved_at": "2026-08-26T11:36:23Z"
+        "flow_hash": "sha256:0b2efc5be4cd1e578c28da314158f23a50d0ea3de38015035f38eedde8c9d37b",
+        "approved_at": "2026-08-27T10:41:06Z"
       }
     },
     "tournament.comment-publish.flow.publish-comment": {
@@ -1854,14 +1854,14 @@
     },
     "tournament.current-round-matching.flow.run-matching-daily": {
       "flow": {
-        "flow_hash": "sha256:4cc9541975114c2746c23c6df2c82e39391ba2fee9fa9d6f5ccbc96e6b7d01fd",
-        "approved_at": "2026-08-26T11:35:31Z"
+        "flow_hash": "sha256:27c43cf578b726178a2c0d7fba9750df3fcd04ee50351750f395dd6ca807aeaf",
+        "approved_at": "2026-08-27T10:40:12Z"
       }
     },
     "tournament.current-round-matching.flow.run-matching": {
       "flow": {
-        "flow_hash": "sha256:4c1ba5870e857f5279a081b266797ea829b8ed01de15c72e239cf53f1e7e2c2e",
-        "approved_at": "2026-08-26T11:35:31Z"
+        "flow_hash": "sha256:a5346f352b1459abb86123206518a315521ccccecc9a120f8b3ce6dbed28a057",
+        "approved_at": "2026-08-27T10:40:12Z"
       }
     },
     "tournament.tournament-detail.flow.get-tournament-detail": {
@@ -4826,7 +4826,7 @@
       "spec": {
         "service": "tournament.current-round-matching",
         "activity_hash": "sha256:7e7f6b424d4c2a5c1b70db8228a71bfa3a4ad745d154246925cd9afccd59b0c1",
-        "approved_at": "2026-08-26T11:52:08Z"
+        "approved_at": "2026-08-27T10:41:50Z"
       },
       "impl": {
         "activity_hash": "sha256:7e7f6b424d4c2a5c1b70db8228a71bfa3a4ad745d154246925cd9afccd59b0c1",
@@ -4943,7 +4943,7 @@
       "spec": {
         "service": "tournament.result-confirm",
         "activity_hash": "sha256:4f48bea5ba103be3c3850be13be0a9d35f6b796786189504ba83be2b22941c50",
-        "approved_at": "2026-08-26T11:53:13Z"
+        "approved_at": "2026-08-27T10:42:08Z"
       },
       "impl": {
         "activity_hash": "sha256:4f48bea5ba103be3c3850be13be0a9d35f6b796786189504ba83be2b22941c50",
@@ -4959,7 +4959,7 @@
       "spec": {
         "service": "tournament.result-confirmation-timeout",
         "activity_hash": "sha256:4bd345535fb85e97eb68b0bc185a3dafe8d71b17f9aafa38a0f621e7d33b409c",
-        "approved_at": "2026-08-26T11:54:10Z"
+        "approved_at": "2026-08-27T10:42:25Z"
       },
       "impl": {
         "activity_hash": "sha256:4bd345535fb85e97eb68b0bc185a3dafe8d71b17f9aafa38a0f621e7d33b409c",
@@ -6115,12 +6115,12 @@
     },
     "@tournament.round-progress": {
       "spec": {
-        "domain_hash": "sha256:3ae1d3af58468e73fe9386d1e0df1126a3365b43eb71c63cb4eabd7cfd0e953f",
-        "approved_at": "2026-08-26T12:05:46Z",
+        "domain_hash": "sha256:bbf8fef6970cd4b4b7b694bea58f641688be65d74d73e38c8a724b430b6b2e12",
+        "approved_at": "2026-08-27T10:43:17Z",
         "introduced_by": "tournament.result-confirm"
       },
       "impl": {
-        "domain_hash": "sha256:3ae1d3af58468e73fe9386d1e0df1126a3365b43eb71c63cb4eabd7cfd0e953f",
+        "domain_hash": "sha256:bbf8fef6970cd4b4b7b694bea58f641688be65d74d73e38c8a724b430b6b2e12",
         "files": [
           "rally-domain/src/main/java/com/rally/domain/round-progress/TournamentRoundProgressDecisionService.java",
           "rally-domain/src/main/java/com/rally/domain/round-progress/RoundProgressReader.java",
@@ -6133,8 +6133,8 @@
           "rally-domain/src/main/java/com/rally/domain/round-progress/RoundProgressEvidence.java",
           "rally-infrastructure/src/main/java/com/rally/db/tournament/repository/RoundProgressReadRepository.java"
         ],
-        "verified_at": "2026-08-27T08:12:02Z",
-        "base_commit": "ac58eb38745064d44e8b0090501f9a077e8b6da1"
+        "verified_at": "2026-08-27T10:44:54Z",
+        "base_commit": "33abc39e55b402ad9e2f7d69f8f5ee78eddbe83d"
       }
     },
     "@tournament.tournament": {
