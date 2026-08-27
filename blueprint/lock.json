@@ -2753,13 +2753,6 @@
         "base_commit": "ac58eb38745064d44e8b0090501f9a077e8b6da1"
       }
     },
-    "meetup.meetup-join.activity.grant-meetup-notification-quota": {
-      "spec": {
-        "service": "meetup.meetup-join",
-        "activity_hash": "sha256:072ea5ac1221553b4e93a39e256e2776c3628600ba4e0652378f2b68000d0e96",
-        "approved_at": "2026-08-25T21:00:11Z"
-      }
-    },
     "meetup.meetup-join.activity.join-direct-participant-chat": {
       "spec": {
         "service": "meetup.meetup-join",
@@ -2811,13 +2804,6 @@
         ],
         "verified_at": "2026-08-26T21:00:15Z",
         "base_commit": "ac58eb38745064d44e8b0090501f9a077e8b6da1"
-      }
-    },
-    "meetup.meetup-publish.activity.grant-publisher-notification-quota": {
-      "spec": {
-        "service": "meetup.meetup-publish",
-        "activity_hash": "sha256:29e52714e3fee26302c0e48c576c0610297e07b1ef27a3119e27826d4b5273b7",
-        "approved_at": "2026-08-25T21:02:42Z"
       }
     },
     "meetup.meetup-publish.activity.join-publisher-chat": {
@@ -3113,13 +3099,6 @@
         "base_commit": "ac58eb38745064d44e8b0090501f9a077e8b6da1"
       }
     },
-    "meetup.registration-approve.activity.grant-approver-notification-quota": {
-      "spec": {
-        "service": "meetup.registration-approve",
-        "activity_hash": "sha256:a6a238ae94ac460dd5fbe53f98ea75d2500513b7ffe1d692aca7be38d456ae98",
-        "approved_at": "2026-08-25T21:15:13Z"
-      }
-    },
     "meetup.registration-approve.activity.join-approved-participant-chat": {
       "spec": {
         "service": "meetup.registration-approve",
@@ -3135,13 +3114,6 @@
         ],
         "verified_at": "2026-08-26T19:47:18Z",
         "base_commit": "ac58eb38745064d44e8b0090501f9a077e8b6da1"
-      }
-    },
-    "meetup.registration-reject.activity.grant-rejector-notification-quota": {
-      "spec": {
-        "service": "meetup.registration-reject",
-        "activity_hash": "sha256:ddaa01882aa92e52e29a0267f5c84171c2d43df59ce7524e4eba6ec603177b96",
-        "approved_at": "2026-08-25T21:16:26Z"
       }
     },
     "meetup.registration-reject.activity.reject-pending-registration": {
@@ -5089,13 +5061,6 @@
         "base_commit": "ac58eb38745064d44e8b0090501f9a077e8b6da1"
       }
     },
-    "tournament.tournament-entry.activity.grant-tournament-notice-subscription": {
-      "spec": {
-        "service": "tournament.tournament-entry",
-        "activity_hash": "sha256:1476b2c2d4d114020acd306cbcc408d4746ba363392fd07ae0e801d8acaf6e38",
-        "approved_at": "2026-08-25T22:24:19Z"
-      }
-    },
     "tournament.tournament-entry.activity.join-tournament-discussion": {
       "spec": {
         "service": "tournament.tournament-entry",
@@ -5804,13 +5769,6 @@
         ],
         "verified_at": "2026-08-26T20:07:51Z",
         "base_commit": "ac58eb38745064d44e8b0090501f9a077e8b6da1"
-      }
-    },
-    "@notification.subscription-delivery": {
-      "spec": {
-        "domain_hash": "sha256:24d95fdcf29244d7036588af2779ccde5d1a33d99886b73dff9fe9f6ff6febf7",
-        "approved_at": "2026-08-26T00:51:50Z",
-        "introduced_by": "meetup.meetup-close"
       }
     },
     "@payment.payment-order": {
