@@ -1,0 +1,46 @@
+id: "@payment.receipt-log"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/ReceiptLog.java
+    role: 聚合根、命令实现与不变量校验
+    symbols: [ReceiptLog]
+    covers: [I1, I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/ReceiptLogState.java
+    role: payment_log 原样报文与处理状态快照
+    symbols: [ReceiptLogState]
+    covers: [I1, I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/ReceiptLogPersistence.java
+    role: payment_log 唯一写端口与按 biz_id 普通更新
+    symbols: [ReceiptLogPersistence]
+    covers: [I1, I2, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/ReceiptLogRecoveryReader.java
+    role: 超时 CALLBACK/RECEIVED 分页恢复扫描
+    symbols: [ReceiptLogRecoveryReader]
+    covers: [I2, I3, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/ReceiptLogReference.java
+    role: 关联类型与关联编号独立可选的支付单关联值对象
+    symbols: [ReceiptLogReference]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/RecordPaymentEventCommand.java
+    role: 携带调用方原样 rawBody 的记录支付事件命令
+    symbols: [RecordPaymentEventCommand]
+    covers: [I1, I2, I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/CompleteCallbackCommand.java
+    role: 终结回调处理命令入参
+    symbols: [CompleteCallbackCommand]
+    covers: [I3, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/ReceiptLogIdGenerator.java
+    role: 日志雪花业务编号端口
+    symbols: [ReceiptLogIdGenerator]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/ReceiptLogInsertResult.java
+    role: 日志唯一键写入结论
+    symbols: [ReceiptLogInsertResult]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/ReceiptLogCompletion.java
+    role: 回调普通更新完成结论
+    symbols: [ReceiptLogCompletion]
+    covers: [I3, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/receipt-log/ReceiptLogDomainException.java
+    role: 稳定领域错误标识
+    symbols: [ReceiptLogDomainException]
+    covers: [I1, I2, I3, I4]

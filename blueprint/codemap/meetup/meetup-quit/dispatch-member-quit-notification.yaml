@@ -1,0 +1,14 @@
+id: meetup.meetup-quit.activity.dispatch-member-quit-notification
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/MemberQuitNotificationContext.java
+    role: 承载稳定退出事件、发布者和语义化通知内容
+    symbols: [MemberQuitNotificationContext]
+    covers: [A1]
+  - path: rally-app/src/main/java/com/rally/meetup/activity/DispatchMemberQuitNotificationActivity.java
+    role: 构造成员退出内容并委托提交后异步幂等触达，隔离所有通知失败
+    symbols: [DispatchMemberQuitNotificationActivity, execute]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 在退出和群聊事务完成后组装通知上下文并触发活动
+    symbols: [RegistrationAppService, quit]
+    covers: [A1, A2]

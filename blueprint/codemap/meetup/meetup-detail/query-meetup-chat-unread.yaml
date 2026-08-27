@@ -1,0 +1,10 @@
+id: meetup.meetup-detail.activity.query-meetup-chat-unread
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/QueryMeetupChatUnreadActivity.java
+    role: 群聊资格门控与未读数只读查询
+    symbols: [QueryMeetupChatUnreadActivity, execute]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupDetailAppService.java
+    role: 约球详情未读数组装
+    symbols: [MeetupDetailAppService]
+    covers: [A1, A4]

@@ -1,0 +1,10 @@
+id: meetup.meetup-publish.activity.join-publisher-chat
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/JoinPublisherChatActivity.java
+    role: 主实现
+    symbols: [JoinPublisherChatActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupAppService.java
+    role: 对外编排入口与事务边界
+    symbols: [MeetupAppService.publish]
+    covers: [A1, A2, A3]

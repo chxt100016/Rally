@@ -1,0 +1,6 @@
+id: pro-tour-data.finished-matches-query.activity.query-finished-round-groups
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/finished-matches-query/activity/QueryFinishedRoundGroupsActivity.java
+    role: 编排完赛查询、轮次分组、上游种子响应及简中译文缺口
+    symbols: [QueryFinishedRoundGroupsActivity]
+    covers: [A1, A2, A3, A4]

@@ -1,0 +1,6 @@
+id: content-production.generic-image-upload.activity.store-generic-image
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/generic-image-upload/activity/StoreGenericImageActivity.java
+    role: 主实现
+    symbols: [StoreGenericImageActivity]
+    covers: [A1, A2, A3, A4]

@@ -23,3 +23,7 @@
 - [Q4] 双打搭档、正赛席位、支付退款、拒赛次数和通知在退赛时如何处理？
   > 只把发起人置 WITHDRAWN，不直接修改搭档关系或搭档报名；若搭档在被终止比赛中且仍为 IN_MATCH，会同其他人一起回 WAITING。不回收正赛席位、不关闭支付单、不退款，返回 refundTriggered=false；不累计拒赛次数，也不发送通知。
   → 已写入详细流程第 7 步、服务边界与接口契约
+
+- [Q5] CHAMPION 报名是否允许退赛？
+  > 否。保持 main 与 @tournament.entry C9：CHAMPION、WITHDRAWN、ELIMINATED 三种终态均禁止退赛。
+  → flow、service 已补齐 CHAMPION 终态限制。

@@ -23,3 +23,7 @@
 - [Q4] 首次付款与并发同步如何判定，报名、席位、赛事轮次和其余资格赛报名如何推进？
   > 读取时 PENDING 即按首次付款，markPaid 的数据库条件更新结果未检查；并发同步都可能继续触发业务推进，虽占位更新会防止超过总量，仍可能为同一报名多占席位。正常单次流程先占位，再把 PAYING 报名改 MAIN/WAITING 并设首轮；资格赛完成且席位满时推进赛事，满位后淘汰其余 QUALIFY/WAITING 报名。
   → 已写入详细流程第 4-6 步、技术线索与服务边界
+
+- [Q5] 支付摘要是否应新增对外 bizType 字段？
+  > 否。保持 main 现有 PaymentOrderSummaryDTO，不新增 bizType，只交付 refBizId。
+  → 接口契约已移除 bizType 并明确保持现有 DTO。

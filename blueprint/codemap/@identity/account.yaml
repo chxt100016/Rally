@@ -1,0 +1,38 @@
+id: "@identity.account"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/account/model/Account.java
+    role: 聚合根与建立命令
+    symbols: [Account]
+    covers: [I1, I2, I3, I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/account/model/AccountData.java
+    role: 不可变聚合状态
+    symbols: [AccountData]
+    covers: [I2, I3, I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/account/model/BindAccountCommand.java
+    role: 建立账户命令入参
+    symbols: [BindAccountCommand]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/account/model/AccountChannel.java
+    role: 渠道类型
+    symbols: [AccountChannel]
+    covers: [I3, I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/account/model/AccountIdentity.java
+    role: 渠道身份值对象
+    symbols: [AccountIdentity]
+    covers: [I1, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/account/model/AccountCredentials.java
+    role: 渠道认证资料值对象
+    symbols: [AccountCredentials]
+    covers: [I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/account/model/AccountIdGenerator.java
+    role: 账户编号生成端口
+    symbols: [AccountIdGenerator]
+    covers: [I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/account/model/AccountIdentityUniqueness.java
+    role: 渠道身份唯一性预检端口
+    symbols: [AccountIdentityUniqueness]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/account/model/AccountDomainException.java
+    role: 领域错误标识
+    symbols: [AccountDomainException]
+    covers: [I1, I2, I3, I4]

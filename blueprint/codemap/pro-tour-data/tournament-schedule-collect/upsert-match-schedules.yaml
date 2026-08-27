@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-schedule-collect.activity.upsert-match-schedules
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-schedule-collect/activity/UpsertMatchSchedulesActivity.java
+    role: 保留排期解析快照并按 drawId+matchId 顺序非空 upsert，以独立事务保证批次失败回滚
+    symbols: [UpsertMatchSchedulesActivity, execute]
+    covers: [A1, A2, A3]

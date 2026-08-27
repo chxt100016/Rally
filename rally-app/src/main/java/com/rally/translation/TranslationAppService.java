@@ -1,7 +1,9 @@
 package com.rally.translation;
 
-import com.rally.domain.translation.TranslationService;
+import com.rally.domain.translation.gateway.TranslationRepository;
 import com.rally.domain.translation.model.TranslationData;
+import com.rally.contentproduction.instanttexttranslation.activity.TranslateSubmittedTextsActivity;
+import com.rally.contentproduction.pendingtranslationbatch.activity.TranslatePendingContentActivity;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -15,18 +17,24 @@ import java.util.List;
 public class TranslationAppService {
 
     @Resource
-    private TranslationService delegate;
+    private TranslationRepository translationRepository;
+
+    @Resource
+    private TranslatePendingContentActivity translatePendingContentActivity;
+
+    @Resource
+    private TranslateSubmittedTextsActivity translateSubmittedTextsActivity;
 
     public int batch() {
-        return delegate.batch();
+        return translatePendingContentActivity.execute();
     }
 
     public List<String> process(List<TranslationData> data) {
-        return delegate.process(data);
+        return translateSubmittedTextsActivity.execute(data);
     }
 
     public List<TranslationData> findAllPending() {
-        return delegate.findAllPending();
+        return translationRepository.findAllPending();
     }
 
 

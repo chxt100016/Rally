@@ -1,14 +1,12 @@
 package com.rally.domain.meetup.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
-import com.rally.domain.auth.exception.BusinessException;
-import com.rally.domain.meetup.enums.MeetupTypeEnum;
 import com.rally.domain.meetup.enums.RegistrationStatusEnum;
 import com.rally.domain.meetup.gateway.MeetupRepository;
 import com.rally.domain.meetup.gateway.RegistrationRepository;
 import com.rally.domain.meetup.model.Meetup;
+import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.QuitResult;
-import com.rally.domain.meetup.model.RegistrationData;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
@@ -50,15 +48,12 @@ public class RegistrationDomainService {
      * @param userId 当前用户 ID
      */
     public void withdraw(String meetupId, String userId) {
-        // 1. 查询报名记录
-        RegistrationData registration = registrationRepository.findActiveByMeetupAndUser(meetupId, userId);
-        Assert.notNull(registration, BizErrorCode.NOT_JOINED);
-
-        // 2. 状态校验（委托实体自身行为）
-        Assert.isTrue(registration.canWithdraw(), BizErrorCode.WAITLIST_NOT_PENDING);
-
-        // 3. 更新状态
-        registrationRepository.updateStatus(registration.getBizId(), RegistrationStatusEnum.WITHDRAWN);
+        MeetupData data = meetupRepository.findByBizId(meetupId);
+        // 保留旧接口契约：不存在的约球在撤回路径仍表现为“未报名”。
+        Assert.notNull(data, BizErrorCode.NOT_JOINED);
+        Meetup meetup = new Meetup(data, registrationRepository.findByMeetupId(meetupId));
+        meetup.withdraw(userId, LocalDateTime.now());
+        meetupRepository.save(meetup);
     }
 
     /**
@@ -68,12 +63,7 @@ public class RegistrationDomainService {
      * @return 退出结果（NORMAL / PENALIZED）
      */
     public QuitResult quit(Meetup meetup, String userId) {
-        // 0. 赛事约球不允许在约球页面退出，需回到比赛页面操作
-        if (MeetupTypeEnum.TOURNAMENT.getCode().equals(meetup.getData().getMeetupType())) {
-            throw new BusinessException(BizErrorCode.MEETUP_TOURNAMENT_QUIT_FORBIDDEN);
-        }
-
-        // 1. 调用聚合根 quit（校验 + 更新状态）
+        // 1. 调用聚合根 quit（赛事类型、报名状态校验 + 更新状态）
         QuitResult result = meetup.quit(userId);
 
         // 2. 持久化（自动计算 currentPlayers）

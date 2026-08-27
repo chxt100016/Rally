@@ -1,0 +1,10 @@
+id: tournament.entry-preference-update.activity.replace-entry-preference
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/entry-preference-update/activity/ReplaceEntryPreferenceActivity.java
+    role: 本人报名查询、终态校验与偏好整组原样替换的事务编排
+    symbols: [ReplaceEntryPreferenceActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentEntryAppService.java
+    role: 保留既有报名偏好更新应用服务入口与事务边界
+    symbols: [TournamentEntryAppService.update]
+    covers: [A1, A2, A3]

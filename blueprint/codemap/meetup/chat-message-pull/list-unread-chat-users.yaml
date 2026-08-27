@@ -1,0 +1,10 @@
+id: meetup.chat-message-pull.activity.list-unread-chat-users
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/ChatAppService.java
+    role: 汇总有效参与者的未读状态并批量补充用户资料
+    symbols: [ChatAppService, buildUnreadUsers]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/meetup/convert/ChatAppConvertMapper.java
+    role: 将未读状态和可缺失用户资料组装为既有对外 DTO
+    symbols: [ChatAppConvertMapper, toChatUnreadUserDTO]
+    covers: [A3, A4]

@@ -1,0 +1,6 @@
+id: personal-profile.self-rating-update.activity.record-review-trigger
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/self-rating-update/activity/RecordReviewTriggerActivity.java
+    role: 仅在所需核查场次为正数时沿用 main 日志链路构造并持久化核查触发日志
+    symbols: [RecordReviewTriggerActivity]
+    covers: [A1, A2]

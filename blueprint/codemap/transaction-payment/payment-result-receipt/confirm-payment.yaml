@@ -1,0 +1,10 @@
+id: transaction-payment.payment-result-receipt.activity.confirm-payment
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/payment-result-receipt/activity/ConfirmPaymentActivity.java
+    role: 支付单读取、状态确认、首次支付推进与重复回调抑制编排
+    symbols: [ConfirmPaymentActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/transaction-payment/payment-result-receipt/activity/RecordPaymentReceiptActivity.java
+    role: 仅对成功交易且商户单号非空的回执调用支付确认活动
+    symbols: [RecordPaymentReceiptActivity]
+    covers: [A1, A4]

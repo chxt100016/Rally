@@ -1,0 +1,10 @@
+id: content-production.seed-list-copy.activity.compose-seed-list-copy
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/seed-list-copy/activity/ComposeSeedListCopyActivity.java
+    role: 主实现
+    symbols: [ComposeSeedListCopyActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/content-production/seed-list-copy/activity/ComposeSeedListCopyResult.java
+    role: 活动出参
+    symbols: [ComposeSeedListCopyResult]
+    covers: [A4, A5]

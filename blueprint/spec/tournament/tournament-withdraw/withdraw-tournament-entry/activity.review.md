@@ -19,3 +19,7 @@
 - [Q3] 是否退款且后续失败会怎样？
   > refundTriggered 固定 false；退出讨论或终止比赛失败会使整个退赛事务回滚。
   → 已写入详细流程第 4 步与边界情况
+
+- [Q4] 退赛拒绝的终态是否包含 CHAMPION？
+  > 是。CHAMPION 与 WITHDRAWN、ELIMINATED 一样返回 TOURNAMENT_ENTRY_STATUS_ILLEGAL。
+  → 活动触发条件、异常分支与详细流程已补齐 CHAMPION。

@@ -1,0 +1,38 @@
+id: "@tour.player"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/player/TourPlayer.java
+    role: 聚合根、C1 命令实现与 tour_player 唯一写入口
+    symbols: [TourPlayer]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/player/TourPlayerIdentity.java
+    role: tour+player_id 不可变复合自然键与巡回赛规范化
+    symbols: [TourPlayerIdentity, TourPlayerIdentity.Tour]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/player/TourPlayerProfilePatch.java
+    role: 非空资料补丁规范化、来源生日容错与资料排名校验
+    symbols: [TourPlayerProfilePatch]
+    covers: [I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/player/TourPlayerState.java
+    role: tour_player 单行不可变聚合状态与非空补丁合并
+    symbols: [TourPlayerState]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/player/TourPlayerStatus.java
+    role: 由正数排名派生的 PROFILED/RANKED 状态
+    symbols: [TourPlayerStatus]
+    covers: [I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/player/RefreshTourPlayerCommand.java
+    role: C1 新增或刷新球员资料输入
+    symbols: [RefreshTourPlayerCommand]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/player/TourPlayerPersistence.java
+    role: tour_player 唯一写端口、批次事务及非空列更新约束
+    symbols: [TourPlayerPersistence]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/player/TourPlayerInsertResult.java
+    role: 复合自然键并发插入结果
+    symbols: [TourPlayerInsertResult, TourPlayerInsertResult.Outcome]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/player/TourPlayerDomainException.java
+    role: 稳定领域错误标识载体
+    symbols: [TourPlayerDomainException]
+    covers: [I1, I2, I3, C1]

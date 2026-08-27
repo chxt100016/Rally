@@ -19,3 +19,15 @@
 - [Q3] 哪些运营字段保留，事务和成功响应是什么？
   > 不映射/保留 bizId、status、currentRound、mainDrawLockedSlots、endTime、offlineMeetupId、create/update审计等进度，也不更新关联对象。TournamentAdminAppService.update @Transactional，校验/保存异常回滚；成功 Result.ok() data=null。
   → 已写入详细流程第 5-6 步、服务边界与事务异常分支
+
+- [Q4] 是否继续允许更新 DRAFT、ACTIVE 与 ABANDONED 任意状态赛事？
+  > 是。保持现有更新权限，不新增赛事状态限制。
+  → 已落入详细流程第 1 步与异常分支说明。
+
+- [Q5] 是否继续只有 offlineFromRound 支持传空清除，其他可选字段空值保留旧值？
+  > 是。维持当前显式列更新与实体空值忽略策略。
+  → 已落入详细流程第 4 步与异常分支说明。
+
+- [Q6] 修改 cityCode 时是否继续不重新查询或同步 cityName？
+  > 是。保持 main 数据映射行为，文档继续明确潜在不一致。
+  → 已落入详细流程第 4 步与异常分支说明。

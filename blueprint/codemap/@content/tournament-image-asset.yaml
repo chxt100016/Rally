@@ -1,0 +1,22 @@
+id: "@content.tournament-image-asset"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-image-asset/TournamentImageAssetService.java
+    role: 主实现（保留 String 赛事编号原值生成固定键）
+    symbols: [TournamentImageAssetService]
+    covers: [R1, R2, R3, R4, R5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-image-asset/TournamentImageCodec.java
+    role: 图片编解码网关
+    symbols: [TournamentImageCodec]
+    covers: [R1, R2, R4]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-image-asset/TournamentImageStorage.java
+    role: 对象存储网关
+    symbols: [TournamentImageStorage]
+    covers: [R3, R4, R5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-image-asset/TournamentImageAssetResult.java
+    role: 契约出参
+    symbols: [TournamentImageAssetResult]
+    covers: [R4]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-image-asset/TournamentImageAssetOutcome.java
+    role: 结论枚举
+    symbols: [TournamentImageAssetOutcome]
+    covers: [R4]

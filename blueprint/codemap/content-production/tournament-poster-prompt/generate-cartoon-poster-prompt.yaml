@@ -1,0 +1,6 @@
+id: content-production.tournament-poster-prompt.activity.generate-cartoon-poster-prompt
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/tournament-poster-prompt/activity/GenerateCartoonPosterPromptActivity.java
+    role: 主实现
+    symbols: [GenerateCartoonPosterPromptActivity]
+    covers: [A1, A2, A3, A4]

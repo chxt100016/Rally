@@ -1,0 +1,10 @@
+id: social-relations.follow-remove.activity.remove-user-follow
+files:
+  - path: rally-app/src/main/java/com/rally/social-relations/follow-remove/activity/RemoveUserFollowActivity.java
+    role: 关系身份构造、关注聚合 C2 编排与现有持久化适配
+    symbols: [RemoveUserFollowActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/user/FollowAppService.java
+    role: 保留 unfollow 对外签名并传入当前用户与原始目标编号
+    symbols: [FollowAppService.unfollow]
+    covers: [A1, A3]

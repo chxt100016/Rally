@@ -1,0 +1,10 @@
+id: meetup.chat-message-pull.activity.pull-chat-messages
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/ChatAppService.java
+    role: 拉取消息应用编排，核实聊天资格并调用消息批次拉取与已读推进
+    symbols: [ChatAppService, pull]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/meetup/convert/ChatAppConvertMapper.java
+    role: 将消息领域数据转换为既有对外 DTO
+    symbols: [ChatAppConvertMapper, toChatMessageDTO]
+    covers: [A4]

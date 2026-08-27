@@ -1,0 +1,10 @@
+id: personal-profile.profile-video-delete.activity.remove-profile-video-items
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/profile-video-delete/activity/RemoveProfileVideoItemsActivity.java
+    role: 读取当前用户档案，调用 C7 移除全部同 key 视频项并无条件保存完整档案
+    symbols: [RemoveProfileVideoItemsActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/user/ProfileAppService.java
+    role: 保留原删除视频入口、事务边界及后续七牛删除和本人档案响应
+    symbols: [ProfileAppService.deleteVideo]
+    covers: [A1, A2, A3]

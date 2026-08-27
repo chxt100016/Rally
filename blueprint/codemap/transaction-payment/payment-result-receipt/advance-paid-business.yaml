@@ -1,0 +1,10 @@
+id: transaction-payment.payment-result-receipt.activity.advance-paid-business
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/payment-result-receipt/activity/ConfirmPaymentActivity.java
+    role: 仅在预读 PENDING 首次确认为 PAID 后触发关联业务推进
+    symbols: [ConfirmPaymentActivity]
+    covers: [A1]
+  - path: rally-app/src/main/java/com/rally/transaction-payment/payment-result-receipt/activity/AdvancePaidBusinessActivity.java
+    role: 报名费业务分流及席位、报名、赛事轮次推进编排
+    symbols: [AdvancePaidBusinessActivity]
+    covers: [A1, A2, A3, A4]

@@ -33,7 +33,8 @@ facade: POST /wechat/user/phone
 
 ```mermaid
 flowchart TD
-    A[resolve-authorized-phone 取得微信授权手机号] -->|微信授权失败| E1[WECHAT_PHONE_FAILED]
+    A[resolve-authorized-phone 取得微信授权手机号] -->|访问令牌为空| E1[WECHAT_AUTH_FAILED]
+    A -->|手机号接口或响应失败| E4[WECHAT_PHONE_NUMBER_FAILED]
     A --> B[bind-user-phone 保存本人手机号]
     B -->|用户不存在| E2[USER_NOT_EXIST]
     B -->|保存失败| E3[SYSTEM_ERROR]
@@ -53,8 +54,9 @@ flowchart TD
 | 对外失败码 | 触发条件 | 由哪个活动报出 | 补偿动作或超时处理 | 对外提示 |
 |---|---|---|---|---|
 | `UNAUTHORIZED` | 未携带登录凭证或登录凭证无效 | 流程 | 手机号保持原值 | 登录已过期或登录凭证无效，请重新登录 |
-| `PARAM_ERROR` | 微信手机号动态令牌为空，或微信返回手机号为空 | 流程 / bind-user-phone | 手机号保持原值 | 微信手机号动态令牌不能为空或参数错误 |
-| `WECHAT_PHONE_FAILED` | 微信手机号授权服务不可用、访问授权失败、微信返回失败或无有效手机号 | resolve-authorized-phone | 手机号保持原值，用户可重新授权后重试 | 获取微信手机号失败或微信授权失败 |
+| `PARAM_ERROR` | 微信手机号动态令牌为空 | 流程 | 手机号保持原值 | 微信手机号动态令牌不能为空或参数错误 |
+| `WECHAT_AUTH_FAILED` | 微信访问令牌为空 | resolve-authorized-phone | 手机号保持原值，用户可重新登录或稍后重试 | 微信授权失败 |
+| `WECHAT_PHONE_NUMBER_FAILED` | 手机号授权接口配置缺失、微信返回失败或无有效手机号 | resolve-authorized-phone | 手机号保持原值，用户可重新授权后重试 | 获取微信手机号失败 |
 | `USER_NOT_EXIST` | 当前登录身份对应的用户资料不存在 | bind-user-phone | 不创建用户或账户，不保存手机号 | 用户不存在 |
 | `SYSTEM_ERROR` | 保存用户资料失败 | bind-user-phone | 事务回滚，本次手机号不成立，原值保持不变 | 系统异常，请稍后重试 |
 

@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-query.activity.register-missing-tour-translations
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-query/activity/RegisterMissingTourTranslationsActivity.java
+    role: 批量查询并应用赛事目录简中译文，逐项容错登记缺译键
+    symbols: [RegisterMissingTourTranslationsActivity]
+    covers: [A1, A2, A3]

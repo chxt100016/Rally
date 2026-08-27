@@ -1,0 +1,6 @@
+id: transaction-payment.timeout-order-close.activity.reconcile-expired-payment
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/timeout-order-close/activity/ReconcileExpiredPaymentActivity.java
+    role: 到期待付单扫描、渠道路由、查单与已付未付分流
+    symbols: [ReconcileExpiredPaymentActivity]
+    covers: [A1, A2, A3, A4]

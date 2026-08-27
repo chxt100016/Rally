@@ -1,0 +1,10 @@
+id: platform-config.all-config-query.activity.query-all-config-view
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/all-config-query/activity/QueryAllConfigViewActivity.java
+    role: 按已登记枚举顺序查询 global 记录并组装原值、默认值、版本和覆盖状态
+    symbols: [QueryAllConfigViewActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/system/HomeConfigAdminAppService.java
+    role: 保留原 getAll 对外入口并委托全量配置查询活动
+    symbols: [HomeConfigAdminAppService.getAll]
+    covers: [A1, A2, A3]

@@ -1,0 +1,6 @@
+id: meetup.review-skip.activity.skip-meetup-review
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/SkipMeetupReviewActivity.java
+    role: 约球实际状态校验与宽松批量跳过评价编排
+    symbols: [SkipMeetupReviewActivity, execute]
+    covers: [A1, A2, A3]

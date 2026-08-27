@@ -1,0 +1,42 @@
+id: "@tournament.tournament"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/Tournament.java
+    role: 赛事生命周期与完赛聚合根
+    symbols: [Tournament]
+    covers: [I7, I9, C3, C4, C5, C8]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentFactory.java
+    role: 草稿创建与初始进度装配
+    symbols: [TournamentFactory]
+    covers: [I1, I4, I7, I8, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentCreateCmd.java
+    role: 赛事完整配置契约与字段校验
+    symbols: [TournamentCreateCmd]
+    covers: [I1, I2, I4, I5, I6, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/service/TournamentPolicy.java
+    role: 赛制、金额与时间不变量校验
+    symbols: [TournamentPolicy]
+    covers: [I2, I3, I5, I6, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/service/TournamentAdminService.java
+    role: 创建、配置更新与生命周期命令入口
+    symbols: [TournamentAdminService]
+    covers: [C1, C2, C3, C4]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/convert/TournamentDomainConvertMapper.java
+    role: 创建及配置更新字段映射
+    symbols: [TournamentDomainConvertMapper]
+    covers: [I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/service/TournamentPaymentService.java
+    role: 有效支付后的原子席位锁定与轮次决策应用
+    symbols: [TournamentPaymentService]
+    covers: [I7, I8, C5, C6]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/service/TournamentOfflineMeetupService.java
+    role: 线下阶段校验与单次活动绑定
+    symbols: [TournamentOfflineMeetupService]
+    covers: [I3, C7]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/service/TournamentMatchFlowService.java
+    role: 普通轮次决策应用、决赛事实协调与赛事完赛调用
+    symbols: [TournamentMatchFlowService]
+    covers: [I8, I9, C6, C8]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/gateway/TournamentRepository.java
+    role: 条件锁位、轮次推进和线下绑定持久化端口
+    symbols: [TournamentRepository]
+    covers: [I3, I7, I8, C5, C6, C7]

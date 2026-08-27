@@ -1,8 +1,10 @@
 package com.rally.web.content;
 
+import com.rally.contentproduction.tournamentimagemaintenance.activity.BindTournamentImagesActivity;
+import com.rally.contentproduction.tournamentimagemaintenance.activity.GenerateTournamentImagesActivity;
+import com.rally.contentproduction.tournamentimagemaintenance.activity.GenerateTournamentImagesResult;
 import com.rally.domain.translation.model.TranslationLanguageEnum;
 import com.rally.tour.TourContentAppService;
-import com.rally.tour.TourUploadAppService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +25,10 @@ public class TourContentController {
     private TourContentAppService tourContentAppService;
 
     @Resource
-    private TourUploadAppService tourUploadAppService;
+    private GenerateTournamentImagesActivity generateTournamentImagesActivity;
+
+    @Resource
+    private BindTournamentImagesActivity bindTournamentImagesActivity;
 
     @GetMapping(value = "/daily", produces = "text/plain;charset=UTF-8")
     public String getDailyContent() {
@@ -48,9 +53,13 @@ public class TourContentController {
      * 背景图压缩至 50KB 以内，保存为 tournament/{tournamentId}_background.jpg。
      */
     @PostMapping("/image")
-    public TourUploadAppService.TournamentImageResult uploadTournamentImage(
+    public GenerateTournamentImagesResult uploadTournamentImage(
             @RequestParam("tournamentId") String tournamentId,
-            @RequestParam("file") MultipartFile file) throws Exception {
-        return tourUploadAppService.uploadTournamentImage(file, tournamentId);
+            @RequestParam("file") MultipartFile file) {
+        GenerateTournamentImagesResult result = generateTournamentImagesActivity
+                .execute(tournamentId, file);
+        bindTournamentImagesActivity.execute(
+                tournamentId, result.imageKey(), result.backgroundKey());
+        return result;
     }
 }

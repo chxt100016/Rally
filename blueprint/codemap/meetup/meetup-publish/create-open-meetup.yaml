@@ -1,0 +1,14 @@
+id: meetup.meetup-publish.activity.create-open-meetup
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/CreateOpenMeetupActivity.java
+    role: 主实现
+    symbols: [CreateOpenMeetupActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/meetup/activity/OpenMeetupContext.java
+    role: 后续步骤上下文
+    symbols: [OpenMeetupContext]
+    covers: [A5]
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupAppService.java
+    role: 对外编排入口
+    symbols: [MeetupAppService.publish]
+    covers: [A1, A2, A3, A4, A5]

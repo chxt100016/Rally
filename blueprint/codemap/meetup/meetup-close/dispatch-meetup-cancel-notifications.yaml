@@ -1,0 +1,6 @@
+id: meetup.meetup-close.activity.dispatch-meetup-cancel-notifications
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupAppService.java
+    role: 约球关闭提交后通知编排，排除发布者并委托幂等触达服务尽力发送
+    symbols: [MeetupAppService, close, dispatchMeetupCancelNotifications]
+    covers: [A1, A2, A3, A4, A5]

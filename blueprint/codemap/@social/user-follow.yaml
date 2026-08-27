@@ -1,0 +1,38 @@
+id: "@social.user-follow"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/user-follow/UserFollow.java
+    role: 关注聚合根、建立关系与原值方向解除实现
+    symbols: [UserFollow]
+    covers: [I1, I2, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-follow/UserFollowState.java
+    role: user_follow 不可变行状态
+    symbols: [UserFollowState]
+    covers: [I1, I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/user-follow/UserFollowDirection.java
+    role: 单向关注值对象
+    symbols: [UserFollowDirection]
+    covers: [I1, I2, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-follow/UserFollowStatus.java
+    role: 关注关系存在状态
+    symbols: [UserFollowStatus]
+    covers: [C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-follow/UserFollowPersistence.java
+    role: user_follow 唯一写端口与方向预查
+    symbols: [UserFollowPersistence]
+    covers: [I1, I2, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-follow/UserFollowIdGenerator.java
+    role: 关注业务编号生成端口
+    symbols: [UserFollowIdGenerator]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/user-follow/FollowUserCommand.java
+    role: 关注用户命令入参
+    symbols: [FollowUserCommand]
+    covers: [I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/user-follow/UnfollowUserCommand.java
+    role: 解除关注命令入参
+    symbols: [UnfollowUserCommand]
+    covers: [C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-follow/UserFollowDomainException.java
+    role: 聚合不变量错误标识承载
+    symbols: [UserFollowDomainException]
+    covers: [I1, I2, C1, C2]

@@ -1,0 +1,10 @@
+id: personal-profile.onboarding-status.activity.initialize-pending-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/onboarding-status/activity/InitializePendingProfileActivity.java
+    role: 将 NONE 读取快照对应的用户聚合交给 C4 初始化并持久化 TBC 档案
+    symbols: [InitializePendingProfileActivity]
+    covers: [A1, A2]
+  - path: rally-app/src/main/java/com/rally/user/OnboardingAppService.java
+    role: 仅在查询开始时为 NONE 时调用初始化活动，并保留对外 NONE 返回语义
+    symbols: [OnboardingAppService.checkStatus]
+    covers: [A1, A2, A3]

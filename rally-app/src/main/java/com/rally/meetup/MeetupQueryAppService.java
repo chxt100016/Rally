@@ -1,12 +1,13 @@
 package com.rally.meetup;
 
-import com.rally.domain.meetup.enums.MeetupSortEnum;
 import com.rally.domain.meetup.model.MeetupCardDTO;
 import com.rally.domain.meetup.model.MeetupData;
 import com.rally.domain.meetup.model.MeetupListCmd;
 
 import com.rally.domain.meetup.model.PageDTO;
-import com.rally.domain.meetup.service.MeetupQueryDomainService;
+import com.rally.meetup.activity.PackMeetupSquareCardsActivity;
+import com.rally.meetup.activity.SearchAvailableMeetupsByDistanceActivity;
+import com.rally.meetup.activity.SearchAvailableMeetupsByTimeActivity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,8 +24,9 @@ import java.util.List;
 @Slf4j
 public class MeetupQueryAppService {
 
-    private final MeetupQueryDomainService meetupQueryDomainService;
-    private final MeetupCardPackingService packingService;
+    private final SearchAvailableMeetupsByDistanceActivity searchAvailableMeetupsByDistanceActivity;
+    private final SearchAvailableMeetupsByTimeActivity searchAvailableMeetupsByTimeActivity;
+    private final PackMeetupSquareCardsActivity packMeetupSquareCardsActivity;
 
     /**
      * 约球列表查询（按时间/距离）
@@ -34,20 +36,16 @@ public class MeetupQueryAppService {
         query.setLastBizId(cursor.isEmpty() ? null : (String) cursor.get(0));
         query.setLastStartTime(cursor.size() > 1 ? LocalDateTime.parse(cursor.get(1).toString()) : null);
         List<MeetupData> dataList = switch (query.getSort()) {
-            case DISTANCE -> meetupQueryDomainService.listByDistance(query);
-            case TIME -> meetupQueryDomainService.listByTime(query);
+            case DISTANCE -> searchAvailableMeetupsByDistanceActivity.execute(query);
+            case TIME -> searchAvailableMeetupsByTimeActivity.execute(query);
             default -> List.of();
         };
-        boolean hasMore = dataList.size() > query.getPageSize();
-        List<MeetupData> pageData = hasMore ? dataList.subList(0, query.getPageSize()) : dataList;
-        List<MeetupCardDTO> res = pageData.stream().map(item -> packingService.packCard(item, query.getLng(), query.getLat())).toList();
-        PageDTO<MeetupCardDTO> page = new PageDTO<>(res, null, hasMore);
-        if (query.getSort() == MeetupSortEnum.TIME) {
-            page.buildCursor(MeetupCardDTO::getMeetupId, c -> c.getStartTime().toString());
-        } else {
-            page.buildCursor(MeetupCardDTO::getMeetupId);
-        }
-        return page;
+        return packMeetupSquareCardsActivity.execute(
+                dataList,
+                query.getPageSize(),
+                query.getSort(),
+                query.getLng(),
+                query.getLat());
     }
 
 }

@@ -1,0 +1,10 @@
+id: identity-account.account-login.activity.establish-wechat-account
+files:
+  - path: rally-app/src/main/java/com/rally/identity-account/account-login/activity/EstablishWechatAccountActivity.java
+    role: 微信账户识别与首登建户编排
+    symbols: [EstablishWechatAccountActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/identity-account/account-login/activity/EstablishedWechatAccount.java
+    role: 账户识别或建立结果
+    symbols: [EstablishedWechatAccount]
+    covers: [A4]

@@ -1,0 +1,6 @@
+id: tournament.result-submit.activity.submit-result
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/result-submit/activity/SubmitResultActivity.java
+    role: 赛果校验、确认重置与版本化事务保存编排
+    symbols: [SubmitResultActivity]
+    covers: [A1, A2, A3, A4]

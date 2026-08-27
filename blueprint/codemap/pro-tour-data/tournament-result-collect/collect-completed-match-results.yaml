@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-result-collect.activity.collect-completed-match-results
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-result-collect/activity/CollectCompletedMatchResultsActivity.java
+    role: 请求并按巡回赛过滤完赛来源，分别编排签表和比赛独立事务
+    symbols: [CollectCompletedMatchResultsActivity, execute]
+    covers: [A1, A2, A3, A4]

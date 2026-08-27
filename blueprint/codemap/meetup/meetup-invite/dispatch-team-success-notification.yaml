@@ -1,0 +1,10 @@
+id: meetup.meetup-invite.activity.dispatch-team-success-notification
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/DispatchTeamSuccessNotificationActivity.java
+    role: 满员判断、提交后异步触达、候选去重与资格复核的活动编排
+    symbols: [DispatchTeamSuccessNotificationActivity, execute]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 邀请主事务完成报名和群聊写入后调用组团成功通知活动
+    symbols: [RegistrationAppService, invite]
+    covers: [A1, A2]

@@ -1,0 +1,10 @@
+id: tournament.tournament-withdraw.activity.withdraw-tournament-entry
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/tournament-withdraw/activity/WithdrawTournamentEntryActivity.java
+    role: 本人报名查询、终态校验与退赛状态写入
+    symbols: [WithdrawTournamentEntryActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentEntryAppService.java
+    role: 保留既有退赛应用入口、全链路事务边界并委托本活动
+    symbols: [TournamentEntryAppService.withdraw]
+    covers: [A1, A2, A3]

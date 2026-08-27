@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-live-collect.activity.upsert-live-match-snapshots
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-live-collect/activity/UpsertLiveMatchSnapshotsActivity.java
+    role: 校验实时比赛身份、关联签表并按自然键顺序新增或非空覆盖快照
+    symbols: [UpsertLiveMatchSnapshotsActivity, execute]
+    covers: [A1, A2, A3]

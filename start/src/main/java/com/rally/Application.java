@@ -4,6 +4,7 @@ package com.rally;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -11,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *
  * @author Frank Zhang
  */
-@SpringBootApplication(scanBasePackages = {"com.rally"})
+@SpringBootApplication(scanBasePackages = {"com.rally"}, nameGenerator = FullyQualifiedAnnotationBeanNameGenerator.class)
 @MapperScan("com.rally.db")
 @EnableScheduling
 public class Application {

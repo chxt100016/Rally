@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-draw-collect.activity.upsert-draw-entries
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-draw-collect/activity/UpsertDrawEntriesActivity.java
+    role: 关联签表、按复合身份稳定去重合并并通过 @tour.tournament-entry C1 批量新增或非空刷新参赛资格
+    symbols: [UpsertDrawEntriesActivity, execute]
+    covers: [A1, A2, A3]

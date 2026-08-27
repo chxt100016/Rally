@@ -1,0 +1,6 @@
+id: identity-account.phone-binding.activity.bind-user-phone
+files:
+  - path: rally-app/src/main/java/com/rally/identity-account/phone-binding/activity/BindUserPhoneActivity.java
+    role: 当前用户授权手机号覆盖编排
+    symbols: [BindUserPhoneActivity]
+    covers: [A1, A2, A3]

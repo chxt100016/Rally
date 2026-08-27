@@ -1,0 +1,62 @@
+id: "@tournament.entry"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntry.java
+    role: 聚合根、C1-C10 命令实现与 rally_tournament_entry 唯一写入口
+    symbols: [TournamentEntry]
+    covers: [I1, I2, I3, I4, I5, I6, I7, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryState.java
+    role: rally_tournament_entry 单行不可变状态及原子替换
+    symbols: [TournamentEntryState]
+    covers: [I1, I2, I3, I4, I5, I6, I7, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryIdentity.java
+    role: biz_id、赛事用户自然键与 entryNo 不可变身份
+    symbols: [TournamentEntryIdentity]
+    covers: [I1, I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryPreferences.java
+    role: 地区、订场能力和可比赛时间整组偏好值对象，列表元素按输入顺序原样保留
+    symbols: [TournamentEntryPreferences]
+    covers: [I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryStage.java
+    role: QUALIFY 与 MAIN 赛段类型
+    symbols: [TournamentEntryStage]
+    covers: [I4, I5, I6, C1, C5, C6, C7, C8]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryStatus.java
+    role: 报名状态与终态判定
+    symbols: [TournamentEntryStatus]
+    covers: [I4, I6, I7, C1, C2, C3, C4, C5, C6, C7, C8, C9]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryRound.java
+    role: 资格赛、正赛轮次推进及首轮签位映射
+    symbols: [TournamentEntryRound]
+    covers: [I4, I7, C1, C4, C6, C7, C8]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryCourtAbility.java
+    role: 订场能力封闭类型
+    symbols: [TournamentEntryCourtAbility]
+    covers: [I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/CreateTournamentEntryCommand.java
+    role: C1 创建资格赛报名及跨根搭档校验事实输入
+    symbols: [CreateTournamentEntryCommand]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/SettleTournamentEntryCommand.java
+    role: C6 已完成比赛胜负、轮次与完成时间事实
+    symbols: [SettleTournamentEntryCommand, SettleTournamentEntryCommand.Outcome]
+    covers: [I4, I6, I7, C6]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryReleaseReason.java
+    role: C5 比赛拒绝、超时及未订场取消事实类型
+    symbols: [TournamentEntryReleaseReason]
+    covers: [I5, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryPersistence.java
+    role: 报名唯一写端口、自然键查询与按 biz_id 普通保存
+    symbols: [TournamentEntryPersistence]
+    covers: [I1, I2, I3, I4, I5, I6, I7, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryInsertResult.java
+    role: C1 双唯一键并发插入结果
+    symbols: [TournamentEntryInsertResult, TournamentEntryInsertResult.Outcome]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryIdGenerator.java
+    role: C1 报名业务 id 生成端口
+    symbols: [TournamentEntryIdGenerator]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryDomainException.java
+    role: 聚合拒绝命令时的稳定错误标识载体
+    symbols: [TournamentEntryDomainException]
+    covers: [I1, I2, I3, I4, I5, I6, I7, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10]

@@ -1,0 +1,10 @@
+id: meetup.registration-withdraw.activity.withdraw-pending-registration
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/WithdrawPendingRegistrationActivity.java
+    role: 主实现
+    symbols: [WithdrawPendingRegistrationActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 对外编排入口
+    symbols: [RegistrationAppService.withdraw]
+    covers: [A1, A2, A3]

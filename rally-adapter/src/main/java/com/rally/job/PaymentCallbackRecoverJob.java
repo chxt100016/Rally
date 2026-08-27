@@ -1,18 +1,14 @@
 package com.rally.job;
 
-import com.rally.domain.payment.gateway.PaymentLogRepository;
-import com.rally.domain.payment.gateway.PaymentOrderRepository;
 import com.rally.domain.payment.model.PaymentLog;
-import com.rally.domain.payment.model.PaymentOrder;
-import com.rally.domain.payment.service.PaymentDomainService;
+import com.rally.transactionpayment.receiptrecovery.activity.FinalizePaymentReceiptActivity;
+import com.rally.transactionpayment.receiptrecovery.activity.ReconcilePaymentStatusActivity;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -26,54 +22,26 @@ import java.util.List;
 public class PaymentCallbackRecoverJob {
 
     /** 收到回调后允许处理的最长时间（分钟）；超过仍 RECEIVED 即视为漏处理 */
-    private static final int RECEIVED_TIMEOUT_MINUTES = 5;
+    @Resource
+    private ReconcilePaymentStatusActivity reconcilePaymentStatusActivity;
 
     @Resource
-    private PaymentLogRepository paymentLogRepository;
+    private com.rally.transactionpayment.receiptrecovery.activity.AdvancePaidBusinessActivity advancePaidBusinessActivity;
 
     @Resource
-    private PaymentOrderRepository paymentOrderRepository;
-
-    @Resource
-    private PaymentDomainService paymentDomainService;
+    private FinalizePaymentReceiptActivity finalizePaymentReceiptActivity;
 
     @Scheduled(cron = "${job.payment_callback_recover.cron:0 */10 * * * ?}")
     public void scan() {
-        LocalDateTime before = LocalDateTime.now().minusMinutes(RECEIVED_TIMEOUT_MINUTES);
-        List<PaymentLog> logs = paymentLogRepository.listUnprocessedCallback(before);
+        List<PaymentLog> logs = reconcilePaymentStatusActivity.scan();
         if (logs.isEmpty()) {
             return;
         }
         log.info("回调漏处理补偿扫描: {} 条 RECEIVED 超时", logs.size());
         for (PaymentLog logEntry : logs) {
-            try {
-                recover(logEntry);
-            } catch (Exception e) {
-                log.error("回调补偿失败 bizId={}", logEntry.getData().getBizId(), e);
-                logEntry.markFailed(e.getMessage());
-                paymentLogRepository.update(logEntry);
-            }
+            finalizePaymentReceiptActivity.execute(logEntry,
+                    receipt -> advancePaidBusinessActivity.execute(
+                            reconcilePaymentStatusActivity.execute(receipt)));
         }
-    }
-
-    private void recover(PaymentLog logEntry) {
-        String refId = logEntry.getData().getRefId();
-        if (StringUtils.isBlank(refId) || !"ORDER".equals(logEntry.getData().getRefType())) {
-            logEntry.markProcessed();
-            paymentLogRepository.update(logEntry);
-            return;
-        }
-        PaymentOrder order = paymentOrderRepository.findByBizId(refId);
-        if (order == null) {
-            logEntry.markFailed("payment_order_not_found");
-            paymentLogRepository.update(logEntry);
-            return;
-        }
-        if (order.isPending()) {
-            // 以查单为权威：已支付则补推；未支付不关单（保留 PENDING 等下次回调/查单）
-            paymentDomainService.recoverIfPaid(order);
-        }
-        logEntry.markProcessed();
-        paymentLogRepository.update(logEntry);
     }
 }

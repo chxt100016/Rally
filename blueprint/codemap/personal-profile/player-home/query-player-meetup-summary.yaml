@@ -1,0 +1,6 @@
+id: personal-profile.player-home.activity.query-player-meetup-summary
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/player-home/activity/QueryPlayerMeetupSummaryActivity.java
+    role: 统计完成态报名并组装最近非草稿约球卡片
+    symbols: [QueryPlayerMeetupSummaryActivity]
+    covers: [A1, A2, A3]

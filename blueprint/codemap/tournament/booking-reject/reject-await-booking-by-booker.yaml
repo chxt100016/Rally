@@ -1,0 +1,6 @@
+id: tournament.booking-reject.activity.reject-await-booking-by-booker
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/booking-reject/activity/RejectAwaitBookingByBookerActivity.java
+    role: 订场人超时拒赛事务编排、跨聚合结算与提交后通知
+    symbols: [RejectAwaitBookingByBookerActivity]
+    covers: [A1, A2, A3, A4, A5]

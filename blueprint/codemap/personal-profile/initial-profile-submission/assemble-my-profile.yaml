@@ -1,0 +1,14 @@
+id: personal-profile.initial-profile-submission.activity.assemble-my-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/basic-profile-update/activity/AssembleMyProfileActivity.java
+    role: 复用共享本人档案组装活动，重读档案并组装基础资料、统计、等级评分与视频资源
+    symbols: [AssembleMyProfileActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/user/MyProfileAppService.java
+    role: 保留原 getMyProfile 签名，读取当前用户并委托共享组装活动
+    symbols: [MyProfileAppService.getMyProfile]
+    covers: [A1]
+  - path: rally-app/src/main/java/com/rally/user/OnboardingAppService.java
+    role: 保留原 submit 事务边界，档案保存后在同一事务内调用共享组装链路
+    symbols: [OnboardingAppService.submit]
+    covers: [A1, A2, A3, A4]

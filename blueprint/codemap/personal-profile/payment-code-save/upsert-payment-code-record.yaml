@@ -1,0 +1,6 @@
+id: personal-profile.payment-code-save.activity.upsert-payment-code-record
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/payment-code-save/activity/UpsertPaymentCodeRecordActivity.java
+    role: 固定收款码扩展键并委托领域保存完成新业务编号的插入或覆盖
+    symbols: [UpsertPaymentCodeRecordActivity]
+    covers: [A1, A2, A3]

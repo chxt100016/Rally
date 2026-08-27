@@ -1,0 +1,10 @@
+id: personal-profile.user-image-upload-authorization.activity.issue-avatar-upload-authorization
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/user-image-upload-authorization/activity/IssueAvatarUploadAuthorizationActivity.java
+    role: 读取头像大小配置、生成秒级精确 key 并组装上传授权响应
+    symbols: [IssueAvatarUploadAuthorizationActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/personal-profile/user-image-upload-authorization/activity/QiniuAssetStorageGateway.java
+    role: 按 main 参数语义适配七牛上传策略与一小时签名地址
+    symbols: [QiniuAssetStorageGateway]
+    covers: [A3]

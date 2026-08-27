@@ -1,0 +1,10 @@
+id: personal-profile.my-profile.activity.assemble-my-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/basic-profile-update/activity/AssembleMyProfileActivity.java
+    role: 复用唯一的本人档案组装实现，按档案状态组装基础资料、关系与约球统计、等级评分和视频资源
+    symbols: [AssembleMyProfileActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/user/MyProfileAppService.java
+    role: 保留 getMyProfile 对外签名，从 UserContext 取得当前用户并委托共享组装活动
+    symbols: [MyProfileAppService.getMyProfile]
+    covers: [A1]

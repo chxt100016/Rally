@@ -19,3 +19,7 @@
 - [Q3] 别名、标签、环境展示和 ext_data 解析失败如何降级？
   > 返回当前 DTO 全字段；alias/tags 按存储分隔规则转列表，type 映射中文 typeShow，ext_data 补 pinyin/pinyinInitial/rating/cost/opentime/tel。字段缺失或 JSON 无法识别时相应扩展字段为空，不丢弃球场。
   → 已写入活动契约、业务动作 A2-A3、详细流程第 3-5 步
+
+- [Q4] 对外 total 应映射数据库 meetup_count，还是保留 main 当前未映射而返回 null 的行为？
+  > 保留 main 当前行为：不新增 meetupCount 到 total 的映射，total 继续为空；文档不得把表字段误写成已交付字段。
+  → 活动成功返回、A3 详细流程与边界情况已明确 total 保持为空。

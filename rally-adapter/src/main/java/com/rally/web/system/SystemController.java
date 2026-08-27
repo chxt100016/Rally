@@ -1,13 +1,14 @@
 package com.rally.web.system;
 
 import com.rally.config.OptionalAuth;
-import com.rally.config.property.QiniuConfiguration;
-import com.rally.domain.system.SystemConfig;
-import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.system.model.HomeConfigDTO;
 import com.rally.domain.system.model.HomeConfigUpdateCmd;
 import com.rally.domain.tour.model.Result;
 import com.rally.system.HomeConfigAdminAppService;
+import com.rally.platformconfig.groupchatentryquery.activity.IssueGroupChatEntryUrlActivity;
+import com.rally.platformconfig.publicconfigquery.activity.QueryPublicConfigMapActivity;
+import com.rally.platformconfig.publicconfigquery.activity.QueryPublicConfigValueActivity;
+import com.rally.platformconfig.splashcoverquery.activity.IssueSplashCoverUrlActivity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +31,10 @@ import java.util.Map;
 public class SystemController {
 
     private final HomeConfigAdminAppService homeConfigAdminAppService;
+    private final QueryPublicConfigValueActivity queryPublicConfigValueActivity;
+    private final QueryPublicConfigMapActivity queryPublicConfigMapActivity;
+    private final IssueGroupChatEntryUrlActivity issueGroupChatEntryUrlActivity;
+    private final IssueSplashCoverUrlActivity issueSplashCoverUrlActivity;
 
     /**
      * 根据 key 查询配置值
@@ -41,8 +44,7 @@ public class SystemController {
      */
     @GetMapping("/config")
     public Result<String> getConfig(@RequestParam("key") String key) {
-        String value = SystemConfig.getString(key);
-        return Result.ok(value);
+        return Result.ok(queryPublicConfigValueActivity.execute(key));
     }
 
     /**
@@ -52,8 +54,7 @@ public class SystemController {
      */
     @GetMapping("/qrcode")
     public Result<String> getQrcode() {
-        String url = QiniuConfiguration.buildSignedUrl("default/qrcode.jpg");
-        return Result.ok(url);
+        return Result.ok(issueGroupChatEntryUrlActivity.execute());
     }
 
     /**
@@ -64,9 +65,7 @@ public class SystemController {
     @GetMapping("/splash-cover")
     @OptionalAuth
     public Result<String> getSplashCover() {
-        String key = SystemConfig.getString(SystemConfigKey.SYSTEM_SPLASH_COVER_KEY.getKey());
-        String url = QiniuConfiguration.buildSignedUrl(key);
-        return Result.ok(url);
+        return Result.ok(issueSplashCoverUrlActivity.execute());
     }
 
     /**
@@ -77,14 +76,7 @@ public class SystemController {
      */
     @PostMapping("/config/batch")
     public Result<Map<String, String>> batchGetConfig(@RequestBody List<String> keys) {
-        Map<String, String> result = new LinkedHashMap<>();
-        for (String key : keys) {
-            String value = SystemConfig.getString(key);
-            if (value != null) {
-                result.put(key, value);
-            }
-        }
-        return Result.ok(result);
+        return Result.ok(queryPublicConfigMapActivity.execute(keys));
     }
 
     /** 获取运营后台可编辑的首页配置。 */

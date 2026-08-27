@@ -1,0 +1,6 @@
+id: meetup.meetup-close.activity.close-meetup
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupAppService.java
+    role: 保留既有公开关闭接口，编排约球加载、C10 关闭、阶梯处罚计算与提交后通知资料组装
+    symbols: [MeetupAppService, close]
+    covers: [A1, A2, A3, A4, A5]

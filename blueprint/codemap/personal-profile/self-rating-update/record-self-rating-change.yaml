@@ -1,0 +1,6 @@
+id: personal-profile.self-rating-update.activity.record-self-rating-change
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/self-rating-update/activity/RecordSelfRatingChangeActivity.java
+    role: 按 main 原有日志链路计算差额并持久化 NTRP 变更日志
+    symbols: [RecordSelfRatingChangeActivity]
+    covers: [A1, A2]

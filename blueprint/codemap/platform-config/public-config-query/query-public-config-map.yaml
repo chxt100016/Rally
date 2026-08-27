@@ -1,0 +1,6 @@
+id: platform-config.public-config-query.activity.query-public-config-map
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/public-config-query/activity/QueryPublicConfigMapActivity.java
+    role: 主实现
+    symbols: [QueryPublicConfigMapActivity]
+    covers: [A1, A2, A3]

@@ -1,0 +1,10 @@
+id: tournament.tournament-withdraw.activity.terminate-withdrawn-match
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/tournament-withdraw/activity/TerminateWithdrawnMatchActivity.java
+    role: 委托既有退赛比赛终止流程并保持完整回滚语义
+    symbols: [TerminateWithdrawnMatchActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentEntryAppService.java
+    role: 在退赛入口共享事务内编排比赛终止活动并固定返回未退款结果
+    symbols: [TournamentEntryAppService.withdraw]
+    covers: [A1, A2, A3, A4]

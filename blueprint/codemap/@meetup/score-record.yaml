@@ -1,0 +1,74 @@
+id: "@meetup.score-record"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreRecord.java
+    role: 比分记录聚合根与宽松新增、内存版本比较修正、零行成功删除主实现
+    symbols: [ScoreRecord]
+    covers: [I1, I2, I3, I4, I5, C1, C2, C3]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreRecordState.java
+    role: 单行比分完整不可变状态与版本快照
+    symbols: [ScoreRecordState]
+    covers: [I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreRecordDraft.java
+    role: 新增与仅写非空字段修正的输入载荷
+    symbols: [ScoreRecordDraft]
+    covers: [I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScorePlayerSnapshot.java
+    role: 球员资料同点快照值对象
+    symbols: [ScorePlayerSnapshot]
+    covers: [I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreLineup.java
+    role: 不校验人数结构、重复或资格的原始阵容值对象
+    symbols: [ScoreLineup]
+    covers: [I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreSetFormat.java
+    role: 赛制与数据库大写编码
+    symbols: [ScoreSetFormat]
+    covers: [I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreMatchType.java
+    role: 比赛类型与数据库大写编码
+    symbols: [ScoreMatchType]
+    covers: [I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreWinSide.java
+    role: 仅按双方主分大小推导的胜方与数据库编码
+    symbols: [ScoreWinSide]
+    covers: [I2, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreRecordStatus.java
+    role: 已记录与已物理删除的命令期语义状态
+    symbols: [ScoreRecordStatus]
+    covers: [C1, C2, C3]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreRecordingEligibility.java
+    role: 兼容命令签名且不在聚合内重复校验的边界载荷
+    symbols: [ScoreRecordingEligibility]
+    covers: [I3, C1, C2, C3]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/CreateScoreRecordCommand.java
+    role: 新增一盘比分命令
+    symbols: [CreateScoreRecordCommand]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/CorrectScoreRecordCommand.java
+    role: 携带读取版本与新内容的修正命令
+    symbols: [CorrectScoreRecordCommand]
+    covers: [I4, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/RemoveScoreRecordCommand.java
+    role: 幂等删除一盘比分命令
+    symbols: [RemoveScoreRecordCommand]
+    covers: [C3]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreRecordUpdate.java
+    role: 不带 SQL 版本条件且保留 null 的稀疏更新载荷
+    symbols: [ScoreRecordUpdate]
+    covers: [I4, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreRecordRemoval.java
+    role: 总是执行且允许零行成功的物理删除载荷
+    symbols: [ScoreRecordRemoval]
+    covers: [I5, C3]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreRecordIdGenerator.java
+    role: 雪花比分业务编号生成端口
+    symbols: [ScoreRecordIdGenerator]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreRecordUniqueness.java
+    role: 仅供新增使用的同场盘号唯一性预检端口
+    symbols: [ScoreRecordUniqueness]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/score-record/ScoreRecordDomainException.java
+    role: 领域拒绝与稳定错误标识承载
+    symbols: [ScoreRecordDomainException]
+    covers: [I1, I2, I4, C1, C2]

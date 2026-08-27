@@ -1,0 +1,6 @@
+id: tournament.booking-confirm.activity.confirm-booking
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/booking-confirm/activity/ConfirmBookingActivity.java
+    role: 确认赛约事务编排、版本化比赛保存、参与者确认落库与草稿赛约开放
+    symbols: [ConfirmBookingActivity]
+    covers: [A1, A2, A3, A4, A5]

@@ -1,0 +1,6 @@
+id: tournament.current-round-matching.activity.run-current-round-matching
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/current-round-matching/activity/RunCurrentRoundMatchingActivity.java
+    role: 手工与定时入口分派、当前轮次匹配事务编排、逐赛事隔离与提交后通知
+    symbols: [RunCurrentRoundMatchingActivity]
+    covers: [A1, A2, A3, A4, A5]

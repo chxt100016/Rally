@@ -1,8 +1,16 @@
 package com.rally.user;
 
-import com.rally.client.qiniu.QiniuClient;
-import com.rally.config.property.QiniuConfiguration;
 import com.rally.domain.log.model.ProfileChangeLogData;
+import com.rally.personalprofile.basicprofileupdate.activity.UpdateBasicProfileActivity;
+import com.rally.personalprofile.genderupdate.activity.UpdateGenderActivity;
+import com.rally.personalprofile.profilevideoadd.activity.AppendProfileVideoActivity;
+import com.rally.personalprofile.profilevideodelete.activity.DeleteProfileVideoFileActivity;
+import com.rally.personalprofile.profilevideodelete.activity.RemoveProfileVideoItemsActivity;
+import com.rally.personalprofile.profilevideoupdate.activity.UpdateProfileVideoTitleActivity;
+import com.rally.personalprofile.selfratingupdate.activity.RecordReviewTriggerActivity;
+import com.rally.personalprofile.selfratingupdate.activity.RecordSelfRatingChangeActivity;
+import com.rally.personalprofile.selfratingupdate.activity.SelfRatingUpdateContext;
+import com.rally.personalprofile.selfratingupdate.activity.UpdateSelfRatingProfileActivity;
 import com.rally.utils.UserContext;
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
@@ -14,17 +22,12 @@ import com.rally.domain.user.gateway.TennisProfileRepository;
 import com.rally.domain.user.gateway.UserRepository;
 import com.rally.domain.user.model.*;
 import com.rally.domain.log.ProfileLogService;
-import com.rally.domain.user.service.UserProfileDomainService;
-import com.rally.domain.utils.Assert;
-import com.rally.db.user.convert.UserConvertMapper;
-import com.rally.user.convert.UserAppConvertMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -44,13 +47,34 @@ public class ProfileAppService {
     private UserRepository userRepository;
 
     @Resource
-    private UserProfileDomainService userProfileDomainService;
-
-    @Resource
     private MyProfileAppService myProfileAppService;
 
     @Resource
-    private QiniuClient qiniuClient;
+    private UpdateBasicProfileActivity updateBasicProfileActivity;
+
+    @Resource
+    private UpdateGenderActivity updateGenderActivity;
+
+    @Resource
+    private AppendProfileVideoActivity appendProfileVideoActivity;
+
+    @Resource
+    private RemoveProfileVideoItemsActivity removeProfileVideoItemsActivity;
+
+    @Resource
+    private DeleteProfileVideoFileActivity deleteProfileVideoFileActivity;
+
+    @Resource
+    private UpdateProfileVideoTitleActivity updateProfileVideoTitleActivity;
+
+    @Resource
+    private UpdateSelfRatingProfileActivity updateSelfRatingProfileActivity;
+
+    @Resource
+    private RecordSelfRatingChangeActivity recordSelfRatingChangeActivity;
+
+    @Resource
+    private RecordReviewTriggerActivity recordReviewTriggerActivity;
 
 
     /**
@@ -59,10 +83,7 @@ public class ProfileAppService {
     @Transactional
     public MyProfileDTO editUser(EditProfileCmd cmd) {
         String userId = UserContext.get();
-        UserData userData = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(BizErrorCode.DATA_NOT_FOUND, "用户不存在"));
-        UserConvertMapper.INSTANCE.updateData(userData, cmd);
-        userRepository.updateUser(userData);
+        updateBasicProfileActivity.execute(userId, cmd);
 
         return myProfileAppService.getMyProfile();
     }
@@ -73,10 +94,7 @@ public class ProfileAppService {
     @Transactional
     public MyProfileDTO uploadVideo(UploadVideoCmd cmd) {
         String userId = UserContext.get();
-        UserProfile userProfile = userProfileDomainService.get(userId);
-        QiniuConfiguration.buildSignedUrl(cmd.getKey());
-        userProfile.addVideo(UserAppConvertMapper.INSTANCE.toVideoVO(cmd));
-        userProfileDomainService.save(userProfile);
+        appendProfileVideoActivity.execute(userId, cmd);
 
         return myProfileAppService.getMyProfile();
     }
@@ -87,17 +105,9 @@ public class ProfileAppService {
     @Transactional
     public MyProfileDTO deleteVideo(DeleteVideoCmd cmd) {
         String userId = UserContext.get();
-        UserProfile userProfile = userProfileDomainService.get(userId);
+        removeProfileVideoItemsActivity.execute(userId, cmd.getKey());
 
-        // 校验至少保留一个视频
-        List<VideoVO> videos = userProfile.getProfile().getVideos();
-        Assert.isTrue(videos != null && videos.size() > 1, BizErrorCode.VIDEO_AT_LEAST_ONE);
-
-        userProfile.deleteVideo(cmd.getKey());
-        userProfileDomainService.save(userProfile);
-
-        // 删除七牛云视频
-        qiniuClient.deleteFile(cmd.getKey());
+        deleteProfileVideoFileActivity.execute(cmd.getKey());
 
         return myProfileAppService.getMyProfile();
     }
@@ -108,9 +118,7 @@ public class ProfileAppService {
     @Transactional
     public MyProfileDTO updateVideo(UpdateVideoCmd cmd) {
         String userId = UserContext.get();
-        UserProfile userProfile = userProfileDomainService.get(userId);
-        userProfile.updateVideo(cmd.getKey(), cmd.getTitle());
-        userProfileDomainService.save(userProfile);
+        updateProfileVideoTitleActivity.execute(userId, cmd.getKey(), cmd.getTitle());
 
         return myProfileAppService.getMyProfile();
     }
@@ -121,10 +129,7 @@ public class ProfileAppService {
     @Transactional
     public MyProfileDTO updateGender(UpdateGenderCmd cmd) {
         String userId = UserContext.get();
-        UserData userData = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(BizErrorCode.DATA_NOT_FOUND, "用户不存在"));
-        userData.setGender(cmd.getGender());
-        userRepository.updateUser(userData);
+        updateGenderActivity.execute(userId, cmd);
 
         return myProfileAppService.getMyProfile();
     }
@@ -135,8 +140,9 @@ public class ProfileAppService {
     @Transactional
     public MyProfileDTO updateNtrp(NtrpUpdateCmd cmd) {
         String userId = UserContext.get();
-        UserProfile userProfile = userProfileDomainService.get(userId);
-        userProfileDomainService.updateNtrp(userProfile, cmd.getNtrpScore());
+        SelfRatingUpdateContext context = updateSelfRatingProfileActivity.execute(userId, cmd.getNtrpScore());
+        recordSelfRatingChangeActivity.execute(context.userId(), context.oldNtrp(), context.newNtrp());
+        recordReviewTriggerActivity.execute(context.userId(), context.requiredMatches());
 
         return myProfileAppService.getMyProfile();
     }

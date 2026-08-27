@@ -1,0 +1,10 @@
+id: tournament.tournament-detail.activity.record-tournament-visit
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/tournamentdetail/activity/RecordTournamentVisitActivity.java
+    role: 保留已报名访问写入先于后续详情聚合的非事务编排边界，并让匿名或未报名分支原样跳过
+    symbols: [RecordTournamentVisitActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentDetailAppService.java
+    role: 保留详情接口、可选登录身份读取与访问记录活动委托
+    symbols: [TournamentDetailAppService.detail]
+    covers: [A1, A3]

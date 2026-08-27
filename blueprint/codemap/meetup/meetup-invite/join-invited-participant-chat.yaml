@@ -1,0 +1,10 @@
+id: meetup.meetup-invite.activity.join-invited-participant-chat
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/JoinInvitedParticipantChatActivity.java
+    role: 主实现
+    symbols: [JoinInvitedParticipantChatActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 邀请事务编排接入
+    symbols: [RegistrationAppService.invite]
+    covers: [A1, A2, A3]

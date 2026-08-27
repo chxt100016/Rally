@@ -1,0 +1,14 @@
+id: personal-profile.payment-code-get.activity.query-payment-code
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/payment-code-get/activity/QueryPaymentCodeActivity.java
+    role: 按当前用户和固定扩展键查询收款码并委托原有 DTO 转换
+    symbols: [QueryPaymentCodeActivity]
+    covers: [A1, A2]
+  - path: rally-app/src/main/java/com/rally/user/PaymentCodeAppService.java
+    role: 保留原 getPaymentCode 对外签名，取得当前用户后委托查询活动
+    symbols: [PaymentCodeAppService.getPaymentCode]
+    covers: [A1, A2]
+  - path: rally-app/src/main/java/com/rally/user/convert/PaymentCodeAppConvertMapper.java
+    role: 保留 extValue 原值并为非空白值生成 3600 秒七牛签名地址
+    symbols: [PaymentCodeAppConvertMapper.toDTO, PaymentCodeAppConvertMapper.keyToUrl]
+    covers: [A2]

@@ -1,0 +1,10 @@
+id: tournament.tournament-entry.activity.join-tournament-discussion
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/tournamententry/activity/JoinTournamentDiscussionActivity.java
+    role: 赛事讨论加入活动实现
+    symbols: [JoinTournamentDiscussionActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentEntryAppService.java
+    role: 报名后同事务调用活动并保持返回语义
+    symbols: [TournamentEntryAppService.join]
+    covers: [A1, A2, A3]

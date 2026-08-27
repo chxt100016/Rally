@@ -1,0 +1,6 @@
+id: platform-config.home-content-query.activity.register-missing-tour-translations
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/home-content-query/activity/RegisterMissingTourTranslationsActivity.java
+    role: 主实现
+    symbols: [RegisterMissingTourTranslationsActivity]
+    covers: [A1, A2, A3]

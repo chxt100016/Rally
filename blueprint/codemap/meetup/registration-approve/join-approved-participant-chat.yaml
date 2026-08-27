@@ -1,0 +1,10 @@
+id: meetup.registration-approve.activity.join-approved-participant-chat
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/JoinApprovedParticipantChatActivity.java
+    role: 主实现
+    symbols: [JoinApprovedParticipantChatActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 审批事务编排接入
+    symbols: [RegistrationAppService.approve]
+    covers: [A1, A2, A3]

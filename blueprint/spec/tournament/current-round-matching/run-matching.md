@@ -61,7 +61,7 @@ flowchart TD
 - HTTP：`POST /tournament/admin/match/run`
 - 请求：可选 `TournamentMatchRunCmd`
 - 入口分派：`TournamentAdminController.runTournamentMatch()`
-- 调用：`TournamentAdminAppService.runTournamentMatch*()` → `TournamentBatchMatchService.matchCurrentRound*()` → `TournamentMatchingService.group()` → `TournamentMatchAssembleService.assemble()`
+- 调用：`TournamentAdminAppService.runTournamentMatch*()` → `RunCurrentRoundMatchingActivity.execute()` → `TournamentBatchMatchService.matchCurrentRound*()` → `TournamentMatchmakingService.match()` → `TournamentMatchAssembleService.assemble()`
 - 单赛事事务：`TournamentBatchMatchService.matchCurrentRound()`／`matchCurrentRoundManually()` 的 `@Transactional`
 - 全量隔离：应用服务逐赛事 `try/catch`；入口方法以 `synchronized` 串行化本进程调用
 - 通知：`NoticeScene.TOURNAMENT_MATCHED`，匹配落地后按用户去重异步发送

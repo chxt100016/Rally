@@ -1,0 +1,42 @@
+id: "@meetup.chat-message"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/chat-message/ChatMessage.java
+    role: 聊天消息聚合根与发布命令
+    symbols: [ChatMessage]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-message/ChatMessageData.java
+    role: 不可变消息状态快照
+    symbols: [ChatMessageData]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-message/PublishChatMessageCommand.java
+    role: 发布消息命令入参
+    symbols: [PublishChatMessageCommand]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-message/ChatMessageContentType.java
+    role: 消息类型与持久化编码
+    symbols: [ChatMessageContentType]
+    covers: [I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-message/ChatMessageStatus.java
+    role: 已发布状态
+    symbols: [ChatMessageStatus]
+    covers: [I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-message/SenderSnapshot.java
+    role: 发布时发送者快照值对象
+    symbols: [SenderSnapshot]
+    covers: [I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-message/MessagePayload.java
+    role: 消息载荷值对象
+    symbols: [MessagePayload]
+    covers: [I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-message/ChatMessageIdGenerator.java
+    role: 雪花消息编号生成端口
+    symbols: [ChatMessageIdGenerator]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-message/ChatMessageBusinessIdUniqueness.java
+    role: 消息业务编号唯一性预检端口
+    symbols: [ChatMessageBusinessIdUniqueness]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-message/ChatMessageDomainException.java
+    role: 领域错误标识承载
+    symbols: [ChatMessageDomainException]
+    covers: [I1, I2, I3, C1]

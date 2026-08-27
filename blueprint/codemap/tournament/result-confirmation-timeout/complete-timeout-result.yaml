@@ -1,0 +1,6 @@
+id: tournament.result-confirmation-timeout.activity.complete-timeout-result
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/result-confirmation-timeout/activity/CompleteTimeoutResultActivity.java
+    role: 超时赛果自动确认、版本化比赛保存、报名结算与赛事进度事务编排
+    symbols: [CompleteTimeoutResultActivity]
+    covers: [A1, A2, A3, A4]

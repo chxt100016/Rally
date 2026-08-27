@@ -1,0 +1,14 @@
+id: meetup.meetup-quit.activity.leave-meetup-chat
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/LeaveMeetupChatActivity.java
+    role: 主实现
+    symbols: [LeaveMeetupChatActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/activity/LeaveMeetupChatContext.java
+    role: 通知上下文
+    symbols: [LeaveMeetupChatContext]
+    covers: [A3]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 退出流程编排与事务边界
+    symbols: [RegistrationAppService.quit]
+    covers: [A1, A2, A3]

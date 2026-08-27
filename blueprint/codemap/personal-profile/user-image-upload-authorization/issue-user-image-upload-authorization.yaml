@@ -1,0 +1,10 @@
+id: personal-profile.user-image-upload-authorization.activity.issue-user-image-upload-authorization
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/user-image-upload-authorization/activity/IssueUserImageUploadAuthorizationActivity.java
+    role: 原样拼接用途与秒级精确 key，以固定 10MB 策略签发一小时上传与预览授权
+    symbols: [IssueUserImageUploadAuthorizationActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/personal-profile/user-image-upload-authorization/activity/QiniuAssetStorageGateway.java
+    role: 复用现有七牛适配，保持精确 scope、SDK key、独立期限与签名地址语义
+    symbols: [QiniuAssetStorageGateway]
+    covers: [A2, A3]

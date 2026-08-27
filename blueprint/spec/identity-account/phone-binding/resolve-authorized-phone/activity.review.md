@@ -19,3 +19,7 @@
 - [Q3] 微信返回的其他手机号字段是否进入绑定或对外返回？
   > 活动只输出 phoneNumber 供下游绑定；countryCode、purePhoneNumber 等即使解析也不参与用户更新，响应不向调用方回传手机号详情。
   → 已写入活动契约、详细流程第 4 步与实现提示
+
+- [Q4] 活动是否应透传主线的 30002/30003 分流，而非统一成新的 WECHAT_PHONE_FAILED？
+  > 是。沿用 WechatMiniappClient 既有异常：access token 为空为 WECHAT_AUTH_FAILED，其余手机号接口失败为 WECHAT_PHONE_NUMBER_FAILED。
+  → 时序图、异常分支与详细流程已明确透传两种既有错误码。

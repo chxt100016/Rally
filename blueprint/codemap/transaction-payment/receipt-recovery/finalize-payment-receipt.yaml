@@ -1,0 +1,6 @@
+id: transaction-payment.receipt-recovery.activity.finalize-payment-receipt
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/receipt-recovery/activity/FinalizePaymentReceiptActivity.java
+    role: 单条恢复结论归类、回执终态写入与扫描继续控制
+    symbols: [FinalizePaymentReceiptActivity]
+    covers: [A1, A2, A3]

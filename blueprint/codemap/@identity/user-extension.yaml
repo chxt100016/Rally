@@ -1,0 +1,38 @@
+id: "@identity.user-extension"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/user-extension/UserExtension.java
+    role: 聚合根与命令入口
+    symbols: [UserExtension]
+    covers: [I1, I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-extension/UserExtensionState.java
+    role: 不可变聚合状态
+    symbols: [UserExtensionState]
+    covers: [I1, I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-extension/UserExtensionIdentity.java
+    role: 扩展身份值对象
+    symbols: [UserExtensionIdentity]
+    covers: [I1, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-extension/SaveUserExtensionCommand.java
+    role: 保存命令入参
+    symbols: [SaveUserExtensionCommand]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/user-extension/RemoveUserExtensionCommand.java
+    role: 按用户与扩展键删除的命令入参
+    symbols: [RemoveUserExtensionCommand]
+    covers: [I4, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-extension/UserExtensionIdGenerator.java
+    role: 雪花业务编号生成端口
+    symbols: [UserExtensionIdGenerator]
+    covers: [I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/user-extension/UserExtensionStatus.java
+    role: 聚合状态枚举
+    symbols: [UserExtensionStatus]
+    covers: [C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-extension/UserExtensionDomainException.java
+    role: 领域异常
+    symbols: [UserExtensionDomainException]
+    covers: [I1, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user-extension/UserExtensionError.java
+    role: 错误标识
+    symbols: [UserExtensionError]
+    covers: [I1, I3]

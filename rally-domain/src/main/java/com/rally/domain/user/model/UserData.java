@@ -21,6 +21,8 @@ public class UserData {
     /** 用户当前城市编码 */
     private String cityCode;
     private String phone;
+    /** 预留邮箱，当前业务不采集。 */
+    private String email;
 
 
 

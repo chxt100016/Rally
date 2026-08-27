@@ -1,0 +1,6 @@
+id: tournament.court-booker-selection-timeout.activity.reject-timeout-match
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/court-booker-selection-timeout/activity/RejectTimeoutMatchActivity.java
+    role: 选订场人超时比赛的单场事务编排、幂等复核与跨聚合结算
+    symbols: [RejectTimeoutMatchActivity]
+    covers: [A1, A2, A3, A4]

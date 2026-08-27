@@ -1,0 +1,6 @@
+id: personal-profile.profile-video-delete.activity.remove-uploaded-video-items
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/profile-video-delete/activity/RemoveUploadedVideoItemsActivity.java
+    role: 先校验本人上传目录，再只读网球档案并按 C7 移除同 key 项、无条件更新完整视频列表
+    symbols: [RemoveUploadedVideoItemsActivity]
+    covers: [A1, A2, A3]

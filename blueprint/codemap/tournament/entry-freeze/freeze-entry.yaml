@@ -1,0 +1,10 @@
+id: tournament.entry-freeze.activity.freeze-entry
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/entry-freeze/activity/FreezeEntryActivity.java
+    role: 冻结报名活动编排、状态校验与事务写入
+    symbols: [FreezeEntryActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 既有后台应用服务入口委托
+    symbols: [TournamentAdminAppService.freezeEntry]
+    covers: [A1, A2, A3]

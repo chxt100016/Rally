@@ -1,0 +1,6 @@
+id: identity-account.phone-binding.activity.resolve-authorized-phone
+files:
+  - path: rally-app/src/main/java/com/rally/identity-account/phone-binding/activity/ResolveAuthorizedPhoneActivity.java
+    role: 微信授权手机号解析活动编排
+    symbols: [ResolveAuthorizedPhoneActivity]
+    covers: [A1, A2, A3]

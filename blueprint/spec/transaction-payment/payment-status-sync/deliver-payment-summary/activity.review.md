@@ -19,3 +19,7 @@
 - [Q3] 摘要是否再次查渠道？
   > 不查，只读取本地最新状态；终态订单可直接返回。
   → 已写入详细流程第 1、4 步与边界情况
+
+- [Q4] 活动交付是否保持 main DTO，仅返回 refBizId 而不返回 bizType？
+  > 是。只交付 paymentId/refBizId/payerUserId/金额/status，不增加 bizType。
+  → 活动契约与详细流程已同步 main DTO。

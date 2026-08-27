@@ -1,0 +1,10 @@
+id: tournament.tournament-config-update.activity.update-tournament-config
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/tournamentconfigupdate/activity/UpdateTournamentConfigActivity.java
+    role: 赛事完整配置校验、白名单映射、非空列持久化与运营进度保留的事务编排
+    symbols: [UpdateTournamentConfigActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 保留既有后台更新接口签名、管理员路由与事务入口并委托配置更新活动
+    symbols: [TournamentAdminAppService.update]
+    covers: [A1, A2, A3, A4]

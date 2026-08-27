@@ -27,6 +27,7 @@ facade: POST /meetup/close
 ## 业务活动
 
 - close-meetup  校验发布者、约球性质和实际状态，将普通约球保存为已关闭
+- dispatch-meetup-cancel-notifications  在关闭事务提交后筛选仍有效的其他参与者并尝试发送取消通知
 
 ## 流程图
 

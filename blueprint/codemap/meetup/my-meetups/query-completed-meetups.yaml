@@ -1,0 +1,10 @@
+id: meetup.my-meetups.activity.query-completed-meetups
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/QueryCompletedMeetupsActivity.java
+    role: 已完成约球查询活动主实现
+    symbols: [QueryCompletedMeetupsActivity, execute]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/UserMeetupAppService.java
+    role: 我的约球已完成标签编排入口
+    symbols: [UserMeetupAppService, queryUserMeetupList]
+    covers: [A1, A2, A3]

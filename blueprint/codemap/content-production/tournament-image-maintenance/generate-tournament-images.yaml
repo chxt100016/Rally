@@ -1,0 +1,18 @@
+id: content-production.tournament-image-maintenance.activity.generate-tournament-images
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/tournament-image-maintenance/activity/GenerateTournamentImagesActivity.java
+    role: 主实现
+    symbols: [GenerateTournamentImagesActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/content-production/tournament-image-maintenance/activity/GenerateTournamentImagesResult.java
+    role: 活动结果
+    symbols: [GenerateTournamentImagesResult]
+    covers: [A4]
+  - path: rally-app/src/main/java/com/rally/content-production/tournament-image-maintenance/activity/TournamentImageCodecAdapter.java
+    role: 图片编解码适配
+    symbols: [TournamentImageCodecAdapter]
+    covers: [A2]
+  - path: rally-app/src/main/java/com/rally/content-production/tournament-image-maintenance/activity/TournamentImageStorageAdapter.java
+    role: 七牛对象存储适配
+    symbols: [TournamentImageStorageAdapter]
+    covers: [A3]

@@ -23,7 +23,7 @@ sequenceDiagram
 
 ## 触发条件
 
-登录参赛者退出本人尚未 WITHDRAWN/ELIMINATED 的赛事报名时执行。
+登录参赛者退出本人非 CHAMPION/WITHDRAWN/ELIMINATED 的赛事报名时执行。
 
 ## 活动契约
 
@@ -34,7 +34,7 @@ sequenceDiagram
 | 错误标识 | 触发条件 | 处理 |
 |---|---|---|
 | `TOURNAMENT_ENTRY_NOT_FOUND` | 本人无报名 | 不修改 |
-| `TOURNAMENT_ENTRY_STATUS_ILLEGAL` | 已 WITHDRAWN 或 ELIMINATED | 保持原状，重复不幂等 |
+| `TOURNAMENT_ENTRY_STATUS_ILLEGAL` | 已 CHAMPION、WITHDRAWN 或 ELIMINATED | 保持原状，重复不幂等 |
 | `OPERATION_FAILED` | 保存或后续联动失败 | 整体事务回滚 |
 
 ## 领域依赖
@@ -52,7 +52,7 @@ A3 标记退赛
 ## 详细流程
 
 1. 按赛事和当前用户取得唯一报名，不存在不创建。
-2. WITHDRAWN/ELIMINATED 禁止；PAYING、WAITING、FROZEN、IN_MATCH 等可退赛。
+2. CHAMPION/WITHDRAWN/ELIMINATED 禁止；PAYING、WAITING、FROZEN、IN_MATCH 等非终态可退赛。
 3. 只把 status 改 WITHDRAWN，赛段、轮次、偏好、计数和时间保留。
 4. 本步骤尚不最终提交；后续退出讨论/终止比赛失败会使退赛回滚。
 

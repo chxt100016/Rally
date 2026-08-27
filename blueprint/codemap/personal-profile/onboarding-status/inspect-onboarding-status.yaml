@@ -1,0 +1,6 @@
+id: personal-profile.onboarding-status.activity.inspect-onboarding-status
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/onboarding-status/activity/InspectOnboardingStatusActivity.java
+    role: 从登录上下文读取本人基础用户与网球档案，返回查询开始时状态
+    symbols: [InspectOnboardingStatusActivity]
+    covers: [A1, A2]

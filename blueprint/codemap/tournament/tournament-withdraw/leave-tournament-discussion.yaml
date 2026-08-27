@@ -1,0 +1,10 @@
+id: tournament.tournament-withdraw.activity.leave-tournament-discussion
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/tournament-withdraw/activity/LeaveTournamentDiscussionActivity.java
+    role: 按赛事频道与用户移除成员及阅读状态并保留历史评论
+    symbols: [LeaveTournamentDiscussionActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentEntryAppService.java
+    role: 在退赛入口同一事务中委托退出赛事讨论活动
+    symbols: [TournamentEntryAppService.withdraw]
+    covers: [A1, A2, A3]

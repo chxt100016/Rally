@@ -1,0 +1,42 @@
+id: "@tour.tournament-entry"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-entry/TourTournamentEntry.java
+    role: 聚合根、C1/C2 命令实现与 tour_tournament_entry 唯一写入口
+    symbols: [TourTournamentEntry]
+    covers: [I1, I2, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-entry/TourTournamentEntryIdentity.java
+    role: draw_id+player_id 不可变复合自然键
+    symbols: [TourTournamentEntryIdentity]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-entry/TourTournamentEntryQualificationPatch.java
+    role: 非空资格补丁、原始 entryType 与 VARCHAR(10) 边界
+    symbols: [TourTournamentEntryQualificationPatch]
+    covers: [I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-entry/TourTournamentEntryStatus.java
+    role: CONFIRMED 与明确退出终态
+    symbols: [TourTournamentEntryStatus]
+    covers: [I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-entry/TourTournamentEntryState.java
+    role: tour_tournament_entry 单行不可变聚合状态与非空资格合并
+    symbols: [TourTournamentEntryState]
+    covers: [I1, I2, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-entry/RefreshTourTournamentEntryCommand.java
+    role: C1 新增或刷新参赛资格输入
+    symbols: [RefreshTourTournamentEntryCommand]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-entry/RecordTourTournamentEntryExitCommand.java
+    role: C2 明确退出输入
+    symbols: [RecordTourTournamentEntryExitCommand]
+    covers: [C2]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-entry/TourTournamentEntryPersistence.java
+    role: tour_tournament_entry 唯一写端口、资格分列更新与状态更新约束
+    symbols: [TourTournamentEntryPersistence]
+    covers: [I1, I2, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-entry/TourTournamentEntryInsertResult.java
+    role: 复合自然键并发插入结果
+    symbols: [TourTournamentEntryInsertResult, TourTournamentEntryInsertResult.Outcome]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament-entry/TourTournamentEntryDomainException.java
+    role: 稳定领域错误标识载体
+    symbols: [TourTournamentEntryDomainException]
+    covers: [I1, I2, I3, C1, C2]

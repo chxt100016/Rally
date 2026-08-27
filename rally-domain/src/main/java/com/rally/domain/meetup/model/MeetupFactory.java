@@ -10,8 +10,10 @@ import com.rally.domain.tournament.model.SubmitBookingCmd;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 约球聚合根工厂
@@ -27,6 +29,24 @@ public class MeetupFactory {
      * @return 完整的 Meetup 聚合根（含创建者报名记录）
      */
     public static Meetup create(MeetupPublishCmd cmd, String userId, CourtData courtData) {
+        return createInternal(cmd, userId, courtData);
+    }
+
+    /** C1：建立普通约球及创建者报名；发布级组合校验仍由 MeetupPolicy 先行完成。 */
+    public static Meetup create(MeetupPublishCmd cmd, String userId, CourtData courtData, LocalDateTime now) {
+        if (StringUtils.isBlank(userId) || cmd == null || cmd.getStartTime() == null
+                || cmd.getStartTime().isBefore(now)) {
+            throw new com.rally.domain.auth.exception.BusinessException(
+                    com.rally.domain.auth.enums.BizErrorCode.PARAM_ERROR);
+        }
+        return createInternal(cmd, userId, courtData);
+    }
+
+    private static Meetup createInternal(MeetupPublishCmd cmd, String userId, CourtData courtData) {
+        if (StringUtils.isBlank(userId) || cmd == null) {
+            throw new com.rally.domain.auth.exception.BusinessException(
+                    com.rally.domain.auth.enums.BizErrorCode.PARAM_ERROR);
+        }
         // 1. 映射 MeetupPublishCmd -> MeetupData（currentPlayers 已在 MapStruct 中设为 1）
         MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, userId, courtData);
         data.setCityName(CityConfig.getCityName(data.getCityCode()));
@@ -48,7 +68,9 @@ public class MeetupFactory {
         // 4. 组装聚合根
         List<RegistrationData> registrations = new ArrayList<>();
         registrations.add(creatorRegistration);
-        return new Meetup(data, registrations);
+        Meetup meetup = new Meetup(data, registrations);
+        meetup.validateAfterCommand();
+        return meetup;
     }
 
     /**
@@ -63,16 +85,37 @@ public class MeetupFactory {
      * @param tournamentName 赛事名称，标题为空时作为默认值
      */
     public static Meetup createTournamentDraft(SubmitBookingCmd cmd, String bookerId, CourtData courtData, List<MatchParticipantData> participants, String tournamentName) {
+        return createTournamentDraft(cmd, bookerId, courtData, participants, tournamentName, true);
+    }
+
+    /** C2：赛事流程将外部许可显式传入；候选用户去重后建立 JOINED 报名。 */
+    public static Meetup createTournamentDraft(SubmitBookingCmd cmd, String bookerId, CourtData courtData,
+                                                List<MatchParticipantData> participants, String tournamentName,
+                                                boolean tournamentCreationAllowed) {
+        if (!tournamentCreationAllowed || StringUtils.isBlank(bookerId) || participants == null
+                || participants.stream().filter(Objects::nonNull)
+                .map(MatchParticipantData::getUserId).filter(StringUtils::isNotBlank).distinct().findAny().isEmpty()) {
+            throw new com.rally.domain.auth.exception.BusinessException(
+                    com.rally.domain.auth.enums.BizErrorCode.PARAM_ERROR);
+        }
         MeetupData data = MeetupDomainConvertMapper.INSTANCE.toMeetupData(cmd, bookerId, courtData);
         data.setBizId(IdWorker.getIdStr());
         data.setCityName(CityConfig.getCityName(data.getCityCode()));
-        applyTournamentParticipants(data, participants, tournamentName);
+        List<String> distinctParticipantIds = participants.stream()
+                .filter(Objects::nonNull)
+                .map(MatchParticipantData::getUserId)
+                .filter(StringUtils::isNotBlank)
+                .distinct()
+                .toList();
+        applyTournamentParticipants(data, distinctParticipantIds.size(), tournamentName);
 
         List<RegistrationData> registrations = new ArrayList<>();
-        for (MatchParticipantData participant : participants) {
-            registrations.add(buildJoinedRegistration(data.getBizId(), participant.getUserId()));
+        for (String participantId : distinctParticipantIds) {
+            registrations.add(buildJoinedRegistration(data.getBizId(), participantId));
         }
-        return new Meetup(data, registrations);
+        Meetup meetup = new Meetup(data, registrations);
+        meetup.validateAfterCommand();
+        return meetup;
     }
 
     /**
@@ -84,23 +127,26 @@ public class MeetupFactory {
         data.setBizId(IdWorker.getIdStr());
         data.setCityName(CityConfig.getCityName(data.getCityCode()));
         data.setMeetupType(MeetupTypeEnum.TOURNAMENT.getCode());
-        data.setMaxPlayers(participantUserIds.size());
-        data.setCurrentPlayers(participantUserIds.size());
+        List<String> distinctParticipantUserIds = participantUserIds.stream()
+                .filter(StringUtils::isNotBlank).distinct().toList();
+        data.setMaxPlayers(distinctParticipantUserIds.size());
+        data.setCurrentPlayers(distinctParticipantUserIds.size());
 
-        List<RegistrationData> registrations = participantUserIds.stream()
-                .distinct()
+        List<RegistrationData> registrations = distinctParticipantUserIds.stream()
                 .map(userId -> buildJoinedRegistration(data.getBizId(), userId))
                 .toList();
-        return new Meetup(data, registrations);
+        Meetup meetup = new Meetup(data, registrations);
+        meetup.validateAfterCommand();
+        return meetup;
     }
 
     /**
      * 赛事约球人数/类型按参赛者强制，标题空则给默认值
      */
-    private static void applyTournamentParticipants(MeetupData data, List<MatchParticipantData> participants, String tournamentName) {
-        data.setMatchType(participants.size() == 2 ? MatchTypeEnum.SINGLE : MatchTypeEnum.DOUBLE);
-        data.setMaxPlayers(participants.size());
-        data.setCurrentPlayers(participants.size());
+    private static void applyTournamentParticipants(MeetupData data, int participantCount, String tournamentName) {
+        data.setMatchType(participantCount == 2 ? MatchTypeEnum.SINGLE : MatchTypeEnum.DOUBLE);
+        data.setMaxPlayers(participantCount);
+        data.setCurrentPlayers(participantCount);
         if (StringUtils.isBlank(data.getTitle())) {
             data.setTitle(tournamentName);
         }

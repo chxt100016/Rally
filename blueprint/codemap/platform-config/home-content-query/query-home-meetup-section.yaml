@@ -1,0 +1,6 @@
+id: platform-config.home-content-query.activity.query-home-meetup-section
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/home-content-query/activity/QueryHomeMeetupSectionActivity.java
+    role: 解析首页约球区文案，按匿名或当前用户查询并组装进行中约球卡片
+    symbols: [QueryHomeMeetupSectionActivity]
+    covers: [A1, A2, A3]

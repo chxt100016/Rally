@@ -1,0 +1,10 @@
+id: tournament.tournament-entry.activity.register-tournament-entry
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/tournamententry/activity/RegisterTournamentEntryActivity.java
+    role: 报名资格校验、重复报名防护、搭档编号处理与资格赛等待报名创建编排
+    symbols: [RegisterTournamentEntryActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentEntryAppService.java
+    role: 保留既有报名接口、共享事务、讨论加入及报名概要返回语义
+    symbols: [TournamentEntryAppService.join]
+    covers: [A5]

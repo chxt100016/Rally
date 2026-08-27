@@ -1,0 +1,14 @@
+id: tournament.comment-publish.activity.publish-comment
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/comment-publish/activity/PublishCommentActivity.java
+    role: 未退赛资格校验、发布者快照、评论与成员阅读状态的事务编排及签名返回
+    symbols: [PublishCommentActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentCommentAppService.java
+    role: 保留 publish 对外签名、当前用户识别与原事务边界
+    symbols: [TournamentCommentAppService.publish]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/tournament/convert/TournamentCommentAppConvertMapper.java
+    role: 映射完整评论 DTO 并签名发布者头像资源键
+    symbols: [TournamentCommentAppConvertMapper.toCommentDTO, TournamentCommentAppConvertMapper.parseAvatar]
+    covers: [A5]

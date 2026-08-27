@@ -1,0 +1,42 @@
+id: "@identity.profile-change-log"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/profilechangelog/model/ProfileChangeLog.java
+    role: 聚合根与建立命令
+    symbols: [ProfileChangeLog]
+    covers: [I1, I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/profilechangelog/model/ProfileChangeLogData.java
+    role: 不可变聚合状态
+    symbols: [ProfileChangeLogData]
+    covers: [I1, I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/profilechangelog/model/ProfileChangeLogType.java
+    role: 变更类型与持久化映射
+    symbols: [ProfileChangeLogType]
+    covers: [I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/profilechangelog/model/ProfileChangeReason.java
+    role: 变更原因与持久化映射
+    symbols: [ProfileChangeReason]
+    covers: [I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/profilechangelog/model/RecordNtrpChangeCommand.java
+    role: NTRP 变化命令入参
+    symbols: [RecordNtrpChangeCommand]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/profilechangelog/model/RecordReviewTriggerCommand.java
+    role: 核查触发命令入参
+    symbols: [RecordReviewTriggerCommand]
+    covers: [C2]
+  - path: rally-domain/src/main/java/com/rally/domain/profilechangelog/model/ProfileChangeLogSourceKey.java
+    role: 来源事件幂等键
+    symbols: [ProfileChangeLogSourceKey]
+    covers: [I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/profilechangelog/model/ProfileChangeLogIdGenerator.java
+    role: 日志业务编号生成端口
+    symbols: [ProfileChangeLogIdGenerator]
+    covers: [I1, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/profilechangelog/model/ProfileChangeLogSourceUniqueness.java
+    role: 来源幂等预检端口
+    symbols: [ProfileChangeLogSourceUniqueness]
+    covers: [I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/profilechangelog/model/ProfileChangeLogDomainException.java
+    role: 领域错误标识
+    symbols: [ProfileChangeLogDomainException]
+    covers: [I1, I2, I3, I4]

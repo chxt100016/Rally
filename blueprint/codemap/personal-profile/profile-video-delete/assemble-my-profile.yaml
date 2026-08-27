@@ -1,0 +1,14 @@
+id: personal-profile.profile-video-delete.activity.assemble-my-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/basic-profile-update/activity/AssembleMyProfileActivity.java
+    role: 复用唯一的本人档案组装实现，重读删除后档案并按状态组装基础资料、统计、等级评分和剩余视频资源
+    symbols: [AssembleMyProfileActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/user/MyProfileAppService.java
+    role: 保留原 getMyProfile 签名，从当前用户上下文委托共享组装活动
+    symbols: [MyProfileAppService.getMyProfile]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/user/ProfileAppService.java
+    role: 在视频列表更新和外部文件删除后于同一数据库事务内组装档案，异常回滚数据库但不恢复文件
+    symbols: [ProfileAppService.deleteVideo]
+    covers: [A1, A2, A3]

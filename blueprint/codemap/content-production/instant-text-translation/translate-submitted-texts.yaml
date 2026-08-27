@@ -1,0 +1,6 @@
+id: content-production.instant-text-translation.activity.translate-submitted-texts
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/instant-text-translation/activity/TranslateSubmittedTextsActivity.java
+    role: 临时文本整批翻译活动编排
+    symbols: [TranslateSubmittedTextsActivity]
+    covers: [A1, A2, A3, A4]

@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-query.activity.query-tournament-catalog
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-query/activity/QueryTournamentCatalogActivity.java
+    role: 编排赛事筛选、类别门槛、同期分组、展示映射及翻译键收集
+    symbols: [QueryTournamentCatalogActivity]
+    covers: [A1, A2, A3, A4]

@@ -1,0 +1,14 @@
+id: personal-profile.gender-update.activity.assemble-my-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/basic-profile-update/activity/AssembleMyProfileActivity.java
+    role: 复用唯一的本人档案组装实现，重读档案并统一组装基础资料、统计、等级评分及视频资源
+    symbols: [AssembleMyProfileActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/user/MyProfileAppService.java
+    role: 委托共享组装活动并保持原 getMyProfile 接口
+    symbols: [MyProfileAppService.getMyProfile]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/user/ProfileAppService.java
+    role: 在性别更新事务内调用共享本人档案组装，组装异常沿事务传播并回滚
+    symbols: [ProfileAppService.updateGender]
+    covers: [A1, A2, A3, A4]

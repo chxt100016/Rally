@@ -1,0 +1,10 @@
+id: personal-profile.profile-video-update.activity.update-profile-video-title
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/profile-video-update/activity/UpdateProfileVideoTitleActivity.java
+    role: 读取当前用户档案，调用 C8 修改首个同 key 标题并无条件保存完整档案
+    symbols: [UpdateProfileVideoTitleActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/user/ProfileAppService.java
+    role: 保留原视频标题修改入口和事务边界，委托活动后继续组装本人档案
+    symbols: [ProfileAppService.updateVideo]
+    covers: [A1, A2, A3]

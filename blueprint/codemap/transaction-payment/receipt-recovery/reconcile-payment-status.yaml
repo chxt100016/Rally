@@ -1,0 +1,6 @@
+id: transaction-payment.receipt-recovery.activity.reconcile-payment-status
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/receipt-recovery/activity/ReconcilePaymentStatusActivity.java
+    role: 主实现
+    symbols: [ReconcilePaymentStatusActivity]
+    covers: [A1, A2, A3, A4]

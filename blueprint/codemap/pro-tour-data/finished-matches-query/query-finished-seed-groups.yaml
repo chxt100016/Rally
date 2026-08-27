@@ -1,0 +1,6 @@
+id: pro-tour-data.finished-matches-query.activity.query-finished-seed-groups
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/finished-matches-query/activity/QueryFinishedSeedGroupsActivity.java
+    role: 复用现有职业赛事查询组装种子资料、完赛败者轮次及 ATP/WTA/OUT 分组
+    symbols: [QueryFinishedSeedGroupsActivity]
+    covers: [A1, A2, A3]

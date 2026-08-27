@@ -1,0 +1,10 @@
+id: personal-profile.basic-profile-update.activity.update-basic-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/basic-profile-update/activity/UpdateBasicProfileActivity.java
+    role: 基础资料更新活动，读取当前用户、调用聚合命令并保存
+    symbols: [UpdateBasicProfileActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/user/ProfileAppService.java
+    role: 保留对外入口及与完整档案组装的同一事务编排
+    symbols: [ProfileAppService.editUser]
+    covers: [A1, A2, A3]

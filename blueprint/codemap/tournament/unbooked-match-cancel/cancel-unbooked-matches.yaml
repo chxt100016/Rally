@@ -1,0 +1,10 @@
+id: tournament.unbooked-match-cancel.activity.cancel-unbooked-matches
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/unbooked-match-cancel/activity/CancelUnbookedMatchesActivity.java
+    role: 赛事未订场比赛整批事务及跨聚合撤销编排
+    symbols: [CancelUnbookedMatchesActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 保留既有运营 HTTP 入口契约并委托业务活动
+    symbols: [TournamentAdminAppService.cancelUnsubmittedTournamentMatches]
+    covers: [A1, A2, A3, A4]

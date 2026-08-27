@@ -1,0 +1,6 @@
+id: personal-profile.player-home.activity.query-player-score-summary
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/player-home/activity/QueryPlayerScoreSummaryActivity.java
+    role: 查询四个球员位置比分、统计类型并组装最近十盘双方视图
+    symbols: [QueryPlayerScoreSummaryActivity]
+    covers: [A1, A2, A3]

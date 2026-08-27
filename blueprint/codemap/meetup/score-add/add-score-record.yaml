@@ -1,0 +1,6 @@
+id: meetup.score-add.activity.add-score-record
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/AddScoreRecordActivity.java
+    role: 复盘资格校验与宽松比分新增编排
+    symbols: [AddScoreRecordActivity, execute]
+    covers: [A1, A2, A3, A4, A5]

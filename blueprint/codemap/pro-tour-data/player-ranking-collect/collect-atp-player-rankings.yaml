@@ -1,0 +1,6 @@
+id: pro-tour-data.player-ranking-collect.activity.collect-atp-player-rankings
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/player-ranking-collect/activity/CollectAtpPlayerRankingsActivity.java
+    role: ATP 前 200 名请求、转换去重与球员资料批量非空覆盖编排
+    symbols: [CollectAtpPlayerRankingsActivity, execute]
+    covers: [A1, A2, A3]

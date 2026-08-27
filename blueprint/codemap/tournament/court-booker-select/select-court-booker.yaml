@@ -1,0 +1,6 @@
+id: tournament.court-booker-select.activity.select-court-booker
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/court-booker-select/activity/SelectCourtBookerActivity.java
+    role: 订场人认领事务编排、参与身份校验与版本化比赛保存
+    symbols: [SelectCourtBookerActivity]
+    covers: [A1, A2, A3, A4]

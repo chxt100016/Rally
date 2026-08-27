@@ -1,0 +1,6 @@
+id: platform-config.splash-cover-query.activity.issue-splash-cover-url
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/splash-cover-query/activity/IssueSplashCoverUrlActivity.java
+    role: 读取启动封面 key，处理空白覆盖并编排一小时对象存储签名
+    symbols: [IssueSplashCoverUrlActivity]
+    covers: [A1, A2, A3]

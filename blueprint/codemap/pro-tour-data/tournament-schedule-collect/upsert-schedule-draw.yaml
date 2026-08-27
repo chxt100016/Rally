@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-schedule-collect.activity.upsert-schedule-draw
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-schedule-collect/activity/UpsertScheduleDrawActivity.java
+    role: 过滤赛程来源并按原始复合身份调用签表聚合关联或新建、独立非空刷新结构
+    symbols: [UpsertScheduleDrawActivity, execute]
+    covers: [A1, A2, A3]

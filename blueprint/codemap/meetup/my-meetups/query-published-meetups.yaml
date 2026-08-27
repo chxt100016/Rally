@@ -1,0 +1,10 @@
+id: meetup.my-meetups.activity.query-published-meetups
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/QueryPublishedMeetupsActivity.java
+    role: 我发布约球查询活动主实现
+    symbols: [QueryPublishedMeetupsActivity, execute]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/UserMeetupAppService.java
+    role: 我的约球入口编排
+    symbols: [UserMeetupAppService, queryUserMeetupList]
+    covers: [A1, A2, A3]

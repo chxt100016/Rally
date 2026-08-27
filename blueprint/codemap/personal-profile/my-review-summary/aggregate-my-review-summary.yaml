@@ -1,0 +1,10 @@
+id: personal-profile.my-review-summary.activity.aggregate-my-review-summary
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/my-review-summary/activity/AggregateMyReviewSummaryActivity.java
+    role: 调用本人全量获评聚合并保持原有返回 DTO 语义
+    symbols: [AggregateMyReviewSummaryActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-domain/src/main/java/com/rally/domain/recap/UserReviewDomainService.java
+    role: 一次读取全部获评并聚合维度记录、标签总数与高频标签
+    symbols: [UserReviewDomainService.getReviewSummary]
+    covers: [A1, A2, A3, A4]

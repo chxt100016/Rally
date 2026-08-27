@@ -1,0 +1,14 @@
+id: tournament.comment-pull.activity.list-comments
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/comment-pull/activity/ListCommentsActivity.java
+    role: 未退赛资格校验、分页钳制、倒序评论交付、发布快照映射与已读单调推进的事务编排
+    symbols: [ListCommentsActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentCommentAppService.java
+    role: 保留 list 对外签名、当前用户识别与原事务边界
+    symbols: [TournamentCommentAppService.list]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/tournament/convert/TournamentCommentAppConvertMapper.java
+    role: 将聊天消息的发布者快照映射为评论 DTO 并签名头像资源键
+    symbols: [TournamentCommentAppConvertMapper.toCommentDTO, TournamentCommentAppConvertMapper.parseAvatar]
+    covers: [A3]

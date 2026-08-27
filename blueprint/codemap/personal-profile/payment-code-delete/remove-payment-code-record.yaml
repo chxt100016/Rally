@@ -1,0 +1,10 @@
+id: personal-profile.payment-code-delete.activity.remove-payment-code-record
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/payment-code-delete/activity/RemovePaymentCodeRecordActivity.java
+    role: 二次读取本人收款码资料并按用户与固定扩展键删除
+    symbols: [RemovePaymentCodeRecordActivity]
+    covers: [A1, A2]
+  - path: rally-app/src/main/java/com/rally/user/PaymentCodeAppService.java
+    role: 保留原删除接口及事务边界，在图片处理后编排记录删除活动
+    symbols: [PaymentCodeAppService.deletePaymentCode]
+    covers: [A1, A2]

@@ -1,0 +1,6 @@
+id: personal-profile.player-home.activity.query-player-public-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/player-home/activity/QueryPlayerPublicProfileActivity.java
+    role: 读取目标用户与可选档案并组装公开资料、等级、评级和视频
+    symbols: [QueryPlayerPublicProfileActivity]
+    covers: [A1, A2, A3, A4]

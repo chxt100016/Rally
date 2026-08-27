@@ -1,10 +1,9 @@
 package com.rally.user;
 
-import com.rally.client.qiniu.QiniuClient;
-import com.rally.domain.user.enums.UserExtKeyEnum;
-import com.rally.domain.user.model.UserExtData;
-import com.rally.domain.user.service.UserExtDomainService;
-import com.rally.user.convert.PaymentCodeAppConvertMapper;
+import com.rally.personalprofile.paymentcodedelete.activity.DeletePaymentCodeImageActivity;
+import com.rally.personalprofile.paymentcodedelete.activity.RemovePaymentCodeRecordActivity;
+import com.rally.personalprofile.paymentcodeget.activity.QueryPaymentCodeActivity;
+import com.rally.personalprofile.paymentcodesave.activity.UpsertPaymentCodeRecordActivity;
 import com.rally.user.model.PaymentCodeCmd;
 import com.rally.user.model.PaymentCodeDTO;
 import com.rally.utils.UserContext;
@@ -16,32 +15,32 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentCodeAppService {
 
     @Resource
-    private UserExtDomainService userExtDomainService;
+    private UpsertPaymentCodeRecordActivity upsertPaymentCodeRecordActivity;
 
     @Resource
-    private QiniuClient qiniuClient;
+    private DeletePaymentCodeImageActivity deletePaymentCodeImageActivity;
 
-    private static final PaymentCodeAppConvertMapper MAPPER = PaymentCodeAppConvertMapper.INSTANCE;
+    @Resource
+    private RemovePaymentCodeRecordActivity removePaymentCodeRecordActivity;
+
+    @Resource
+    private QueryPaymentCodeActivity queryPaymentCodeActivity;
 
     @Transactional
     public void savePaymentCode(PaymentCodeCmd cmd) {
         String userId = UserContext.get();
-        userExtDomainService.save(userId, UserExtKeyEnum.PAYMENT_CODE.getKey(), cmd.getKey());
+        upsertPaymentCodeRecordActivity.execute(userId, cmd.getKey());
     }
 
     public PaymentCodeDTO getPaymentCode() {
         String userId = UserContext.get();
-        UserExtData data = userExtDomainService.get(userId, UserExtKeyEnum.PAYMENT_CODE.getKey());
-        return MAPPER.toDTO(data);
+        return queryPaymentCodeActivity.execute(userId);
     }
 
     @Transactional
     public void deletePaymentCode() {
         String userId = UserContext.get();
-        UserExtData data = userExtDomainService.get(userId, UserExtKeyEnum.PAYMENT_CODE.getKey());
-        if (data != null && data.getExtValue() != null) {
-            qiniuClient.deleteFile(data.getExtValue());
-        }
-        userExtDomainService.delete(userId, UserExtKeyEnum.PAYMENT_CODE.getKey());
+        deletePaymentCodeImageActivity.execute(userId);
+        removePaymentCodeRecordActivity.execute(userId);
     }
 }

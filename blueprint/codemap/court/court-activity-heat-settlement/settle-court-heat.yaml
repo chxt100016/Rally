@@ -1,0 +1,6 @@
+id: court.court-activity-heat-settlement.activity.settle-court-heat
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/SettleCourtHeatActivity.java
+    role: 主实现
+    symbols: [SettleCourtHeatActivity]
+    covers: [A1, A2, A3, A4]

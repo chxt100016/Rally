@@ -1,0 +1,6 @@
+id: transaction-payment.timeout-order-close.activity.advance-paid-business
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/timeout-order-close/activity/AdvancePaidBusinessActivity.java
+    role: 到期单本地付款确认及报名费席位、报名与轮次推进编排
+    symbols: [AdvancePaidBusinessActivity]
+    covers: [A1, A2, A3, A4]

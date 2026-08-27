@@ -14,7 +14,7 @@ facade: POST /payment/sync-status
 
 ## 接口契约
 
-查询参数 `paymentId` 指定支付单。成功返回支付单号、业务类型与关联编号、付款人、各项金额和对外状态；对外状态为 `UNPAID`、`PAID` 或 `CLOSED`。
+查询参数 `paymentId` 指定支付单。成功返回支付单号、关联业务编号、付款人、各项金额和对外状态，不交付内部 `bizType`；对外状态为 `UNPAID`、`PAID` 或 `CLOSED`。
 
 ## 业务活动
 

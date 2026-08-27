@@ -1,0 +1,10 @@
+id: social-relations.follow-create.activity.establish-user-follow
+files:
+  - path: rally-app/src/main/java/com/rally/social-relations/follow-create/activity/EstablishUserFollowActivity.java
+    role: 目标账户校验、关注聚合 C1 编排与现有持久化适配
+    symbols: [EstablishUserFollowActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/user/FollowAppService.java
+    role: 保留 follow 对外签名并传入当前用户与目标用户
+    symbols: [FollowAppService.follow]
+    covers: [A1, A3]

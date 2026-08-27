@@ -1,0 +1,14 @@
+id: tournament.tournament-list.activity.query-tournament-admin-list
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/tournamentlist/activity/QueryTournamentAdminListActivity.java
+    role: 后台赛事精确筛选、倒序分页、摘要映射与图片签名的业务活动
+    symbols: [QueryTournamentAdminListActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 保留后台列表对外签名并委派业务活动
+    symbols: [TournamentAdminAppService.list]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/tournament/convert/TournamentAppConvertMapper.java
+    role: 完整映射后台赛事摘要并签名海报与群二维码
+    symbols: [TournamentAppConvertMapper.toTournamentAdminItemDTO, TournamentAppConvertMapper.toTournamentAdminItemDTOList]
+    covers: [A3, A4]

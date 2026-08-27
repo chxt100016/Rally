@@ -13,12 +13,14 @@ import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.system.model.HomeConfigDTO;
 import com.rally.domain.system.model.HomeConfigItemDTO;
 import com.rally.domain.system.model.HomeConfigUpdateCmd;
+import com.rally.platformconfig.allconfigquery.activity.QueryAllConfigViewActivity;
+import com.rally.platformconfig.homeconfigquery.activity.QueryHomeConfigViewActivity;
+import com.rally.platformconfig.homeconfigupdate.activity.PublishHomeConfigActivity;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -41,6 +43,9 @@ public class HomeConfigAdminAppService {
     );
 
     private final SysConfigRepository sysConfigRepository;
+    private final QueryAllConfigViewActivity queryAllConfigViewActivity;
+    private final PublishHomeConfigActivity publishHomeConfigActivity;
+    private final QueryHomeConfigViewActivity queryHomeConfigViewActivity;
 
     public HomeConfigDTO get() {
         return new HomeConfigDTO(List.of(
@@ -51,15 +56,13 @@ public class HomeConfigAdminAppService {
     }
 
     public HomeConfigDTO getAll() {
-        return new HomeConfigDTO(Arrays.stream(SystemConfigKey.values()).map(this::buildItem).toList());
+        return queryAllConfigViewActivity.execute();
     }
 
     @Transactional
     public HomeConfigDTO update(HomeConfigUpdateCmd cmd) {
-        if (!HOME_KEYS.contains(cmd.getKey())) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, "该配置不允许在首页配置中心修改");
-        }
-        return save(cmd, true);
+        publishHomeConfigActivity.execute(cmd);
+        return queryHomeConfigViewActivity.execute();
     }
 
     @Transactional

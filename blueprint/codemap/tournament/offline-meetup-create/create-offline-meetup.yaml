@@ -1,0 +1,10 @@
+id: tournament.offline-meetup-create.activity.create-offline-meetup
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/offlinemeetupcreate/activity/CreateOfflineMeetupActivity.java
+    role: 线下赛活动创建、候选成员加入与赛事唯一绑定事务编排
+    symbols: [CreateOfflineMeetupActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 既有后台应用服务入口委托
+    symbols: [TournamentAdminAppService.createOfflineMeetup]
+    covers: [A1, A2, A3, A4, A5]

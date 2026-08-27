@@ -1,0 +1,6 @@
+id: tournament.result-confirm.activity.confirm-result
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/result-confirm/activity/ConfirmResultActivity.java
+    role: 赛果确认、版本化比赛保存、胜负报名结算与赛事进度事务编排
+    symbols: [ConfirmResultActivity]
+    covers: [A1, A2, A3, A4, A5]

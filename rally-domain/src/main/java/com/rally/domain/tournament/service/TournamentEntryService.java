@@ -87,7 +87,7 @@ public class TournamentEntryService {
     }
 
     /**
-     * 退出赛事：置 WITHDRAWN（资格赛/正赛通用）。若本人正在比赛中，关比赛与对手回池由 TournamentMatchFlowService 处理
+     * 退出赛事：置 WITHDRAWN（资格赛/正赛通用）。若本人正在比赛中，关比赛与对手回池由退赛活动处理
      */
     public void withdraw(TournamentEntry entry) {
         entry.assertCanWithdraw();

@@ -1,0 +1,6 @@
+id: meetup.meetup-detail.activity.assemble-meetup-overview
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupDetailAppService.java
+    role: 约球概览查询、视角筛选与返回组装
+    symbols: [MeetupDetailAppService]
+    covers: [A1, A2, A3, A4, A5]

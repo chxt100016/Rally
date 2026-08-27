@@ -1,0 +1,6 @@
+id: platform-config.group-chat-entry-query.activity.issue-group-chat-entry-url
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/group-chat-entry-query/activity/IssueGroupChatEntryUrlActivity.java
+    role: 选择固定群聊二维码 key，编排一小时对象存储签名并直接返回 URL
+    symbols: [IssueGroupChatEntryUrlActivity]
+    covers: [A1, A2, A3]

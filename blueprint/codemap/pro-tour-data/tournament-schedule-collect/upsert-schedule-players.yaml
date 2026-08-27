@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-schedule-collect.activity.upsert-schedule-players
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-schedule-collect/activity/UpsertSchedulePlayersActivity.java
+    role: 继承或强制巡回赛身份、稳定顺序去重合并并批量新增或非空刷新赛程球员
+    symbols: [UpsertSchedulePlayersActivity, execute]
+    covers: [A1, A2, A3]

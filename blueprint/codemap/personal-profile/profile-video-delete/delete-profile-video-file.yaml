@@ -1,0 +1,10 @@
+id: personal-profile.profile-video-delete.activity.delete-profile-video-file
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/profile-video-delete/activity/DeleteProfileVideoFileActivity.java
+    role: 将请求 key 原样交给七牛删除并沿用 612 容错与其他异常传播
+    symbols: [DeleteProfileVideoFileActivity]
+    covers: [A1, A2]
+  - path: rally-app/src/main/java/com/rally/user/ProfileAppService.java
+    role: 保留原删除入口和事务边界，在档案保存后、本人档案组装前调用物理删除活动
+    symbols: [ProfileAppService.deleteVideo]
+    covers: [A1, A2]

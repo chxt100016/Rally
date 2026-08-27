@@ -1,0 +1,14 @@
+id: meetup.meetup-quit.activity.quit-meetup-participant
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/QuitMeetupParticipantActivity.java
+    role: 主实现
+    symbols: [QuitMeetupParticipantActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/meetup/activity/MeetupParticipantQuitContext.java
+    role: 后续步骤上下文
+    symbols: [MeetupParticipantQuitContext]
+    covers: [A5]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 对外编排入口
+    symbols: [RegistrationAppService.quit]
+    covers: [A1, A2, A3, A4, A5]

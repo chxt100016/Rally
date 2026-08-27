@@ -10,6 +10,10 @@ import com.rally.domain.user.model.UserFollowData;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserFollowDomainService;
 import com.rally.domain.user.service.UserProfileDomainService;
+import com.rally.socialrelations.followcreate.activity.EstablishUserFollowActivity;
+import com.rally.socialrelations.followerslist.activity.QueryFollowersPageActivity;
+import com.rally.socialrelations.followinglist.activity.QueryFollowingPageActivity;
+import com.rally.socialrelations.followremove.activity.RemoveUserFollowActivity;
 import com.rally.utils.UserContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -35,28 +39,36 @@ public class FollowAppService {
     @Resource
     private UserProfileDomainService userProfileDomainService;
 
+    @Resource
+    private EstablishUserFollowActivity establishUserFollowActivity;
+
+    @Resource
+    private RemoveUserFollowActivity removeUserFollowActivity;
+
+    @Resource
+    private QueryFollowersPageActivity queryFollowersPageActivity;
+
+    @Resource
+    private QueryFollowingPageActivity queryFollowingPageActivity;
+
     /** 关注 */
     public void follow(FollowCmd cmd) {
-        userFollowDomainService.follow(UserContext.get(), cmd.getTargetUserId());
+        establishUserFollowActivity.execute(UserContext.get(), cmd.getTargetUserId());
     }
 
     /** 取消关注 */
     public void unfollow(FollowCmd cmd) {
-        userFollowDomainService.unfollow(UserContext.get(), cmd.getTargetUserId());
+        removeUserFollowActivity.execute(UserContext.get(), cmd.getTargetUserId());
     }
 
     /** 关注列表（取对端 followingId） */
     public PageDTO<FollowUserDTO> getFollowingList(FollowListCmd cmd) {
-        String targetUserId = StringUtils.isNotBlank(cmd.getUserId()) ? cmd.getUserId() : UserContext.get();
-        PageDTO<UserFollowData> page = userFollowDomainService.listFollowing(targetUserId, cmd);
-        return enrich(page, UserFollowData::getFollowingId);
+        return queryFollowingPageActivity.execute(UserContext.get(), cmd);
     }
 
     /** 被关注列表（取对端 followerId） */
     public PageDTO<FollowUserDTO> getFollowerList(FollowListCmd cmd) {
-        String targetUserId = StringUtils.isNotBlank(cmd.getUserId()) ? cmd.getUserId() : UserContext.get();
-        PageDTO<UserFollowData> page = userFollowDomainService.listFollowers(targetUserId, cmd);
-        return enrich(page, UserFollowData::getFollowerId);
+        return queryFollowersPageActivity.execute(UserContext.get(), cmd);
     }
 
     /** 批量补全用户信息并标记当前登录用户是否已关注 */

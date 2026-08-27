@@ -1,0 +1,6 @@
+id: pro-tour-data.player-ranking-collect.activity.collect-wta-player-rankings
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/player-ranking-collect/activity/CollectWtaPlayerRankingsActivity.java
+    role: WTA 前 200 名请求、转换去重与球员资料批量非空覆盖编排
+    symbols: [CollectWtaPlayerRankingsActivity, execute]
+    covers: [A1, A2, A3]

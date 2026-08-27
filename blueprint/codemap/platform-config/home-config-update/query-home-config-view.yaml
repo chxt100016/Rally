@@ -1,0 +1,10 @@
+id: platform-config.home-config-update.activity.query-home-config-view
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/home-config-query/activity/QueryHomeConfigViewActivity.java
+    role: 复用固定三项首页配置查询，组装 raw 生效值、默认值、版本与覆盖状态
+    symbols: [QueryHomeConfigViewActivity]
+    covers: [A1, A2]
+  - path: rally-app/src/main/java/com/rally/system/HomeConfigAdminAppService.java
+    role: 在发布与缓存重建后的同一事务内查询并返回三项首页配置视图
+    symbols: [HomeConfigAdminAppService.update]
+    covers: [A1, A2]

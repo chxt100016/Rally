@@ -1,0 +1,10 @@
+id: meetup.registration-reject.activity.reject-pending-registration
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/RejectPendingRegistrationActivity.java
+    role: 主实现
+    symbols: [RejectPendingRegistrationActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 对外编排入口
+    symbols: [RegistrationAppService.reject]
+    covers: [A1, A2, A3]

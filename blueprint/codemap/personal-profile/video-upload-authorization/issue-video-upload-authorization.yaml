@@ -1,0 +1,10 @@
+id: personal-profile.video-upload-authorization.activity.issue-video-upload-authorization
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/video-upload-authorization/activity/IssueVideoUploadAuthorizationActivity.java
+    role: 按需核对已登记视频数量、读取大小配置并组装上传授权响应
+    symbols: [IssueVideoUploadAuthorizationActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/personal-profile/user-image-upload-authorization/activity/QiniuAssetStorageGateway.java
+    role: 复用现有七牛适配，保留前缀初始策略与空 SDK key 的签发语义
+    symbols: [QiniuAssetStorageGateway]
+    covers: [A3]

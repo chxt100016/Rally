@@ -1,0 +1,10 @@
+id: identity-account.account-login.activity.verify-wechat-identity
+files:
+  - path: rally-app/src/main/java/com/rally/identity-account/account-login/activity/VerifyWechatIdentityActivity.java
+    role: 微信身份核实活动编排
+    symbols: [VerifyWechatIdentityActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/identity-account/account-login/activity/VerifiedWechatIdentity.java
+    role: 微信身份核实结果
+    symbols: [VerifiedWechatIdentity]
+    covers: [A3]

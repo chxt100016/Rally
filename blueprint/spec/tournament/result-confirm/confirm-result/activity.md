@@ -6,7 +6,7 @@ reads: []
 
 ## 概要
 
-确认赛果，并在全员确认时完成比赛；普通轮次结算报名与轮次，决赛结算冠军与赛事终态。
+确认赛果；全员确认后完成比赛，结算晋级、冠军与赛事终态。
 
 ## 时序图
 
@@ -37,46 +37,69 @@ PENDING_CONFIRM 比赛参与者提交 `confirm=true` 时执行。
 
 ## 活动契约
 
-本人转 CONFIRMED；未全员确认时保持待确认。全员确认须有胜方，比赛转 COMPLETED；非决赛按资格赛/正赛结算报名和评估轮次，决赛胜方成为冠军且赛事结束。
+### 入参
+
+| 字段 | 类型 | 必填 | 约束 |
+|---|---|---|---|
+| `matchId` | 字符串 | 是 | 目标比赛编号 |
+| `confirm` | 布尔 | 是 | 本活动固定为 `true` |
+| `operatorId` | 字符串 | 是 | 须存在本人报名与比赛参与关系 |
+| `confirmedTime` | 日期时间 | 是 | 记录本次确认，并在全员确认时作为完成时间 |
+
+### 成功返回
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| 无 | - | - | 未全员确认或完成全部结算后均无数据返回 |
 
 ## 异常分支
 
-| 错误标识 | 触发条件 | 处理 |
+| 错误标识 | 触发条件 | 来源 |
 |---|---|---|
-| `TOURNAMENT_ENTRY_NOT_FOUND`/`TOURNAMENT_NOT_FOUND` | 比赛、本人报名/参与关系或赛事缺失 | 回滚 |
-| `TOURNAMENT_INVALID_RESULT_CONFIRM` | 比赛非 PENDING_CONFIRM | 不修改 |
-| `TOURNAMENT_RESULT_WINNER_REQUIRED` | 全员确认但无胜方 | 本次确认也回滚 |
-| `TOURNAMENT_MATCH_VERSION_CONFLICT`/`OPERATION_FAILED` | 并发或结算保存失败 | 整体回滚 |
+| `TOURNAMENT_ENTRY_NOT_FOUND` | 比赛、本人报名或本人参与关系缺失 | confirm-result 流程 `TOURNAMENT_ENTRY_NOT_FOUND` 一行 |
+| `TOURNAMENT_NOT_FOUND` | 比赛所属赛事缺失 | confirm-result 流程 `TOURNAMENT_NOT_FOUND` 一行 |
+| `TOURNAMENT_INVALID_RESULT_CONFIRM` | 比赛非 `PENDING_CONFIRM` | confirm-result 流程同名错误一行 |
+| `TOURNAMENT_RESULT_WINNER_REQUIRED` | 全员确认但无胜方 | confirm-result 流程同名错误一行 |
+| `TOURNAMENT_MATCH_VERSION_CONFLICT` | 保存前比赛已被并发修改 | confirm-result 流程同名错误一行 |
+| `OPERATION_FAILED` | 参与关系、报名、比赛、赛事或轮次保存失败 | confirm-result 流程同名错误一行 |
 
 ## 领域依赖
 
 ### @tournament.match
+
 - 输入：待确认比赛、本人参与关系与版本
 - 输出：确认状态及按需 COMPLETED
+
 ### @tournament.entry
+
 - 输入：胜负方报名及赛段
 - 输出：PAYING/WAITING/ELIMINATED/CHAMPION 与晋级
+
 ### @tournament.tournament
+
 - 输入：已完成决赛、胜方报名编号和完成时间
 - 输出：FINISHED、championEntryNo 和 endTime
+
 ### @tournament.round-progress
+
 - 输入：赛事轮次、完成场数和锁位情况
 - 输出：按需推进当前轮次
 
 ## 业务动作
 
-A1 校验待确认与参与身份
-A2 确认本人赛果
-A3 全员时完成比赛
-A4 结算胜负报名
-A5 决赛结束赛事或评估普通轮次推进
+- A1 校验待确认状态与参与身份。
+- A2 确认本人赛果。
+- A3 全员确认时完成比赛。
+- A4 结算胜负报名。
+- A5 决赛结束赛事或评估普通轮次推进。
 
 ## 详细流程
 
-1. 要求比赛 PENDING_CONFIRM，赛事、本人报名及参与关系存在；本人改 CONFIRMED 并记录当前时间。
-2. 尚有未确认者时保存后结束；全员确认时 winnerEntryNo 必须存在，比赛转 COMPLETED 并记完成时间。
-3. 资格赛胜方转 PAYING、负方 WAITING；非决赛正赛胜方转 WAITING 并晋级，负方 ELIMINATED；决赛胜方转 CHAMPION，负方 ELIMINATED。
-4. 比赛轮次为 FINAL 时，以 winnerEntryNo 和 completedTime 将赛事更新为 FINISHED，并记录 championEntryNo、endTime；否则根据已完成场数和正赛锁位评估是否推进赛事 currentRound。
+1. A1 要求比赛 `PENDING_CONFIRM`，赛事、本人报名及参与关系存在。
+2. A2 将本人改为 `CONFIRMED` 并记录当前时间；重复确认在比赛仍待确认时继续刷新时间。
+3. A3 尚有未确认者时保存后结束；全员确认时 `winnerEntryNo` 必须存在，比赛转 `COMPLETED` 并记完成时间。
+4. A4 资格赛胜方转 `PAYING`、负方 `WAITING`；非决赛正赛胜方转 `WAITING` 并晋级，负方 `ELIMINATED`；决赛胜方转 `CHAMPION`，负方 `ELIMINATED`。
+5. A5 比赛轮次为 `FINAL` 时，以 `winnerEntryNo` 和 `completedTime` 将赛事更新为 `FINISHED`，并记录 `championEntryNo`、`endTime`；否则根据已完成场数和正赛锁位评估是否推进赛事 `currentRound`。
 
 ## 边界情况
 

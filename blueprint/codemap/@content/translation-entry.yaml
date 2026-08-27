@@ -1,0 +1,34 @@
+id: "@content.translation-entry"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/translation-entry/TranslationEntry.java
+    role: 主实现
+    symbols: [TranslationEntry]
+    covers: [I1, I2, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/translation-entry/TranslationEntryState.java
+    role: 聚合状态
+    symbols: [TranslationEntryState]
+    covers: [I2, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/translation-entry/TranslationEntryKey.java
+    role: 翻译键值对象
+    symbols: [TranslationEntryKey]
+    covers: [I1, I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/translation-entry/RegisterTranslationEntryCmd.java
+    role: 命令入参
+    symbols: [RegisterTranslationEntryCmd]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/translation-entry/SaveTranslationTextCmd.java
+    role: 命令入参
+    symbols: [SaveTranslationTextCmd]
+    covers: [C2]
+  - path: rally-domain/src/main/java/com/rally/domain/translation-entry/TranslationEntryStatus.java
+    role: 状态枚举
+    symbols: [TranslationEntryStatus]
+    covers: [I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/translation-entry/TranslationEntryException.java
+    role: 领域异常
+    symbols: [TranslationEntryException]
+    covers: [I1, I2, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/translation-entry/TranslationEntryError.java
+    role: 错误标识
+    symbols: [TranslationEntryError]
+    covers: [I1, I2, I3]

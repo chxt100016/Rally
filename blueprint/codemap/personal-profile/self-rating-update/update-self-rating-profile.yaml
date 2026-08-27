@@ -1,0 +1,10 @@
+id: personal-profile.self-rating-update.activity.update-self-rating-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/self-rating-update/activity/UpdateSelfRatingProfileActivity.java
+    role: 读取本人档案，按可信度分档配置调用 C9 完成冷却、涨幅、核查状态、NTRP 时间更新及部分字段落库
+    symbols: [UpdateSelfRatingProfileActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/personal-profile/self-rating-update/activity/SelfRatingUpdateContext.java
+    role: 承载修改前后 NTRP、差额与可选核查所需场次
+    symbols: [SelfRatingUpdateContext]
+    covers: [A2, A3]

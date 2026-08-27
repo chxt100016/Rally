@@ -1,15 +1,14 @@
 package com.rally.job;
 
-import com.rally.domain.payment.gateway.PaymentOrderRepository;
 import com.rally.domain.payment.model.PaymentOrder;
-import com.rally.domain.payment.service.PaymentDomainService;
+import com.rally.transactionpayment.timeoutorderclose.activity.CloseExpiredPaymentActivity;
+import com.rally.transactionpayment.timeoutorderclose.activity.ReconcileExpiredPaymentActivity;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -22,21 +21,29 @@ import java.util.List;
 public class PaymentTimeoutJob {
 
     @Resource
-    private PaymentOrderRepository paymentOrderRepository;
+    private ReconcileExpiredPaymentActivity reconcileExpiredPaymentActivity;
 
     @Resource
-    private PaymentDomainService paymentDomainService;
+    private com.rally.transactionpayment.timeoutorderclose.activity.AdvancePaidBusinessActivity advancePaidBusinessActivity;
+
+    @Resource
+    private CloseExpiredPaymentActivity closeExpiredPaymentActivity;
 
     @Scheduled(cron = "${job.payment_timeout.cron:0 */5 * * * ?}")
     public void scan() {
-        List<PaymentOrder> expired = paymentOrderRepository.listExpiredPending(LocalDateTime.now());
+        List<PaymentOrder> expired = reconcileExpiredPaymentActivity.scan();
         if (expired.isEmpty()) {
             return;
         }
         log.info("支付超时关单扫描: {} 单待处理", expired.size());
         for (PaymentOrder order : expired) {
             try {
-                paymentDomainService.timeoutCheck(order);
+                ReconcileExpiredPaymentActivity.Result result = reconcileExpiredPaymentActivity.execute(order);
+                if (result.paid()) {
+                    advancePaidBusinessActivity.execute(result);
+                } else {
+                    closeExpiredPaymentActivity.execute(result);
+                }
             } catch (Exception e) {
                 log.error("超时关单失败 bizId={}", order.getBizId(), e);
             }

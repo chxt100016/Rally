@@ -1,0 +1,6 @@
+id: tournament.booking-reschedule-request.activity.request-rebooking
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/bookingreschedulerequest/activity/RequestRebookingActivity.java
+    role: 重订请求事务编排、参与资格校验、版本化比赛与参与者保存
+    symbols: [RequestRebookingActivity]
+    covers: [A1, A2, A3, A4]

@@ -6,7 +6,7 @@ facade: ${job.tournamentMatchTimeout.cron:0 0 */2 * * ?}
 
 ## 概要
 
-定时批量完成提交后超过 48 小时仍待确认的赛果；普通轮次结算报名并评估轮次，决赛产生冠军并结束赛事。
+定时完成超时赛果并结算报名；决赛产生冠军并结束赛事。
 
 ## 触发
 
@@ -61,5 +61,5 @@ flowchart TD
 - Job：`TournamentMatchTimeoutJob.processTimeoutMatches()` 中的 `processPendingConfirmTimeout()`
 - 开关：`job.tournamentMatchTimeout.enabled=true`
 - 调度：`${job.tournamentMatchTimeout.cron:0 0 */2 * * ?}`
-- 调用：`TournamentMatchRepository.findTimeoutMatches(PENDING_CONFIRM, now-48h)` → `TournamentMatchFlowService.completePendingConfirmTimeout()` → `settleCompletedMatch()` → 非决赛 `TournamentRoundProgressService.advanceIfReady()`／决赛 `Tournament.finish()`
+- 调用：`TournamentMatchRepository.findTimeoutMatches(PENDING_CONFIRM, now-48h)` → `CompleteTimeoutResultActivity.execute()` → 非决赛 `TournamentRoundProgressDecisionService.evaluate()` 后条件推进／决赛 `Tournament.finish()`
 - 事务：每场 `@Transactional(rollbackFor = Exception.class)`；Job 按场 `try/catch`

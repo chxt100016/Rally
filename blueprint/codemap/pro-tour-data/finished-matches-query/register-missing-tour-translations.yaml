@@ -1,0 +1,6 @@
+id: pro-tour-data.finished-matches-query.activity.register-missing-tour-translations
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/finished-matches-query/activity/RegisterMissingTourTranslationsActivity.java
+    role: 去重完赛展示缺译键、逐项幂等登记并容错保留原文
+    symbols: [RegisterMissingTourTranslationsActivity]
+    covers: [A1, A2, A3]

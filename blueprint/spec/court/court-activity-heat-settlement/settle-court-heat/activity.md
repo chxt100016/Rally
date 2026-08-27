@@ -14,12 +14,12 @@ reads: []
 sequenceDiagram
     participant F as settle-yesterday-court-heat 流程
     participant A as settle-court-heat 活动
-    participant C as @court.court
+    participant C as rally_court 统计写入端口
     F->>A: 执行昨日结算
     A->>A: 查询并筛选昨日已结束约球
     A->>A: 按球场编号汇总次数
     loop 每个有效球场编号
-        A->>C: 累加约球次数
+        A->>C: 按 biz_id 原子累加 meetup_count
     end
     A-->>F: 结算结束
 ```
@@ -48,24 +48,21 @@ sequenceDiagram
 
 ## 领域依赖
 
-### @court.court
-
-- 输入：球场业务编号及本次应增加的正整数约球次数
-- 输出：`meetup_count` 在空值按 0 的基础上原子累加；球场不存在时影响 0 条。异常形态：数据库更新异常终止当前结算
+无
 
 ## 业务动作
 
 A1 确定运行环境昨日完整自然日时间窗
 A2 筛选已结束且选场模式、球场编号合格的约球
 A3 按球场编号汇总应增加次数
-A4 逐球场原子累加活动热度
+A4 通过统计写入端口逐球场原子累加活动热度
 
 ## 详细流程
 
 1. `A1` 使用运行环境 `LocalDate`，取昨日 `LocalTime.MIN` 到 `LocalTime.MAX` 的闭合范围。
 2. `A2` 查询结束时间在范围内且状态为 `FINISHED` 的全部约球；再保留 `courtId` 非空且选场模式为 `MAP` 或 `TEXT` 的记录。
 3. `A3` 按 `courtId` 汇总记录数；查询或筛选结果为空时直接结束。
-4. `A4` 对每个分组执行 `meetup_count = COALESCE(meetup_count, 0) + count`，以球场 `biz_id` 定位。
+4. `A4` 通过现有统计写入端口，对每个分组执行 `meetup_count = COALESCE(meetup_count, 0) + count`，以球场 `biz_id` 定位；该统计字段不进入 `@court.court` 聚合。
 5. 各球场逐个更新，不设覆盖整批的总事务；发生异常时终止并交由定时任务记录。
 
 ## 边界情况
@@ -78,4 +75,4 @@ A4 逐球场原子累加活动热度
 
 ## 实现提示
 
-累加必须使用数据库原子表达式避免并发覆盖；调度层保留完整异常日志，后续若要求重跑需先引入结算幂等凭据。
+沿用 `CourtRepository.batchIncrementMeetupCount` 统计写入路径，累加必须使用数据库原子表达式避免并发覆盖；调度层保留完整异常日志，后续若要求重跑需先引入结算幂等凭据。

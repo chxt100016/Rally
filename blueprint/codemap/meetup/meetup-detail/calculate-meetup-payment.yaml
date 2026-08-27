@@ -1,0 +1,6 @@
+id: meetup.meetup-detail.activity.calculate-meetup-payment
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupDetailAppService.java
+    role: 费用角色识别、金额分摊、收款码查询与支付视图组装
+    symbols: [MeetupDetailAppService]
+    covers: [A1, A2, A3, A4, A5]

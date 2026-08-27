@@ -1,0 +1,14 @@
+id: meetup.meetup-square-list.activity.pack-meetup-square-cards
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/PackMeetupSquareCardsActivity.java
+    role: 主实现
+    symbols: [PackMeetupSquareCardsActivity, execute]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupCardPackingService.java
+    role: 卡片映射与球场背景补充
+    symbols: [MeetupCardPackingService, packCard, resolveBackgroundKey]
+    covers: [A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupQueryAppService.java
+    role: 查询入口编排
+    symbols: [MeetupQueryAppService, queryMeetupList]
+    covers: [A1, A4]

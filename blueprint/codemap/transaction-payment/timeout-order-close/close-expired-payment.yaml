@@ -1,0 +1,6 @@
+id: transaction-payment.timeout-order-close.activity.close-expired-payment
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/timeout-order-close/activity/CloseExpiredPaymentActivity.java
+    role: 本地支付单条件关闭、活跃键释放与渠道尽力关单编排
+    symbols: [CloseExpiredPaymentActivity]
+    covers: [A1, A2, A3]

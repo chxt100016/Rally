@@ -6,7 +6,7 @@ facade: POST /tournament/match/result-confirm
 
 ## 概要
 
-记录当前参赛者接受已提交赛果，并在全员确认后完成比赛与胜负结算；决赛完成时同时产生冠军并结束赛事。
+记录本人赛果确认，全员确认后完成比赛；决赛产生冠军并结束赛事。
 
 ## 触发
 
@@ -59,6 +59,6 @@ flowchart TD
 
 - HTTP：`POST /tournament/match/result-confirm`
 - 请求：`ResultConfirmCmd`，本流程仅 `confirm=true`
-- 调用：`TournamentMatchAppService.confirmResult()` → `TournamentMatchFlowService.handleResultConfirm()` → `TournamentMatch.confirmResult()` → `settleCompletedMatch()` → 非决赛 `TournamentRoundProgressService.advanceIfReady()`／决赛 `Tournament.finish()`
+- 调用：`TournamentMatchAppService.confirmResult()` → `ConfirmResultActivity.execute()` → `TournamentMatch.confirmResult()` → 非决赛 `TournamentRoundProgressDecisionService.evaluate()` 后条件推进／决赛 `Tournament.finish()`
 - 并发：`TournamentMatchRepository.updateWithVersion()`
 - 事务：比赛、参与确认、报名、冠军和赛事终态在同一事务提交。

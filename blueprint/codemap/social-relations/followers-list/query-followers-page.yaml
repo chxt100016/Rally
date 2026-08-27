@@ -1,0 +1,10 @@
+id: social-relations.followers-list.activity.query-followers-page
+files:
+  - path: rally-app/src/main/java/com/rally/social-relations/followers-list/activity/QueryFollowersPageActivity.java
+    role: 粉丝游标分页、档案补充、头像签名与当前用户关注状态组装
+    symbols: [QueryFollowersPageActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/user/FollowAppService.java
+    role: 保留 getFollowerList 对外签名并传入当前用户
+    symbols: [FollowAppService.getFollowerList]
+    covers: [A1, A4]

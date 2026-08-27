@@ -1,0 +1,6 @@
+id: tournament.booking-reject.activity.reject-await-schedule-confirm
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/booking-reject/activity/RejectAwaitScheduleConfirmActivity.java
+    role: 订场人等待对方确认超时拒赛事务编排、跨聚合结算与提交后通知
+    symbols: [RejectAwaitScheduleConfirmActivity]
+    covers: [A1, A2, A3, A4]

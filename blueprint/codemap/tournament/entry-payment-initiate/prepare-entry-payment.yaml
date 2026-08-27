@@ -1,0 +1,10 @@
+id: tournament.entry-payment-initiate.activity.prepare-entry-payment
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/entrypaymentinitiate/activity/PrepareEntryPaymentActivity.java
+    role: 报名支付资格、支付单轮换及微信预下单事务编排
+    symbols: [PrepareEntryPaymentActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentEntryAppService.java
+    role: 既有报名支付应用服务入口委托
+    symbols: [TournamentEntryAppService.pay]
+    covers: [A1, A2, A3, A4, A5]

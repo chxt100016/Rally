@@ -8,7 +8,7 @@ tables:
 
 ## 概要
 
-守护职业赛事一个年份项目签表的唯一身份与结构一致。
+保存职业赛事年份项目签表的原始身份与可选结构字段。
 
 ## 聚合清单
 
@@ -43,33 +43,36 @@ tables:
 
 | 状态 | 含义 | 可迁移到 | 触发命令 |
 |---|---|---|---|
-| `PLACEHOLDER` | 身份已知，两个结构字段都未知 | `STRUCTURED` | `C2` |
-| `STRUCTURED` | 规模与轮数均已知且一致 | `STRUCTURED` | `C2` |
+| `PLACEHOLDER` | 身份已知，两个结构字段都未知 | `PARTIAL`、`STRUCTURED` | `C2` |
+| `PARTIAL` | size 与 totalRounds 仅一项已知，或保留来源的零值 | `PARTIAL`、`STRUCTURED` | `C2` |
+| `STRUCTURED` | 两项均有来源值，但不要求数学一致 | `PARTIAL`、`STRUCTURED` | `C2` |
 
 ## 不变量
 
 | 编号 | 约束 | 涉及聚合内哪些对象 | 为什么必须在一次事务内保证 | 违反时的错误标识 |
 |---|---|---|---|---|
 | I1 | 赛事编号、正数年份、项目类型组成唯一身份，建立后不可修改 | 签表根、签表身份 | 身份漂移会把已采集比赛挂到另一赛事项目 | `TOUR_DRAW_IDENTITY_CONFLICT` |
-| I2 | 类型只接受 `MS/WS/MD/WD/XD`，来源别名进入前规范化 | 签表身份 | 多种代码表达同一项目会绕过唯一键形成重复签表 | `TOUR_DRAW_TYPE_INVALID` |
-| I3 | 占位时结构字段都空；结构化时 size 为正的 2 次幂且 `totalRounds=log2(size)`，两项同时写 | 签表结构 | 半结构无法确定轮次边界，必须同改同回滚 | `TOUR_DRAW_STRUCTURE_INVALID` |
+| I2 | drawType 使用来源原始非空代码参与唯一身份，不做别名归一；ATP/WTA 路径可分别保存 `MS/MD/LS/LD` | 签表身份 | 比赛快照和查询同样使用来源代码，改写会产生不一致或重复身份 | 空类型按保存失败传播 |
+| I3 | size 与 totalRounds 是两个独立可空字段；更新时各自仅在新值非 null 时覆盖。允许 size=0，不校验 2 次幂，也不要求 totalRounds 与 size 的对数关系 | 签表结构 | 保留各来源不完整、零值或分阶段补充的 main 数据 | 无专用拒绝 |
 
 ## 命令
 
 | 编号 | 命令 | 前置状态 | 入参 | 后置状态 | 拒绝情形 |
 |---|---|---|---|---|---|
-| C1 | 关联或建立签表 | 自然键不存在或已存在 | 已收录赛事、年份、规范项目类型 | 新建 `PLACEHOLDER`；已存在幂等返回内部 id | 赛事未收录；年份/类型非法 |
-| C2 | 刷新签表结构 | `PLACEHOLDER/STRUCTURED` | 非空 size 与 totalRounds | `STRUCTURED`，整体替换结构 | 只给一项；违反 I3；试图改身份 |
+| C1 | 关联或建立签表 | 自然键不存在或已存在 | 已收录赛事、年份、来源原始 drawType、可选 size/totalRounds | 新建并保存当前可用字段；已存在返回内部 id 并进入 C2 非空刷新 | 赛事未收录或来源不可识别；数据库保存失败 |
+| C2 | 刷新签表结构 | `PLACEHOLDER/PARTIAL/STRUCTURED` | 可选 size 与 totalRounds | 两字段分别非空覆盖，null 保留存量；两项都 null 时只保持身份 | 试图修改自然身份；数据库更新失败 |
 
 ## 边界情况
 
 - 实时来源只有身份：允许建立 PLACEHOLDER，不臆测规模。
-- 两个结构字段都空：不刷新；只给其中一项：拒绝且不清存量。
+- 两个结构字段都空：只确保身份存在；只给其中一项时只刷新该项且不清另一项。
 - 重复或并发采集自然键：唯一键收敛后返回同一内部 id。
 - 来源遗漏既有签表：不删除、不失效。
 - 双打开关关闭：调用方不发命令；聚合仍支持合法双打类型。
 - 后续比赛保存失败：签表保留供下次补采。
+- `LS/LD` 与 `WS/WD` 不互相归一，若来源分别提供则按不同自然身份保存。
+- size=0、非 2 次幂或与 totalRounds 不一致时仍按来源保存。
 
 ## 实现提示
 
-`uk_tour_draw_tournament_year_type` 保护自然键。来源代码先映射为领域类型，结构更新同时写两列，禁止忽略 null 形成半结构。
+`uk_tour_draw_tournament_year_type` 保护原始 `(tournamentId,year,drawType)` 自然键。仓储按自然键查后插入或更新，size/totalRounds 使用各自非 null 覆盖；不得把 `LS/LD` 改成 `WS/WD`，也不得追加数学结构校验。

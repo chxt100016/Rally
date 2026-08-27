@@ -32,7 +32,17 @@ sequenceDiagram
 
 ## 活动契约
 
-入参为 `meetupId`、`registrationId` 和当前 `rejectorId`；成功无业务返回，目标报名历史已保存为 `REJECTED`。
+### 入参
+
+| 字段 | 类型 | 必填 | 约束 |
+|---|---|---|---|
+| `meetupId` | 字符串 | 是 | 目标约球编号，接口已校验非空白 |
+| `registrationId` | 字符串 | 是 | 目标业务报名编号，必须属于该约球 |
+| `rejectorId` | 字符串 | 是 | 当前登录用户，必须为约球发布者 |
+
+### 成功返回
+
+无业务数据；目标报名历史已保存为 `REJECTED`。
 
 ## 异常分支
 

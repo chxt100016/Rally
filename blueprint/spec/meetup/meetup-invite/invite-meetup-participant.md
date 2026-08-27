@@ -29,6 +29,7 @@ facade: POST /meetup/registration/invite
 
 - register-invited-participant  校验发布者、名额和活动报名，新增已加入报名并重算当前人数
 - join-invited-participant-chat  为被邀请人建立初始未读数为零的约球群聊成员关系
+- dispatch-team-success-notification  邀请后满员时在事务提交后向当时仍有效的参与者尝试发送组团成功通知
 
 ## 流程图
 

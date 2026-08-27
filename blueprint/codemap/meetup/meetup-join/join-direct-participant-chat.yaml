@@ -1,0 +1,10 @@
+id: meetup.meetup-join.activity.join-direct-participant-chat
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/JoinDirectParticipantChatActivity.java
+    role: 直接报名群聊成员建立编排
+    symbols: [JoinDirectParticipantChatActivity, execute]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 报名主事务编排接入
+    symbols: [RegistrationAppService, join]
+    covers: [A1, A2, A3, A4]

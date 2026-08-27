@@ -1,0 +1,6 @@
+id: pro-tour-data.upcoming-matches-query.activity.query-upcoming-match-groups
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/upcoming-matches-query/activity/QueryUpcomingMatchGroupsActivity.java
+    role: 编排跨年份种子状态、待赛日期窗口、比赛 DTO、日期球场分组及简中译文缺口
+    symbols: [QueryUpcomingMatchGroupsActivity]
+    covers: [A1, A2, A3, A4, A5]

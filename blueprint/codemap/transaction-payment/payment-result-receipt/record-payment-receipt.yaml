@@ -1,0 +1,6 @@
+id: transaction-payment.payment-result-receipt.activity.record-payment-receipt
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/payment-result-receipt/activity/RecordPaymentReceiptActivity.java
+    role: 微信回调验真、回执留痕、推进分流与渠道结果编排
+    symbols: [RecordPaymentReceiptActivity]
+    covers: [A1, A2, A3, A4]

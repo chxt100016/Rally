@@ -2,19 +2,28 @@ package com.rally.domain.tournament.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.meetup.enums.MatchTypeEnum;
+import com.rally.domain.tournament.entry.TournamentEntryStatus;
 import com.rally.domain.tournament.enums.TournamentEntryStatusEnum;
 import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.gateway.TournamentEntryRepository;
 import com.rally.domain.tournament.gateway.TournamentMatchRepository;
 import com.rally.domain.tournament.gateway.TournamentRepository;
-import com.rally.domain.tournament.model.MatchGroup;
 import com.rally.domain.tournament.model.MatchParticipantData;
 import com.rally.domain.tournament.model.TournamentData;
 import com.rally.domain.tournament.model.TournamentEntryData;
 import com.rally.domain.tournament.model.TournamentMatch;
 import com.rally.domain.tournament.model.TournamentMatchData;
-import com.rally.domain.tournament.model.TournamentMatchTeam;
+import com.rally.domain.tournament.match.TournamentMatchRound;
+import com.rally.domain.tournament.matchmaking.CompletedPairing;
+import com.rally.domain.tournament.matchmaking.MatchmakingCandidate;
+import com.rally.domain.tournament.matchmaking.MatchmakingGroup;
+import com.rally.domain.tournament.matchmaking.MatchmakingMember;
+import com.rally.domain.tournament.matchmaking.MatchmakingRejection;
+import com.rally.domain.tournament.matchmaking.MatchmakingRequest;
+import com.rally.domain.tournament.matchmaking.MatchmakingResult;
+import com.rally.domain.tournament.matchmaking.TournamentMatchmakingService;
+import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.enums.GenderEnum;
 import com.rally.domain.user.gateway.UserProfileRepository;
 import com.rally.domain.utils.Assert;
@@ -38,7 +47,7 @@ public class TournamentBatchMatchService {
     private final TournamentRepository tournamentRepository;
     private final TournamentEntryRepository tournamentEntryRepository;
     private final TournamentMatchRepository tournamentMatchRepository;
-    private final TournamentMatchingService tournamentMatchingService;
+    private final TournamentMatchmakingService tournamentMatchmakingService;
     private final TournamentMatchAssembleService tournamentMatchAssembleService;
     private final UserProfileRepository userProfileRepository;
 
@@ -59,10 +68,7 @@ public class TournamentBatchMatchService {
     @Transactional
     public List<TournamentMatch> matchCurrentRound(String tournamentId, List<Integer> excludedEntryNos) {
         TournamentData tournament = getTournament(tournamentId);
-        List<TournamentMatchTeam> teams = waitingTeams(tournament, excludedEntryNos);
-        int groupSize = groupSize(tournament);
-        List<MatchGroup> groups = tournamentMatchingService.group(teams, groupSize, playedPairs(tournamentId, tournament.getCurrentRound()));
-        return tournamentMatchAssembleService.assemble(tournamentId, groups, tournament.getCurrentRound(), groupSize);
+        return matchCurrentRound(tournament, null, excludedEntryNos);
     }
 
     /**
@@ -80,27 +86,7 @@ public class TournamentBatchMatchService {
     public List<TournamentMatch> matchCurrentRoundManually(String tournamentId, List<List<Integer>> manualGroups, List<Integer> excludedEntryNos) {
         Assert.isTrue(manualGroups != null && !manualGroups.isEmpty(), BizErrorCode.PARAM_ERROR);
         TournamentData tournament = getTournament(tournamentId);
-        int groupSize = groupSize(tournament);
-        Map<Integer, TournamentMatchTeam> teams = waitingTeams(tournament, excludedEntryNos).stream()
-                .collect(Collectors.toMap(TournamentMatchTeam::getEntryNo, team -> team));
-        Set<Integer> usedEntryNos = new HashSet<>();
-        List<MatchGroup> groups = new ArrayList<>();
-        for (List<Integer> entryNos : manualGroups) {
-            Assert.isTrue(entryNos != null && entryNos.size() == groupSize, BizErrorCode.PARAM_ERROR);
-            List<TournamentMatchTeam> groupTeams = new ArrayList<>();
-            for (Integer entryNo : entryNos) {
-                Assert.isTrue(entryNo != null && usedEntryNos.add(entryNo), BizErrorCode.PARAM_ERROR);
-                TournamentMatchTeam team = teams.get(entryNo);
-                Assert.notNull(team, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
-                groupTeams.add(team);
-            }
-            groups.add(new MatchGroup(groupTeams.stream().flatMap(team -> team.getEntries().stream()).toList()));
-        }
-        List<TournamentMatch> matches = new ArrayList<>(
-                tournamentMatchAssembleService.assemble(tournamentId, groups, tournament.getCurrentRound(), groupSize));
-        // 手工指定的队伍已在上一句推进为 IN_MATCH；重新查询即可只对剩余 WAITING 队伍自动匹配。
-        matches.addAll(matchCurrentRound(tournamentId, excludedEntryNos));
-        return matches;
+        return matchCurrentRound(tournament, manualGroups, excludedEntryNos);
     }
 
     /**
@@ -152,34 +138,96 @@ public class TournamentBatchMatchService {
         return tournament.getCurrentRound() == TournamentRoundEnum.QUALIFIER ? tournament.getQualifierGroupSize() : 2;
     }
 
-    private List<TournamentMatchTeam> waitingTeams(TournamentData tournament, List<Integer> excludedEntryNos) {
-        Set<Integer> excluded = excludedEntryNos == null ? Set.of() : new HashSet<>(excludedEntryNos);
+    private List<TournamentMatch> matchCurrentRound(
+            TournamentData tournament,
+            List<List<Integer>> manualGroups,
+            List<Integer> excludedEntryNos) {
+        int groupSize = groupSize(tournament);
+        List<CandidateContext> contexts = waitingCandidates(tournament);
+        Map<Integer, CandidateContext> contextByEntryNo = contexts.stream()
+                .collect(Collectors.toMap(context -> context.candidate().entryNo(), context -> context));
+        Set<Integer> excluded = excludedEntryNos == null
+                ? Set.of() : new HashSet<>(excludedEntryNos);
+
+        MatchmakingResult result = tournamentMatchmakingService.match(new MatchmakingRequest(
+                TournamentMatchRound.valueOf(tournament.getCurrentRound().name()),
+                groupSize,
+                contexts.stream().map(CandidateContext::candidate).toList(),
+                excluded,
+                manualGroups,
+                completedPairings(tournament.getBizId(), tournament.getCurrentRound())));
+        if (!result.isAccepted()) {
+            throw matchmakingRejection(result.getRejection(), manualGroups, excluded, contextByEntryNo);
+        }
+
+        List<List<TournamentEntryData>> groups = result.getGroups().stream()
+                .map(group -> entriesForGroup(group, contextByEntryNo))
+                .toList();
+        return tournamentMatchAssembleService.assemble(
+                tournament.getBizId(), groups, tournament.getCurrentRound(), groupSize);
+    }
+
+    private List<CandidateContext> waitingCandidates(TournamentData tournament) {
         List<TournamentEntryData> entries = tournamentEntryRepository.findByTournamentId(tournament.getBizId()).stream()
                 .filter(entry -> entry.getStatus() == TournamentEntryStatusEnum.WAITING)
                 .filter(entry -> entry.getCurrentRound() == tournament.getCurrentRound())
-                .filter(entry -> !excluded.contains(entry.getEntryNo()))
                 .toList();
         Map<Integer, List<TournamentEntryData>> byEntryNo = entries.stream().collect(Collectors.groupingBy(TournamentEntryData::getEntryNo));
-        List<TournamentMatchTeam> teams = new ArrayList<>();
+        List<CandidateContext> candidates = new ArrayList<>();
         for (Map.Entry<Integer, List<TournamentEntryData>> item : byEntryNo.entrySet()) {
             List<TournamentEntryData> members = item.getValue();
             // 双打队伍尚未由两位成员完成报名时，不能参加匹配。
             if (tournament.getMatchType() == MatchTypeEnum.DOUBLE && members.size() != 2) {
                 continue;
             }
-            Set<String> districts = members.stream().flatMap(entry -> entry.getPreferredDistricts() == null ? java.util.stream.Stream.<String>empty() : entry.getPreferredDistricts().stream())
-                    .collect(Collectors.toSet());
-            List<GenderEnum> genders = userProfileRepository.findByUserIds(members.stream().map(TournamentEntryData::getUserId).toList())
-                    .stream().map(profile -> profile == null ? null : profile.getGender()).toList();
+            List<UserProfile> profiles = userProfileRepository.findByUserIds(
+                    members.stream().map(TournamentEntryData::getUserId).toList());
+            List<MatchmakingMember> memberSnapshots = new ArrayList<>();
+            for (int index = 0; index < members.size(); index++) {
+                TournamentEntryData member = members.get(index);
+                UserProfile profile = index < profiles.size() ? profiles.get(index) : null;
+                GenderEnum gender = profile == null ? null : profile.getGender();
+                memberSnapshots.add(new MatchmakingMember(
+                        member.getUserId(),
+                        member.getCourtAbility() == com.rally.domain.tournament.enums.CourtAbilityEnum.CAN_BOOK,
+                        gender == null ? null : gender.name()));
+            }
             LocalDateTime joinedTime = members.stream().map(TournamentEntryData::getCreateTime).filter(java.util.Objects::nonNull)
                     .min(Comparator.naturalOrder()).orElse(null);
-            teams.add(new TournamentMatchTeam(item.getKey(), members, districts, genders, joinedTime));
+            MatchmakingCandidate candidate = new MatchmakingCandidate(
+                    item.getKey(),
+                    TournamentMatchRound.valueOf(tournament.getCurrentRound().name()),
+                    TournamentEntryStatus.WAITING,
+                    memberSnapshots,
+                    tournament.getMatchType() == MatchTypeEnum.DOUBLE ? 2 : 1,
+                    commonValues(members, TournamentEntryData::getAvailableTimes),
+                    commonValues(members, TournamentEntryData::getPreferredDistricts),
+                    joinedTime);
+            candidates.add(new CandidateContext(candidate, List.copyOf(members)));
         }
-        return teams.stream().sorted(Comparator.comparing(TournamentMatchTeam::getJoinedTime,
-                Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(TournamentMatchTeam::getEntryNo)).toList();
+        return candidates.stream().sorted(Comparator
+                .comparing((CandidateContext context) -> context.candidate().joinedTime(),
+                        Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(context -> context.candidate().entryNo())).toList();
     }
 
-    private Set<String> playedPairs(String tournamentId, TournamentRoundEnum round) {
+    private Set<String> commonValues(
+            List<TournamentEntryData> members,
+            java.util.function.Function<TournamentEntryData, List<String>> extractor) {
+        Set<String> common = null;
+        for (TournamentEntryData member : members) {
+            List<String> values = extractor.apply(member);
+            Set<String> memberValues = values == null ? Set.of() : new HashSet<>(values);
+            if (common == null) {
+                common = new HashSet<>(memberValues);
+            } else {
+                common.retainAll(memberValues);
+            }
+        }
+        return common == null ? Set.of() : Set.copyOf(common);
+    }
+
+    private Set<CompletedPairing> completedPairings(String tournamentId, TournamentRoundEnum round) {
         List<TournamentMatchData> matches = tournamentMatchRepository.findByTournamentId(tournamentId).stream()
                 .filter(match -> match.getRound() == round)
                 .filter(match -> match.getStatus() == TournamentMatchStatusEnum.COMPLETED)
@@ -188,18 +236,48 @@ public class TournamentBatchMatchService {
         Map<String, List<MatchParticipantData>> participants = tournamentMatchRepository.findParticipantsByMatchIds(
                         matches.stream().map(TournamentMatchData::getBizId).toList()).stream()
                 .collect(Collectors.groupingBy(MatchParticipantData::getMatchId));
-        Set<String> result = new HashSet<>();
+        Set<CompletedPairing> result = new HashSet<>();
         for (TournamentMatchData match : matches) {
             List<Integer> entryNos = participants.getOrDefault(match.getBizId(), List.of()).stream()
                     .map(MatchParticipantData::getEntryNo).distinct().sorted().toList();
             for (int i = 0; i < entryNos.size(); i++) {
-                for (int j = i + 1; j < entryNos.size(); j++) result.add(pairKey(entryNos.get(i), entryNos.get(j)));
+                for (int j = i + 1; j < entryNos.size(); j++) {
+                    result.add(new CompletedPairing(entryNos.get(i), entryNos.get(j)));
+                }
             }
         }
         return result;
     }
 
-    private String pairKey(Integer left, Integer right) {
-        return left < right ? left + "|" + right : right + "|" + left;
+    private List<TournamentEntryData> entriesForGroup(
+            MatchmakingGroup group,
+            Map<Integer, CandidateContext> contextByEntryNo) {
+        return group.entryNos().stream()
+                .map(contextByEntryNo::get)
+                .flatMap(context -> context.entries().stream())
+                .toList();
+    }
+
+    private RuntimeException matchmakingRejection(
+            MatchmakingRejection rejection,
+            List<List<Integer>> manualGroups,
+            Set<Integer> excluded,
+            Map<Integer, CandidateContext> candidates) {
+        if (rejection == MatchmakingRejection.MANUAL_GROUP_INVALID
+                && manualGroups != null
+                && manualGroups.stream().filter(java.util.Objects::nonNull)
+                .flatMap(List::stream)
+                .anyMatch(entryNo -> entryNo == null
+                        || excluded.contains(entryNo)
+                        || !candidates.containsKey(entryNo))) {
+            return new com.rally.domain.auth.exception.BusinessException(
+                    BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
+        }
+        return new com.rally.domain.auth.exception.BusinessException(BizErrorCode.PARAM_ERROR);
+    }
+
+    private record CandidateContext(
+            MatchmakingCandidate candidate,
+            List<TournamentEntryData> entries) {
     }
 }

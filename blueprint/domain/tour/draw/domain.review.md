@@ -19,3 +19,7 @@
 - [Q3] size 与 totalRounds 的一致性如何约束，来源后退或空值如何处理？
   > 结构化时 size 必须为正的 2 次幂且 totalRounds=log2(size)，两者必须同时更新；空来源不清旧值，不接受只更新其中一个或不一致值。
   → I3、C2 与结构刷新边界情况
+
+- [Q4] 签表是否应保留main的来源原始drawType及size/totalRounds独立非空覆盖，而不做别名归一或数学结构校验？
+  > 保留main：LS/LD等来源代码原样参与自然键，不归一为WS/WD；size和totalRounds各自非null时独立覆盖，允许只给一项、两项都空及size=0，不校验2次幂或轮数关系。
+  → 已修正状态、I2/I3、C1/C2、边界和实现提示。

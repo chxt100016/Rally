@@ -1,0 +1,6 @@
+id: platform-config.public-config-query.activity.query-public-config-value
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/public-config-query/activity/QueryPublicConfigValueActivity.java
+    role: 主实现
+    symbols: [QueryPublicConfigValueActivity]
+    covers: [A1, A2, A3]

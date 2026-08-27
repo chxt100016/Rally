@@ -1,0 +1,6 @@
+id: content-production.pending-poster-list.activity.list-pending-poster-prompts
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/pending-poster-list/activity/ListPendingPosterPromptsActivity.java
+    role: 主实现
+    symbols: [ListPendingPosterPromptsActivity]
+    covers: [A1, A2, A3, A4]

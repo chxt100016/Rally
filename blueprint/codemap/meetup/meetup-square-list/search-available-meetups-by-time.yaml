@@ -1,0 +1,10 @@
+id: meetup.meetup-square-list.activity.search-available-meetups-by-time
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/SearchAvailableMeetupsByTimeActivity.java
+    role: 主实现
+    symbols: [SearchAvailableMeetupsByTimeActivity, execute]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupQueryAppService.java
+    role: 时间排序分支编排入口
+    symbols: [MeetupQueryAppService.queryMeetupList]
+    covers: [A1, A2, A3]

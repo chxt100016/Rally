@@ -1,0 +1,6 @@
+id: platform-config.home-content-query.activity.query-home-news-section
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/home-content-query/activity/QueryHomeNewsSectionActivity.java
+    role: 按已有回退文案组装固定空资讯时间线区块
+    symbols: [QueryHomeNewsSectionActivity]
+    covers: [A1, A2]

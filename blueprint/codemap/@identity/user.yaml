@@ -1,0 +1,30 @@
+id: "@identity.user"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/user/model/UserProfile.java
+    role: 用户聚合根、命令与不变量校验（C2、C4-C9 保持 main 弱语义）
+    symbols: [UserProfile]
+    covers: [I1, I2, I3, I4, I5, I6, C1, C2, C3, C4, C5, C6, C7, C8, C9]
+  - path: rally-domain/src/main/java/com/rally/domain/user/model/UserData.java
+    role: 用户根状态与基础资料查询
+    symbols: [UserData]
+    covers: [I1, C1, C2, C3]
+  - path: rally-domain/src/main/java/com/rally/domain/user/model/TennisProfileData.java
+    role: 网球档案实体状态与 C4-C9 既有弱操作
+    symbols: [TennisProfileData]
+    covers: [I2, I3, I4, I5, I6, C4, C5, C6, C7, C8, C9]
+  - path: rally-domain/src/main/java/com/rally/domain/user/model/UserDomainException.java
+    role: 聚合稳定错误标识
+    symbols: [UserDomainException]
+    covers: [I1, I2, I3, I4, I5, I6]
+  - path: rally-domain/src/main/java/com/rally/domain/user/model/EditProfileCmd.java
+    role: 基础资料部分修改命令入参
+    symbols: [EditProfileCmd]
+    covers: [C2]
+  - path: rally-domain/src/main/java/com/rally/domain/user/model/OnboardingCmd.java
+    role: 初始档案兼容命令入参
+    symbols: [OnboardingCmd]
+    covers: [C5]
+  - path: rally-domain/src/main/java/com/rally/domain/user/model/VideoVO.java
+    role: 档案视频值对象
+    symbols: [VideoVO]
+    covers: [I5, C5, C6, C7, C8]

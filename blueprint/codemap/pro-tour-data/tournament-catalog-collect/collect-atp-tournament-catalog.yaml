@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-catalog-collect.activity.collect-atp-tournament-catalog
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-catalog-collect/activity/CollectAtpTournamentCatalogActivity.java
+    role: ATP 全年名录请求、映射去重与赛事年度批量刷新编排
+    symbols: [CollectAtpTournamentCatalogActivity, execute]
+    covers: [A1, A2, A3]

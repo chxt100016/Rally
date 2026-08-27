@@ -3,7 +3,8 @@ package com.rally.job;
 import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
 import com.rally.domain.tournament.gateway.TournamentMatchRepository;
 import com.rally.domain.tournament.model.TournamentMatch;
-import com.rally.domain.tournament.service.TournamentMatchFlowService;
+import com.rally.tournament.courtbookerselectiontimeout.activity.RejectTimeoutMatchActivity;
+import com.rally.tournament.resultconfirmationtimeout.activity.CompleteTimeoutResultActivity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,7 +21,8 @@ import java.util.List;
 public class TournamentMatchTimeoutJob {
 
     private final TournamentMatchRepository matchRepository;
-    private final TournamentMatchFlowService matchFlowService;
+    private final RejectTimeoutMatchActivity rejectTimeoutMatchActivity;
+    private final CompleteTimeoutResultActivity completeTimeoutResultActivity;
 
     @Scheduled(cron = "${job.tournamentMatchTimeout.cron:0 0 */2 * * ?}")
     public void processTimeoutMatches() {
@@ -36,7 +38,7 @@ public class TournamentMatchTimeoutJob {
         log.info("MATCHED状态超时比赛数量: {}", matches.size());
         for (TournamentMatch match : matches) {
             try {
-                matchFlowService.handleMatchedTimeout(match.getMatchId());
+                rejectTimeoutMatchActivity.execute(match.getMatchId());
             } catch (Exception e) {
                 log.error("处理MATCHED超时比赛失败, matchId={}", match.getMatchId(), e);
             }
@@ -49,7 +51,7 @@ public class TournamentMatchTimeoutJob {
         log.info("PENDING_CONFIRM状态超时比赛数量: {}", matches.size());
         for (TournamentMatch match : matches) {
             try {
-                matchFlowService.completePendingConfirmTimeout(match.getMatchId());
+                completeTimeoutResultActivity.execute(match.getMatchId(), LocalDateTime.now());
             } catch (Exception e) {
                 log.error("处理PENDING_CONFIRM超时比赛失败, matchId={}", match.getMatchId(), e);
             }

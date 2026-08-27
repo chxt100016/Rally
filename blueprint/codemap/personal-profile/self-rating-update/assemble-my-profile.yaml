@@ -1,0 +1,14 @@
+id: personal-profile.self-rating-update.activity.assemble-my-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/basic-profile-update/activity/AssembleMyProfileActivity.java
+    role: 复用唯一的本人档案组装实现，重读自评修改后的档案并按状态组装基础资料、等级提示、评分、统计与签名视频
+    symbols: [AssembleMyProfileActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/user/MyProfileAppService.java
+    role: 保留原 getMyProfile 对外签名，从当前用户上下文委托共享组装活动
+    symbols: [MyProfileAppService.getMyProfile]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/user/ProfileAppService.java
+    role: 在自评更新及日志完成后于同一事务内调用共享档案组装，聚合异常继续传播并整体回滚
+    symbols: [ProfileAppService.updateNtrp]
+    covers: [A1, A2, A3]

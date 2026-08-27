@@ -1,0 +1,6 @@
+id: meetup.peer-review-submit.activity.upsert-peer-review-items
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/UpsertPeerReviewItemsActivity.java
+    role: 评价值校验、约球资格与时限核实及逐项 upsert 编排
+    symbols: [UpsertPeerReviewItemsActivity, execute]
+    covers: [A1, A2, A3, A4, A5]

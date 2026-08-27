@@ -1,0 +1,38 @@
+id: "@tour.match"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/match/TourMatch.java
+    role: 聚合根、C1 新增或刷新命令与 tour_match 唯一写入口
+    symbols: [TourMatch]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TourMatchIdentity.java
+    role: draw_id+match_id 不可变自然键与比赛序号派生
+    symbols: [TourMatchIdentity]
+    covers: [I1, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TourMatchSnapshot.java
+    role: 非空快照补丁规范化、格式校验与 sets_json 整体替换
+    symbols: [TourMatchSnapshot]
+    covers: [I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TourMatchStatus.java
+    role: 可纠正状态及未知来源保留规则
+    symbols: [TourMatchStatus]
+    covers: [I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TourMatchState.java
+    role: tour_match 单行不可变聚合状态
+    symbols: [TourMatchState]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/RefreshTourMatchCommand.java
+    role: C1 新增或刷新比赛快照输入
+    symbols: [RefreshTourMatchCommand]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TourMatchPersistence.java
+    role: tour_match 唯一写端口与完整快照原子更新约束
+    symbols: [TourMatchPersistence]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TourMatchInsertResult.java
+    role: 自然键并发插入结果
+    symbols: [TourMatchInsertResult, TourMatchInsertResult.Outcome]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TourMatchDomainException.java
+    role: 稳定领域错误标识载体
+    symbols: [TourMatchDomainException]
+    covers: [I1, I2, I3, C1]

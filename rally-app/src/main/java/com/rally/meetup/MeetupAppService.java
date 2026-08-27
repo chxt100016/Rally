@@ -1,19 +1,19 @@
 package com.rally.meetup;
 
-import com.rally.domain.meetup.service.ChatDomainService;
-import com.rally.domain.user.model.UserProfile;
-import com.rally.domain.user.service.UserProfileDomainService;
 import com.rally.utils.UserContext;
 import com.rally.domain.meetup.model.*;
 import com.rally.domain.meetup.model.MeetupEditCmd;
-import com.rally.domain.meetup.service.MeetupPolicy;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.notify.enums.NoticeScene;
 import com.rally.domain.notify.enums.NotifyBizType;
 import com.rally.domain.notify.service.NotificationDeliveryService;
 import com.rally.domain.system.SystemConfig;
 import com.rally.domain.system.enums.SystemConfigKey;
-import com.rally.meetup.convert.MeetupAppConvertMapper;
+import com.rally.meetup.activity.BuildMeetupEditSummaryActivity;
+import com.rally.meetup.activity.CreateOpenMeetupActivity;
+import com.rally.meetup.activity.JoinPublisherChatActivity;
+import com.rally.meetup.activity.OpenMeetupContext;
+import com.rally.meetup.activity.ReviseMeetupActivity;
 import com.rally.notify.MeetupNotifyAssembler;
 import com.rally.notify.NotificationEventId;
 import lombok.RequiredArgsConstructor;
@@ -31,15 +31,17 @@ public class MeetupAppService {
 
     private final MeetupDomainService meetupDomainService;
 
-    private final MeetupPolicy meetupPolicy;
-
-    private final ChatDomainService chatDomainService;
-
     private final NotificationDeliveryService notificationDeliveryService;
 
-    private final UserProfileDomainService userProfileDomainService;
-
     private final MeetupCardPackingService meetupCardPackingService;
+
+    private final CreateOpenMeetupActivity createOpenMeetupActivity;
+
+    private final JoinPublisherChatActivity joinPublisherChatActivity;
+
+    private final ReviseMeetupActivity reviseMeetupActivity;
+
+    private final BuildMeetupEditSummaryActivity buildMeetupEditSummaryActivity;
 
     /**
      * 发布约球
@@ -47,18 +49,12 @@ public class MeetupAppService {
     @Transactional
     public void publish(MeetupPublishCmd cmd) {
         String userId = UserContext.get();
-        UserProfile userProfile = this.userProfileDomainService.get(userId);
-        userProfile.assertCompleted();
 
-        // 1. 校验
-        meetupPolicy.assertPublish(userId, cmd);
+        // 校验发布资格与内容，建立 OPEN 约球和发布者 JOINED 报名。
+        OpenMeetupContext meetupContext = createOpenMeetupActivity.execute(userId, cmd);
 
-        // 2. 构建 MeetupData 并持久化（含创建者自动报名）
-        Meetup meetup = meetupDomainService.save(userId, cmd);
-        String meetupId = meetup.getMeetupId();
-
-        // 加入群聊
-        chatDomainService.join(meetupId, userId);
+        // 与约球及发布者报名保持同一事务，建立发布者的初始聊天成员关系。
+        joinPublisherChatActivity.execute(meetupContext.meetupId(), meetupContext.publisherId());
 
     }
 
@@ -67,23 +63,13 @@ public class MeetupAppService {
      */
     @Transactional
     public MeetupVO edit(MeetupEditCmd cmd) {
-        String meetupId = cmd.getMeetupId();
         String userId = UserContext.get();
 
-        // 1. 获取聚合根
-        Meetup meetup = meetupDomainService.get(meetupId);
-        MeetupData data = meetup.getData();
+        // 校验并保存约球编辑资料；活动内部保留既有校验与映射顺序。
+        MeetupData data = reviseMeetupActivity.execute(userId, cmd);
 
-        // 2. 编辑校验
-        meetupPolicy.assertEdit(meetup, cmd);
-
-        // 3. 更新字段 + 落库
-        meetupDomainService.edit(userId, meetup, cmd);
-
-        // 4. 返回详情
-        MeetupVO vo = MeetupAppConvertMapper.INSTANCE.toMeetupVO(data);
-        vo.setBackgroundImage(meetupCardPackingService.resolveBackgroundKey(data));
-        return vo;
+        // 由保存后的同一内存对象形成编辑摘要与背景。
+        return buildMeetupEditSummaryActivity.execute(data);
     }
 
     /**
@@ -114,12 +100,21 @@ public class MeetupAppService {
             }
         }
 
-        // 4. 发送取消通知给全体已加入参与人（创建人除外）
+        // 4. 提交后异步通知全体已加入参与人（创建人除外）
+        dispatchMeetupCancelNotifications(meetupId, userId, meetup, data);
+        log.info("约球已关闭: meetupId={}", meetupId);
+    }
+
+    /**
+     * 约球关闭通知编排。触达服务在当前事务提交后异步执行，
+     * 并在发送前复核参与资格；其失败不影响已提交的 CLOSED 事实。
+     */
+    private void dispatchMeetupCancelNotifications(String meetupId, String creatorId,
+                                                    Meetup meetup, MeetupData data) {
         notificationDeliveryService.notify(NotificationEventId.of(NoticeScene.MEETUP_CANCEL, meetupId),
                 NotifyBizType.MEETUP, meetupId, NoticeScene.MEETUP_CANCEL,
-                meetup.getActiveParticipantIds(userId), MeetupNotifyAssembler.meetupCancelData(data),
+                meetup.getActiveParticipantIds(creatorId), MeetupNotifyAssembler.meetupCancelData(data),
                 uid -> meetupDomainService.shouldNotice(meetupId, uid));
-        log.info("约球已关闭: meetupId={}", meetupId);
     }
 
     /**

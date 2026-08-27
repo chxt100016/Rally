@@ -1,0 +1,10 @@
+id: court.city-court-list.activity.list-city-courts
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/ListCityCourtsActivity.java
+    role: 主实现
+    symbols: [ListCityCourtsActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/court/CourtQueryAppService.java
+    role: 应用服务编排入口
+    symbols: [CourtQueryAppService.getAll]
+    covers: [A1, A2, A3]

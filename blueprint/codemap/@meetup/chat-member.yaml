@@ -1,0 +1,34 @@
+id: "@meetup.chat-member"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/chat-member/ChatMemberSet.java
+    role: 聊天成员集合聚合根与全部命令实现
+    symbols: [ChatMemberSet]
+    covers: [I1, I2, I3, I4, C1, C2, C3, C4]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-member/ChatMemberState.java
+    role: 聊天成员实体与阅读状态
+    symbols: [ChatMemberState]
+    covers: [I1, I2, I3, I4, C1, C2, C3, C4]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-member/ChatMemberDomainException.java
+    role: 领域错误标识承载
+    symbols: [ChatMemberDomainException]
+    covers: [I1, I2, I3, I4, C1, C2, C3, C4]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-member/ChatMemberIdGenerator.java
+    role: 成员业务编号生成端口
+    symbols: [ChatMemberIdGenerator]
+    covers: [I1, C1, C3, C4]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-member/JoinChatCommand.java
+    role: 加入频道命令入参
+    symbols: [JoinChatCommand]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-member/LeaveChatCommand.java
+    role: 离开频道命令入参
+    symbols: [LeaveChatCommand]
+    covers: [C2]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-member/RecordNewMessageCommand.java
+    role: 记录新消息命令入参
+    symbols: [RecordNewMessageCommand]
+    covers: [I4, C3]
+  - path: rally-domain/src/main/java/com/rally/domain/chat-member/ConfirmDeliveredMessageCommand.java
+    role: 确认已交付消息命令入参
+    symbols: [ConfirmDeliveredMessageCommand]
+    covers: [I2, I3, C4]

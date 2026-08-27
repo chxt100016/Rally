@@ -1,0 +1,46 @@
+id: "@meetup.meetup"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/model/Meetup.java
+    role: 聚合根、命令、费用原样替换与聊天/比分/评价资格查询主实现
+    symbols: [Meetup]
+    covers: [I1, I2, I3, I4, I6, I7, I8, I9, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13, C14, C15]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/model/MeetupFactory.java
+    role: 聚合创建工厂
+    symbols: [MeetupFactory]
+    covers: [I1, I2, I3, I4, I5, I6, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/model/MeetupData.java
+    role: 聚合根数据载体
+    symbols: [MeetupData]
+    covers: [I1, I2, I4, I5, I6, I8, I9, C1, C2, C3, C10, C11, C12, C13, C14]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/model/RegistrationData.java
+    role: 报名实体与状态判定
+    symbols: [RegistrationData]
+    covers: [I1, I2, I3, I7, I8, C1, C2, C4, C5, C6, C7, C8, C9]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/convert/MeetupDomainConvertMapper.java
+    role: 创建与编辑字段映射
+    symbols: [MeetupDomainConvertMapper]
+    covers: [I4, I5, C1, C2, C3]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/service/MeetupPolicy.java
+    role: 发布与编辑前置策略
+    symbols: [MeetupPolicy]
+    covers: [I4, I5, I6, C1, C3, C10, C14]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/service/MeetupDomainService.java
+    role: 聚合加载保存兼容门面
+    symbols: [MeetupDomainService]
+    covers: [I1, I2, I7, C1, C3, C10, C11, C12, C13, C14]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/service/RegistrationDomainService.java
+    role: 报名命令保存兼容门面
+    symbols: [RegistrationDomainService]
+    covers: [I1, I2, I3, I7, C4, C5, C6, C7, C8]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/gateway/MeetupRepository.java
+    role: 聚合整体持久化端口
+    symbols: [MeetupRepository]
+    covers: [I1, I2, I7, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13, C14]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/gateway/RegistrationRepository.java
+    role: 跳过评价批量状态迁移持久化端口
+    symbols: [RegistrationRepository]
+    covers: [C15]
+  - path: rally-domain/src/main/java/com/rally/domain/recap/service/ReviewDomainService.java
+    role: 跳过评价命令的既有领域编排
+    symbols: [ReviewDomainService, skipReview]
+    covers: [C15]

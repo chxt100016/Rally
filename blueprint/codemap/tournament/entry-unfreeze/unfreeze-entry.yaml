@@ -1,0 +1,10 @@
+id: tournament.entry-unfreeze.activity.unfreeze-entry
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/entry-unfreeze/activity/UnfreezeEntryActivity.java
+    role: 解冻本人报名的资格校验、状态转换与事务编排
+    symbols: [UnfreezeEntryActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentEntryAppService.java
+    role: 保留既有解冻应用入口并委托活动
+    symbols: [TournamentEntryAppService.unfreeze]
+    covers: [A1, A2, A3, A4]

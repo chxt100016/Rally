@@ -1,0 +1,6 @@
+id: tournament.result-reject.activity.reject-result
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/result-reject/activity/RejectResultActivity.java
+    role: 赛果拒绝、赛段计数、跨聚合释放与提交后通知编排
+    symbols: [RejectResultActivity]
+    covers: [A1, A2, A3, A4, A5]

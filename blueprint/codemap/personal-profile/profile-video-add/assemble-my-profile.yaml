@@ -1,0 +1,14 @@
+id: personal-profile.profile-video-add.activity.assemble-my-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/basic-profile-update/activity/AssembleMyProfileActivity.java
+    role: 复用唯一的本人档案组装实现，重读追加后的档案并按状态组装基础资料、统计、等级评分和完整视频资源
+    symbols: [AssembleMyProfileActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/user/MyProfileAppService.java
+    role: 保留原 getMyProfile 签名，从当前用户上下文委托共享组装活动
+    symbols: [MyProfileAppService.getMyProfile]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/user/ProfileAppService.java
+    role: 在视频追加事务内同步调用共享本人档案组装，聚合异常沿事务传播并回滚追加
+    symbols: [ProfileAppService.uploadVideo]
+    covers: [A1, A2, A3, A4]

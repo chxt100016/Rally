@@ -1,10 +1,10 @@
 package com.rally.payment;
 
-import com.rally.domain.payment.model.PaymentOrder;
 import com.rally.domain.payment.model.PaymentOrderSummaryDTO;
-import com.rally.domain.payment.service.PaymentDomainService;
-import com.rally.payment.convert.PaymentAppConvertMapper;
-import com.rally.utils.UserContext;
+import com.rally.transactionpayment.paymentresultreceipt.activity.RecordPaymentReceiptActivity;
+import com.rally.transactionpayment.paymentstatussync.activity.AdvancePaidBusinessActivity;
+import com.rally.transactionpayment.paymentstatussync.activity.DeliverPaymentSummaryActivity;
+import com.rally.transactionpayment.paymentstatussync.activity.ReconcilePaymentStatusActivity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PaymentAppService {
 
-    private final PaymentDomainService paymentDomainService;
+    private final ReconcilePaymentStatusActivity reconcilePaymentStatusActivity;
+    private final AdvancePaidBusinessActivity advancePaidBusinessActivity;
+    private final DeliverPaymentSummaryActivity deliverPaymentSummaryActivity;
+    private final RecordPaymentReceiptActivity recordPaymentReceiptActivity;
 
     /**
      * 轮询支付状态（前端支付确认中轮询）：
@@ -29,13 +32,9 @@ public class PaymentAppService {
      */
     @Transactional
     public PaymentOrderSummaryDTO syncPayStatus(String paymentId) {
-        String userId = UserContext.get();
-        PaymentOrder order = paymentDomainService.load(paymentId);
-        order.assertPayer(userId);
-        if (order.isPending()) {
-            order = paymentDomainService.recoverIfPaid(order);
-        }
-        return PaymentAppConvertMapper.INSTANCE.toSummary(order);
+        ReconcilePaymentStatusActivity.Result result = reconcilePaymentStatusActivity.execute(paymentId);
+        advancePaidBusinessActivity.execute(result);
+        return deliverPaymentSummaryActivity.execute(paymentId);
     }
 
     /**
@@ -44,6 +43,6 @@ public class PaymentAppService {
      * @return true 处理成功；false 需告知渠道重试
      */
     public boolean handlePayCallback(String body, Map<String, String> headers) {
-        return paymentDomainService.handleCallback(body, headers);
+        return recordPaymentReceiptActivity.execute(body, headers);
     }
 }

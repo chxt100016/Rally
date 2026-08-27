@@ -1,0 +1,6 @@
+id: content-production.daily-schedule-copy.activity.register-missing-translations
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/daily-schedule-copy/activity/RegisterMissingTranslationsActivity.java
+    role: 主实现
+    symbols: [RegisterMissingTranslationsActivity]
+    covers: [A1, A2, A3]

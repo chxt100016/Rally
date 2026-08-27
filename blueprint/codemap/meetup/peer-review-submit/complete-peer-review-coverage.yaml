@@ -1,0 +1,6 @@
+id: meetup.peer-review-submit.activity.complete-peer-review-coverage
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/CompletePeerReviewCoverageActivity.java
+    role: 复用既有事务入口汇总评价覆盖并条件推进本人报名状态
+    symbols: [CompletePeerReviewCoverageActivity, execute]
+    covers: [A1, A2, A3, A4]

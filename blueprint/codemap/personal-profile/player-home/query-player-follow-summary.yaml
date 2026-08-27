@@ -1,0 +1,6 @@
+id: personal-profile.player-home.activity.query-player-follow-summary
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/player-home/activity/QueryPlayerFollowSummaryActivity.java
+    role: 独立统计目标粉丝数、关注数并判定查询人是否已关注目标
+    symbols: [QueryPlayerFollowSummaryActivity]
+    covers: [A1, A2, A3]

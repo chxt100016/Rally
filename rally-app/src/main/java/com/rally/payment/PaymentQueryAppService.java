@@ -1,9 +1,7 @@
 package com.rally.payment;
 
 import com.rally.domain.payment.model.PaymentOrderSummaryDTO;
-import com.rally.domain.payment.service.PaymentQueryDomainService;
-import com.rally.payment.convert.PaymentAppConvertMapper;
-import com.rally.utils.UserContext;
+import com.rally.transactionpayment.pendingordersquery.activity.DeliverPendingOrdersActivity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +14,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PaymentQueryAppService {
 
-    private final PaymentQueryDomainService paymentQueryDomainService;
+    private final DeliverPendingOrdersActivity deliverPendingOrdersActivity;
 
     /** 当前用户的全部待支付单 */
     public List<PaymentOrderSummaryDTO> myPending() {
-        String userId = UserContext.get();
-        return PaymentAppConvertMapper.INSTANCE.toSummaryList(paymentQueryDomainService.myPending(userId));
+        return deliverPendingOrdersActivity.execute();
     }
 }

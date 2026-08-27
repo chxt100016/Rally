@@ -1,0 +1,10 @@
+id: platform-config.home-content-query.activity.query-home-tour-section
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/home-content-query/activity/QueryHomeTourSectionActivity.java
+    role: 筛选和分组当前赛事与最近比赛，签发代表图片并应用简中翻译
+    symbols: [QueryHomeTourSectionActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/platform-config/home-content-query/activity/QueryHomeTourSectionResult.java
+    role: 交付巡回赛区块及后续待登记的翻译缺口
+    symbols: [QueryHomeTourSectionResult]
+    covers: [A4]

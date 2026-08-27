@@ -1,0 +1,10 @@
+id: personal-profile.basic-profile-update.activity.assemble-my-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/basic-profile-update/activity/AssembleMyProfileActivity.java
+    role: 本人档案重新读取、状态分支及完整返回组装
+    symbols: [AssembleMyProfileActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/user/MyProfileAppService.java
+    role: 保留原 getMyProfile 对外签名并传入当前用户身份
+    symbols: [MyProfileAppService.getMyProfile]
+    covers: [A1]

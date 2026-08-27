@@ -1,0 +1,6 @@
+id: meetup.meetup-finish-settlement.activity.settle-finished-meetups
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/SettleFinishedMeetupsActivity.java
+    role: 主实现
+    symbols: [SettleFinishedMeetupsActivity, execute]
+    covers: [A1, A2, A3]

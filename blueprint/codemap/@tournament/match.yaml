@@ -1,0 +1,66 @@
+id: "@tournament.match"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatch.java
+    role: 聚合根、C1-C9 命令实现与两张比赛表的唯一状态变更入口
+    symbols: [TournamentMatch]
+    covers: [I1, I2, I3, I4, I5, I6, I7, C1, C2, C3, C4, C5, C6, C7, C8, C9]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchState.java
+    role: rally_tournament_match 单行不可变根状态与版本递增
+    symbols: [TournamentMatchState]
+    covers: [I1, I2, I3, I5, I6, C1, C2, C3, C4, C5, C6, C7, C8]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchParticipant.java
+    role: rally_tournament_match_participant 不可变实体及两条确认链变更
+    symbols: [TournamentMatchParticipant]
+    covers: [I2, I4, I5, I6, C1, C3, C4, C5, C6, C7, C8]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchPersistence.java
+    role: 根与全部参与者的原子插入、版本保存及条件删除端口
+    symbols: [TournamentMatchPersistence]
+    covers: [I1, I2, I3, I4, I5, I6, C1, C2, C3, C4, C5, C6, C7, C8, C9]
+  - path: rally-domain/src/main/java/com/rally/domain/match/CreateTournamentMatchCommand.java
+    role: C1 创建比赛的身份、轮次、匹配时间和可选订场人事实
+    symbols: [CreateTournamentMatchCommand]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/CreateTournamentMatchParticipant.java
+    role: C1 参与者用户与报名编号快照
+    symbols: [CreateTournamentMatchParticipant]
+    covers: [I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/RejectTournamentMatchCommand.java
+    role: C8 终止来源、场景资格与拒绝审计事实
+    symbols: [RejectTournamentMatchCommand]
+    covers: [I4, I6, C8]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchRejectionSource.java
+    role: C8 人工拒绝、超时与退赛终止来源
+    symbols: [TournamentMatchRejectionSource]
+    covers: [C8]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchRejectPhase.java
+    role: 赛约拒绝与赛果拒绝审计阶段
+    symbols: [TournamentMatchRejectPhase]
+    covers: [C8]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentScheduleSubmissionOutcome.java
+    role: C3 区分聚合推进与 SCHEDULED 外部赛约单独修改
+    symbols: [TournamentScheduleSubmissionOutcome]
+    covers: [I6, C3]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchStatus.java
+    role: 包含 PENDING_PLAY 的比赛生命周期封闭状态
+    symbols: [TournamentMatchStatus]
+    covers: [I3, I5, C1, C2, C3, C4, C5, C6, C7, C8, C9]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchConfirmStatus.java
+    role: 赛约确认与赛果确认的封闭状态
+    symbols: [TournamentMatchConfirmStatus]
+    covers: [I4, I5, C1, C3, C4, C5, C6, C7, C8]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchRound.java
+    role: 表字段支持的赛事轮次类型
+    symbols: [TournamentMatchRound]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchIdGenerator.java
+    role: C1 比赛根和参与者业务 id 生成端口
+    symbols: [TournamentMatchIdGenerator]
+    covers: [I1, I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchInsertResult.java
+    role: C1 双唯一键并发插入结果
+    symbols: [TournamentMatchInsertResult, TournamentMatchInsertResult.Outcome]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchDomainException.java
+    role: 聚合拒绝命令时的稳定错误标识载体
+    symbols: [TournamentMatchDomainException]
+    covers: [I1, I2, I3, I4, I5, I6, I7, C1, C2, C3, C4, C5, C6, C7, C8, C9]

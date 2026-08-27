@@ -1,0 +1,6 @@
+id: platform-config.available-cities-query.activity.query-available-city-list
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/available-cities-query/activity/QueryAvailableCityListActivity.java
+    role: 使用现有配置分割去重与城市名录映射语义组装已开通城市 DTO 列表
+    symbols: [QueryAvailableCityListActivity]
+    covers: [A1, A2, A3]

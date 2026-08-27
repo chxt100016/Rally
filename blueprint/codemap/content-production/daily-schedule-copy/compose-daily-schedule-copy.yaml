@@ -1,0 +1,10 @@
+id: content-production.daily-schedule-copy.activity.compose-daily-schedule-copy
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/daily-schedule-copy/activity/ComposeDailyScheduleCopyActivity.java
+    role: 主实现
+    symbols: [ComposeDailyScheduleCopyActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/content-production/daily-schedule-copy/activity/ComposeDailyScheduleCopyResult.java
+    role: 活动出参
+    symbols: [ComposeDailyScheduleCopyResult]
+    covers: [A5]

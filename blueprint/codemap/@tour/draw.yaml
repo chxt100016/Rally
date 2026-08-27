@@ -1,0 +1,42 @@
+id: "@tour.draw"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/draw/TourDraw.java
+    role: 聚合根、C1/C2 命令实现与 tour_draw 唯一写入口
+    symbols: [TourDraw]
+    covers: [I1, I2, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/draw/TourDrawIdentity.java
+    role: 赛事、年份与来源原始项目代码的不可变自然键
+    symbols: [TourDrawIdentity]
+    covers: [I1, I2, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/draw/TourDrawStructure.java
+    role: 规模与总轮数独立可空的原始结构值对象
+    symbols: [TourDrawStructure]
+    covers: [I3, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/draw/TourDrawStatus.java
+    role: 由结构字段派生的聚合状态
+    symbols: [TourDrawStatus]
+    covers: [I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/draw/TourDrawState.java
+    role: tour_draw 单行不可变状态
+    symbols: [TourDrawState]
+    covers: [I1, I2, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/draw/AssociateTourDrawCommand.java
+    role: 关联或以当前可用结构字段建立签表命令
+    symbols: [AssociateTourDrawCommand]
+    covers: [I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/draw/RefreshTourDrawStructureCommand.java
+    role: 按非空输入独立刷新签表结构命令
+    symbols: [RefreshTourDrawStructureCommand]
+    covers: [C2]
+  - path: rally-domain/src/main/java/com/rally/domain/draw/TourDrawPersistence.java
+    role: tour_draw 唯一写端口、自然键竞争收敛与独立非空覆盖
+    symbols: [TourDrawPersistence]
+    covers: [I1, I3, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/draw/TourDrawInsertResult.java
+    role: 自然键唯一插入结果
+    symbols: [TourDrawInsertResult, TourDrawInsertResult.Outcome]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/draw/TourDrawDomainException.java
+    role: 稳定领域错误标识载体
+    symbols: [TourDrawDomainException]
+    covers: [I1, I2, I3, C1, C2]

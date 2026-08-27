@@ -19,3 +19,15 @@
 - [Q3] MapStruct 整体更新的空值、费用与已知字段覆盖缺陷如何记录？
   > nullValue IGNORE 通常保留 null 入参字段；costItems null 保留、空列表清空；districtCode 不保存，hourlyAllocations 不在命令。重算 endTime 依赖 startTime+duration。命中 courtData 时生成映射会额外把 meetup.bizId、cityName、createTime、updateTime 覆盖为球场值，随后 save 可能按被覆盖 bizId 更新错误目标；这是当前真实实现，报错与否取决于仓储。
   → 已写入业务动作 A4-A5、详细流程第 6-9 步、边界情况与实现提示
+
+- [Q4] 是否继续在发布者校验前执行赛事阶段、编辑锁定、城市和成员锁定规则？
+  > 是。保持 main 的校验顺序及错误优先级。
+  → 已落入业务动作 A1 至 A3 与详细流程第 1 至 4 步。
+
+- [Q5] 命中球场时是否继续保留当前映射覆盖 bizId、cityName 与时间字段的行为？
+  > 是。本轮仅记录真实缺陷，不改变业务写入目标或响应字段。
+  → 已落入详细流程第 8 步、边界情况与实现提示。
+
+- [Q6] 编辑是否继续不校验 duration 正数、范围或 0.5 步长？
+  > 是。维持当前编辑校验范围，不套用发布时长规则。
+  → 已落入详细流程第 7 步与边界情况。

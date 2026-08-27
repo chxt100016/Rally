@@ -1,0 +1,6 @@
+id: platform-config.city-catalog-query.activity.query-city-catalog
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/city-catalog-query/activity/QueryCityCatalogActivity.java
+    role: 复制启动城市名录并映射公开字段
+    symbols: [QueryCityCatalogActivity]
+    covers: [A1, A2]

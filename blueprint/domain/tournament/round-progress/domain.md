@@ -67,4 +67,4 @@ R9 服务只读并返回判定，不得通过仓储更新 currentRound 或批量
 
 ## 实现提示
 
-查询只投影 frontmatter 列，并在一次一致性读取中按 round 聚合 COMPLETED 数量。把计算实现为无副作用函数，调用方收到 ADVANCE 后使用带轮次顺序条件的赛事聚合命令更新；现有 `TournamentRoundProgressService` 直接调用写仓储的部分应在实现阶段外移。
+查询只投影 frontmatter 列，并在一次一致性读取中按 round 聚合 COMPLETED 数量。计算实现为无副作用函数；调用方收到 ADVANCE 后使用带轮次顺序条件的赛事聚合命令更新，旧的读写混合轮次服务已删除。

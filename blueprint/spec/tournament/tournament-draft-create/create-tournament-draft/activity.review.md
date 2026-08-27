@@ -19,3 +19,15 @@
 - [Q3] 新草稿初始值是什么？
   > status=DRAFT、currentRound=QUALIFIER、currentFilledSlots=0，endTime/offlineMeetupId 为空。
   → 已写入活动契约与详细流程第 5-6 步
+
+- [Q4] totalSlots 是否继续仅允许 2 到 64 的 2 次方，且 totalSlots=2 仍视为合法？
+  > 是。totalSlots 继续限制为 2–64 且为 2 的整数次幂，最小值 2 合法。
+  → 已落实到活动契约、业务动作 A1、详细流程第 2 步与边界情况。
+
+- [Q5] offlineFromRound 为空是否继续表示全程线上，非空时只要求对应签位小于 totalSlots，不新增线下活动创建？
+  > 是。空值表示全程线上；非空只做轮次签位关系校验，创建草稿不联动生成线下活动。
+  → 已落实到活动契约、业务动作 A1、详细流程第 2/6 步与边界情况。
+
+- [Q6] cityCode 查不到城市时是否继续由现有未处理异常统一收敛为 OPERATION_FAILED，而不新增城市专用错误码？
+  > 是。城市缺失继续由现有异常路径收敛为 OPERATION_FAILED，不改变错误码接口。
+  → 已落实到异常分支、@system.location-catalog、业务动作 A2、详细流程第 4 步与边界情况。

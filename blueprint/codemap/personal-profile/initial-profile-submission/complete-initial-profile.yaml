@@ -1,0 +1,10 @@
+id: personal-profile.initial-profile-submission.activity.complete-initial-profile
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/initial-profile-submission/activity/CompleteInitialProfileActivity.java
+    role: 读取当前用户档案、必要时初始化 TBC、预处理视频并完整覆盖初始档案
+    symbols: [CompleteInitialProfileActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/user/OnboardingAppService.java
+    role: 保留原 submit 对外签名和事务边界，保存后在同一事务内组装本人档案
+    symbols: [OnboardingAppService.submit]
+    covers: [A1, A2, A3, A4]

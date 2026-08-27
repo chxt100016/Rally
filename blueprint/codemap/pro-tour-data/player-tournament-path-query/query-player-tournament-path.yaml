@@ -1,0 +1,6 @@
+id: pro-tour-data.player-tournament-path-query.activity.query-player-tournament-path
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/player-tournament-path-query/activity/QueryPlayerTournamentPathActivity.java
+    role: 编排球员签表路径查询、轮次对手推算及简中译文缺口
+    symbols: [QueryPlayerTournamentPathActivity]
+    covers: [A1, A2, A3, A4]

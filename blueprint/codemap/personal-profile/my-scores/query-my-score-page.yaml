@@ -1,0 +1,6 @@
+id: personal-profile.my-scores.activity.query-my-score-page
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/my-scores/activity/QueryMyScorePageActivity.java
+    role: 查询、筛选、游标分页并转换本人视角的盘级比分
+    symbols: [QueryMyScorePageActivity]
+    covers: [A1, A2, A3, A4, A5]

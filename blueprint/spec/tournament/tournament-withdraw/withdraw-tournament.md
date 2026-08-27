@@ -38,7 +38,7 @@ flowchart TD
 ## 详细流程
 
 1. 识别当前登录用户，接收赛事编号并取得本人报名。
-2. 确认报名不是 `WITHDRAWN` 或 `ELIMINATED`，将本人状态改为 `WITHDRAWN`，其余报名字段保持不变。
+2. 确认报名不是 `CHAMPION`、`WITHDRAWN` 或 `ELIMINATED`，将本人状态改为 `WITHDRAWN`，其余报名字段保持不变。
 3. 删除本人赛事讨论成员关系，保留既有评论。
 4. 查找本人在该赛事中的一场未完成或终止比赛；没有时直接完成退赛。
 5. 找到时以版本条件将比赛改为 `REJECTED`，不记录拒赛理由且不累计拒赛次数。
@@ -51,7 +51,7 @@ flowchart TD
 |---|---|---|---|---|
 | 未登录/参数校验错误 | 无有效登录或赛事编号空白 | 入口鉴权与校验 | 不读取/修改 | 统一登录提示／赛事ID不能为空 |
 | `TOURNAMENT_ENTRY_NOT_FOUND` | 指定赛事没有本人报名，或在途比赛某参与者报名缺失 | withdraw-tournament-entry／terminate-withdrawn-match | 事务回滚 | 报名记录不存在 |
-| `TOURNAMENT_ENTRY_STATUS_ILLEGAL` | 本人报名已为 `WITHDRAWN` 或 `ELIMINATED` | withdraw-tournament-entry | 所有对象不变 | 报名当前状态不允许该操作 |
+| `TOURNAMENT_ENTRY_STATUS_ILLEGAL` | 本人报名已为 `CHAMPION`、`WITHDRAWN` 或 `ELIMINATED` | withdraw-tournament-entry | 所有对象不变 | 报名当前状态不允许该操作 |
 | 无在途比赛 | 本人没有状态非 `COMPLETED`、`REJECTED` 的比赛 | terminate-withdrawn-match | 保留本人退赛和退出讨论，正常返回 | 退赛成功 |
 | 赛约无需关闭 | 比赛无赛约、赛约不存在或状态不是 `DRAFT` | terminate-withdrawn-match | 不创建或改变该活动，继续退赛 | 退赛成功 |
 | 报名无需释放 | 同场某报名当前不是 `IN_MATCH` | terminate-withdrawn-match | 保留该报名现状 | 退赛成功 |

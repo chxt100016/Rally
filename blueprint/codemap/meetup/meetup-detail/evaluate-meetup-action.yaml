@@ -1,0 +1,6 @@
+id: meetup.meetup-detail.activity.evaluate-meetup-action
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupDetailAppService.java
+    role: 操作状态计算与可报名限制编排
+    symbols: [MeetupDetailAppService]
+    covers: [A1, A2, A3, A4]

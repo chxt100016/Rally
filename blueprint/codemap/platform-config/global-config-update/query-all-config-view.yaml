@@ -1,0 +1,10 @@
+id: platform-config.global-config-update.activity.query-all-config-view
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/all-config-query/activity/QueryAllConfigViewActivity.java
+    role: 按配置名录顺序读取 global 记录并组装生效值、默认值、版本和覆盖状态
+    symbols: [QueryAllConfigViewActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/system/HomeConfigAdminAppService.java
+    role: 在发布事务内于缓存刷新后调用共享全量查询活动并返回完整视图
+    symbols: [HomeConfigAdminAppService.updateAny, HomeConfigAdminAppService.getAll]
+    covers: [A1, A2, A3]

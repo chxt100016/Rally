@@ -1,0 +1,42 @@
+id: "@system.platform-config"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/platform-config/PlatformConfig.java
+    role: 聚合根、命令实现与 sys_config 唯一写入口
+    symbols: [PlatformConfig]
+    covers: [I1, I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/platform-config/PlatformConfigState.java
+    role: sys_config 单行状态与定向版本迁移
+    symbols: [PlatformConfigState]
+    covers: [I1, I2, I3, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/platform-config/ConfigIdentity.java
+    role: 配置键与作用域身份值对象
+    symbols: [ConfigIdentity]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/platform-config/TypedConfigValue.java
+    role: 类型化规范配置值对象与 100000 字符业务上限
+    symbols: [TypedConfigValue]
+    covers: [I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/platform-config/PlatformConfigDefinition.java
+    role: 应用配置名录与规范化校验端口
+    symbols: [PlatformConfigDefinition]
+    covers: [I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/platform-config/PublishPlatformConfigCommand.java
+    role: 发布配置命令与首次规范化
+    symbols: [PublishPlatformConfigCommand]
+    covers: [I1, I2, I3, I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/platform-config/PlatformConfigPersistence.java
+    role: sys_config 唯一领域写端口与版本 CAS
+    symbols: [PlatformConfigPersistence]
+    covers: [I1, I4, C1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/platform-config/PlatformConfigInsertResult.java
+    role: 首次发布唯一键插入结果
+    symbols: [PlatformConfigInsertResult, PlatformConfigInsertResult.Outcome]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/platform-config/PlatformConfigIdGenerator.java
+    role: 配置雪花业务编号生成端口
+    symbols: [PlatformConfigIdGenerator]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/platform-config/PlatformConfigDomainException.java
+    role: 稳定领域错误标识
+    symbols: [PlatformConfigDomainException]
+    covers: [I1, I2, I3, I4, C1, C2]

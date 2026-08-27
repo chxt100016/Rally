@@ -27,14 +27,14 @@ sequenceDiagram
 
 ## 活动契约
 
-本人报名存在且非 ELIMINATED/WITHDRAWN 时，以本次三组值整体覆盖旧偏好；报名状态和其他字段不变。
+本人报名存在且非 CHAMPION/ELIMINATED/WITHDRAWN 时，以本次三组值整体覆盖旧偏好；地区和时间元素原样保留，报名状态和其他字段不变。
 
 ## 异常分支
 
 | 错误标识 | 触发条件 | 处理 |
 |---|---|---|
 | `TOURNAMENT_ENTRY_NOT_FOUND` | 本人无指定赛事报名 | 不创建报名 |
-| `TOURNAMENT_ENTRY_STATUS_ILLEGAL` | 报名已 ELIMINATED 或 WITHDRAWN | 保留原偏好 |
+| `TOURNAMENT_ENTRY_STATUS_ILLEGAL` | 报名已 CHAMPION、ELIMINATED 或 WITHDRAWN | 保留原偏好 |
 | `OPERATION_FAILED` | 保存失败 | 事务回滚，保留原偏好 |
 
 ## 领域依赖
@@ -54,14 +54,15 @@ A3 整组替换匹配偏好
 
 1. 入口要求 tournamentId、至少一项 preferredDistricts、courtAbility、至少一项 availableTimes。
 2. 按赛事和当前用户取得报名，不存在不自动创建。
-3. ELIMINATED/WITHDRAWN 拒绝；PAYING、WAITING、FROZEN、IN_MATCH 等其余状态可更新。
-4. 三组偏好整体替换而非合并，在事务内保存；状态、赛段、轮次和计数均不变。
+3. CHAMPION/ELIMINATED/WITHDRAWN 拒绝；PAYING、WAITING、FROZEN、IN_MATCH 等非终态可更新。
+4. 三组偏好整体替换而非合并，在事务内保存；地区和时间列表元素按请求原样保留，不清洗、去重或新增格式校验；状态、赛段、轮次和计数均不变。
 
 ## 边界情况
 
 - 列表内重复值是否保留由请求模型/持久化现状决定，不在活动额外去重。
 - 冻结或比赛中的报名仍可更新未来匹配偏好。
 - 空列表在入口被拒绝，无法用本活动清空偏好。
+- 非空列表中的空白、重复或其他原始元素按现有请求校验结果原样保存。
 
 ## 实现提示
 

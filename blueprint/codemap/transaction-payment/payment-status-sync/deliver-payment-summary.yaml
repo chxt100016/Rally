@@ -1,0 +1,6 @@
+id: transaction-payment.payment-status-sync.activity.deliver-payment-summary
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/payment-status-sync/activity/DeliverPaymentSummaryActivity.java
+    role: 本地最新支付单重读及既有金额、关联业务和对外状态摘要映射
+    symbols: [DeliverPaymentSummaryActivity]
+    covers: [A1, A2, A3]

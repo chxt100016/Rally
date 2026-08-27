@@ -1,0 +1,6 @@
+id: content-production.tournament-image-maintenance.activity.bind-tournament-images
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/tournament-image-maintenance/activity/BindTournamentImagesActivity.java
+    role: 同编号职业赛事图片绑定活动编排与 C2 持久化适配
+    symbols: [BindTournamentImagesActivity]
+    covers: [A1, A2, A3]

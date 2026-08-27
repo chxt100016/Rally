@@ -1,0 +1,10 @@
+id: court.court-name-search.activity.search-courts-by-name
+files:
+  - path: rally-app/src/main/java/com/rally/court/activity/SearchCourtsByNameActivity.java
+    role: 主实现
+    symbols: [SearchCourtsByNameActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/court/CourtQueryAppService.java
+    role: 应用服务入口
+    symbols: [CourtQueryAppService]
+    covers: [A1, A2, A3]

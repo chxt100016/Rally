@@ -1,0 +1,10 @@
+id: meetup.my-meetups.activity.query-recent-meetups
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/QueryRecentMeetupsActivity.java
+    role: 最近约球查询活动主实现
+    symbols: [QueryRecentMeetupsActivity, execute]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/UserMeetupAppService.java
+    role: 我的约球最近标签编排入口
+    symbols: [UserMeetupAppService, queryUserMeetupList]
+    covers: [A1, A2, A3]

@@ -1,0 +1,14 @@
+id: meetup.meetup-invite.activity.register-invited-participant
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/RegisterInvitedParticipantActivity.java
+    role: 主实现
+    symbols: [RegisterInvitedParticipantActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/meetup/activity/InvitedParticipantContext.java
+    role: 后续步骤上下文
+    symbols: [InvitedParticipantContext]
+    covers: [A5]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 对外编排入口
+    symbols: [RegistrationAppService.invite]
+    covers: [A1, A2, A3, A4, A5]

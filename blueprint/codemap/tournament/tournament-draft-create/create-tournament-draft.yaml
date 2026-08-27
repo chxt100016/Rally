@@ -1,0 +1,10 @@
+id: tournament.tournament-draft-create.activity.create-tournament-draft
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/tournamentdraftcreate/activity/CreateTournamentDraftActivity.java
+    role: 创建赛事草稿业务活动编排
+    symbols: [CreateTournamentDraftActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 后台创建接口事务入口
+    symbols: [TournamentAdminAppService]
+    covers: [A5]

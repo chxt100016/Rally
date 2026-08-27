@@ -1,0 +1,6 @@
+id: meetup.score-delete.activity.delete-score-record
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/DeleteScoreRecordActivity.java
+    role: 复盘资格校验与幂等比分物理删除编排
+    symbols: [DeleteScoreRecordActivity, execute]
+    covers: [A1, A2, A3]

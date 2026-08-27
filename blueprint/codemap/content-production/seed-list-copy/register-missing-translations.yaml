@@ -1,0 +1,6 @@
+id: content-production.seed-list-copy.activity.register-missing-translations
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/seed-list-copy/activity/RegisterMissingTranslationsActivity.java
+    role: 主实现
+    symbols: [RegisterMissingTranslationsActivity]
+    covers: [A1, A2, A3]

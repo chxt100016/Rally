@@ -1,0 +1,6 @@
+id: meetup.meetup-detail.activity.assemble-meetup-recap
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupDetailAppService.java
+    role: 复盘状态门控、评价与比分查询及视图组装
+    symbols: [MeetupDetailAppService, buildRecap]
+    covers: [A1, A2, A3, A4, A5]

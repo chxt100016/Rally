@@ -1,0 +1,6 @@
+id: identity-account.registration-profile-completion.activity.complete-registration-profile
+files:
+  - path: rally-app/src/main/java/com/rally/identity-account/registration-profile-completion/activity/CompleteRegistrationProfileActivity.java
+    role: 当前用户注册资料转换与保存编排
+    symbols: [CompleteRegistrationProfileActivity]
+    covers: [A1, A2, A3]

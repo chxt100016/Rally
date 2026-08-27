@@ -6,6 +6,7 @@ import com.rally.domain.system.model.Location;
 import com.rally.domain.system.model.LocationQuery;
 import com.rally.domain.system.model.LocationResult;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,8 +30,14 @@ public class LocationCatalogService {
     private static final int MUNICIPALITY_PREFIX_LENGTH = 2;
     private static final int CITY_PREFIX_LENGTH = 4;
 
-    /** 城市编码 -> 下属区县，首次使用时按名录预建 */
+    /** 城市编码 -> 下属区县，Spring 启动时预建，非 Spring 直接构造时首次查询兜底 */
     private volatile Map<String, List<Location>> districtsByCity;
+
+    /** Spring 启动时在 CityConfig 完成两份名录加载后预建区县索引。 */
+    @Autowired
+    void initializeCatalog(CityConfig cityConfig) {
+        districtsByCity = buildIndex();
+    }
 
     public LocationResult query(LocationQuery query) {
         if (query == null || query.getScope() == null || !isValidCode(query.getCode())) {

@@ -1,0 +1,10 @@
+id: tournament.tournament-abandon.activity.abandon-tournament
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/tournamentabandon/activity/AbandonTournamentActivity.java
+    role: 废弃赛事的聚合加载、状态转换与事务编排
+    symbols: [AbandonTournamentActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 保留既有后台应用入口并委托废弃赛事活动
+    symbols: [TournamentAdminAppService.abandon]
+    covers: [A1, A2, A3]

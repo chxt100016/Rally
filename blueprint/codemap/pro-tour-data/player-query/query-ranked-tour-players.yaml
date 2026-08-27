@@ -1,0 +1,6 @@
+id: pro-tour-data.player-query.activity.query-ranked-tour-players
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/player-query/activity/QueryRankedTourPlayersActivity.java
+    role: 编排排名查询、公开资料组装、简中姓名翻译及缺译键收集
+    symbols: [QueryRankedTourPlayersActivity]
+    covers: [A1, A2, A3, A4]

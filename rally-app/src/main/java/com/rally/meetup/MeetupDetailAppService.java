@@ -6,7 +6,6 @@ import com.rally.domain.meetup.enums.JoinRestrictionEnum;
 import com.rally.domain.meetup.enums.MeetupRoleEnum;
 import com.rally.domain.meetup.enums.MeetupStatusEnum;
 import com.rally.domain.meetup.model.*;
-import com.rally.domain.meetup.service.ChatDomainService;
 import com.rally.domain.meetup.service.MeetupDomainService;
 import com.rally.domain.meetup.service.UserMeetupQueryDomainService;
 import com.rally.domain.recap.model.RecapDTO;
@@ -22,6 +21,7 @@ import com.rally.domain.user.model.UserExtData;
 import com.rally.domain.user.model.UserProfile;
 import com.rally.domain.user.service.UserExtDomainService;
 import com.rally.domain.user.service.UserProfileDomainService;
+import com.rally.meetup.activity.QueryMeetupChatUnreadActivity;
 import com.rally.meetup.convert.MeetupAppConvertMapper;
 import com.rally.utils.SunUtils;
 import com.rally.utils.UserContext;
@@ -51,7 +51,7 @@ public class MeetupDetailAppService {
     private final UserProfileDomainService userProfileDomainService;
     private final ReviewDomainService reviewDomainService;
     private final ScoreDomainService scoreDomainService;
-    private final ChatDomainService chatDomainService;
+    private final QueryMeetupChatUnreadActivity queryMeetupChatUnreadActivity;
     private final UserExtDomainService userExtDomainService;
     private final MeetupCardPackingService meetupCardPackingService;
 
@@ -86,7 +86,7 @@ public class MeetupDetailAppService {
                 .setCreator(buildCreatorDTO(meetup.getCreatorId(), profileMap))
                 .setParticipants(buildParticipantsView(meetup, currentUserId, participants, profileMap))
                 .setRecap(meetup.canReview() ? buildRecap(meetup) : null)
-                .setUnreadCount(meetup.canChat(currentUserId) ? chatDomainService.getUnreadCount(meetupId, currentUserId) : null)
+                .setUnreadCount(queryMeetupChatUnreadActivity.execute(meetupId, currentUserId, actionState))
                 .setPayment(buildPaymentView(meetup, currentUserId));
 
         // 仅未报名场景计算准入限制，决定 报名按钮是否可点

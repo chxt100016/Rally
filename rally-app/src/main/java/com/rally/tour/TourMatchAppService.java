@@ -1,67 +1,42 @@
 package com.rally.tour;
 
-import com.rally.domain.tour.TourMatchQueryDomainService;
-import com.rally.domain.tour.model.*;
-import com.rally.domain.translation.model.TranslationLanguageEnum;
-import com.rally.translation.TourTranslationService;
-import jakarta.annotation.Resource;
+import com.rally.domain.tour.model.SeedGroupDTO;
+import com.rally.domain.tour.model.TourMatchDTO;
+import com.rally.protourdata.finishedmatchesquery.activity.QueryFinishedRoundGroupsActivity;
+import com.rally.protourdata.finishedmatchesquery.activity.QueryFinishedSeedGroupsActivity;
+import com.rally.protourdata.upcomingmatchesquery.activity.QueryUpcomingMatchGroupsActivity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TourMatchAppService {
 
-    @Resource
-    private TourMatchQueryDomainService tourMatchQueryDomainService;
-
-    @Resource
-    private TourTranslationService tourTranslationService;
+    private final QueryUpcomingMatchGroupsActivity queryUpcomingMatchGroupsActivity;
+    private final com.rally.protourdata.upcomingmatchesquery.activity.RegisterMissingTourTranslationsActivity
+            registerUpcomingTranslationsActivity;
+    private final QueryFinishedSeedGroupsActivity queryFinishedSeedGroupsActivity;
+    private final QueryFinishedRoundGroupsActivity queryFinishedRoundGroupsActivity;
+    private final com.rally.protourdata.finishedmatchesquery.activity.RegisterMissingTourTranslationsActivity
+            registerFinishedTranslationsActivity;
 
     @Cacheable(value = "upcoming", key = "#p0")
     public TourMatchDTO upcoming(List<String> tournamentIds) {
-        TourMatchDTO dto = new TourMatchDTO();
-        dto.setSeed(tourMatchQueryDomainService.seedGroups(tournamentIds));
-        dto.setMatch(tourMatchQueryDomainService.upcomingDateGroups(tournamentIds));
-        translate(dto);
-        return dto;
+        QueryUpcomingMatchGroupsActivity.Result result =
+                queryUpcomingMatchGroupsActivity.execute(tournamentIds);
+        registerUpcomingTranslationsActivity.execute(result.missingTranslationKeys());
+        return result.data();
     }
 
     @Cacheable(value = "finished", key = "#p0")
     public TourMatchDTO finished(List<String> tournamentIds) {
-        TourMatchDTO dto = new TourMatchDTO();
-        dto.setSeed(tourMatchQueryDomainService.seedGroups(tournamentIds));
-        dto.setMatch(tourMatchQueryDomainService.finishedRoundGroups(tournamentIds));
-        translate(dto);
-        return dto;
-    }
-
-    private void translate(TourMatchDTO dto) {
-        if (dto.getMatch() != null) {
-            tourTranslationService.matchGroups(dto.getMatch(), TranslationLanguageEnum.ZH_CN);
-
-            List<MatchQueryVO> matches = new ArrayList<>();
-            for (MatchGroupDTO group : dto.getMatch()) {
-                collectMatches(group, matches);
-            }
-            tourTranslationService.matches(matches, TranslationLanguageEnum.ZH_CN);
-        }
-
-        List<SeedVO> seeds = new ArrayList<>();
-        if (dto.getSeed() != null) {
-            for (SeedGroupDTO group : dto.getSeed()) {
-                if (group.getData() != null) seeds.addAll(group.getData());
-            }
-        }
-        tourTranslationService.seeds(seeds, TranslationLanguageEnum.ZH_CN);
-    }
-
-    private void collectMatches(MatchGroupDTO group, List<MatchQueryVO> out) {
-        if (group.getData() != null) out.addAll(group.getData());
-        if (group.getChildren() != null) {
-            for (MatchGroupDTO child : group.getChildren()) collectMatches(child, out);
-        }
+        List<SeedGroupDTO> seeds = queryFinishedSeedGroupsActivity.execute(tournamentIds);
+        QueryFinishedRoundGroupsActivity.Result result =
+                queryFinishedRoundGroupsActivity.execute(tournamentIds, seeds);
+        registerFinishedTranslationsActivity.execute(result.missingTranslationKeys());
+        return result.data();
     }
 }

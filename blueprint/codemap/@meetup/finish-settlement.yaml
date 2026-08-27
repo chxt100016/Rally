@@ -1,0 +1,6 @@
+id: "@meetup.finish-settlement"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/finish-settlement/FinishSettlementService.java
+    role: 主实现
+    symbols: [FinishSettlementService, settle]
+    covers: [R1, R2, R3, R4, R5]

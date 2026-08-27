@@ -1,0 +1,10 @@
+id: personal-profile.gender-update.activity.update-gender
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/gender-update/activity/UpdateGenderActivity.java
+    role: 性别更新活动，读取当前用户、直接覆盖性别并保存完整对象
+    symbols: [UpdateGenderActivity]
+    covers: [A1, A2]
+  - path: rally-app/src/main/java/com/rally/user/ProfileAppService.java
+    role: 保留 UserContext 对外入口以及与本人档案组装的同一事务编排
+    symbols: [ProfileAppService.updateGender]
+    covers: [A1, A2]

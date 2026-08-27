@@ -1,0 +1,6 @@
+id: personal-profile.my-performance-stats.activity.calculate-my-performance-stats
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/my-performance-stats/activity/CalculateMyPerformanceStatsActivity.java
+    role: 查询、筛选并汇总本人盘级战绩
+    symbols: [CalculateMyPerformanceStatsActivity]
+    covers: [A1, A2, A3, A4]

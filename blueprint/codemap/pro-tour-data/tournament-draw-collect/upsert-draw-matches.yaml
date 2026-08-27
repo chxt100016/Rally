@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-draw-collect.activity.upsert-draw-matches
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-draw-collect/activity/UpsertDrawMatchesActivity.java
+    role: 关联已保存签表、校验来源比赛身份并通过 @tour.match C1 按自然键新增或非空刷新快照
+    symbols: [UpsertDrawMatchesActivity, execute]
+    covers: [A1, A2, A3]

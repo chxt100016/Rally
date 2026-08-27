@@ -1,0 +1,10 @@
+id: meetup.registration-approve.activity.dispatch-registration-approved-notification
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/DispatchRegistrationApprovedNotificationActivity.java
+    role: 主实现
+    symbols: [DispatchRegistrationApprovedNotificationActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 审批事务编排接入
+    symbols: [RegistrationAppService.approve]
+    covers: [A3]

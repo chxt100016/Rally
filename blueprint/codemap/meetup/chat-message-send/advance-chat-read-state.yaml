@@ -1,0 +1,10 @@
+id: meetup.chat-message-send.activity.advance-chat-read-state
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/ChatAppService.java
+    role: 在既有发送编排中触发消息保存后的阅读状态处理并等待其完成
+    symbols: [ChatAppService, send]
+    covers: [A3]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/service/ChatDomainService.java
+    role: 按既有顺序递增其他现有成员未读数并补建或单调推进发送者已读状态
+    symbols: [ChatDomainService, send, advanceReadPosition]
+    covers: [A1, A2, A3]

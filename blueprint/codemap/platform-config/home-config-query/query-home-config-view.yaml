@@ -1,0 +1,6 @@
+id: platform-config.home-config-query.activity.query-home-config-view
+files:
+  - path: rally-app/src/main/java/com/rally/platform-config/home-config-query/activity/QueryHomeConfigViewActivity.java
+    role: 按固定三项顺序查询 global 记录并组装原值、默认值、版本和覆盖状态
+    symbols: [QueryHomeConfigViewActivity]
+    covers: [A1, A2, A3]

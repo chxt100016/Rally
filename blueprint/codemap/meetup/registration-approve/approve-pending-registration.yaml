@@ -1,0 +1,14 @@
+id: meetup.registration-approve.activity.approve-pending-registration
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/ApprovePendingRegistrationActivity.java
+    role: 主实现
+    symbols: [ApprovePendingRegistrationActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-app/src/main/java/com/rally/meetup/activity/ApprovedRegistrationContext.java
+    role: 后续步骤上下文
+    symbols: [ApprovedRegistrationContext]
+    covers: [A4]
+  - path: rally-app/src/main/java/com/rally/meetup/RegistrationAppService.java
+    role: 对外编排入口
+    symbols: [RegistrationAppService.approve]
+    covers: [A1, A2, A3, A4]

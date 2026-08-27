@@ -30,7 +30,7 @@ sequenceDiagram
 
 ## 活动契约
 
-返回支付单号、业务类型/ref、付款人、本金、手续费、总额与对外状态；PENDING→UNPAID、PAID→PAID、CLOSED/FAILED→CLOSED。
+返回支付单号、refBizId、付款人、本金、手续费、总额与对外状态，不交付内部 bizType；PENDING→UNPAID、PAID→PAID、CLOSED/FAILED→CLOSED。
 
 ## 异常分支
 
@@ -51,7 +51,7 @@ A3 映射对外状态
 ## 详细流程
 
 1. 使用已验证 paymentId 读取本地最新状态，不再次查询渠道。
-2. 交付 bizId、bizType、refBizId、payerUserId、base/fee/payAmount。
+2. 交付 bizId、refBizId、payerUserId、base/fee/payAmount；保持 main DTO，不增加 bizType。
 3. PENDING 映射 UNPAID，PAID 映射 PAID，CLOSED 和 FAILED 都映射 CLOSED。
 4. 本地已终态路径会直接执行本活动，未触发前置推进也能正常返回。
 

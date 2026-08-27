@@ -4,10 +4,16 @@ import com.rally.domain.payment.enums.BizTypeEnum;
 import com.rally.domain.payment.enums.PayChannelEnum;
 import com.rally.domain.payment.model.PaymentOrder;
 import com.rally.domain.payment.service.PaymentDomainService;
+import com.rally.domain.auth.exception.BusinessException;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.gateway.TournamentEntryRepository;
 import com.rally.domain.tournament.gateway.TournamentRepository;
 import com.rally.domain.tournament.model.Tournament;
 import com.rally.domain.tournament.model.TournamentEntry;
+import com.rally.domain.tournament.roundprogress.RoundProgressDecision;
+import com.rally.domain.tournament.roundprogress.RoundProgressRejection;
+import com.rally.domain.tournament.roundprogress.RoundProgressResult;
+import com.rally.domain.tournament.roundprogress.TournamentRoundProgressDecisionService;
 import com.rally.domain.utils.Assert;
 import com.rally.domain.auth.enums.BizErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +29,7 @@ public class TournamentPaymentService {
     private final PaymentDomainService paymentDomainService;
     private final TournamentRepository tournamentRepository;
     private final TournamentEntryRepository tournamentEntryRepository;
-    private final TournamentRoundProgressService tournamentRoundProgressService;
+    private final TournamentRoundProgressDecisionService roundProgressDecisionService;
 
     /**
      * 建单：校验 entry 处于 PAYING、赛事未满员 → 建单
@@ -51,7 +57,7 @@ public class TournamentPaymentService {
 
         entry.advanceToMainDrawPaid(tournament.getData().getTotalSlots());
         tournamentEntryRepository.save(entry.getData());
-        tournamentRoundProgressService.advanceIfReady(tournamentId);
+        advanceRoundIfReady(tournamentId);
 
         Tournament latestTournament = getTournament(tournamentId);
         if (latestTournament.isSlotsFull()) {
@@ -80,5 +86,28 @@ public class TournamentPaymentService {
         var data = tournamentEntryRepository.findByBizId(entryBizId);
         Assert.notNull(data, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
         return new TournamentEntry(data);
+    }
+
+    private void advanceRoundIfReady(String tournamentId) {
+        RoundProgressResult result = roundProgressDecisionService.evaluate(tournamentId);
+        if (!result.isAccepted()) {
+            throw roundProgressRejection(result.getRejection());
+        }
+        if (result.getDecision() != RoundProgressDecision.ADVANCE) {
+            return;
+        }
+        TournamentRoundEnum targetRound = result.getTargetRound();
+        if (targetRound == null) {
+            throw new BusinessException(BizErrorCode.OPERATION_FAILED, "轮次推进目标不能为空");
+        }
+        tournamentRepository.advanceCurrentRoundIfLater(tournamentId, targetRound);
+    }
+
+    private BusinessException roundProgressRejection(RoundProgressRejection rejection) {
+        if (rejection == RoundProgressRejection.TOURNAMENT_NOT_FOUND) {
+            return new BusinessException(BizErrorCode.TOURNAMENT_NOT_FOUND);
+        }
+        return new BusinessException(BizErrorCode.TOURNAMENT_CONFIG_INCOMPLETE,
+                "正赛签位数只能是2到64的2次方");
     }
 }

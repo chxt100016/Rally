@@ -1,0 +1,6 @@
+id: content-production.tournament-poster-prompt.activity.generate-standard-poster-prompt
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/tournament-poster-prompt/activity/GenerateStandardPosterPromptActivity.java
+    role: 主实现
+    symbols: [GenerateStandardPosterPromptActivity]
+    covers: [A1, A2, A3]

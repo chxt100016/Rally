@@ -1,0 +1,6 @@
+id: personal-profile.player-home.activity.query-player-review-summary
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/player-home/activity/QueryPlayerReviewSummaryActivity.java
+    role: 读取目标全部获评并投影总数与最多五个高频标签
+    symbols: [QueryPlayerReviewSummaryActivity]
+    covers: [A1, A2, A3]

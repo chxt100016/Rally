@@ -1,0 +1,6 @@
+id: content-production.pending-translation-batch.activity.translate-pending-content
+files:
+  - path: rally-app/src/main/java/com/rally/content-production/pending-translation-batch/activity/TranslatePendingContentActivity.java
+    role: 待译条目分批翻译与保存编排
+    symbols: [TranslatePendingContentActivity]
+    covers: [A1, A2, A3, A4]

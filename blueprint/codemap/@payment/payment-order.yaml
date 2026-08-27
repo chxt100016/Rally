@@ -1,0 +1,58 @@
+id: "@payment.payment-order"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/PaymentOrder.java
+    role: 聚合根与命令实现
+    symbols: [PaymentOrder]
+    covers: [I1, I2, I3, I4, I5, C1, C2, C3, C4, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/PaymentOrderState.java
+    role: 表状态快照与定向状态迁移
+    symbols: [PaymentOrderState]
+    covers: [I1, I2, I3, I4, C1, C2, C3, C4, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/PaymentOrderPersistence.java
+    role: payment_order 唯一写端口与状态 CAS
+    symbols: [PaymentOrderPersistence]
+    covers: [I3, I4, I5, C1, C2, C3, C4, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/PaymentOrderStatus.java
+    role: 支付单状态机
+    symbols: [PaymentOrderStatus]
+    covers: [I3, I4, I5, C1, C2, C3, C4, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/PaymentOrderConfirmation.java
+    role: 支付确认幂等结论
+    symbols: [PaymentOrderConfirmation]
+    covers: [C3]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/PaymentOrderClosure.java
+    role: 关闭与幂等结论
+    symbols: [PaymentOrderClosure]
+    covers: [C4]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/PaymentOrderInsertResult.java
+    role: 建单唯一键写入结论
+    symbols: [PaymentOrderInsertResult]
+    covers: [I1, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/PaymentOrderIdGenerator.java
+    role: 支付业务编号生成端口
+    symbols: [PaymentOrderIdGenerator]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/CreatePaymentOrderCommand.java
+    role: 建立支付单命令入参
+    symbols: [CreatePaymentOrderCommand]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/SavePrepayCommand.java
+    role: 保存预支付凭证命令入参
+    symbols: [SavePrepayCommand]
+    covers: [C2]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/ConfirmPaymentCommand.java
+    role: 渠道支付结果命令入参
+    symbols: [ConfirmPaymentCommand]
+    covers: [I4, I5, C3]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/ClosePaymentCommand.java
+    role: 关闭待付单命令入参
+    symbols: [ClosePaymentCommand]
+    covers: [I3, I5, C4]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/FailPaymentOrderCommand.java
+    role: 标记建单失败命令入参
+    symbols: [FailPaymentOrderCommand]
+    covers: [I3, I5, C5]
+  - path: rally-domain/src/main/java/com/rally/domain/payment-order/PaymentOrderDomainException.java
+    role: 领域错误标识
+    symbols: [PaymentOrderDomainException]
+    covers: [I1, I2, I3, I4, I5]

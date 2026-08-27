@@ -1,0 +1,6 @@
+id: tournament.booking-reject.activity.reject-booking-on-confirm
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/booking-reject/activity/RejectBookingOnConfirmActivity.java
+    role: 确认赛约时拒赛的事务编排、赛段计数、跨聚合释放与提交后通知
+    symbols: [RejectBookingOnConfirmActivity]
+    covers: [A1, A2, A3, A4, A5]

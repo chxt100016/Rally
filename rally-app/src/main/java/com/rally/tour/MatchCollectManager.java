@@ -1,15 +1,19 @@
 package com.rally.tour;
 
-import com.rally.tour.model.Discipline;
-import com.rally.tour.model.Match;
+import com.rally.protourdata.tournamentdrawcollect.activity.UpsertDrawEntriesActivity;
+import com.rally.protourdata.tournamentdrawcollect.activity.UpsertDrawMatchesActivity;
+import com.rally.protourdata.tournamentdrawcollect.activity.UpsertDrawPlayersActivity;
+import com.rally.protourdata.tournamentschedulecollect.activity.UpsertMatchSchedulesActivity;
+import com.rally.protourdata.tournamentschedulecollect.activity.UpsertScheduleDrawActivity;
+import com.rally.protourdata.tournamentschedulecollect.activity.UpsertScheduleEntriesActivity;
+import com.rally.protourdata.tournamentschedulecollect.activity.UpsertSchedulePlayersActivity;
+import com.rally.protourdata.tournamentlivecollect.activity.UpsertLiveMatchSnapshotsActivity;
 import com.rally.tour.client.MatchCollectClient;
 import com.rally.tour.client.MatchCollectResult;
 import com.rally.tour.parser.CollectType;
 import com.rally.tour.parser.DrawParams;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;
@@ -18,37 +22,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
+@RequiredArgsConstructor
 public class MatchCollectManager {
 
-    @Value("${tour.collect.doubles:false}")
-    private boolean collectDoubles;
-
-    @Resource
-    private TournamentCollectService tournamentCollectService;
-    @Resource
-    private DrawCollectService drawCollectService;
-    @Resource
-    private MatchCollectService matchCollectService;
-    @Resource
-    private PlayerCollectService playerCollectService;
-
-    @Resource
-    private List<MatchCollectClient> matchCollectClients;
+    private final List<MatchCollectClient> matchCollectClients;
+    private final com.rally.protourdata.tournamentdrawcollect.activity.UpsertTournamentDrawActivity
+            upsertDrawActivity;
+    private final UpsertDrawMatchesActivity upsertDrawMatchesActivity;
+    private final UpsertDrawPlayersActivity upsertDrawPlayersActivity;
+    private final UpsertDrawEntriesActivity upsertDrawEntriesActivity;
+    private final UpsertScheduleDrawActivity upsertScheduleDrawActivity;
+    private final UpsertMatchSchedulesActivity upsertMatchSchedulesActivity;
+    private final UpsertSchedulePlayersActivity upsertSchedulePlayersActivity;
+    private final UpsertScheduleEntriesActivity upsertScheduleEntriesActivity;
+    private final com.rally.protourdata.tournamentlivecollect.activity.UpsertTournamentDrawActivity
+            upsertLiveDrawActivity;
+    private final UpsertLiveMatchSnapshotsActivity upsertLiveMatchSnapshotsActivity;
 
     private Map<CollectType, MatchCollectClient> clients;
 
     @PostConstruct
     private void initClients() {
         clients = matchCollectClients.stream().collect(Collectors.toMap(
-                        MatchCollectClient::collectType,
-                        client -> client,
-                        (a, b) -> {
-                            throw new IllegalStateException("重复的比赛采集 Client: " + a.collectType());
-                        },
-                        () -> new EnumMap<>(CollectType.class)
-                ));
+                MatchCollectClient::collectType,
+                client -> client,
+                (first, second) -> {
+                    throw new IllegalStateException("重复的比赛采集 Client: " + first.collectType());
+                },
+                () -> new EnumMap<>(CollectType.class)));
         EnumSet<CollectType> missing = EnumSet.allOf(CollectType.class);
         missing.removeAll(clients.keySet());
         if (!missing.isEmpty()) {
@@ -61,43 +63,40 @@ public class MatchCollectManager {
         if (client == null) {
             throw new IllegalArgumentException("未注册比赛采集 Client: " + type);
         }
-        collect(params, client);
-    }
-
-    void collect(DrawParams params, MatchCollectClient client) {
         List<MatchCollectResult> draws = client.collect(params);
-
         for (MatchCollectResult draw : draws) {
-            if (!shouldCollect(draw.getDiscipline())) continue;
-
-            String tournamentId = draw.getTournamentId();
-            if (!tournamentCollectService.exists(tournamentId)) {
-                log.warn("Tournament not found, skip draw: {}", tournamentId);
-                continue;
+            switch (type.getPhase()) {
+                case DRAW -> persistDraw(params, draw);
+                case OOP -> persistSchedule(params, draw);
+                case LIVE -> persistLive(params, draw);
             }
-
-            Long drawId = drawCollectService.saveOrUpdate(
-                    tournamentId, draw.getYear(), draw.getDrawTypeCode(),
-                    draw.getDrawMeta().getDrawSize(), draw.getDrawMeta().getTotalRounds());
-
-            List<Match> matches = draw.getMatches();
-            matches.forEach(match -> match.setDrawId(drawId));
-            try {
-                matchCollectService.saveMatches(matches);
-            } catch (RuntimeException e) {
-                log.error("比赛保存失败: collectType={}, tournamentId={}, year={}, drawType={}, drawId={}, matchCount={}",
-                        client.collectType(), tournamentId, draw.getYear(), draw.getDrawTypeCode(), drawId,
-                        matches.size(), e);
-                throw e;
-            }
-
-            playerCollectService.savePlayers(draw.getPlayers());
-            draw.getEntries().forEach(entry -> entry.setDrawId(drawId));
-            tournamentCollectService.saveEntries(draw.getEntries());
         }
     }
 
-    private boolean shouldCollect(Discipline discipline) {
-        return discipline != Discipline.DOUBLES || collectDoubles;
+    private void persistDraw(DrawParams target, MatchCollectResult draw) {
+        Long drawId = upsertDrawActivity.execute(draw);
+        if (drawId == null) {
+            return;
+        }
+        upsertDrawMatchesActivity.execute(drawId, draw.getMatches());
+        upsertDrawPlayersActivity.execute(draw.getPlayers(), target.getTour());
+        upsertDrawEntriesActivity.execute(drawId, draw.getEntries());
+    }
+
+    private void persistSchedule(DrawParams target, MatchCollectResult draw) {
+        Long drawId = upsertScheduleDrawActivity.execute(target, draw);
+        if (drawId == null) {
+            return;
+        }
+        upsertMatchSchedulesActivity.execute(drawId, draw.getMatches());
+        upsertSchedulePlayersActivity.execute(draw.getPlayers(), target.getTour());
+        upsertScheduleEntriesActivity.execute(drawId, draw.getEntries());
+    }
+
+    private void persistLive(DrawParams target, MatchCollectResult draw) {
+        Long drawId = upsertLiveDrawActivity.execute(target, draw);
+        if (drawId != null) {
+            upsertLiveMatchSnapshotsActivity.execute(drawId, draw.getMatches());
+        }
     }
 }

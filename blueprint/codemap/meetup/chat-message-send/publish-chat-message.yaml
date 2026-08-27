@@ -1,0 +1,10 @@
+id: meetup.chat-message-send.activity.publish-chat-message
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/ChatAppService.java
+    role: 核实约球聊天资格、取得发送者当前资料并编排消息发布
+    symbols: [ChatAppService, send, assertIn]
+    covers: [A1, A2, A3, A4]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/service/ChatDomainService.java
+    role: 生成消息编号与时间、保存发送者快照和消息内容并返回已保存消息
+    symbols: [ChatDomainService, send]
+    covers: [A3, A4]

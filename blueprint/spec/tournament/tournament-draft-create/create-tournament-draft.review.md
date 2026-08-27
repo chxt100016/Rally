@@ -19,3 +19,15 @@
 - [Q3] 初始状态、默认字段、事务边界和成功响应是什么？
   > 生成业务编号并保存配置，强制 status=DRAFT、currentRound=QUALIFIER、mainDrawLockedSlots=0、endTime/offlineMeetupId=null。TournamentAdminAppService.create @Transactional，任何异常回滚。成功返回 Result<TournamentIdDTO> 只含 tournamentId，不创建其他对象。
   → 已写入详细流程第 5-6 步、接口契约与事务线索
+
+- [Q4] offlineFromRound 为空时是否继续表示赛事全程线上？
+  > 是。保持当前可选字段语义，不创建线下承接配置。
+  → 已落入接口契约与详细流程第 2 步。
+
+- [Q5] 创建赛事时是否继续不校验赛事名称唯一性？
+  > 是。维持现有创建规则，不新增名称唯一性契约。
+  → 已落入服务边界。
+
+- [Q6] 城市编码查不到城市时是否继续按 OPERATION_FAILED 返回系统异常？
+  > 是。保持现有异常映射，不新增城市专用错误码。
+  → 已落入详细流程第 4 步与异常分支。

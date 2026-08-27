@@ -25,4 +25,4 @@ files:
   - path: rally-infrastructure/src/main/java/com/rally/config/ResourceConfigLoader.java
     role: 名录加载
     symbols: [ResourceConfigLoader]
-    covers: [R5]
+    covers: [R5, R7]

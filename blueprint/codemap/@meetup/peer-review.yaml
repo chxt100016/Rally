@@ -1,0 +1,46 @@
+id: "@meetup.peer-review"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/PeerReviewSet.java
+    role: 同场评价集合聚合根与提交、覆盖查询主实现
+    symbols: [PeerReviewSet]
+    covers: [I1, I2, I3, I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/PeerReviewItem.java
+    role: 评价项实体与稳定身份覆盖
+    symbols: [PeerReviewItem]
+    covers: [I1, I2, I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/PeerReviewType.java
+    role: 评价维度与数据库编码映射
+    symbols: [PeerReviewType]
+    covers: [I1, I3, I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/LevelVote.java
+    role: 水平评价合法值与数据库编码映射
+    symbols: [LevelVote]
+    covers: [I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/AttendanceVote.java
+    role: 出勤评价合法值与数据库编码映射
+    symbols: [AttendanceVote]
+    covers: [I3, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/PeerReviewSubmission.java
+    role: 批量评价项命令值对象
+    symbols: [PeerReviewSubmission]
+    covers: [I2, I3, I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/SubmitPeerReviewsCommand.java
+    role: 提交评价批次命令入参
+    symbols: [SubmitPeerReviewsCommand]
+    covers: [I2, I3, I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/PeerReviewEligibility.java
+    role: 约球边界传入的可评价结论
+    symbols: [PeerReviewEligibility]
+    covers: [I2, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/PeerReviewIdGenerator.java
+    role: 评价项雪花业务编号生成端口
+    symbols: [PeerReviewIdGenerator]
+    covers: [I1, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/PeerReviewStatus.java
+    role: 评价集合状态
+    symbols: [PeerReviewStatus]
+    covers: [C1]
+  - path: rally-domain/src/main/java/com/rally/domain/peer-review/PeerReviewDomainException.java
+    role: 领域错误标识承载
+    symbols: [PeerReviewDomainException]
+    covers: [I1, I2, I3, I4, C1]

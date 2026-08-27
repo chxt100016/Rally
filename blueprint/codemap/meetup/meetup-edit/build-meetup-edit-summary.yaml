@@ -1,0 +1,10 @@
+id: meetup.meetup-edit.activity.build-meetup-edit-summary
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/BuildMeetupEditSummaryActivity.java
+    role: 主实现
+    symbols: [BuildMeetupEditSummaryActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/meetup/MeetupAppService.java
+    role: 编辑流程编排入口
+    symbols: [MeetupAppService.edit]
+    covers: [A1, A2, A3]

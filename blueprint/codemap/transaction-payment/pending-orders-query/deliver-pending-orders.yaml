@@ -1,0 +1,6 @@
+id: transaction-payment.pending-orders-query.activity.deliver-pending-orders
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/pending-orders-query/activity/DeliverPendingOrdersActivity.java
+    role: 当前付款人 PENDING 全量查询及既有金额、关联业务和 UNPAID 摘要映射
+    symbols: [DeliverPendingOrdersActivity]
+    covers: [A1, A2, A3]

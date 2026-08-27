@@ -1,0 +1,10 @@
+id: personal-profile.profile-video-add.activity.append-profile-video
+files:
+  - path: rally-app/src/main/java/com/rally/personal-profile/profile-video-add/activity/AppendProfileVideoActivity.java
+    role: 读取当前用户档案、预试签名构址并原样追加视频后保存完整档案
+    symbols: [AppendProfileVideoActivity]
+    covers: [A1, A2, A3]
+  - path: rally-app/src/main/java/com/rally/user/ProfileAppService.java
+    role: 保留原上传视频入口、事务边界及保存后本人档案聚合响应
+    symbols: [ProfileAppService.uploadVideo]
+    covers: [A1, A2, A3]

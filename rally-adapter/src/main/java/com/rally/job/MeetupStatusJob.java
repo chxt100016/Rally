@@ -1,7 +1,7 @@
 package com.rally.job;
 
-import com.rally.domain.court.service.CourtDomainService;
-import com.rally.domain.meetup.gateway.MeetupRepository;
+import com.rally.court.activity.SettleCourtHeatActivity;
+import com.rally.meetup.activity.SettleFinishedMeetupsActivity;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,10 +19,10 @@ import org.springframework.stereotype.Component;
 public class MeetupStatusJob {
 
     @Resource
-    private MeetupRepository meetupRepository;
+    private SettleFinishedMeetupsActivity settleFinishedMeetupsActivity;
 
     @Resource
-    private CourtDomainService courtDomainService;
+    private SettleCourtHeatActivity settleCourtHeatActivity;
 
     /**
      * 约球状态兜底（凌晨 2:00）
@@ -32,7 +32,7 @@ public class MeetupStatusJob {
     public void updateFinishedStatus() {
         log.info("开始执行约球状态兜底任务");
         try {
-            int affected = meetupRepository.batchUpdateToFinished();
+            int affected = settleFinishedMeetupsActivity.execute();
             log.info("约球状态兜底任务完成，更新 {} 条记录", affected);
         } catch (Exception e) {
             log.error("约球状态兜底任务异常", e);
@@ -47,7 +47,7 @@ public class MeetupStatusJob {
     public void statisticsCourtMeetupCount() {
         log.info("开始执行球场约球次数统计任务");
         try {
-            courtDomainService.statisticsYesterdayMeetupCount();
+            settleCourtHeatActivity.execute();
             log.info("球场约球次数统计任务完成");
         } catch (Exception e) {
             log.error("球场约球次数统计任务异常", e);

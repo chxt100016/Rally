@@ -57,6 +57,6 @@ flowchart TD
 - 调度：`TournamentMatchJob.run()`
 - 开关：`job.tournamentMatch.enabled=true`
 - cron：`${job.tournamentMatch.cron:0 0 2 * * ?}`
-- 调用：`TournamentAdminAppService.runTournamentMatch()` → `TournamentBatchMatchService.matchCurrentRound()` → `TournamentMatchingService.group()` → `TournamentMatchAssembleService.assemble()`
+- 调用：`TournamentAdminAppService.runTournamentMatch()` → `RunCurrentRoundMatchingActivity.executeScheduled()` → `TournamentBatchMatchService.matchCurrentRound()` → `TournamentMatchmakingService.match()` → `TournamentMatchAssembleService.assemble()`
 - 隔离：应用服务逐赛事 `try/catch`，领域服务以单赛事 `@Transactional` 保存
 - 通知：`NoticeScene.TOURNAMENT_MATCHED`，匹配落地后按用户去重异步发送

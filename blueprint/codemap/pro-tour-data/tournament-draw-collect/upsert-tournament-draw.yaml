@@ -1,0 +1,6 @@
+id: pro-tour-data.tournament-draw-collect.activity.upsert-tournament-draw
+files:
+  - path: rally-app/src/main/java/com/rally/pro-tour-data/tournament-draw-collect/activity/UpsertTournamentDrawActivity.java
+    role: 过滤可保存来源签表并按原始复合身份调用签表聚合新增或独立非空刷新结构
+    symbols: [UpsertTournamentDrawActivity, execute]
+    covers: [A1, A2, A3]

@@ -1,0 +1,6 @@
+id: transaction-payment.payment-status-sync.activity.reconcile-payment-status
+files:
+  - path: rally-app/src/main/java/com/rally/transaction-payment/payment-status-sync/activity/ReconcilePaymentStatusActivity.java
+    role: 付款人校验、终态短路、渠道查单与首次支付确认编排
+    symbols: [ReconcilePaymentStatusActivity]
+    covers: [A1, A2, A3, A4]

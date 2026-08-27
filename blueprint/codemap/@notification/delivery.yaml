@@ -1,0 +1,30 @@
+id: "@notification.delivery"
+files:
+  - path: rally-domain/src/main/java/com/rally/domain/delivery/NotificationDelivery.java
+    role: 单行聚合根与状态命令
+    symbols: [NotificationDelivery]
+    covers: [I1, I2, I3, I4, I5, C2, C4]
+  - path: rally-domain/src/main/java/com/rally/domain/delivery/NotificationDeliveryDispatcher.java
+    role: 提交后异步触达与兼容编排
+    symbols: [NotificationDeliveryDispatcher]
+    covers: [I2, I3, I4, I5, C1, C2, C3, C4]
+  - path: rally-domain/src/main/java/com/rally/domain/delivery/TriggerNotificationCommand.java
+    role: 业务通知触发命令
+    symbols: [TriggerNotificationCommand]
+    covers: [I4, C1]
+  - path: rally-domain/src/main/java/com/rally/domain/delivery/AcquireDeliveryCommand.java
+    role: 触达执行权命令
+    symbols: [AcquireDeliveryCommand]
+    covers: [I1, I2, I3, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/delivery/RecordDeliveryResultCommand.java
+    role: 渠道终态回写命令
+    symbols: [RecordDeliveryResultCommand]
+    covers: [I5, C4]
+  - path: rally-domain/src/main/java/com/rally/domain/delivery/DeliveryIdGenerator.java
+    role: 触达流水号生成端口
+    symbols: [DeliveryIdGenerator]
+    covers: [I1, C2]
+  - path: rally-domain/src/main/java/com/rally/domain/delivery/DeliveryDomainException.java
+    role: 聚合不变量错误标识
+    symbols: [DeliveryDomainException]
+    covers: [I1, I3, I4, I5]

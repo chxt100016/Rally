@@ -1,0 +1,6 @@
+id: meetup.score-update.activity.update-score-record
+files:
+  - path: rally-app/src/main/java/com/rally/meetup/activity/UpdateScoreRecordActivity.java
+    role: 复盘资格校验与宽松比分修正编排
+    symbols: [UpdateScoreRecordActivity, execute]
+    covers: [A1, A2, A3, A4]
