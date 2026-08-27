@@ -39,6 +39,8 @@ public class TournamentDTO {
     private String offlineFromRoundShow;
     /** 冠军报名编号；赛事未结束时为 null。 */
     private Integer championEntryNo;
+    /** 冠军成员；尚未产生冠军或冠军报名缺失时为空列表。 */
+    private List<TournamentChampionUserDTO> championUsers = List.of();
     private String matchRuleDescription;
     private TournamentDisplayStatusEnum displayStatus;
     private String displayStatusShow;

@@ -1,10 +1,18 @@
 id: tournament.tournament-detail.activity.assemble-tournament-detail
 files:
   - path: rally-app/src/main/java/com/rally/tournament/tournamentdetail/activity/AssembleTournamentDetailActivity.java
-    role: 聚合公开赛事与个人进度、统一正赛可晋级和已晋级名额、补比赛对手及限制、推导动作和活动卡片、批量填充资料并签名图片
+    role: 聚合公开赛事与个人进度、按冠军报名提取成员并去重、统一正赛可晋级和已晋级名额、补比赛对手及限制、推导动作和活动卡片、批量填充资料并签名图片
     symbols: [AssembleTournamentDetailActivity]
     covers: [A1, A2, A3, A4, A5]
   - path: rally-app/src/main/java/com/rally/tournament/TournamentDetailAppService.java
     role: 保留既有详情接口签名、可选登录身份读取与活动委托
     symbols: [TournamentDetailAppService.detail]
     covers: [A1, A2, A3, A4, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentDTO.java
+    role: 在赛事公开区块承载冠军报名编号和冠军成员列表
+    symbols: [TournamentDTO.championEntryNo, TournamentDTO.championUsers]
+    covers: [A1, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentChampionUserDTO.java
+    role: 定义冠军成员 userId、昵称映射名称、签名头像和性别字段
+    symbols: [TournamentChampionUserDTO]
+    covers: [A1, A5]

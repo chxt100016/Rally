@@ -9,14 +9,17 @@ import com.rally.domain.tournament.enums.TournamentActionStateEnum;
 import com.rally.domain.tournament.enums.TournamentJoinRestrictionEnum;
 import com.rally.domain.tournament.enums.RebookReasonEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
+import com.rally.domain.tournament.gateway.TournamentEntryRepository;
 import com.rally.domain.tournament.model.MatchOpponentDTO;
 import com.rally.domain.tournament.model.MatchParticipantDTO;
 import com.rally.domain.tournament.model.MyCurrentMatchDTO;
 import com.rally.domain.tournament.model.TournamentActionDTO;
 import com.rally.domain.tournament.model.TournamentBracketMatchDTO;
+import com.rally.domain.tournament.model.TournamentChampionUserDTO;
 import com.rally.domain.tournament.model.TournamentDetailDTO;
 import com.rally.domain.tournament.model.TournamentCommentStateDTO;
 import com.rally.domain.tournament.model.TournamentEntrantDTO;
+import com.rally.domain.tournament.model.TournamentEntryData;
 import com.rally.domain.tournament.model.TournamentRejectRecordDTO;
 import com.rally.domain.tournament.service.TournamentDetailService;
 import com.rally.domain.tournament.service.TournamentPolicy;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,6 +46,8 @@ import java.util.stream.Collectors;
 public class AssembleTournamentDetailActivity {
 
     private final TournamentDetailService tournamentDetailService;
+
+    private final TournamentEntryRepository tournamentEntryRepository;
 
     private final TournamentPolicy tournamentPolicy;
 
@@ -59,6 +65,7 @@ public class AssembleTournamentDetailActivity {
     public TournamentDetailDTO execute(String tournamentId, String userId) {
         TournamentDetailDTO detail = tournamentDetailService.assembleDetail(tournamentId, userId);
         fillProgress(detail);
+        fillChampionUsers(detail, tournamentId);
         fillCommentState(detail, tournamentId, userId);
         if (detail.getTournament() != null) {
             detail.getTournament().setPosterUrl(QiniuConfiguration.buildSignedUrl(detail.getTournament().getPosterUrl()));
@@ -80,6 +87,44 @@ public class AssembleTournamentDetailActivity {
         fillMeetupCard(detail);
         fillOfflineMeetupCard(detail);
         return detail;
+    }
+
+    /**
+     * 按冠军报名编号提取成员编号。报名缺失时降级为空列表，双打按报名中的用户、搭档顺序展示。
+     */
+    private void fillChampionUsers(TournamentDetailDTO detail, String tournamentId) {
+        if (detail.getTournament() == null || detail.getTournament().getChampionEntryNo() == null) {
+            if (detail.getTournament() != null) {
+                detail.getTournament().setChampionUsers(List.of());
+            }
+            return;
+        }
+
+        Integer championEntryNo = detail.getTournament().getChampionEntryNo();
+        LinkedHashSet<String> championUserIds = new LinkedHashSet<>();
+        tournamentEntryRepository.findByTournamentId(tournamentId).stream()
+                .filter(entry -> Objects.equals(championEntryNo, entry.getEntryNo()))
+                .forEach(entry -> addEntryUserIds(championUserIds, entry));
+
+        List<TournamentChampionUserDTO> championUsers = championUserIds.stream()
+                .map(this::toChampionUser)
+                .collect(Collectors.toList());
+        detail.getTournament().setChampionUsers(championUsers);
+    }
+
+    private void addEntryUserIds(LinkedHashSet<String> userIds, TournamentEntryData entry) {
+        if (entry.getUserId() != null) {
+            userIds.add(entry.getUserId());
+        }
+        if (entry.getPartnerId() != null) {
+            userIds.add(entry.getPartnerId());
+        }
+    }
+
+    private TournamentChampionUserDTO toChampionUser(String userId) {
+        TournamentChampionUserDTO championUser = new TournamentChampionUserDTO();
+        championUser.setUserId(userId);
+        return championUser;
     }
 
     /**
@@ -151,6 +196,9 @@ public class AssembleTournamentDetailActivity {
 
     private List<String> collectUserIds(TournamentDetailDTO detail) {
         List<String> userIds = new ArrayList<>();
+        if (detail.getTournament() != null && detail.getTournament().getChampionUsers() != null) {
+            detail.getTournament().getChampionUsers().forEach(champion -> userIds.add(champion.getUserId()));
+        }
         MyCurrentMatchDTO myCurrentMatch = detail.getMyCurrentMatch();
         if (myCurrentMatch != null && myCurrentMatch.getParticipants() != null) {
             myCurrentMatch.getParticipants().forEach(p -> userIds.add(p.getUserId()));
@@ -171,6 +219,9 @@ public class AssembleTournamentDetailActivity {
     }
 
     private void fillNicknames(TournamentDetailDTO detail, Map<String, UserProfile> profiles) {
+        if (detail.getTournament() != null && detail.getTournament().getChampionUsers() != null) {
+            detail.getTournament().getChampionUsers().forEach(champion -> fillChampionUserInfo(champion, profiles));
+        }
         MyCurrentMatchDTO myCurrentMatch = detail.getMyCurrentMatch();
         if (myCurrentMatch != null && myCurrentMatch.getParticipants() != null) {
             myCurrentMatch.getParticipants().forEach(p -> fillParticipantInfo(p, profiles));
@@ -199,6 +250,16 @@ public class AssembleTournamentDetailActivity {
             detail.getEntrantOverview().getRounds().forEach(round ->
                     round.getEntrants().forEach(entrant -> fillEntrantInfo(entrant, profiles)));
         }
+    }
+
+    private void fillChampionUserInfo(TournamentChampionUserDTO champion, Map<String, UserProfile> profiles) {
+        UserProfile profile = profiles.get(champion.getUserId());
+        if (profile == null || profile.getUser() == null) {
+            return;
+        }
+        champion.setName(profile.getUser().getNickname());
+        champion.setAvatarUrl(QiniuConfiguration.buildSignedUrl(profile.getUser().getAvatarUrl()));
+        champion.setGender(profile.getUser().getGender());
     }
 
     private void fillEntrantInfo(TournamentEntrantDTO entrant, Map<String, UserProfile> profiles) {
