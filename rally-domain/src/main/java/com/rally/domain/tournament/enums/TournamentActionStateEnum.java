@@ -12,7 +12,7 @@ import lombok.Getter;
 public enum TournamentActionStateEnum {
     NOT_LOGGED_IN("未登录", "登录后查看", "登录后即可报名参赛、查看赛事信息。"),
     NOT_REGISTERED("未报名", "立即报名参赛", "报名成功后进入资格赛匹配池，开赛后自动匹配对手。"),
-    NOT_REGISTERED_CLOSED("报名关闭", "暂不可报名", "当前赛事暂不可报名。"),
+    NOT_REGISTERED_CLOSED("报名关闭", "不可报名", "当前赛事不可报名。"),
     FROZEN("已冻结", "匹配暂时冻结", "重新确认后即可恢复匹配。"),
     AWAIT_QUALIFIER_START("待匹配", "报名成功，等待赛事开始", "报名成功，赛事即将开始匹配。"),
     AWAIT_PAYMENT("待支付", "支付报名费，锁定正赛席位", "你已晋级正赛，请在尽快完成支付以锁定席位。"),
