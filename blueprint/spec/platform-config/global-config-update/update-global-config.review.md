@@ -55,3 +55,15 @@
 - [Q12] 旧 cityAware 字段是否作为未识别扩展字段原样保留但不再校验、不再产生运行效果？
   > 是；cityAware 从已识别字段退出，按其他未知字段原样保留，但发布和首页查询都忽略它。
   → 落实到首页 JSON 规范化和向后兼容说明。
+
+- [Q13] 占位符从 {{cityId}} 重命名为 {{cityCode}} 后，旧 {{cityId}} 是否立即退出登记并在发布时按未知占位符拒绝？
+  > 是，当前只登记 {{cityCode}} 与 {{cityName}}；旧 {{cityId}} 作为未知占位符拒绝发布，不提供双写兼容。
+  → 落实到占位符目录、PARAM_ERROR 和 POSTER URL 校验规则。
+
+- [Q14] 本次是否仅重命名 URL 占位符，poster.cityId 的城市可见性字段及精确匹配规则保持不变？
+  > 是，只改 URL 占位符命名；poster.cityId 仍控制海报可见城市，规则不变。
+  → 落实到首页结构校验和 POSTER 规则，明确字段与占位符分离。
+
+- [Q15] 默认球场链接是否统一使用查询参数 cityCode={{cityCode}}，cityName 和 mode=view 保持不变？
+  > 是，默认地图与球场搜索 URL 使用 cityCode={{cityCode}}&cityName={{cityName}}&mode=view。
+  → 落实到技术线索和默认配置约定。

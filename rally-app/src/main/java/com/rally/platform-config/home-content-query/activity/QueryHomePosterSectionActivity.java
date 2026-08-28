@@ -132,7 +132,7 @@ public class QueryHomePosterSectionActivity {
 
         for (int index = 0; index < urls.length; index++) {
             if (isNotBlank(urls[index])) {
-                urls[index] = urls[index].replace("{{cityId}}", cityCode);
+                urls[index] = urls[index].replace("{{cityCode}}", cityCode);
                 if (needsCityName) {
                     urls[index] = urls[index].replace("{{cityName}}", cityName);
                 }
@@ -166,7 +166,7 @@ public class QueryHomePosterSectionActivity {
             String placeholder = url.substring(opening + 2, closing);
             if ("cityName".equals(placeholder)) {
                 needsCityName = true;
-            } else if (!"cityId".equals(placeholder)) {
+            } else if (!"cityCode".equals(placeholder)) {
                 throw new IllegalArgumentException("导航地址包含未登记或空白占位符");
             }
             cursor = closing + 2;

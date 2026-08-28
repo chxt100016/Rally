@@ -43,3 +43,15 @@
 - [Q9] cityAware 是否从已识别 POSTER 字段中移除，但因未知字段保留规则而允许随 JSON 原样保存？
   > 是，cityAware 不再作为已识别字段校验，但按未知字段保留规则原样保存。
   → 落实到 A1 的字段规则和边界情况。
+
+- [Q10] 发布活动的已登记占位符集合是否直接由 {{cityId}} 替换为 {{cityCode}}，不同时保留旧名称？
+  > 是，集合只保留 {{cityCode}} 与 {{cityName}}，不兼容 {{cityId}}。
+  → 落实到 A1 的占位符白名单。
+
+- [Q11] 旧 {{cityId}} 出现在任一三端 URL 时是否复用现有“包含无效占位符”PARAM_ERROR，不新增错误码？
+  > 是，复用 PARAM_ERROR 和现有无效占位符提示，不新增错误码。
+  → 落实到异常分支与 A1 校验结果。
+
+- [Q12] SystemConfigKey 的内置默认地图和球场搜索 URL 是否都必须同步改为 cityCode={{cityCode}}？
+  > 是，两条内置默认 URL 都改为 cityCode={{cityCode}}，其他参数不变。
+  → 落实到 A1 默认配置与实现映射。

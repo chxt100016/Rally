@@ -65,7 +65,7 @@ flowchart TD
 | `OPERATION_FAILED` | 首次配置的保存操作返回失败 | publish-global-config | 整个数据库事务回滚 | 配置保存失败 |
 | `SYSTEM_ERROR` | 数据库约束或长度拒绝、配置缓存刷新、全量视图查询或事务提交发生未处理异常 | publish-global-config / query-all-config-view | 数据库事务回滚，不返回部分视图；进程内缓存无事务补偿，可能已被清空、部分重建或保留未提交新值 | 系统异常，请稍后重试 |
 
-首页最多 30 个区域；区域 `id` 必须非空、不重复，且仅含字母、数字、下划线或中划线，最长 64 位。区域类型限于 `MEETUP`、`TOUR_MATCH`、`POSTER`、`NEWS`，除 `POSTER` 外同类只能一个。`POSTER` 区域必须有非空标题和海报数组，每区最多 20 张；单张海报的 `actionType` 限于 `NAVIGATE` 或 `PREVIEW`，图片 key 必填，`cityId` 可缺失、为 `null` 或空白字符串，非空时必须是字符串但不校验是否已进入城市名录。`wechatUrl`、`appUrl`、`webUrl` 可选字符串，只有这三个字段允许出现海报导航占位符；当前仅登记 `{{cityId}}` 与 `{{cityName}}`，任何其他 `{{...}}`、空占位符、未闭合 `{{` 或无配对 `}}` 均拒绝发布。
+首页最多 30 个区域；区域 `id` 必须非空、不重复，且仅含字母、数字、下划线或中划线，最长 64 位。区域类型限于 `MEETUP`、`TOUR_MATCH`、`POSTER`、`NEWS`，除 `POSTER` 外同类只能一个。`POSTER` 区域必须有非空标题和海报数组，每区最多 20 张；单张海报的 `actionType` 限于 `NAVIGATE` 或 `PREVIEW`，图片 key 必填，`cityId` 可缺失、为 `null` 或空白字符串，非空时必须是字符串但不校验是否已进入城市名录。`wechatUrl`、`appUrl`、`webUrl` 可选字符串，只有这三个字段允许出现海报导航占位符；当前仅登记 `{{cityCode}}` 与 `{{cityName}}`，旧 `{{cityId}}` 和任何其他 `{{...}}`、空占位符、未闭合 `{{` 或无配对 `}}` 均拒绝发布。
 
 应用校验上限与当前表结构不一致：前者为 100,000 个 Java 字符，`sys_config.config_value` 当前是 `VARCHAR(2048)`；超过数据库容量的值可在通过应用校验后以系统异常失败。
 
@@ -76,7 +76,8 @@ flowchart TD
 - 请求：`HomeConfigUpdateCmd`，`@NotBlank key`、`@NotNull configValue`、`@NotNull version`
 - 发布：`PublishGlobalConfigActivity.execute()`，`@Transactional`
 - 校验：`PublishGlobalConfigActivity` 中的整体首页 JSON 校验与标量配置校验
-- 海报导航占位符：仅 `wechatUrl`、`appUrl`、`webUrl`；当前为 `{{cityId}}`、`{{cityName}}`
+- 海报导航占位符：仅 `wechatUrl`、`appUrl`、`webUrl`；当前为 `{{cityCode}}`、`{{cityName}}`
+- 默认球场导航：`cityCode={{cityCode}}&cityName={{cityName}}&mode=view`
 - 并发更新：`SysConfigService.updateValueIfVersion()`，条件 `id + version`
 - 缓存刷新：`SystemConfig.init()`，只作用于当前 JVM
 - 成功响应：`QueryAllConfigViewActivity.execute()`，返回全部已登记配置

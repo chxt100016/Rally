@@ -1,11 +1,11 @@
 id: platform-config.global-config-update.activity.publish-global-config
 files:
   - path: rally-app/src/main/java/com/rally/platform-config/global-config-update/activity/PublishGlobalConfigActivity.java
-    role: 校验规范化配置（含海报三端 URL 占位符）、编排首次或 CAS 发布，并在事务内重建当前 JVM 缓存
+    role: 校验规范化配置（含海报三端 URL 的 cityCode/cityName 占位符）、编排首次或 CAS 发布，并在事务内重建当前 JVM 缓存
     symbols: [PublishGlobalConfigActivity]
     covers: [A1, A2, A3]
   - path: rally-domain/src/main/java/com/rally/domain/system/enums/SystemConfigKey.java
-    role: 登记唯一完整首页配置键及使用城市占位符的内置默认首页 JSON
+    role: 登记唯一完整首页配置键及使用 cityCode/cityName 占位符的内置默认首页 JSON
     symbols: [SystemConfigKey.HOME_PAGE_CONFIG]
     covers: [A1]
   - path: rally-adapter/src/main/java/com/rally/web/system/SystemController.java

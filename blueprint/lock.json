@@ -604,12 +604,12 @@
     },
     "platform-config.global-config-update": {
       "flow": {
-        "product_hash": "sha256:07519ea69835f1b16f9c708351418ab23b2b7bee0634fcebfbffffd89236dbee",
-        "approved_at": "2026-08-27T15:46:02Z"
+        "product_hash": "sha256:cfa3a5c498e985c0543aa3e6fb3dd6d9d374e220582597f05f23c1b2086cf911",
+        "approved_at": "2026-08-28T04:33:20Z"
       },
       "activity": {
-        "flows_hash": "sha256:6bec8863d36f3bc5f4274fc17acdd766189058330c6a09f208a18aa1b0fcecca",
-        "approved_at": "2026-08-27T15:49:55Z"
+        "flows_hash": "sha256:abf2e261af47ebb041776aa8fbf54428383ce3ce6b5a3dbe13b75ed88fc68d93",
+        "approved_at": "2026-08-28T04:36:00Z"
       }
     },
     "platform-config.group-chat-entry-query": {
@@ -624,12 +624,12 @@
     },
     "platform-config.home-content-query": {
       "flow": {
-        "product_hash": "sha256:bc79c49f3146ef5c36b6297863ece9df6e91ef69fb84106d43d3cd67c83e094d",
-        "approved_at": "2026-08-27T15:47:16Z"
+        "product_hash": "sha256:70518c135b516d0702786a1102d7bee0a48c1a8050b00a55278059c8fe93d3bf",
+        "approved_at": "2026-08-28T04:34:24Z"
       },
       "activity": {
-        "flows_hash": "sha256:e230ce3e5becc5f49fc036fb2724a8d3c22b73cf76b52b32adfdcf0606055013",
-        "approved_at": "2026-08-27T15:49:55Z"
+        "flows_hash": "sha256:91146d984eacc42b64d0ba7660be83239f44a8950ccbd46653e31445e9b152d2",
+        "approved_at": "2026-08-28T04:36:06Z"
       }
     },
     "platform-config.public-config-query": {
@@ -1510,8 +1510,8 @@
     },
     "platform-config.global-config-update.flow.update-global-config": {
       "flow": {
-        "flow_hash": "sha256:74258ef1593eb41fa570be58da1f090ed312dad53bd9b75156aa72dd334c154a",
-        "approved_at": "2026-08-27T15:46:02Z"
+        "flow_hash": "sha256:a457cc3b2700d40afbe34cb3401e7416c59ecd64cc2d8af1e79bc32f5a52e405",
+        "approved_at": "2026-08-28T04:33:20Z"
       }
     },
     "platform-config.group-chat-entry-query.flow.query-group-chat-entry": {
@@ -1522,8 +1522,8 @@
     },
     "platform-config.home-content-query.flow.query-home-content": {
       "flow": {
-        "flow_hash": "sha256:40cc372ceb455a4ea4f29994d624d5fcee2556c82d860a4dcc9384e4471af9cc",
-        "approved_at": "2026-08-27T15:47:16Z"
+        "flow_hash": "sha256:6bcecd7125fc654f29970c5af56bc0feac5279bafe00c461068c4c1894d1cdd4",
+        "approved_at": "2026-08-28T04:34:24Z"
       }
     },
     "platform-config.public-config-query.flow.query-config-value": {
@@ -3858,26 +3858,26 @@
     "platform-config.global-config-update.activity.publish-global-config": {
       "spec": {
         "service": "platform-config.global-config-update",
-        "activity_hash": "sha256:405f66a34ffb2c47cc44d539a8a417ce1b155f19bfee2b6c08a1f58f52053f2b",
-        "approved_at": "2026-08-27T15:49:55Z"
+        "activity_hash": "sha256:f6c581c53df230f5a888bc1b6f87b6083dee4ab5ccf1c95edbdcffcfb39442c7",
+        "approved_at": "2026-08-28T04:36:00Z"
       },
       "impl": {
-        "activity_hash": "sha256:405f66a34ffb2c47cc44d539a8a417ce1b155f19bfee2b6c08a1f58f52053f2b",
+        "activity_hash": "sha256:f6c581c53df230f5a888bc1b6f87b6083dee4ab5ccf1c95edbdcffcfb39442c7",
         "uses_hash": "sha256:c14e73944e574421ff8b8763f338f1ee8c23ba78cdb6590934d10c9ea554c67d",
         "files": [
           "rally-app/src/main/java/com/rally/platform-config/global-config-update/activity/PublishGlobalConfigActivity.java",
           "rally-domain/src/main/java/com/rally/domain/system/enums/SystemConfigKey.java",
           "rally-adapter/src/main/java/com/rally/web/system/SystemController.java"
         ],
-        "verified_at": "2026-08-27T15:52:49Z",
-        "base_commit": "1e2875745448d36b9c3c47b38830779f18ab18c6"
+        "verified_at": "2026-08-28T04:38:08Z",
+        "base_commit": "5cb5186f0576885c7f5241e8ac784095bdd02d63"
       }
     },
     "platform-config.global-config-update.activity.query-all-config-view": {
       "spec": {
         "service": "platform-config.global-config-update",
         "activity_hash": "sha256:3de20dca90ce15fdd89d4fec59b6a66e97ad61de6db19697196904ba4bb24113",
-        "approved_at": "2026-08-27T15:49:55Z"
+        "approved_at": "2026-08-28T04:36:00Z"
       },
       "impl": {
         "activity_hash": "sha256:3de20dca90ce15fdd89d4fec59b6a66e97ad61de6db19697196904ba4bb24113",
@@ -3909,7 +3909,7 @@
       "spec": {
         "service": "platform-config.home-content-query",
         "activity_hash": "sha256:5c4bcbab8d3b7f1ebff4c6df923da158ba367224f6449ddd4fda7f7b91e61d32",
-        "approved_at": "2026-08-27T15:49:55Z"
+        "approved_at": "2026-08-28T04:36:06Z"
       },
       "impl": {
         "activity_hash": "sha256:5c4bcbab8d3b7f1ebff4c6df923da158ba367224f6449ddd4fda7f7b91e61d32",
@@ -3925,7 +3925,7 @@
       "spec": {
         "service": "platform-config.home-content-query",
         "activity_hash": "sha256:d47c67b1722373ce48e06da88291eb1b3af11774d9ef2f4a159dea23209d45b4",
-        "approved_at": "2026-08-27T15:49:55Z"
+        "approved_at": "2026-08-28T04:36:06Z"
       },
       "impl": {
         "activity_hash": "sha256:d47c67b1722373ce48e06da88291eb1b3af11774d9ef2f4a159dea23209d45b4",
@@ -3940,26 +3940,26 @@
     "platform-config.home-content-query.activity.query-home-poster-section": {
       "spec": {
         "service": "platform-config.home-content-query",
-        "activity_hash": "sha256:b5e7aab90137f7ce14565285a9c9b512dc70a5a5eb66535ab93d22d2fc971a2f",
-        "approved_at": "2026-08-27T15:49:55Z"
+        "activity_hash": "sha256:7c69d73c4a56da908ca4ed817a6358a6dd5b009955969694d49941113365e02c",
+        "approved_at": "2026-08-28T04:36:06Z"
       },
       "impl": {
-        "activity_hash": "sha256:b5e7aab90137f7ce14565285a9c9b512dc70a5a5eb66535ab93d22d2fc971a2f",
+        "activity_hash": "sha256:7c69d73c4a56da908ca4ed817a6358a6dd5b009955969694d49941113365e02c",
         "uses_hash": "sha256:6499f246147793a371a34d64d861aad9c6382fd03994b3ba441ce5de7cec6f03",
         "files": [
           "rally-app/src/main/java/com/rally/home/HomeAppService.java",
           "rally-app/src/main/java/com/rally/platform-config/home-content-query/activity/QueryHomePosterSectionActivity.java",
           "rally-domain/src/main/java/com/rally/domain/system/enums/SystemConfigKey.java"
         ],
-        "verified_at": "2026-08-27T15:55:59Z",
-        "base_commit": "1e2875745448d36b9c3c47b38830779f18ab18c6"
+        "verified_at": "2026-08-28T04:39:50Z",
+        "base_commit": "5cb5186f0576885c7f5241e8ac784095bdd02d63"
       }
     },
     "platform-config.home-content-query.activity.query-home-tour-section": {
       "spec": {
         "service": "platform-config.home-content-query",
         "activity_hash": "sha256:231aa1ffa4deb0a108923a9217960c9ddddae9ff57ca1c6c27552d17849dbd5c",
-        "approved_at": "2026-08-27T15:49:55Z"
+        "approved_at": "2026-08-28T04:36:06Z"
       },
       "impl": {
         "activity_hash": "sha256:231aa1ffa4deb0a108923a9217960c9ddddae9ff57ca1c6c27552d17849dbd5c",
@@ -3976,7 +3976,7 @@
       "spec": {
         "service": "platform-config.home-content-query",
         "activity_hash": "sha256:52d5cf48c5e98a2b7bbd2e2593e6f2b24f358ac511b3b6f72bd896fff6c27761",
-        "approved_at": "2026-08-27T15:49:55Z"
+        "approved_at": "2026-08-28T04:36:06Z"
       },
       "impl": {
         "activity_hash": "sha256:52d5cf48c5e98a2b7bbd2e2593e6f2b24f358ac511b3b6f72bd896fff6c27761",

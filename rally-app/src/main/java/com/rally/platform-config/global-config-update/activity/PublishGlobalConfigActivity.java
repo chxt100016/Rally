@@ -47,7 +47,7 @@ public class PublishGlobalConfigActivity {
     private static final Set<String> OPTIONAL_POSTER_TEXT_FIELDS = Set.of("title", "subtitle");
     private static final Set<String> POSTER_URL_FIELDS = Set.of("wechatUrl", "appUrl", "webUrl");
     private static final Set<String> POSTER_URL_PLACEHOLDERS = Set.of(
-            "{{cityId}}", "{{cityName}}");
+            "{{cityCode}}", "{{cityName}}");
 
     private final SysConfigRepository sysConfigRepository;
 
