@@ -28,7 +28,7 @@ facade: GET /home/page
 ## 业务活动
 
 - query-home-meetup-section  交付匿名空列表或本人最多十张进行中约球卡片
-- query-home-poster-section  按城市可见性筛选并交付统一海报区域
+- query-home-poster-section  按区块城市可见性筛选并交付统一海报区域
 - query-home-tour-section  交付当前职业赛事分组及最近比赛
 - register-missing-tour-translations  为首页职业赛事展示中未命中的简体中文文本登记待翻译项
 - query-home-news-section  交付资讯区域文案与当前空资讯列表
@@ -57,8 +57,8 @@ flowchart TD
 2. 从当前运行实例的 `home.page.config` 读取完整 JSON 根对象及其 `sections` 数组。当前值缺失时由系统配置机制提供完整默认 JSON；解析失败、根结构错误或 `sections` 不是数组时，记录日志并整体回退完整默认 JSON。按数组顺序遍历，对象为空或 `enabled=false` 时跳过；`enabled` 缺失或非明确 `false` 均视为启用。
 3. 区域 `type` 为空或不是 `MEETUP`、`TOUR_MATCH`、`POSTER`、`NEWS` 时省略。旧的 `TOURNAMENT_POSTER` 和 `COURT_POSTER` 不再识别。每个区域的构建异常都单独捕获并记录，省略该区域后继续处理后续配置。
 4. `MEETUP` 区域使用配置标题，空白时回退“我的约球”，副标题原样取值。匿名访问返回空约球列表；已识别用户查询其报名状态为 `JOINED`、`REVIEWED` 或 `SKIPPED`，约球状态为 `OPEN`且结束时间未到的记录，按业务编号倒序取前 10 条并组装卡片，不返回续页标识。
-5. `POSTER` 区域直接使用区域内的标题、副标题和海报数组，忽略旧 `cityAware` 字段。先按数组顺序检查单张海报的 `cityId`：缺失、为 `null` 或空白时保留，非空时仅在与本次有效 `cityCode` 精确相等时保留。不匹配的海报不做后续交互解析、图片签名或导航处理。
-6. 对可见海报按原顺序转换：`actionType` 必须可转为响应的 `NAVIGATE` 或 `PREVIEW` 交互类型；图片 key 为空白时 URL 为 `null`，否则签发一小时七牛 URL；文案原样取值。三个非空导航目标只允许 `{{cityCode}}`、`{{cityName}}` 两种占位符；旧 `{{cityId}}` 和其他未登记、空白、未闭合或无配对的占位符使当前海报转换失败，终止该数组的后续处理并保留失败前已形成的海报。城市筛选后没有可见海报时，仍交付区域标题、副标题和空海报数组。
+5. `POSTER` 区域先检查区块 `cityId`：缺失、为 `null` 或空白时整个区块可见，非空时仅在与本次有效 `cityCode` 精确相等时可见；不匹配则在读取海报数组、交互解析、图片签名或导航处理之前省略整个区块。可见区块直接使用区域内的标题、副标题和海报数组，忽略旧 `cityAware` 及单张海报上的旧 `cityId`。
+6. 对区块内海报按原顺序转换：`actionType` 必须可转为响应的 `NAVIGATE` 或 `PREVIEW` 交互类型；图片 key 为空白时 URL 为 `null`，否则签发一小时七牛 URL；文案原样取值。三个非空导航目标只允许 `{{cityCode}}`、`{{cityName}}` 两种占位符；旧 `{{cityId}}` 和其他未登记、空白、未闭合或无配对的占位符使当前海报转换失败，终止该数组的后续处理并保留失败前已形成的海报。海报数组为空时，仍交付区域标题、副标题和空海报数组。
 7. 将三个导航目标中每次出现的 `{{cityCode}}` 全部替换为本次有效 `cityCode` 原字符串，不查询城市名录；只有任一导航目标实际包含 `{{cityName}}` 时才查询城市名称，并把全部 `{{cityName}}` 按原字符串替换，不额外编码。城市名无法取得时不交付当前海报并继续后续海报。没有占位符的导航目标保持原样，不再自动追加城市或 `mode` 参数。
 8. `TOUR_MATCH` 区域查询开始日不晚于明天且结束日不早于昨天的赛事，过滤数字级别小于 250 的记录，保留空白或非数字级别。将日期重叠且城市名忽略大小写相同的赛事跨巡回赛合并，组内和组间按 `GS`、`1000`、`500`、`250`、其他级别及日期/编号排序，每组首项作为代表赛事。
 9. 对每个赛事组查询未结束比赛，并补入这些比赛日期内已结束的比赛；双方球员都未确定的记录被过滤，单方确定则保留。按日期和球场分组后，首页只取最早日期组的排序首个球场及其全部比赛；缺少赛事编号、日期、球场或可展示比赛的组被省略。
@@ -74,7 +74,7 @@ flowchart TD
 | —（默认配置） | `home.page.config` 解析失败、根结构错误或 `sections` 不是数组 | 流程编排 | 记录日志并整体使用完整默认首页 JSON 继续 | 无 |
 | —（区域省略） | 区域已停用、为空、类型缺失或不支持 | 流程编排 | 不加入当前区域，继续处理后续配置 | 无 |
 | —（区域省略） | 约球、城市名录、职业赛事/比赛/球员/种子、翻译缓存或七牛签名在某区域构建中抛出异常 | 对应区域查询 | 记录区域 id 和 type，省略整个当前区域；已形成和后续区域不受影响 | 无 |
-| —（城市筛选） | 海报非空 `cityId` 与本次 `cityCode` 不匹配 | query-home-poster-section | 跳过该海报，不做后续解析或签名；继续同区域其他海报 | 无 |
+| —（区块城市筛选） | 海报区块非空 `cityId` 与本次 `cityCode` 不匹配 | query-home-poster-section | 省略整个区块，不读取或处理区块内海报；继续后续区域 | 无 |
 | —（部分海报） | 可见海报对象为空、`actionType` 无效、图片签名失败，或导航目标包含未登记、空白、未闭合或无配对的占位符 | query-home-poster-section | 终止当前海报数组的后续处理，保留已形成海报 | 无 |
 | —（单张海报省略） | 海报导航目标包含 `{{cityName}}`，但本次城市无法在名录中识别 | query-home-poster-section | 不交付当前海报，继续处理其他海报 | 无 |
 | —（赛事组省略） | 某组没有有效赛事编号、未结束比赛日期、球场或可展示对阵 | query-home-tour-section | 该组返回空并继续其他组；全部组为空时省略职业赛事区 | 无 |
@@ -89,7 +89,8 @@ flowchart TD
 - 顶层组装：`HomeAppService.getHomePage()` / `querySection()`
 - 完整首页配置：`home.page.config`，根对象的 `sections` 按数组顺序交付
 - 默认城市：`330100`；城市名：`CityConfig.getCityName()`
-- 海报导航占位符：`{{cityCode}}` 取最终 `cityCode`，`{{cityName}}` 取城市名；旧 `{{cityId}}` 不兼容，旧 `cityAware` 不再读取
+- 海报可见城市：读取 `POSTER` 区块的 `cityId` 与最终 `cityCode` 精确匹配；单张海报的旧 `cityId` 不再读取
+- 海报导航占位符：`{{cityCode}}` 取最终 `cityCode`，`{{cityName}}` 取城市名；旧 `{{cityId}}` 占位符不兼容，旧 `cityAware` 不再读取
 - 我的约球：`UserMeetupAppService.queryUserMeetupList(IN_PROGRESS)`，默认 `size=10`
 - 赛事分组：`TourTournamentQueryDomainService.findValidCurrentTournamentGroups(LocalDate.now())`
 - 比赛分组：`TourMatchQueryDomainService.upcomingDateGroups()`，首页只取第一日期/第一球场

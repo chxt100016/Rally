@@ -5,7 +5,7 @@ files:
     symbols: [HomeAppService]
     covers: [A1, A2, A3]
   - path: rally-app/src/main/java/com/rally/platform-config/home-content-query/activity/QueryHomePosterSectionActivity.java
-    role: 按城市筛选统一海报，仅校验并替换 cityCode/cityName 导航占位符，再转换交互和签发图片
+    role: 先按 POSTER 区块 cityId 筛选整个区域，再校验并替换 cityCode/cityName 导航占位符、转换交互和签发图片
     symbols: [QueryHomePosterSectionActivity]
     covers: [A1, A2, A3]
   - path: rally-domain/src/main/java/com/rally/domain/system/enums/SystemConfigKey.java

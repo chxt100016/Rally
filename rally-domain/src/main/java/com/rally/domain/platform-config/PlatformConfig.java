@@ -84,6 +84,22 @@ public final class PlatformConfig {
         return config;
     }
 
+    /**
+     * 为覆盖发布恢复已有记录。
+     *
+     * <p>只校验持久化状态本身，不用当前名录重新校验旧内容。这样名录规则升级后，
+     * 已不符合新规则的旧值仍可被通过新规则校验的新值覆盖。</p>
+     */
+    public static PlatformConfig restoreForPublish(
+            PlatformConfigState state, PlatformConfigDefinition definition) {
+        require(state != null, CONFIG_IDENTITY_CONFLICT, "平台配置不存在");
+        require(definition != null, CONFIG_VALUE_INVALID, "配置键不存在于名录");
+        PlatformConfig config = new PlatformConfig(state, definition);
+        config.checkPersistentState();
+        config.requirePersistentId();
+        return config;
+    }
+
     /** C1（记录已存在）：发布新值或重新启用，版本精确加一。 */
     public void publish(
             PublishPlatformConfigCommand command,
@@ -154,8 +170,16 @@ public final class PlatformConfig {
         return error(CONFIG_IDENTITY_CONFLICT, "配置业务编号或配置身份已存在", cause);
     }
 
-    /** I1-I4：恢复及每个成功命令后校验全部聚合不变量。 */
+    /** I1-I4：严格恢复及每个成功命令后校验全部聚合不变量。 */
     private void checkInvariants() {
+        checkPersistentState();
+
+        // I2：当前值的键、类型、内容必须始终通过随应用发布的名录定义。
+        validateAgainstDefinition(definition, state.identity(), state.value());
+    }
+
+    /** 校验覆盖发布所依赖的持久化状态；旧内容由新发布值替换，不按当前名录重验。 */
+    private void checkPersistentState() {
         // I1：身份和业务编号非空；不可变值对象与无身份修改入口共同保证建立后不可改。
         requireNotBlank(state.bizId(), CONFIG_IDENTITY_CONFLICT, "配置业务编号不能为空");
         require(state.bizId().length() <= BIZ_ID_MAX,
@@ -165,9 +189,8 @@ public final class PlatformConfig {
                 CONFIG_IDENTITY_CONFLICT,
                 "配置身份不能为空");
 
-        // I2：当前值的键、类型、内容必须始终通过随应用发布的名录定义。
+        // 类型化值对象仍须完整，内容名录规则由严格恢复或新发布命令负责。
         require(state.value() != null, CONFIG_VALUE_INVALID, "类型化配置值不能为空");
-        validateAgainstDefinition(definition, state.identity(), state.value());
 
         // I3：值对象只在超过 100000 字符时提前拒绝；
         // 2049-100000 字符与名录固定说明不做表列容量预检。

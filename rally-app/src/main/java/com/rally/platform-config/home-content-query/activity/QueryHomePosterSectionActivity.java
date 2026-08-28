@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 业务活动 query-home-poster-section：按城市可见性组装统一首页海报区块。
+ * 业务活动 query-home-poster-section：按区块城市可见性组装统一首页海报区块。
  */
 @Slf4j
 @Component
@@ -35,6 +35,9 @@ public class QueryHomePosterSectionActivity {
         String type = section.getString("type");
         if (!"POSTER".equals(type)) {
             throw new IllegalArgumentException("不支持的首页海报区域类型: " + type);
+        }
+        if (!isSectionVisible(section, cityCode)) {
+            return null;
         }
 
         PosterCardDisplayData data = new PosterCardDisplayData();
@@ -54,11 +57,6 @@ public class QueryHomePosterSectionActivity {
 
         for (int index = 0; index < config.size(); index++) {
             JSONObject posterJson = config.getJSONObject(index);
-
-            // A1：全城市海报直接保留；配置了非空 cityId 时按原字符串精确匹配。
-            if (!isVisible(posterJson, cityCode)) {
-                continue;
-            }
 
             try {
                 // A2：先校验并替换三个导航地址；未知城市仅省略当前海报。
@@ -89,11 +87,8 @@ public class QueryHomePosterSectionActivity {
         return posters;
     }
 
-    private boolean isVisible(JSONObject posterJson, String cityCode) {
-        if (posterJson == null) {
-            return true;
-        }
-        String configuredCityId = posterJson.getString("cityId");
+    private boolean isSectionVisible(JSONObject section, String cityCode) {
+        String configuredCityId = section.getString("cityId");
         return configuredCityId == null
                 || configuredCityId.trim().isEmpty()
                 || configuredCityId.equals(cityCode);

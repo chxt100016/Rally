@@ -68,7 +68,8 @@ public class PublishGlobalConfigActivity {
             if (existing == null) {
                 PlatformConfig.firstPublish(command, IdWorker::getIdStr, persistence);
             } else {
-                PlatformConfig.restore(toState(existing), definition).publish(command, persistence);
+                PlatformConfig.restoreForPublish(toState(existing), definition)
+                        .publish(command, persistence);
             }
         } catch (PlatformConfigDomainException exception) {
             throw toBusinessException(exception);
@@ -231,6 +232,11 @@ public class PublishGlobalConfigActivity {
             if ("POSTER".equals(type)) {
                 requireTextField(section, "title", "海报区标题不能为空");
                 validateOptionalString(section, "subtitle", false, "海报区 subtitle 必须是字符串");
+                validateOptionalString(
+                        section,
+                        "cityId",
+                        true,
+                        "海报区 cityId 必须是字符串");
                 Object postersValue = section.get("posters");
                 if (!(postersValue instanceof JSONArray posters)) {
                     throw new BusinessException(BizErrorCode.PARAM_ERROR, "海报列表必须是数组");
@@ -306,11 +312,6 @@ public class PublishGlobalConfigActivity {
             for (String field : POSTER_URL_FIELDS) {
                 validatePosterUrl(poster, field, index);
             }
-            validateOptionalString(
-                    poster,
-                    "cityId",
-                    true,
-                    "第 " + (index + 1) + " 张海报 cityId 必须是字符串");
         }
     }
 
