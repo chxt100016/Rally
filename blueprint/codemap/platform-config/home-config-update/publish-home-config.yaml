@@ -1,6 +1,0 @@
-id: platform-config.home-config-update.activity.publish-home-config
-files:
-  - path: rally-app/src/main/java/com/rally/platform-config/home-config-update/activity/PublishHomeConfigActivity.java
-    role: 限定首页三 key 白名单并复用 global 发布的规范化、乐观更新与缓存重建流程
-    symbols: [PublishHomeConfigActivity]
-    covers: [A1, A2, A3]

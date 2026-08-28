@@ -16,7 +16,7 @@ facade: GET /system/admin/config
 
 请求参数：无。请求头必须包含 `X-Admin-Key`。
 
-成功返回 `configs` 列表，固定按已登记配置的声明顺序包含 64 项。每项包含 `key`、`description`、`configValue`、`defaultValue`、`version` 和 `overridden`。不支持过滤、分页或指定作用域。
+成功返回 `configs` 列表，按当前已登记配置的声明顺序包含名录中的全部配置项，数量随名录版本动态变化。每项包含 `key`、`description`、`configValue`、`defaultValue`、`version` 和 `overridden`。不支持过滤、分页或指定作用域。
 
 ## 业务活动
 
@@ -28,13 +28,13 @@ facade: GET /system/admin/config
 flowchart TD
     A[query-all-config-view 查询全部配置视图] -->|X-Admin-Key 缺失、未配置或不匹配| E1[ACCESS_DENIED]
     A -->|任一配置资料读取失败| E2[SYSTEM_ERROR]
-    A --> S([返回 64 项配置])
+    A --> S([返回全部已登记配置])
 ```
 
 ## 详细流程
 
 1. 请求先经过运营后台接口鉴权；只有服务端已配置且请求携带与之一致的 `X-Admin-Key` 才继续，不依赖用户登录态。
-2. 按 `SystemConfigKey` 枚举声明顺序遍历全部 64 个已注册配置；数据库中不在枚举内的配置不进入结果。
+2. 按 `SystemConfigKey` 枚举声明顺序遍历当前全部已注册配置；数据库中不在枚举内的配置不进入结果，返回数量随正式名录动态变化。
 3. 对每个配置键查询 `scope=global` 的唯一记录。已启用记录使用库内 `configValue`，并标记 `overridden=true`；记录不存在或已停用时回退枚举默认值，并标记 `overridden=false`。
 4. `version` 在记录不存在时为 0；只要记录存在就返回其库内版本，即使记录已停用。每项同时返回枚举中的键、说明和默认值。
 5. 查询不解析、校验或归一化库内配置值，也不修复无效值；组装完成后一次性返回 `configs` 列表，不产生任何持久化变更。
@@ -52,7 +52,7 @@ flowchart TD
 
 - HTTP：`GET /system/admin/config`
 - 鉴权范围：`/system/admin/**`，请求头 `X-Admin-Key`，服务端配置 `admin.api-key`
-- 配置名录：`SystemConfigKey.values()`，当前 64 项
+- 配置名录：`SystemConfigKey.values()`，数量随正式名录动态变化
 - 持久化：`sys_config`，唯一键 `(config_key, scope)`，本流程只查询 `scope=global`
-- 组装：`HomeConfigAdminAppService.getAll()` / `buildItem()`
+- 组装：`QueryAllConfigViewActivity.queryAll()` / `buildItem()`
 - 响应：`HomeConfigDTO.configs` 与 `HomeConfigItemDTO`

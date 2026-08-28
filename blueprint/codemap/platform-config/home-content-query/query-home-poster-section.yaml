@@ -1,6 +1,14 @@
 id: platform-config.home-content-query.activity.query-home-poster-section
 files:
+  - path: rally-app/src/main/java/com/rally/home/HomeAppService.java
+    role: 从完整首页 JSON 根对象读取 sections，并仅编排统一 POSTER 区域
+    symbols: [HomeAppService]
+    covers: [A1, A2, A3]
   - path: rally-app/src/main/java/com/rally/platform-config/home-content-query/activity/QueryHomePosterSectionActivity.java
-    role: 解析首页海报配置，附加城市导航参数并签发图片地址，组装海报区块
+    role: 按城市筛选统一海报，校验并替换城市导航占位符，再转换交互和签发图片
     symbols: [QueryHomePosterSectionActivity]
+    covers: [A1, A2, A3]
+  - path: rally-domain/src/main/java/com/rally/domain/system/enums/SystemConfigKey.java
+    role: 提供唯一完整首页配置 key 及默认根 JSON
+    symbols: [SystemConfigKey]
     covers: [A1, A2, A3]

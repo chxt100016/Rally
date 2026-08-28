@@ -1,14 +1,12 @@
 ---
 id: platform-config.home-content-query.activity.query-home-poster-section
 depends_on: []
-reads:
-  - name: sys_config
-    columns: [config_key, config_value, value_type, scope, enabled]
+reads: []
 ---
 
 ## 概要
 
-按区域类型组装赛事、城市球场或自定义海报卡片，并签名图片地址。
+按城市可见性筛选、替换导航占位符并组装统一海报卡片。
 
 ## 时序图
 
@@ -16,28 +14,46 @@ reads:
 sequenceDiagram
     participant H as 首页编排
     participant A as query-home-poster-section 活动
-    participant DB as sys_config
     participant M as @media.asset-storage
-    H->>A: 区域类型、配置与城市
-    A->>DB: 按需读取海报配置
-    A->>M: 签名非空图片 key
-    A-->>H: 海报卡片区或部分海报
+    H->>A: POSTER 区域与本次 cityCode
+    A->>A: 先按 cityId 筛选可见海报
+    loop 每张可见海报
+        A->>A: 校验并替换导航占位符
+        A->>M: 签名非空图片 key
+    end
+    A-->>H: 海报卡片区、空列表或部分海报
 ```
 
 ## 触发条件
 
-布局遇到 `TOURNAMENT_POSTER`、`COURT_POSTER` 或 `POSTER` 区域时执行。
+完整首页配置遇到已启用的 `POSTER` 区域时执行；区域对象和最终有效 `cityCode` 已由首页编排传入。
 
 ## 活动契约
 
-返回区域标题、副标题及按配置顺序形成的海报；单项失败终止该数组后续转换但保留此前项。活动不写配置。
+入参：
+
+| 字段 | 类型 | 必填 | 约束 |
+|---|---|---|---|
+| section | 海报区域 | 是 | 类型为 `POSTER`，包含标题、可选副标题和海报数组；旧 `cityAware` 被忽略 |
+| cityCode | 字符串 | 是 | 首页编排已选定的本次有效城市编码 |
+
+成功返回：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| displayType | 枚举 | 固定为 `POSTER_CARD` |
+| title | 字符串 | 区域标题 |
+| subtitle | 字符串或空 | 区域副标题 |
+| posters | 海报数组 | 按原顺序保留的可见海报；可为空或部分成功 |
 
 ## 异常分支
 
-| 错误标识 | 触发条件 | 处理 |
+| 错误标识 | 触发条件 | 来源 |
 |---|---|---|
-| 部分海报 | 海报为空、类型非法、图片签名或城市导航失败 | 保留失败前项目，停止本数组后续 |
-| 区域省略 | 球场区城市副标题或区域外层构建失败 | 省略整个区域，其他区域继续 |
+| `POSTER_CITY_FILTERED` | 海报的非空 `cityId` 与本次 `cityCode` 不匹配 | query-home-content —（城市筛选） |
+| `POSTER_PARTIAL` | 可见海报对象为空、`actionType` 无效、图片签名失败，或 URL 包含未登记、空白、未闭合或无配对的占位符 | query-home-content —（部分海报） |
+| `POSTER_CITY_UNAVAILABLE` | 当前海报任一 URL 使用 `{{cityName}}`，但 `cityCode` 无法取得城市名 | query-home-content —（单张海报省略） |
+| `POSTER_SECTION_FAILED` | 区域外层构建发生其他未处理异常 | query-home-content —（区域省略） |
 
 ## 领域依赖
 
@@ -48,23 +64,28 @@ sequenceDiagram
 
 ## 业务动作
 
-A1 选择区域文案与海报配置
-A2 按需附加城市导航参数
-A3 转换海报并签名图片
+A1 按 cityId 筛选本次城市可见的海报
+A2 校验并替换可见海报的导航占位符
+A3 转换可形成海报并签名图片
 
 ## 详细流程
 
-1. 赛事海报读取对应对象配置，解析异常回退默认 JSON；区域非空文案优先，不附城市。
-2. 球场海报标题默认“附近球场”，副标题默认使用城市名“寻找「城市」的球场”，读取通用海报配置并附城市。
-3. 自定义 POSTER 直接用区域文案/数组，仅 `cityAware=true` 时附城市。
-4. 非空导航值直接追加 `?cityCode=...&cityName=...&mode=view`，不识别已有查询参数也不 URL 编码。
-5. 海报 type 转 NAVIGATE/PREVIEW，非空图片 key 生成一小时 URL，其他文案与三端导航原样投影；异常被数组级捕获并保留此前项。
+1. `A1` 按区域数组顺序检查每张海报。`cityId` 缺失、为 null 或 trim 后为空时视为全城市可见；其他值不裁剪、不规范化，仅与本次 `cityCode` 原字符串精确相等时保留。
+2. 不匹配海报直接跳过，不执行 `A2` 或 `A3`；这不是转换失败，后续海报继续。
+3. `A2` 检查三个导航 URL，只允许 `{{cityId}}` 与 `{{cityName}}`；未登记、空白、未闭合或无配对的占位符使当前海报转换失败，保留此前结果并停止本区域后续海报。标题、副标题和其他字段中的大括号不参与检查。
+4. 将三个 URL 中全部 `{{cityId}}` 替换为本次 `cityCode` 原字符串，不查询城市名录。任一 URL 含 `{{cityName}}` 时只查询一次城市名，并替换三个 URL 中的全部出现位置；不额外编码。城市名不可用时省略当前海报并继续后续海报，不执行图片签名。
+5. null 或空白 URL 原样保留，没有占位符的 URL 原样交付。旧 `cityAware` 完全忽略，不自动追加城市、`mode` 或其他参数；占位符规则对 `NAVIGATE` 与 `PREVIEW` 一致。
+6. `A3` 将 `actionType` 转为响应的 `NAVIGATE` 或 `PREVIEW` 类型，投影文案和替换后的三端导航；非空图片 key 通过 `@media.asset-storage` 生成一小时 URL，空白 key 得到 null URL。对象、交互类型或图片签名转换失败时，保留此前已形成海报并停止本区域后续海报。
+7. 将区域标题、副标题和已形成海报组装为 `POSTER_CARD`。城市筛选后为空仍返回区域与空数组。
 
 ## 边界情况
 
 - 图片 key 空白时 URL 为 null。
-- 未知城市可使球场区域省略；自定义城市感知区则保留已形成海报。
-- 原 URL 已有 `?` 仍再追加 `?`。
+- `cityId` 只有空白判定会裁剪；非空值包含前后空格时不会匹配通常的城市编码。
+- 所有海报都因 cityId 不匹配被过滤时，区域仍按空列表交付。
+- 未知城市只影响 URL 实际使用 `{{cityName}}` 的当前海报，不影响只使用 `{{cityId}}` 或没有占位符的海报。
+- 同一 URL 中同一占位符可重复出现，全部替换；已有查询参数不需要特殊拼接。
+- 旧 `cityAware` 存在、缺失或取任何值都不改变结果。
 
 ## 实现提示
 

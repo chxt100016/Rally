@@ -41,7 +41,7 @@ public class HomeAppService {
         JSONArray sections = parseLayout();
         for (int index = 0; index < sections.size(); index++) {
             JSONObject section = sections.getJSONObject(index);
-            if (section == null || Boolean.FALSE.equals(section.getBoolean("enabled"))) {
+            if (section == null || Boolean.FALSE.equals(section.get("enabled"))) {
                 continue;
             }
             try {
@@ -66,7 +66,7 @@ public class HomeAppService {
         }
         return switch (type) {
             case "MEETUP" -> queryHomeMeetupSectionActivity.execute(section);
-            case "TOURNAMENT_POSTER", "COURT_POSTER", "POSTER" ->
+            case "POSTER" ->
                     queryHomePosterSectionActivity.execute(section, cityCode);
             case "TOUR_MATCH" -> queryTourSection(section);
             case "NEWS" -> queryHomeNewsSectionActivity.execute(section);
@@ -82,11 +82,19 @@ public class HomeAppService {
 
     private JSONArray parseLayout() {
         try {
-            return JSON.parseArray(SystemConfig.getString(
-                    SystemConfigKey.HOME_LAYOUT_CONFIG.getKey()));
+            return parseSections(SystemConfig.getString(
+                    SystemConfigKey.HOME_PAGE_CONFIG.getKey()));
         } catch (Exception exception) {
-            log.error("解析首页布局配置失败，使用默认配置", exception);
-            return JSON.parseArray(SystemConfigKey.HOME_LAYOUT_CONFIG.getDefaultValue());
+            log.error("解析完整首页配置失败，使用默认配置", exception);
+            return parseSections(SystemConfigKey.HOME_PAGE_CONFIG.getDefaultValue());
         }
+    }
+
+    private JSONArray parseSections(String configJson) {
+        JSONObject root = JSON.parseObject(configJson);
+        if (root == null || !(root.get("sections") instanceof JSONArray sections)) {
+            throw new IllegalArgumentException("完整首页配置根对象缺少 sections 数组");
+        }
+        return sections;
     }
 }

@@ -4,7 +4,7 @@ files:
     role: 按已登记枚举顺序查询 global 记录并组装原值、默认值、版本和覆盖状态
     symbols: [QueryAllConfigViewActivity]
     covers: [A1, A2, A3]
-  - path: rally-app/src/main/java/com/rally/system/HomeConfigAdminAppService.java
-    role: 保留原 getAll 对外入口并委托全量配置查询活动
-    symbols: [HomeConfigAdminAppService.getAll]
+  - path: rally-adapter/src/main/java/com/rally/web/system/SystemController.java
+    role: 暴露已通过运营密钥鉴权的全量已登记配置查询入口并委托查询活动
+    symbols: [SystemController.getAllConfig]
     covers: [A1, A2, A3]

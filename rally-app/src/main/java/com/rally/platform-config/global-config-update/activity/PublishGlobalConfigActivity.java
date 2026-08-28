@@ -41,12 +41,13 @@ public class PublishGlobalConfigActivity {
     private static final int MAX_CONFIG_LENGTH = 100_000;
     private static final int MAX_POSTERS = 20;
     private static final int MAX_HOME_SECTIONS = 30;
-    private static final Set<String> HOME_KEYS = Set.of(
-            SystemConfigKey.HOME_LAYOUT_CONFIG.getKey(),
-            SystemConfigKey.HOME_TOURNAMENT_POSTER_CONFIG.getKey(),
-            SystemConfigKey.HOME_POSTER_CONFIG.getKey());
     private static final Set<String> HOME_SECTION_TYPES = Set.of(
-            "MEETUP", "TOURNAMENT_POSTER", "TOUR_MATCH", "COURT_POSTER", "POSTER", "NEWS");
+            "MEETUP", "TOUR_MATCH", "POSTER", "NEWS");
+    private static final Set<String> POSTER_ACTION_TYPES = Set.of("NAVIGATE", "PREVIEW");
+    private static final Set<String> OPTIONAL_POSTER_TEXT_FIELDS = Set.of("title", "subtitle");
+    private static final Set<String> POSTER_URL_FIELDS = Set.of("wechatUrl", "appUrl", "webUrl");
+    private static final Set<String> POSTER_URL_PLACEHOLDERS = Set.of(
+            "{{cityId}}", "{{cityName}}");
 
     private final SysConfigRepository sysConfigRepository;
 
@@ -168,22 +169,8 @@ public class PublishGlobalConfigActivity {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "配置内容不能超过 100KB");
         }
         try {
-            if (key == SystemConfigKey.HOME_LAYOUT_CONFIG) {
-                JSONArray sections = JSON.parseArray(value);
-                validateHomeSections(sections);
-                return JSON.toJSONString(sections);
-            }
-            if (key == SystemConfigKey.HOME_TOURNAMENT_POSTER_CONFIG) {
-                JSONObject section = JSON.parseObject(value);
-                requireText(section.getString("title"), "赛事海报区标题不能为空");
-                requireText(section.getString("subtitle"), "赛事海报区副标题不能为空");
-                validatePosters(section.getJSONArray("posters"));
-                return JSON.toJSONString(section);
-            }
-            if (key == SystemConfigKey.HOME_POSTER_CONFIG) {
-                JSONArray posters = JSON.parseArray(value);
-                validatePosters(posters);
-                return JSON.toJSONString(posters);
+            if (key == SystemConfigKey.HOME_PAGE_CONFIG) {
+                return validateAndNormalizeHomePage(value);
             }
             validateScalar(key, value);
             return value;
@@ -194,25 +181,36 @@ public class PublishGlobalConfigActivity {
         }
     }
 
-    private static void validateHomeSections(JSONArray sections) {
-        if (sections == null) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, "首页区域配置不能为空");
+    private static String validateAndNormalizeHomePage(String value) {
+        Object parsed = JSON.parse(value);
+        if (!(parsed instanceof JSONObject root)) {
+            throw new BusinessException(BizErrorCode.PARAM_ERROR, "首页配置必须是 JSON 对象");
         }
+        Object sectionsValue = root.get("sections");
+        if (!(sectionsValue instanceof JSONArray sections)) {
+            throw new BusinessException(BizErrorCode.PARAM_ERROR, "首页 sections 必须是数组");
+        }
+        validateHomeSections(sections);
+        return JSON.toJSONString(root);
+    }
+
+    private static void validateHomeSections(JSONArray sections) {
         if (sections.size() > MAX_HOME_SECTIONS) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "首页最多配置 30 个区域");
         }
         Set<String> ids = new HashSet<>();
         Set<String> singletonTypes = new HashSet<>();
         for (int index = 0; index < sections.size(); index++) {
-            JSONObject section = sections.getJSONObject(index);
-            if (section == null) {
+            Object sectionValue = sections.get(index);
+            if (!(sectionValue instanceof JSONObject section)) {
                 throw new BusinessException(
                         BizErrorCode.PARAM_ERROR,
                         "第 " + (index + 1) + " 个首页区域格式错误");
             }
-            String id = section.getString("id");
-            String type = section.getString("type");
-            requireText(id, "第 " + (index + 1) + " 个首页区域 id 不能为空");
+            String id = requireTextField(
+                    section, "id", "第 " + (index + 1) + " 个首页区域 id 不能为空");
+            String type = requireTextField(
+                    section, "type", "第 " + (index + 1) + " 个首页区域 type 不能为空");
             if (id.length() > 64 || !id.matches("[A-Za-z0-9_-]+")) {
                 throw new BusinessException(
                         BizErrorCode.PARAM_ERROR,
@@ -229,9 +227,15 @@ public class PublishGlobalConfigActivity {
                         BizErrorCode.PARAM_ERROR,
                         "同一种动态首页区域只能配置一次：" + type);
             }
+            validateOptionalBoolean(section, "enabled", "首页区域 enabled 必须是布尔值");
             if ("POSTER".equals(type)) {
-                requireText(section.getString("title"), "自定义海报区标题不能为空");
-                validatePosters(section.getJSONArray("posters"));
+                requireTextField(section, "title", "海报区标题不能为空");
+                validateOptionalString(section, "subtitle", false, "海报区 subtitle 必须是字符串");
+                Object postersValue = section.get("posters");
+                if (!(postersValue instanceof JSONArray posters)) {
+                    throw new BusinessException(BizErrorCode.PARAM_ERROR, "海报列表必须是数组");
+                }
+                validatePosters(posters);
             }
         }
     }
@@ -256,7 +260,7 @@ public class PublishGlobalConfigActivity {
     }
 
     private static String valueType(SystemConfigKey key) {
-        if (HOME_KEYS.contains(key.getKey())) {
+        if (key == SystemConfigKey.HOME_PAGE_CONFIG) {
             return "json";
         }
         String defaultValue = key.getDefaultValue();
@@ -270,32 +274,114 @@ public class PublishGlobalConfigActivity {
     }
 
     private static void validatePosters(JSONArray posters) {
-        if (posters == null) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, "海报列表不能为空");
-        }
         if (posters.size() > MAX_POSTERS) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "每个区域最多配置 20 张海报");
         }
         for (int index = 0; index < posters.size(); index++) {
-            JSONObject poster = posters.getJSONObject(index);
-            if (poster == null) {
+            Object posterValue = posters.get(index);
+            if (!(posterValue instanceof JSONObject poster)) {
                 throw new BusinessException(
                         BizErrorCode.PARAM_ERROR, "第 " + (index + 1) + " 张海报格式错误");
             }
-            String type = poster.getString("type");
-            if (!"NAVIGATE".equals(type) && !"PREVIEW".equals(type)) {
+            String actionType = requireTextField(
+                    poster,
+                    "actionType",
+                    "第 " + (index + 1) + " 张海报 actionType 不能为空");
+            if (!POSTER_ACTION_TYPES.contains(actionType)) {
                 throw new BusinessException(
                         BizErrorCode.PARAM_ERROR,
-                        "第 " + (index + 1) + " 张海报类型只能是 NAVIGATE 或 PREVIEW");
+                        "第 " + (index + 1) + " 张海报 actionType 只能是 NAVIGATE 或 PREVIEW");
             }
-            requireText(
-                    poster.getString("image"),
+            requireTextField(
+                    poster,
+                    "image",
                     "第 " + (index + 1) + " 张海报图片 key 不能为空");
+            for (String field : OPTIONAL_POSTER_TEXT_FIELDS) {
+                validateOptionalString(
+                        poster,
+                        field,
+                        false,
+                        "第 " + (index + 1) + " 张海报 " + field + " 必须是字符串");
+            }
+            for (String field : POSTER_URL_FIELDS) {
+                validatePosterUrl(poster, field, index);
+            }
+            validateOptionalString(
+                    poster,
+                    "cityId",
+                    true,
+                    "第 " + (index + 1) + " 张海报 cityId 必须是字符串");
         }
     }
 
-    private static void requireText(String value, String message) {
-        if (StringUtils.isBlank(value)) {
+    private static void validatePosterUrl(JSONObject poster, String field, int posterIndex) {
+        if (!poster.containsKey(field)) {
+            return;
+        }
+        Object value = poster.get(field);
+        if (!(value instanceof String url)) {
+            throw new BusinessException(
+                    BizErrorCode.PARAM_ERROR,
+                    "第 " + (posterIndex + 1) + " 张海报 " + field + " 必须是字符串");
+        }
+        validatePosterUrlPlaceholders(url, posterIndex, field);
+    }
+
+    private static void validatePosterUrlPlaceholders(
+            String url, int posterIndex, String field) {
+        int cursor = 0;
+        while (cursor < url.length()) {
+            int opening = url.indexOf("{{", cursor);
+            int closing = url.indexOf("}}", cursor);
+            if (closing >= 0 && (opening < 0 || closing < opening)) {
+                throw invalidPosterUrlPlaceholder(posterIndex, field);
+            }
+            if (opening < 0) {
+                return;
+            }
+            closing = url.indexOf("}}", opening + 2);
+            if (closing < 0) {
+                throw invalidPosterUrlPlaceholder(posterIndex, field);
+            }
+            String placeholder = url.substring(opening, closing + 2);
+            if (!POSTER_URL_PLACEHOLDERS.contains(placeholder)) {
+                throw invalidPosterUrlPlaceholder(posterIndex, field);
+            }
+            cursor = closing + 2;
+        }
+    }
+
+    private static BusinessException invalidPosterUrlPlaceholder(int posterIndex, String field) {
+        return new BusinessException(
+                BizErrorCode.PARAM_ERROR,
+                "第 " + (posterIndex + 1) + " 张海报 " + field + " 包含无效占位符");
+    }
+
+    private static String requireTextField(JSONObject object, String field, String message) {
+        Object value = object.get(field);
+        if (!(value instanceof String text) || StringUtils.isBlank(text)) {
+            throw new BusinessException(BizErrorCode.PARAM_ERROR, message);
+        }
+        return text;
+    }
+
+    private static void validateOptionalString(
+            JSONObject object,
+            String field,
+            boolean allowNull,
+            String message) {
+        if (!object.containsKey(field)) {
+            return;
+        }
+        Object value = object.get(field);
+        if ((value == null && allowNull) || value instanceof String) {
+            return;
+        }
+        throw new BusinessException(BizErrorCode.PARAM_ERROR, message);
+    }
+
+    private static void validateOptionalBoolean(JSONObject object, String field, String message) {
+        if (object.containsKey(field) && !(object.get(field) instanceof Boolean)) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, message);
         }
     }

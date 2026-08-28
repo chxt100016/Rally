@@ -4,7 +4,8 @@ import com.rally.config.OptionalAuth;
 import com.rally.domain.system.model.HomeConfigDTO;
 import com.rally.domain.system.model.HomeConfigUpdateCmd;
 import com.rally.domain.tour.model.Result;
-import com.rally.system.HomeConfigAdminAppService;
+import com.rally.platformconfig.allconfigquery.activity.QueryAllConfigViewActivity;
+import com.rally.platformconfig.globalconfigupdate.activity.PublishGlobalConfigActivity;
 import com.rally.platformconfig.groupchatentryquery.activity.IssueGroupChatEntryUrlActivity;
 import com.rally.platformconfig.publicconfigquery.activity.QueryPublicConfigMapActivity;
 import com.rally.platformconfig.publicconfigquery.activity.QueryPublicConfigValueActivity;
@@ -30,7 +31,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SystemController {
 
-    private final HomeConfigAdminAppService homeConfigAdminAppService;
+    private final PublishGlobalConfigActivity publishGlobalConfigActivity;
+    private final QueryAllConfigViewActivity queryAllConfigViewActivity;
     private final QueryPublicConfigValueActivity queryPublicConfigValueActivity;
     private final QueryPublicConfigMapActivity queryPublicConfigMapActivity;
     private final IssueGroupChatEntryUrlActivity issueGroupChatEntryUrlActivity;
@@ -79,28 +81,17 @@ public class SystemController {
         return Result.ok(queryPublicConfigMapActivity.execute(keys));
     }
 
-    /** 获取运营后台可编辑的首页配置。 */
-    @GetMapping("/admin/home/config")
-    public Result<HomeConfigDTO> getHomeConfig() {
-        return Result.ok(homeConfigAdminAppService.get());
-    }
-
-    /** 更新首页配置并立即刷新当前实例的配置缓存。 */
-    @PostMapping("/admin/home/config/update")
-    public Result<HomeConfigDTO> updateHomeConfig(@Valid @RequestBody HomeConfigUpdateCmd cmd) {
-        return Result.ok(homeConfigAdminAppService.update(cmd));
-    }
-
     /** 获取运营后台可编辑的全部系统配置。 */
     @GetMapping("/admin/config")
     public Result<HomeConfigDTO> getAllConfig() {
-        return Result.ok(homeConfigAdminAppService.getAll());
+        return Result.ok(queryAllConfigViewActivity.execute());
     }
 
     /** 更新任意已登记的系统配置并立即刷新当前实例缓存。 */
     @PostMapping("/admin/config/update")
     public Result<HomeConfigDTO> updateConfig(@Valid @RequestBody HomeConfigUpdateCmd cmd) {
-        return Result.ok(homeConfigAdminAppService.updateAny(cmd));
+        publishGlobalConfigActivity.execute(cmd);
+        return Result.ok(queryAllConfigViewActivity.execute());
     }
 
 

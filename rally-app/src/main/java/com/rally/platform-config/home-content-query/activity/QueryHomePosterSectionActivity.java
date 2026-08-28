@@ -1,6 +1,5 @@
 package com.rally.platformconfig.homecontentquery.activity;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.rally.domain.media.assetstorage.AssetStorageGateway;
@@ -8,8 +7,6 @@ import com.rally.domain.media.assetstorage.AssetStorageService;
 import com.rally.domain.media.assetstorage.SignedReadOutcome;
 import com.rally.domain.media.assetstorage.SignedReadResult;
 import com.rally.domain.system.CityConfig;
-import com.rally.domain.system.SystemConfig;
-import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.home.model.DisplayType;
 import com.rally.home.model.HomeDisplayItemDTO;
 import com.rally.home.model.PosterCardDisplayData;
@@ -20,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 业务活动 query-home-poster-section：组装赛事、球场或自定义首页海报区块。
+ * 业务活动 query-home-poster-section：按城市可见性组装统一首页海报区块。
  */
 @Slf4j
 @Component
@@ -36,46 +33,14 @@ public class QueryHomePosterSectionActivity {
 
     public HomeDisplayItemDTO execute(JSONObject section, String cityCode) {
         String type = section.getString("type");
-        return switch (type) {
-            case "TOURNAMENT_POSTER" -> buildTournamentPoster(section);
-            case "COURT_POSTER" -> buildCourtPoster(section, cityCode);
-            case "POSTER" -> buildCustomPoster(section, cityCode);
-            default -> throw new IllegalArgumentException("不支持的首页海报区域类型: " + type);
-        };
-    }
+        if (!"POSTER".equals(type)) {
+            throw new IllegalArgumentException("不支持的首页海报区域类型: " + type);
+        }
 
-    private HomeDisplayItemDTO buildTournamentPoster(JSONObject section) {
-        // A1：赛事海报使用运行时对象配置；仅解析异常时回退枚举默认 JSON。
-        JSONObject config = parseObjectConfig(SystemConfigKey.HOME_TOURNAMENT_POSTER_CONFIG);
-        PosterCardDisplayData data = new PosterCardDisplayData();
-        data.setTitle(configuredText(section, "title", config.getString("title")));
-        data.setSubtitle(configuredText(section, "subtitle", config.getString("subtitle")));
-        data.setPosters(buildPosterItems(config.getJSONArray("posters"), null));
-        return displayItem(data);
-    }
-
-    private HomeDisplayItemDTO buildCourtPoster(JSONObject section, String cityCode) {
-        // A1/A2：与 main 一致，城市名在构造默认副标题时立即解析；未知城市使整个区块失败。
-        PosterCardDisplayData data = new PosterCardDisplayData();
-        data.setTitle(configuredText(section, "title", "附近球场"));
-        data.setSubtitle(configuredText(
-                section,
-                "subtitle",
-                "寻找「" + CityConfig.getCityName(cityCode) + "」的球场"));
-        data.setPosters(buildPosterItems(
-                parseArrayConfig(SystemConfigKey.HOME_POSTER_CONFIG), cityCode));
-        return displayItem(data);
-    }
-
-    private HomeDisplayItemDTO buildCustomPoster(JSONObject section, String cityCode) {
-        // A1/A2：自定义区保留原始文案、数组和顺序，仅 cityAware=true 时附加城市参数。
         PosterCardDisplayData data = new PosterCardDisplayData();
         data.setTitle(section.getString("title"));
         data.setSubtitle(section.getString("subtitle"));
-        String posterCityCode = Boolean.TRUE.equals(section.getBoolean("cityAware"))
-                ? cityCode
-                : null;
-        data.setPosters(buildPosterItems(section.getJSONArray("posters"), posterCityCode));
+        data.setPosters(buildPosterItems(section.getJSONArray("posters"), cityCode));
         return displayItem(data);
     }
 
@@ -87,71 +52,140 @@ public class QueryHomePosterSectionActivity {
             return posters;
         }
 
-        // A3：数组级保护保留 main 的部分成功语义；额外 JSON 字段自然忽略。
-        try {
-            for (int index = 0; index < config.size(); index++) {
-                JSONObject posterJson = config.getJSONObject(index);
+        for (int index = 0; index < config.size(); index++) {
+            JSONObject posterJson = config.getJSONObject(index);
+
+            // A1：全城市海报直接保留；配置了非空 cityId 时按原字符串精确匹配。
+            if (!isVisible(posterJson, cityCode)) {
+                continue;
+            }
+
+            try {
+                // A2：先校验并替换三个导航地址；未知城市仅省略当前海报。
+                String[] navigationUrls = resolveNavigationUrls(posterJson, cityCode);
+                if (navigationUrls == null) {
+                    log.warn("首页海报城市不可用，省略当前海报 cityCode={} index={}",
+                            cityCode, index);
+                    continue;
+                }
+
+                // A3：导航处理完成后才转换交互和签名图片。
                 PosterCardDisplayData.PosterCardItem poster =
                         new PosterCardDisplayData.PosterCardItem();
                 poster.setType(PosterCardDisplayData.PosterType.valueOf(
-                        posterJson.getString("type")));
-                poster.setImageUrl(signImage(posterJson.getString("image")));
+                        posterJson.getString("actionType")));
                 poster.setTitle(posterJson.getString("title"));
                 poster.setSubtitle(posterJson.getString("subtitle"));
-                poster.setWechatUrl(cityAwareUrl(posterJson.getString("wechatUrl"), cityCode));
-                poster.setAppUrl(cityAwareUrl(posterJson.getString("appUrl"), cityCode));
-                poster.setWebUrl(cityAwareUrl(posterJson.getString("webUrl"), cityCode));
+                poster.setWechatUrl(navigationUrls[0]);
+                poster.setAppUrl(navigationUrls[1]);
+                poster.setWebUrl(navigationUrls[2]);
+                poster.setImageUrl(signImage(posterJson.getString("image")));
                 posters.add(poster);
+            } catch (Exception exception) {
+                log.error("转换首页海报配置失败 index={}", index, exception);
+                break;
             }
-        } catch (Exception exception) {
-            log.error("解析首页海报配置失败", exception);
         }
         return posters;
     }
 
+    private boolean isVisible(JSONObject posterJson, String cityCode) {
+        if (posterJson == null) {
+            return true;
+        }
+        String configuredCityId = posterJson.getString("cityId");
+        return configuredCityId == null
+                || configuredCityId.trim().isEmpty()
+                || configuredCityId.equals(cityCode);
+    }
+
     private String signImage(String resourceKey) {
-        SignedReadResult signedRead = assetStorageService.signReadUrl(
-                resourceKey, URL_TTL_SECONDS);
         if (resourceKey == null || resourceKey.isBlank()) {
             return null;
         }
+        SignedReadResult signedRead = assetStorageService.signReadUrl(
+                resourceKey, URL_TTL_SECONDS);
         if (signedRead.getOutcome() != SignedReadOutcome.SIGNED) {
             throw new IllegalStateException("签发首页海报图片地址失败");
         }
         return signedRead.getSignedUrl();
     }
 
-    private String cityAwareUrl(String url, String cityCode) {
-        if (cityCode == null || url == null || url.trim().isEmpty()) {
-            return url;
+    private String[] resolveNavigationUrls(JSONObject posterJson, String cityCode) {
+        String[] urls = {
+                posterJson.getString("wechatUrl"),
+                posterJson.getString("appUrl"),
+                posterJson.getString("webUrl")
+        };
+        boolean needsCityName = false;
+        for (String url : urls) {
+            needsCityName |= validateTemplate(url);
         }
-        String cityName = CityConfig.getCityName(cityCode);
-        return url + "?cityCode=" + cityCode
-                + "&cityName=" + cityName
-                + "&mode=view";
+
+        String cityName = null;
+        if (needsCityName) {
+            cityName = cityNameOrNull(cityCode);
+            if (cityName == null) {
+                return null;
+            }
+        }
+
+        for (int index = 0; index < urls.length; index++) {
+            if (isNotBlank(urls[index])) {
+                urls[index] = urls[index].replace("{{cityId}}", cityCode);
+                if (needsCityName) {
+                    urls[index] = urls[index].replace("{{cityName}}", cityName);
+                }
+            }
+        }
+        return urls;
     }
 
-    private JSONObject parseObjectConfig(SystemConfigKey key) {
+    /**
+     * 校验单个导航模板，并返回其是否使用城市名占位符。
+     */
+    private boolean validateTemplate(String url) {
+        if (!isNotBlank(url)) {
+            return false;
+        }
+        boolean needsCityName = false;
+        int cursor = 0;
+        while (cursor < url.length()) {
+            int opening = url.indexOf("{{", cursor);
+            int closing = url.indexOf("}}", cursor);
+            if (closing >= 0 && (opening < 0 || closing < opening)) {
+                throw new IllegalArgumentException("导航地址包含无配对的占位符结束标记");
+            }
+            if (opening < 0) {
+                return needsCityName;
+            }
+            if (closing < 0) {
+                throw new IllegalArgumentException("导航地址包含未闭合的占位符");
+            }
+
+            String placeholder = url.substring(opening + 2, closing);
+            if ("cityName".equals(placeholder)) {
+                needsCityName = true;
+            } else if (!"cityId".equals(placeholder)) {
+                throw new IllegalArgumentException("导航地址包含未登记或空白占位符");
+            }
+            cursor = closing + 2;
+        }
+        return needsCityName;
+    }
+
+    private boolean isNotBlank(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+
+    private String cityNameOrNull(String cityCode) {
         try {
-            return JSON.parseObject(SystemConfig.getString(key.getKey()));
-        } catch (Exception exception) {
-            log.error("解析首页配置失败 key={}", key.getKey(), exception);
-            return JSON.parseObject(key.getDefaultValue());
+            String cityName = CityConfig.getCityName(cityCode);
+            return isNotBlank(cityName) ? cityName : null;
+        } catch (RuntimeException exception) {
+            log.warn("查询首页海报城市名称失败 cityCode={}", cityCode, exception);
+            return null;
         }
-    }
-
-    private JSONArray parseArrayConfig(SystemConfigKey key) {
-        try {
-            return JSON.parseArray(SystemConfig.getString(key.getKey()));
-        } catch (Exception exception) {
-            log.error("解析首页配置失败 key={}", key.getKey(), exception);
-            return JSON.parseArray(key.getDefaultValue());
-        }
-    }
-
-    private String configuredText(JSONObject section, String key, String fallback) {
-        String value = section.getString(key);
-        return value == null || value.isBlank() ? fallback : value;
     }
 
     private HomeDisplayItemDTO displayItem(PosterCardDisplayData data) {

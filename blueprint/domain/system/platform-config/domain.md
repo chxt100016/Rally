@@ -62,7 +62,7 @@ tables:
 | C1 | 发布配置 | 不存在、`ENABLED` 或 `DISABLED` | 名录定义、global scope、经活动规范化的值、名录说明、expectedVersion | `ENABLED`；首次 expectedVersion=0 建 version 1，否则按 id+version 更新并加一；随后在事务内全量重建当前 JVM 缓存 | 未知键；类型/值或首页 JSON 不合法；超过 100000；版本冲突；数据库或缓存刷新失败 |
 | C2 | 停用配置 | `ENABLED` | expectedVersion | `DISABLED`，版本加一，保留原值 | 配置不存在；版本冲突 |
 
-首页布局、赛事海报和通用海报仍使用同一 C1，只是调用方传入相应名录 JSON 校验规则；领域不另建“首页配置”聚合。
+完整首页 JSON 配置仍使用同一 C1，由调用方按 `home.page.config` 的名录规则校验整份配置；领域不另建“首页配置”聚合。
 
 ## 边界情况
 
