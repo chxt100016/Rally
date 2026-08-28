@@ -14,7 +14,7 @@ facade: GET /tournament/detail/{bizId}
 
 ## 接口契约
 
-路径参数 `bizId` 指定赛事。接口允许匿名访问，成功返回赛事聚合详情；返回内容按登录、报名和当前比赛状态裁剪。`tournament.championUsers` 交付冠军参赛编号下按 `userId` 去重的成员列表，成员包含 `userId`、`name`、`avatarUrl` 和 `gender`；未产生冠军时返回空列表，单打返回 1 人，双打返回 2 人，并保留 `championEntryNo`。成员资料缺失时保留 `userId`并将无法取得的展示字段留空。赛事进度中的当前轮次可晋级名额表示本轮胜出席位总数，已晋级名额表示已产生的胜出席位，剩余名额表示两者之差；决赛以 1 个冠军名额计。赛事图片与用户头像地址限时一小时。
+路径参数 `bizId` 指定赛事。接口允许匿名访问，成功返回赛事聚合详情；返回内容按登录、报名和当前比赛状态裁剪。`entryOptions.districtOptions` 按赛事城市交付完整区县级行政区划的中文名称，城市无法识别时为空列表且不使用其他城市代替；`entryOptions.timeOptions` 固定依次交付工作日白天、工作日晚上、周末上午、周末下午、周末晚上。报名可用选项不因登录或报名状态裁剪。`tournament.championUsers` 交付冠军参赛编号下按 `userId` 去重的成员列表，成员包含 `userId`、`name`、`avatarUrl` 和 `gender`；未产生冠军时返回空列表，单打返回 1 人，双打返回 2 人，并保留 `championEntryNo`。成员资料缺失时保留 `userId`并将无法取得的展示字段留空。赛事进度中的当前轮次可晋级名额表示本轮胜出席位总数，已晋级名额表示已产生的胜出席位，剩余名额表示两者之差；决赛以 1 个冠军名额计。赛事图片与用户头像地址限时一小时。
 
 ## 业务活动
 
@@ -35,7 +35,7 @@ flowchart TD
 
 ## 详细流程
 
-1. 按赛事编号读取赛事、全部报名、比赛和参与关系，形成公开资料、展示状态、进度、签表、参赛者与拒赛统计。
+1. 按赛事编号读取赛事、全部报名、比赛和参与关系，形成公开资料、展示状态、进度、签表、参赛者与拒赛统计，并按赛事城市形成完整区县级行政区划和固定的可比赛时间选项。
 2. 匿名用户只获得公开区块和未登录动作；已登录未报名用户获得报名动作及适用的个人资料限制。
 3. 已报名用户先把本次查询时间写为最近访问时间，再交付本人报名、时间线和评论未读数。
 4. 本人在比赛中时取得当前未终止比赛，聚合参与者、确认进度、对手访问时间和符合关系条件的对手手机号；订场阶段补充对手偏好。
@@ -48,6 +48,7 @@ flowchart TD
 | 对外失败码 | 触发条件 | 由哪个活动报出 | 补偿动作或超时处理 | 对外提示 |
 |---|---|---|---|---|
 | `TOURNAMENT_NOT_FOUND` | 指定赛事不存在 | assemble-tournament-detail | 不修改任何对象 | 赛事不存在 |
+| 赛事城市无法识别 | 赛事城市未在行政区划名录中命中 | assemble-tournament-detail | 区域选项交付空列表，时间选项正常交付，不使用其他城市代替 | 查询成功 |
 | 未登录 | 请求没有有效登录身份 | assemble-tournament-detail | 交付公开区块与 `NOT_LOGGED_IN` 动作，不记访问 | 查询成功 |
 | 未报名 | 登录用户没有该赛事报名 | assemble-tournament-detail | 交付报名动作和适用限制，不建立报名 | 查询成功 |
 | 当前比赛缺失 | 报名为 `IN_MATCH`，但没有找到未完成或终止比赛 | assemble-tournament-detail | 不交付当前比赛，动作按等待匹配展示 | 查询成功 |
@@ -63,5 +64,5 @@ flowchart TD
 - HTTP：`GET /tournament/detail/{bizId}`，`@OptionalAuth`
 - 调用：`TournamentDetailController.detail()` → `TournamentDetailAppService.detail()` → `TournamentDetailService.assembleDetail()`
 - 访问记录：`TournamentEntryRepository.updateLastVisitTime()`，发生在应用层后续聚合之前且无统一外层事务
-- 依赖：`UserProfileDomainService`、`ChatDomainService`、`MeetupDomainService`、`MeetupCardPackingService`
+- 依赖：`LocationCatalogService`、`UserProfileDomainService`、`ChatDomainService`、`MeetupDomainService`、`MeetupCardPackingService`
 - 图片：`QiniuConfiguration.buildSignedUrl()`

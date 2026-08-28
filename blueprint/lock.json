@@ -1034,12 +1034,12 @@
     },
     "tournament.tournament-detail": {
       "flow": {
-        "product_hash": "sha256:face63d95bfea72cc6b9ce45c7b9aa8b706e67e8f99039bf9fe0cb10a74dad11",
-        "approved_at": "2026-08-27T11:48:17Z"
+        "product_hash": "sha256:2b1ed37698c8f1637159de76972c5c99f21aae651ecc70dfe133d19c5f032c86",
+        "approved_at": "2026-08-28T10:55:23Z"
       },
       "activity": {
-        "flows_hash": "sha256:9040a8f72a010776af5112698e51054721e6f648b784bc44e6f0e63f911ebfbb",
-        "approved_at": "2026-08-27T11:50:50Z"
+        "flows_hash": "sha256:0ec552561c0647ccbf077a8355915dfbff82daa0e9c0c8704ffd88df721069c9",
+        "approved_at": "2026-08-28T10:56:47Z"
       }
     },
     "tournament.tournament-entry": {
@@ -1834,8 +1834,8 @@
     },
     "tournament.tournament-detail.flow.get-tournament-detail": {
       "flow": {
-        "flow_hash": "sha256:9f254dc03bbd891ad27ac47c0afc9895f327e4bcaf142859dc63115fdbcc9296",
-        "approved_at": "2026-08-27T11:48:17Z"
+        "flow_hash": "sha256:c26e57e53e7f4ba0eeb29e6bfdcaf47c8a83c9474a5fd4a17e0c4a2125e5b869",
+        "approved_at": "2026-08-28T10:55:23Z"
       }
     },
     "tournament.tournament-entry.flow.join-tournament": {
@@ -4936,27 +4936,30 @@
     "tournament.tournament-detail.activity.assemble-tournament-detail": {
       "spec": {
         "service": "tournament.tournament-detail",
-        "activity_hash": "sha256:710edcd065de6570123b595673dba7d4bf63058bd7e443deac6a08085cbce1cb",
-        "approved_at": "2026-08-27T11:50:50Z"
+        "activity_hash": "sha256:fa281eb482dcadd4dbb6e023cd92d7916214f19464629bdd521d5e9c9e84a994",
+        "approved_at": "2026-08-28T10:56:47Z"
       },
       "impl": {
-        "activity_hash": "sha256:710edcd065de6570123b595673dba7d4bf63058bd7e443deac6a08085cbce1cb",
+        "activity_hash": "sha256:fa281eb482dcadd4dbb6e023cd92d7916214f19464629bdd521d5e9c9e84a994",
         "uses_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/tournamentdetail/activity/AssembleTournamentDetailActivity.java",
           "rally-app/src/main/java/com/rally/tournament/TournamentDetailAppService.java",
           "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentDTO.java",
-          "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentChampionUserDTO.java"
+          "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentChampionUserDTO.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentDetailDTO.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentEntryOptionsDTO.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/service/TournamentDetailService.java"
         ],
-        "verified_at": "2026-08-27T11:54:25Z",
-        "base_commit": "11b65aec8a96ad24d3f822bc1e4cf18e3fa31076"
+        "verified_at": "2026-08-28T11:03:09Z",
+        "base_commit": "f4d5447641925e47212fee6227e35c14f43565d7"
       }
     },
     "tournament.tournament-detail.activity.record-tournament-visit": {
       "spec": {
         "service": "tournament.tournament-detail",
         "activity_hash": "sha256:1e9d0c01dccd44503e38bb2ccdb836dcd976fa506f059756aa5f8924de216017",
-        "approved_at": "2026-08-27T11:50:50Z"
+        "approved_at": "2026-08-28T10:56:47Z"
       },
       "impl": {
         "activity_hash": "sha256:1e9d0c01dccd44503e38bb2ccdb836dcd976fa506f059756aa5f8924de216017",

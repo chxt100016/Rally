@@ -11,6 +11,8 @@ import java.util.List;
 @Data
 public class TournamentDetailDTO {
     private TournamentDTO tournament;
+    /** 报名可用区域与比赛时间，不按访问者身份裁剪。 */
+    private TournamentEntryOptionsDTO entryOptions;
     private TournamentProgressDTO progress;
     /** 线下赛活动；未创建时为 null。 */
     private TournamentOfflineDTO offline;

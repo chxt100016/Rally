@@ -1,6 +1,11 @@
 package com.rally.domain.tournament.service;
 
 import com.rally.domain.auth.enums.BizErrorCode;
+import com.rally.domain.system.enums.LocationScopeEnum;
+import com.rally.domain.system.model.Location;
+import com.rally.domain.system.model.LocationQuery;
+import com.rally.domain.system.model.LocationResult;
+import com.rally.domain.system.service.LocationCatalogService;
 import com.rally.domain.tournament.convert.TournamentDomainConvertMapper;
 import com.rally.domain.tournament.enums.ConfirmStatusEnum;
 import com.rally.domain.tournament.enums.TournamentActionStateEnum;
@@ -30,6 +35,7 @@ import com.rally.domain.tournament.model.TournamentEntrantRoundDTO;
 import com.rally.domain.tournament.model.TournamentEntrantsDTO;
 import com.rally.domain.tournament.model.TournamentEntryData;
 import com.rally.domain.tournament.model.TournamentEntryDTO;
+import com.rally.domain.tournament.model.TournamentEntryOptionsDTO;
 import com.rally.domain.tournament.model.TournamentMatch;
 import com.rally.domain.tournament.model.TournamentMatchData;
 import com.rally.domain.tournament.model.TournamentOfflineDTO;
@@ -60,6 +66,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TournamentDetailService {
 
+    private static final List<String> TIME_OPTIONS = List.of(
+            "工作日白天", "工作日晚上", "周末上午", "周末下午", "周末晚上");
+
     private final TournamentRepository tournamentRepository;
 
     private final TournamentEntryRepository tournamentEntryRepository;
@@ -67,6 +76,8 @@ public class TournamentDetailService {
     private final TournamentMatchRepository tournamentMatchRepository;
 
     private final TournamentEntryService tournamentEntryService;
+
+    private final LocationCatalogService locationCatalogService;
 
     /**
      * 聚合装配赛事详情，userId 为空时只返回公开区块，并标记为未登录状态
@@ -82,6 +93,7 @@ public class TournamentDetailService {
         TournamentDTO tournamentDTO = TournamentDomainConvertMapper.INSTANCE.toTournamentDTO(tournamentData);
         calculateStatus(tournamentDTO, tournamentData);
         detail.setTournament(tournamentDTO);
+        detail.setEntryOptions(assembleEntryOptions(tournamentData.getCityCode()));
         if (tournamentData.getOfflineMeetupId() != null) {
             TournamentOfflineDTO offline = new TournamentOfflineDTO();
             offline.setMeetupId(tournamentData.getOfflineMeetupId());
@@ -120,6 +132,18 @@ public class TournamentDetailService {
         setAction(detail, calculateActionState(tournamentData, myEntryData, activeMatch, userId));
         detail.setMyTimeline(assembleTimeline(tournamentId, userId, myEntryData));
         return detail;
+    }
+
+    /**
+     * 区域选项取赛事城市下属的完整区县名录；城市未命中或没有区县时返回空列表。
+     */
+    private TournamentEntryOptionsDTO assembleEntryOptions(String cityCode) {
+        LocationResult city = locationCatalogService.query(
+                new LocationQuery(cityCode, LocationScopeEnum.DISTRICTS_OF_CITY));
+        List<String> districtOptions = city.isHit()
+                ? city.getDistricts().stream().map(Location::getName).toList()
+                : List.of();
+        return new TournamentEntryOptionsDTO(districtOptions, TIME_OPTIONS);
     }
 
     private void calculateStatus(TournamentDTO tournamentDTO, TournamentData tournamentData) {

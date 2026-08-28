@@ -16,3 +16,15 @@ files:
     role: 定义冠军成员 userId、昵称映射名称、签名头像和性别字段
     symbols: [TournamentChampionUserDTO]
     covers: [A1, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentDetailDTO.java
+    role: 在详情顶层承载不按访问者身份裁剪的报名可用选项
+    symbols: [TournamentDetailDTO.entryOptions]
+    covers: [A1]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentEntryOptionsDTO.java
+    role: 定义非空且不可变的区域与比赛时间选项列表
+    symbols: [TournamentEntryOptionsDTO]
+    covers: [A1]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/service/TournamentDetailService.java
+    role: 使用赛事城市编码查询完整区县名录并在身份裁剪前装配报名可用选项
+    symbols: [TournamentDetailService.assembleDetail, TournamentDetailService.assembleEntryOptions]
+    covers: [A1, A2, A3, A4]
