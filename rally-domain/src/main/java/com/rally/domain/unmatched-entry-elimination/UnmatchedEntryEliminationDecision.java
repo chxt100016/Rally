@@ -1,6 +1,9 @@
 package com.rally.domain.tournament.unmatchedentryelimination;
 
-/** Outcome of evaluating an unmatched-entry snapshot. */
+/**
+ * @deprecated Compatibility decision for the retired batch-entry API.
+ */
+@Deprecated
 public enum UnmatchedEntryEliminationDecision {
     ACCEPTED,
     REJECTED_INPUT_INVALID

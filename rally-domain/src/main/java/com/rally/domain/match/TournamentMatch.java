@@ -331,9 +331,9 @@ public final class TournamentMatch {
     }
 
     /**
-     * C10：按赛事内自然键锁定最新比赛，产生联动快照后条件物理删除。
+     * C10：按赛事内自然键锁定最新比赛，产生联动快照后版本化软终止。
      *
-     * <p>这一运营清理能力允许参与者列表为空，以便清理历史异常数据；
+     * <p>这一运营终止能力允许参与者列表为空，以便处理历史异常数据；
      * 不改变常规聚合恢复仍必须满足完整对阵的约束。</p>
      */
     public static TournamentMatchCancellationSnapshot cancel(
@@ -365,9 +365,16 @@ public final class TournamentMatch {
                 "已完成比赛不能取消");
 
         TournamentMatchCancellationSnapshot snapshot = cancellationSnapshot(target);
-        require(persistence.deleteNotCompletedWithParticipants(latest.bizId()),
+        if (latest.status() == TournamentMatchStatus.REJECTED) {
+            return snapshot;
+        }
+        require(latest.version() >= 0, TOURNAMENT_MATCH_IDENTITY_CONFLICT,
+                "比赛版本非法");
+        TournamentMatchState terminated = latest.terminateByAdmin();
+        require(persistence.terminateByAdminWithVersion(
+                        terminated, latest.version()),
                 TOURNAMENT_MATCH_VERSION_CONFLICT,
-                "比赛已被删除或已完成");
+                "比赛状态或版本已变化");
         return snapshot;
     }
 

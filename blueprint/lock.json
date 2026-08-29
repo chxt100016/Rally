@@ -1124,22 +1124,22 @@
     },
     "tournament.single-match-cancel": {
       "flow": {
-        "product_hash": "sha256:d2a1e8cd214ee2811c0cd3bc20edc58cb2187c33f0fa818c5e55c0363926e570",
-        "approved_at": "2026-08-29T09:35:22Z"
+        "product_hash": "sha256:434b6ee4c9e653ab4e5df461e961c5b77c8ba9cf3484d6f3b058300e4d313d59",
+        "approved_at": "2026-08-29T11:58:49Z"
       },
       "activity": {
-        "flows_hash": "sha256:eb4a20397a34f96ca0bf39c24f025e589d2871c211adc266ccba8f3cbc64df07",
-        "approved_at": "2026-08-29T09:39:40Z"
+        "flows_hash": "sha256:3d094c5e8b80498316ce7585029bfc14a42b4bac1b5c34962909d5cdf350c37b",
+        "approved_at": "2026-08-29T12:02:52Z"
       }
     },
     "tournament.unmatched-entry-elimination": {
       "flow": {
-        "product_hash": "sha256:a09b0b4a816909211aadc54d97e09f956df0a6e4a46a829de8e45c1ddf2896d7",
-        "approved_at": "2026-08-29T09:36:05Z"
+        "product_hash": "sha256:86ded602d27ec4e8e1c81f3fab8a247a3313c49d10ba22362b564f1be0b10bbc",
+        "approved_at": "2026-08-29T12:01:00Z"
       },
       "activity": {
-        "flows_hash": "sha256:93fbcbfee4f5a8ecb4fe020f1d5265e73b4aff509c90294b10e3938a63600320",
-        "approved_at": "2026-08-29T09:39:40Z"
+        "flows_hash": "sha256:adf2a3bf5297cc0966088f3475003bde6d123a69535e4f253f2e04271165e100",
+        "approved_at": "2026-08-29T12:04:32Z"
       }
     }
   },
@@ -1908,14 +1908,14 @@
     },
     "tournament.single-match-cancel.flow.cancel-single-match": {
       "flow": {
-        "flow_hash": "sha256:56dca6726ad2cffe5897d1124595bda7393c49ecad7ca52e4a7bd0218e9cd678",
-        "approved_at": "2026-08-29T09:35:22Z"
+        "flow_hash": "sha256:eb2ba763bd2f46ff33f3be1d462bb512f9ffa096f46d3b62b8380fe29a07a532",
+        "approved_at": "2026-08-29T11:58:49Z"
       }
     },
     "tournament.unmatched-entry-elimination.flow.eliminate-unmatched-entries": {
       "flow": {
-        "flow_hash": "sha256:0eaa24f656ce106a0157e936dd4a2b8e9eef6015aaa308c627447aea4a626b3c",
-        "approved_at": "2026-08-29T09:36:05Z"
+        "flow_hash": "sha256:b98f6764e448a1ab240299c947793293fb1e148e253020f85703481a0a395ed2",
+        "approved_at": "2026-08-29T12:01:00Z"
       }
     }
   },
@@ -2659,13 +2659,13 @@
       },
       "impl": {
         "activity_hash": "sha256:b33314cf33f8ddae2f8e73f427c60fb4ef38395dcb7b93b7ed85a5fa0ccd1387",
-        "uses_hash": "sha256:d28e065390a4ff60b3e6d99ccf57b6f81e83ba1d48e5c4244fbbd19e00dc0936",
+        "uses_hash": "sha256:9a132cbdecc20d8a29d058236b44fa07cec14548b6d81e60c84713bbb8c55da9",
         "files": [
           "rally-app/src/main/java/com/rally/meetup/activity/ReviseMeetupActivity.java",
           "rally-app/src/main/java/com/rally/meetup/MeetupAppService.java"
         ],
-        "verified_at": "2026-08-29T10:21:40Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:22:07Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "meetup.meetup-finish-settlement.activity.settle-finished-meetups": {
@@ -4561,12 +4561,12 @@
       },
       "impl": {
         "activity_hash": "sha256:ca3d6ef465d263abc6a089e0a8cbe5c57e600b3b0d0efe3a24d9c9155c32019c",
-        "uses_hash": "sha256:55abb031f802b485bdc30e1d591172f79f0f4d0f3f85948825117d6ac9d204a9",
+        "uses_hash": "sha256:56076267efe7944d936d372d958f1267d58996cccd18ebcd48e2714368c23f1e",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/booking-confirm/activity/ConfirmBookingActivity.java"
         ],
-        "verified_at": "2026-08-29T10:21:49Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:23:22Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.booking-reject.activity.reject-await-booking-by-booker": {
@@ -4577,12 +4577,12 @@
       },
       "impl": {
         "activity_hash": "sha256:80bbf33448d2a97b140b411b566aeb1e71aa6e6ac06958ddb0f70eb42f27637f",
-        "uses_hash": "sha256:55abb031f802b485bdc30e1d591172f79f0f4d0f3f85948825117d6ac9d204a9",
+        "uses_hash": "sha256:56076267efe7944d936d372d958f1267d58996cccd18ebcd48e2714368c23f1e",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/booking-reject/activity/RejectAwaitBookingByBookerActivity.java"
         ],
-        "verified_at": "2026-08-29T10:21:58Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:24:22Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.booking-reject.activity.reject-await-booking-by-opponent": {
@@ -4593,12 +4593,12 @@
       },
       "impl": {
         "activity_hash": "sha256:746c733f47fd3d18ad49031af6903d9facb97796501519fe987aa232d753a7f9",
-        "uses_hash": "sha256:55abb031f802b485bdc30e1d591172f79f0f4d0f3f85948825117d6ac9d204a9",
+        "uses_hash": "sha256:56076267efe7944d936d372d958f1267d58996cccd18ebcd48e2714368c23f1e",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/booking-reject/activity/RejectAwaitBookingByOpponentActivity.java"
         ],
-        "verified_at": "2026-08-29T10:22:07Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:25:21Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.booking-reject.activity.reject-await-court-booker": {
@@ -4609,12 +4609,12 @@
       },
       "impl": {
         "activity_hash": "sha256:42196baf2cfca7ae174237221c10fc06bc1ef14686d05f0060a51a0c4baf1106",
-        "uses_hash": "sha256:55abb031f802b485bdc30e1d591172f79f0f4d0f3f85948825117d6ac9d204a9",
+        "uses_hash": "sha256:56076267efe7944d936d372d958f1267d58996cccd18ebcd48e2714368c23f1e",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/booking-reject/activity/RejectAwaitCourtBookerActivity.java"
         ],
-        "verified_at": "2026-08-29T10:22:16Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:26:15Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.booking-reject.activity.reject-await-schedule-confirm": {
@@ -4625,12 +4625,12 @@
       },
       "impl": {
         "activity_hash": "sha256:2c0a646269d1c42624f3971681866873f20e8194d8cae7e5e955dd1583708d30",
-        "uses_hash": "sha256:55abb031f802b485bdc30e1d591172f79f0f4d0f3f85948825117d6ac9d204a9",
+        "uses_hash": "sha256:56076267efe7944d936d372d958f1267d58996cccd18ebcd48e2714368c23f1e",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/booking-reject/activity/RejectAwaitScheduleConfirmActivity.java"
         ],
-        "verified_at": "2026-08-29T10:22:25Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:27:09Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.booking-reject.activity.reject-booking-on-confirm": {
@@ -4641,12 +4641,12 @@
       },
       "impl": {
         "activity_hash": "sha256:1137e8dbb765f8cc46c1446b40dceda6e7374a84eff1b032bc5ef7aa3657197b",
-        "uses_hash": "sha256:55abb031f802b485bdc30e1d591172f79f0f4d0f3f85948825117d6ac9d204a9",
+        "uses_hash": "sha256:56076267efe7944d936d372d958f1267d58996cccd18ebcd48e2714368c23f1e",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/booking-reject/activity/RejectBookingOnConfirmActivity.java"
         ],
-        "verified_at": "2026-08-29T10:22:40Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:28:12Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.booking-reschedule-request.activity.request-rebooking": {
@@ -4657,12 +4657,12 @@
       },
       "impl": {
         "activity_hash": "sha256:2534828f271db98327f34b300a074a1443399f2baecbe2f056f0b156bf5b80f5",
-        "uses_hash": "sha256:57c3e19c98552db5376ccdf6f38592203209586c1222e4e88641e4391168cf25",
+        "uses_hash": "sha256:0ed2fdbc3787b92a1eae186c383e3eb2ba215235599d04c58791273cbaca1c5f",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/bookingreschedulerequest/activity/RequestRebookingActivity.java"
         ],
-        "verified_at": "2026-08-29T10:22:50Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:29:10Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.booking-submit.activity.save-booking": {
@@ -4673,12 +4673,14 @@
       },
       "impl": {
         "activity_hash": "sha256:48bbc6299e0a5075f9f0ab4a0e76909fadf410c3f636a5f7b4506da60dad607c",
-        "uses_hash": "sha256:e100bbccb3614718b0bc220eef2f723a12d1a10f55b5caf453b706b576296163",
+        "uses_hash": "sha256:d027882867493e581cc1447ae656e7be82ced7720f8f58820ebf1cd1ba4b366f",
         "files": [
-          "rally-app/src/main/java/com/rally/tournament/booking-submit/activity/SaveBookingActivity.java"
+          "rally-app/src/main/java/com/rally/tournament/booking-submit/activity/SaveBookingActivity.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/gateway/TournamentMatchRepository.java",
+          "rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentMatchRepositoryImpl.java"
         ],
-        "verified_at": "2026-08-29T10:23:12Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:33:46Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.comment-publish.activity.publish-comment": {
@@ -4725,12 +4727,12 @@
       },
       "impl": {
         "activity_hash": "sha256:5e86b453729f36df3957a69834dc4916a247f6305d2abed1ad509630eefb0821",
-        "uses_hash": "sha256:57c3e19c98552db5376ccdf6f38592203209586c1222e4e88641e4391168cf25",
+        "uses_hash": "sha256:0ed2fdbc3787b92a1eae186c383e3eb2ba215235599d04c58791273cbaca1c5f",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/court-booker-select/activity/SelectCourtBookerActivity.java"
         ],
-        "verified_at": "2026-08-29T10:23:40Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:34:58Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.court-booker-selection-timeout.activity.reject-timeout-match": {
@@ -4741,12 +4743,12 @@
       },
       "impl": {
         "activity_hash": "sha256:623b7fa29602a24d33ea4f9b2dfa506f272fdd9c4b39d7f4ca0286e498a2f445",
-        "uses_hash": "sha256:55abb031f802b485bdc30e1d591172f79f0f4d0f3f85948825117d6ac9d204a9",
+        "uses_hash": "sha256:56076267efe7944d936d372d958f1267d58996cccd18ebcd48e2714368c23f1e",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/court-booker-selection-timeout/activity/RejectTimeoutMatchActivity.java"
         ],
-        "verified_at": "2026-08-29T10:23:49Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:36:01Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.current-round-matching.activity.run-current-round-matching": {
@@ -4757,12 +4759,12 @@
       },
       "impl": {
         "activity_hash": "sha256:7e7f6b424d4c2a5c1b70db8228a71bfa3a4ad745d154246925cd9afccd59b0c1",
-        "uses_hash": "sha256:a38b013721db00a62870988af4c89170c4dccfe2e1519f5cf0955f0b29d379c1",
+        "uses_hash": "sha256:5bf28b2ca5c7dbb28eb8c2f3c303712b4acda424dc21be220dc1571d0d1ca757",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/current-round-matching/activity/RunCurrentRoundMatchingActivity.java"
         ],
-        "verified_at": "2026-08-29T10:23:58Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:38:05Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.entry-freeze.activity.freeze-entry": {
@@ -4858,12 +4860,12 @@
       },
       "impl": {
         "activity_hash": "sha256:d7772dd85f511e3ed09a053c244f09cb9e121aecd697d921f4b2d2db8a43ad5b",
-        "uses_hash": "sha256:57c3e19c98552db5376ccdf6f38592203209586c1222e4e88641e4391168cf25",
+        "uses_hash": "sha256:0ed2fdbc3787b92a1eae186c383e3eb2ba215235599d04c58791273cbaca1c5f",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/result-submit/activity/SubmitResultActivity.java"
         ],
-        "verified_at": "2026-08-29T10:25:38Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:42:21Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.result-confirm.activity.confirm-result": {
@@ -4874,12 +4876,12 @@
       },
       "impl": {
         "activity_hash": "sha256:4f48bea5ba103be3c3850be13be0a9d35f6b796786189504ba83be2b22941c50",
-        "uses_hash": "sha256:9a8e7dfb74ee3d882df305d3453dcc2ec1de703cc2b06b7b323dc4c96777362c",
+        "uses_hash": "sha256:a7ee08d6c2295bd6d800d03cf6c6eaa5836c80a9b8d6d9789f22e9fefa5a2aea",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/result-confirm/activity/ConfirmResultActivity.java"
         ],
-        "verified_at": "2026-08-29T10:25:09Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:39:07Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.result-confirmation-timeout.activity.complete-timeout-result": {
@@ -4890,12 +4892,12 @@
       },
       "impl": {
         "activity_hash": "sha256:4bd345535fb85e97eb68b0bc185a3dafe8d71b17f9aafa38a0f621e7d33b409c",
-        "uses_hash": "sha256:9a8e7dfb74ee3d882df305d3453dcc2ec1de703cc2b06b7b323dc4c96777362c",
+        "uses_hash": "sha256:a7ee08d6c2295bd6d800d03cf6c6eaa5836c80a9b8d6d9789f22e9fefa5a2aea",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/result-confirmation-timeout/activity/CompleteTimeoutResultActivity.java"
         ],
-        "verified_at": "2026-08-29T10:25:19Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:40:12Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.result-reject.activity.reject-result": {
@@ -4906,12 +4908,12 @@
       },
       "impl": {
         "activity_hash": "sha256:655f93b077138d2e25bd0ff17d2f7fb74d7d54ed5ee43185501df4f883a92cb7",
-        "uses_hash": "sha256:0cbc97ba5a6cb3f7d1d17826d8f0d697c38633db5511fb523acb338d42f38a7e",
+        "uses_hash": "sha256:c4cbb91c418209ef7e01e090c97f96935888f4d1da9ce5b493eb33783478e612",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/result-reject/activity/RejectResultActivity.java"
         ],
-        "verified_at": "2026-08-29T10:25:28Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:41:25Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.tournament-abandon.activity.abandon-tournament": {
@@ -5098,13 +5100,13 @@
       },
       "impl": {
         "activity_hash": "sha256:f8af9979d1e3ca01ab5044f12c72eccbbae53fc9bae065db5cf452c8831d5694",
-        "uses_hash": "sha256:55abb031f802b485bdc30e1d591172f79f0f4d0f3f85948825117d6ac9d204a9",
+        "uses_hash": "sha256:56076267efe7944d936d372d958f1267d58996cccd18ebcd48e2714368c23f1e",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/tournament-withdraw/activity/TerminateWithdrawnMatchActivity.java",
           "rally-app/src/main/java/com/rally/tournament/TournamentEntryAppService.java"
         ],
-        "verified_at": "2026-08-29T10:26:28Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:46:53Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.tournament-withdraw.activity.withdraw-tournament-entry": {
@@ -5132,13 +5134,13 @@
       },
       "impl": {
         "activity_hash": "sha256:1b0b25f988099eeb33a0cdc3f25acca52ece25ba7fbf7fbb7bd50e12eed26203",
-        "uses_hash": "sha256:92835d712188786d48ef2ed41e58676028a9c0114687890eaf981d814bb236ec",
+        "uses_hash": "sha256:f5e05018b1cc0e932f48a684a66ad9c7b5adb6304dc498094642087a4bb08d07",
         "files": [
           "rally-app/src/main/java/com/rally/tournament/unbooked-match-cancel/activity/CancelUnbookedMatchesActivity.java",
           "rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java"
         ],
-        "verified_at": "2026-08-29T10:26:37Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:48:01Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "transaction-payment.payment-result-receipt.activity.advance-paid-business": {
@@ -5355,7 +5357,7 @@
       "spec": {
         "service": "tournament.single-match-cancel",
         "activity_hash": "sha256:3117646e0bd10b7cb63eafd46dc4817329f85e14a47e3209e6fbe35cd49da611",
-        "approved_at": "2026-08-29T09:39:40Z"
+        "approved_at": "2026-08-29T12:02:52Z"
       },
       "impl": {
         "activity_hash": "sha256:3117646e0bd10b7cb63eafd46dc4817329f85e14a47e3209e6fbe35cd49da611",
@@ -5371,12 +5373,12 @@
     "tournament.single-match-cancel.activity.delete-cancellable-match": {
       "spec": {
         "service": "tournament.single-match-cancel",
-        "activity_hash": "sha256:8de4b8fdbc96c79cc02eedb709bd973d7566d7aebe4bd459b03f773a98a646cc",
-        "approved_at": "2026-08-29T09:39:40Z"
+        "activity_hash": "sha256:edbd4c345b4dc2a838583da280a3b8375ba6b88ab6387792b0124282ea2b2126",
+        "approved_at": "2026-08-29T12:02:52Z"
       },
       "impl": {
-        "activity_hash": "sha256:8de4b8fdbc96c79cc02eedb709bd973d7566d7aebe4bd459b03f773a98a646cc",
-        "uses_hash": "sha256:5595c0c1e5bd6628b85185b97ba05174a6a9f23e884acdf4760e203cf1b97ae6",
+        "activity_hash": "sha256:edbd4c345b4dc2a838583da280a3b8375ba6b88ab6387792b0124282ea2b2126",
+        "uses_hash": "sha256:f31b6c98d4ef9e2ab388cb54d84f23ba64ccdf00af82b871a03f1d965dc91891",
         "files": [
           "rally-adapter/src/main/java/com/rally/web/tournament/TournamentAdminController.java",
           "rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java",
@@ -5385,15 +5387,15 @@
           "rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentMatchPersistenceAdapter.java",
           "rally-domain/src/main/java/com/rally/domain/auth/enums/BizErrorCode.java"
         ],
-        "verified_at": "2026-08-29T10:18:59Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:45:19Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "tournament.single-match-cancel.activity.release-cancelled-match-entries": {
       "spec": {
         "service": "tournament.single-match-cancel",
         "activity_hash": "sha256:b579866a77c39252b3cddc00c9ac3cd54856330731437a56ce58e5139106687a",
-        "approved_at": "2026-08-29T09:39:40Z"
+        "approved_at": "2026-08-29T12:02:52Z"
       },
       "impl": {
         "activity_hash": "sha256:b579866a77c39252b3cddc00c9ac3cd54856330731437a56ce58e5139106687a",
@@ -5411,21 +5413,25 @@
     "tournament.unmatched-entry-elimination.activity.eliminate-unmatched-entry-units": {
       "spec": {
         "service": "tournament.unmatched-entry-elimination",
-        "activity_hash": "sha256:ca847cb715123c2d68f7fe34676c4a39a0f564ed4ad839c56e333af4dfa77f58",
-        "approved_at": "2026-08-29T09:39:40Z"
+        "activity_hash": "sha256:afb0e2835cd40af8caf1387db7e2e8efcf6fa2c72c95e520e24e9b3a868fe9c5",
+        "approved_at": "2026-08-29T12:04:32Z"
       },
       "impl": {
-        "activity_hash": "sha256:ca847cb715123c2d68f7fe34676c4a39a0f564ed4ad839c56e333af4dfa77f58",
-        "uses_hash": "sha256:d3bd88d4730e6e50fefd1d5b7e8319a3b1fda77e6465780937bb4a28c3073908",
+        "activity_hash": "sha256:afb0e2835cd40af8caf1387db7e2e8efcf6fa2c72c95e520e24e9b3a868fe9c5",
+        "uses_hash": "sha256:fc977485d553cb687cddf93c43d948214cb9ad296cf7be5a6a3c75d64e46dad6",
         "files": [
           "rally-adapter/src/main/java/com/rally/web/tournament/TournamentAdminController.java",
           "rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java",
           "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentUnmatchedEntryEliminationCmd.java",
           "rally-app/src/main/java/com/rally/tournament/unmatchedentryelimination/activity/EliminateUnmatchedEntryUnitsActivity.java",
-          "rally-domain/src/main/java/com/rally/domain/auth/enums/BizErrorCode.java"
+          "rally-domain/src/main/java/com/rally/domain/auth/enums/BizErrorCode.java",
+          "rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryPersistence.java",
+          "rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentEntryPersistenceAdapter.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/gateway/TournamentMatchRepository.java",
+          "rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentMatchRepositoryImpl.java"
         ],
-        "verified_at": "2026-08-29T10:19:41Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:54:53Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     }
   },
@@ -6058,12 +6064,12 @@
     },
     "@tournament.match": {
       "spec": {
-        "domain_hash": "sha256:a872117af29653e1487cd390ed59720af3b97166966e75e7264d4f65443e2c61",
-        "approved_at": "2026-08-29T09:48:39Z",
+        "domain_hash": "sha256:fbdd7705cca499eb41c08f500b509290e8960e2ef67341ce667352d22b0b4f66",
+        "approved_at": "2026-08-29T12:06:36Z",
         "introduced_by": "meetup.meetup-edit"
       },
       "impl": {
-        "domain_hash": "sha256:a872117af29653e1487cd390ed59720af3b97166966e75e7264d4f65443e2c61",
+        "domain_hash": "sha256:fbdd7705cca499eb41c08f500b509290e8960e2ef67341ce667352d22b0b4f66",
         "files": [
           "rally-domain/src/main/java/com/rally/domain/match/TournamentMatch.java",
           "rally-domain/src/main/java/com/rally/domain/match/TournamentMatchState.java",
@@ -6084,10 +6090,11 @@
           "rally-domain/src/main/java/com/rally/domain/match/TournamentMatchRound.java",
           "rally-domain/src/main/java/com/rally/domain/match/TournamentMatchIdGenerator.java",
           "rally-domain/src/main/java/com/rally/domain/match/TournamentMatchInsertResult.java",
-          "rally-domain/src/main/java/com/rally/domain/match/TournamentMatchDomainException.java"
+          "rally-domain/src/main/java/com/rally/domain/match/TournamentMatchDomainException.java",
+          "rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentMatchPersistenceAdapter.java"
         ],
-        "verified_at": "2026-08-29T09:56:10Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:14:49Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     },
     "@tournament.matchmaking": {
@@ -6183,21 +6190,23 @@
     },
     "@tournament.unmatched-entry-elimination": {
       "spec": {
-        "domain_hash": "sha256:023dc2493371f47b637b2c7721d12c134873026919045178afae79b076284ff3",
-        "approved_at": "2026-08-29T09:40:56Z",
+        "domain_hash": "sha256:51dccece9ad211afbe1cae38a7ba19f016c23ce9d9f36bd381657adf498fafff",
+        "approved_at": "2026-08-29T12:10:07Z",
         "introduced_by": "tournament.unmatched-entry-elimination"
       },
       "impl": {
-        "domain_hash": "sha256:023dc2493371f47b637b2c7721d12c134873026919045178afae79b076284ff3",
+        "domain_hash": "sha256:51dccece9ad211afbe1cae38a7ba19f016c23ce9d9f36bd381657adf498fafff",
         "files": [
           "rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/UnmatchedEntryEliminationService.java",
+          "rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/SingleEntrySnapshot.java",
+          "rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/SingleEntryEliminationDecision.java",
           "rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/UnmatchedEntrySnapshot.java",
           "rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/ActiveParticipantSnapshot.java",
           "rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/UnmatchedEntryEliminationResult.java",
           "rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/UnmatchedEntryEliminationDecision.java"
         ],
-        "verified_at": "2026-08-29T09:44:26Z",
-        "base_commit": "2b053aa1fb99c2aa8169329deab5c8e49ec5444a"
+        "verified_at": "2026-08-29T12:20:10Z",
+        "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
       }
     }
   }

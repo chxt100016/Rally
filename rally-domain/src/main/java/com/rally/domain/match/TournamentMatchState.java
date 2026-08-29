@@ -99,6 +99,11 @@ public record TournamentMatchState(
                 TournamentMatchStatus.REJECTED, completedTime, version + 1);
     }
 
+    /** C10：运营终止只改变状态并递增版本，全部历史字段原样保留。 */
+    TournamentMatchState terminateByAdmin() {
+        return withStatus(TournamentMatchStatus.REJECTED);
+    }
+
     private TournamentMatchState copy(
             Long replacementId,
             String replacementCourtBookerId,

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 业务活动 delete-cancellable-match：删除运营指定的未完成比赛并返回联动快照。
+ * 业务活动 delete-cancellable-match：终止运营指定的未完成比赛并返回联动快照。
  */
 @Component
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ public class DeleteCancellableMatchActivity {
     private final TournamentMatchPersistence matchPersistence;
 
     /**
-     * 锁定、快照和条件物理删除共用外层事务，供后续活动继续联动。
+     * 锁定、快照和条件软终止加入当前事务，供后续活动继续联动。
      */
     @Transactional(rollbackFor = Exception.class)
     public TournamentMatchCancellationSnapshot execute(String tournamentId, int matchNo) {
@@ -33,14 +33,14 @@ public class DeleteCancellableMatchActivity {
         }
 
         try {
-            // A2-A5：聚合负责自然键锁定、最新状态判定、快照生成与条件物理删除。
+            // A2-A5：聚合负责锁定最新状态、生成快照及首次终止；REJECTED 幂等返回。
             return TournamentMatch.cancel(
                     new CancelTournamentMatchCommand(tournamentId, matchNo),
                     matchPersistence);
         } catch (TournamentMatchDomainException exception) {
             throw toBusinessException(exception);
         } catch (RuntimeException exception) {
-            throw new BusinessException(BizErrorCode.OPERATION_FAILED, "比赛取消失败");
+            throw new BusinessException(BizErrorCode.OPERATION_FAILED, "比赛终止失败");
         }
     }
 
@@ -51,7 +51,7 @@ public class DeleteCancellableMatchActivity {
             case TournamentMatch.TOURNAMENT_MATCH_CANCEL_FORBIDDEN ->
                     new BusinessException(
                             BizErrorCode.TOURNAMENT_MATCH_CANCEL_FORBIDDEN,
-                            "已完成比赛不能取消");
+                            "已完成比赛不能终止");
             case TournamentMatch.TOURNAMENT_MATCH_VERSION_CONFLICT ->
                     new BusinessException(BizErrorCode.TOURNAMENT_MATCH_VERSION_CONFLICT);
             default -> new BusinessException(BizErrorCode.OPERATION_FAILED, exception.getMessage());

@@ -124,6 +124,27 @@ public class TournamentMatchPersistenceAdapter implements TournamentMatchPersist
     }
 
     @Override
+    public boolean terminateByAdminWithVersion(
+            TournamentMatchState state,
+            int expectedVersion) {
+        if (state.status() != TournamentMatchStatus.REJECTED
+                || state.version() != expectedVersion + 1) {
+            return false;
+        }
+        return matchService.lambdaUpdate()
+                .eq(TournamentMatchPO::getBizId, state.bizId())
+                .eq(TournamentMatchPO::getVersion, expectedVersion)
+                .notIn(TournamentMatchPO::getStatus,
+                        TournamentMatchStatus.COMPLETED.name(),
+                        TournamentMatchStatus.REJECTED.name())
+                .set(TournamentMatchPO::getStatus,
+                        TournamentMatchStatus.REJECTED.name())
+                .set(TournamentMatchPO::getVersion, state.version())
+                .update();
+    }
+
+    @Override
+    @Deprecated
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteNotCompletedWithParticipants(String bizId) {
         int removed = matchService.getBaseMapper().delete(Wrappers

@@ -5,6 +5,11 @@ public interface TournamentEntryPersistence {
 
     TournamentEntryState findByTournamentAndUser(String tournamentId, String userId);
 
+    /** 在当前事务中按赛事与用户自然键锁定报名。 */
+    TournamentEntryState findByTournamentAndUserForUpdate(
+            String tournamentId,
+            String userId);
+
     TournamentEntryInsertResult insert(TournamentEntryState state);
 
     boolean saveByBizId(TournamentEntryState state);

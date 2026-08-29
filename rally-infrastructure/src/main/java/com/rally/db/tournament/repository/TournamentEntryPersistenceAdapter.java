@@ -35,6 +35,18 @@ public class TournamentEntryPersistenceAdapter implements TournamentEntryPersist
     }
 
     @Override
+    public TournamentEntryState findByTournamentAndUserForUpdate(
+            String tournamentId,
+            String userId) {
+        TournamentEntryPO po = tournamentEntryService.lambdaQuery()
+                .eq(TournamentEntryPO::getTournamentId, tournamentId)
+                .eq(TournamentEntryPO::getUserId, userId)
+                .last("FOR UPDATE")
+                .one();
+        return po == null ? null : toState(po);
+    }
+
+    @Override
     public TournamentEntryInsertResult insert(TournamentEntryState state) {
         TournamentEntryPO po = toPo(state);
         po.setId(null);

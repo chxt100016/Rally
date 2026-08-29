@@ -129,19 +129,20 @@ public class TournamentAdminAppService {
         cancelUnbookedMatchesActivity.execute(tournamentId);
     }
 
-    /** 运营取消一场未完成比赛，并在同一事务中完成赛约和报名联动。 */
+    /** 运营终止一场未完成比赛，并在同一事务中完成赛约和报名联动。 */
     @Transactional(rollbackFor = Exception.class)
     public void cancelSingleTournamentMatch(TournamentSingleMatchCancelCmd cmd) {
-        var cancellationSnapshot = deleteCancellableMatchActivity.execute(
+        var terminationSnapshot = deleteCancellableMatchActivity.execute(
                 cmd.getTournamentId(), cmd.getMatchNo());
-        cancellationSnapshot = closeCancelledMatchDraftMeetupActivity.execute(cancellationSnapshot);
-        releaseCancelledMatchEntriesActivity.execute(cancellationSnapshot);
+        terminationSnapshot = closeCancelledMatchDraftMeetupActivity.execute(terminationSnapshot);
+        releaseCancelledMatchEntriesActivity.execute(terminationSnapshot);
     }
 
-    /** 运营淘汰当前轮次未进入比赛的参赛单元，与匹配入口使用同一实例锁。 */
+    /** 运营淘汰当前轮次未进入比赛的指定用户，与匹配入口使用同一实例锁。 */
     public synchronized void eliminateUnmatchedEntries(
             TournamentUnmatchedEntryEliminationCmd cmd) {
-        eliminateUnmatchedEntryUnitsActivity.execute(cmd.getTournamentId());
+        eliminateUnmatchedEntryUnitsActivity.execute(
+                cmd.getTournamentId(), cmd.getUserId());
     }
 
     /** 运营将指定用户处于等待匹配状态的报名冻结。 */

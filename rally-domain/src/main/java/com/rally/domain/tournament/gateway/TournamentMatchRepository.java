@@ -50,6 +50,11 @@ public interface TournamentMatchRepository {
     TournamentMatch findByBizIdWithParticipants(String matchId);
 
     /**
+     * 在当前事务中锁定比赛根后加载 match+participants。
+     */
+    TournamentMatch findByBizIdWithParticipantsForUpdate(String matchId);
+
+    /**
      * 查询某场比赛的所有参与者
      */
     List<MatchParticipantData> findParticipantsByMatchId(String matchId);
@@ -83,6 +88,9 @@ public interface TournamentMatchRepository {
      * 查询某用户在某赛事下当前进行中（非 COMPLETED/REJECTED）的比赛，无则返回 null
      */
     TournamentMatch findActiveMatchByTournamentAndUser(String tournamentId, String userId);
+
+    /** 指定用户是否参与该赛事任一进行中比赛。 */
+    boolean existsActiveMatchByTournamentAndUser(String tournamentId, String userId);
 
     /**
      * 统计某赛事下已生成的比赛总场数

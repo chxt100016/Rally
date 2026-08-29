@@ -155,7 +155,10 @@ public enum BizErrorCode {
     TOURNAMENT_WAITING_SCHEDULE_CONFIRM_REJECT_FORBIDDEN(46031, "当前不是等待对方确认阶段"),
     TOURNAMENT_COMMENT_FORBIDDEN(46032, "只有赛事参与者可以查看或发布评论"),
     TOURNAMENT_MATCH_NOT_FOUND(46033, "比赛不存在"),
-    TOURNAMENT_ENTRY_VERSION_CONFLICT(46034, "报名状态已变更，请刷新后重试");
+    TOURNAMENT_ENTRY_VERSION_CONFLICT(46034, "报名状态已变更，请刷新后重试"),
+    TOURNAMENT_STATUS_INVALID(46035, "当前赛事不能淘汰未入赛参赛者"),
+    TOURNAMENT_ENTRY_STATUS_INVALID(46036, "当前报名状态或轮次不能淘汰"),
+    TOURNAMENT_ENTRY_IN_ACTIVE_MATCH(46037, "参赛者仍在比赛中，不能淘汰");
 
     private final int code;
     private final String message;

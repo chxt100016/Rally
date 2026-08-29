@@ -7,80 +7,65 @@ import com.rally.domain.tournament.entry.TournamentEntryDomainException;
 import com.rally.domain.tournament.entry.TournamentEntryPersistence;
 import com.rally.domain.tournament.entry.TournamentEntryRound;
 import com.rally.domain.tournament.entry.TournamentEntryState;
-import com.rally.domain.tournament.enums.TournamentMatchStatusEnum;
+import com.rally.domain.tournament.enums.TournamentEntryStatusEnum;
+import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.enums.TournamentStatusEnum;
-import com.rally.domain.tournament.gateway.TournamentEntryRepository;
 import com.rally.domain.tournament.gateway.TournamentMatchRepository;
 import com.rally.domain.tournament.gateway.TournamentRepository;
-import com.rally.domain.tournament.model.MatchParticipantData;
 import com.rally.domain.tournament.model.TournamentData;
-import com.rally.domain.tournament.model.TournamentEntryData;
-import com.rally.domain.tournament.model.TournamentMatchData;
-import com.rally.domain.tournament.unmatchedentryelimination.ActiveParticipantSnapshot;
-import com.rally.domain.tournament.unmatchedentryelimination.UnmatchedEntryEliminationDecision;
-import com.rally.domain.tournament.unmatchedentryelimination.UnmatchedEntryEliminationResult;
+import com.rally.domain.tournament.unmatchedentryelimination.SingleEntryEliminationDecision;
+import com.rally.domain.tournament.unmatchedentryelimination.SingleEntrySnapshot;
 import com.rally.domain.tournament.unmatchedentryelimination.UnmatchedEntryEliminationService;
-import com.rally.domain.tournament.unmatchedentryelimination.UnmatchedEntrySnapshot;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 /**
- * 业务活动 eliminate-unmatched-entry-units：整组淘汰当前轮次未进入在途比赛的报名。
+ * 业务活动 eliminate-unmatched-entry-units：淘汰指定用户的当前轮次未入赛报名。
  */
 @Component
 @RequiredArgsConstructor
 public class EliminateUnmatchedEntryUnitsActivity {
 
-    private static final Set<TournamentMatchStatusEnum> IN_PROGRESS_STATUSES =
-            EnumSet.of(
-                    TournamentMatchStatusEnum.MATCHED,
-                    TournamentMatchStatusEnum.BOOKING,
-                    TournamentMatchStatusEnum.SCHEDULED,
-                    TournamentMatchStatusEnum.PENDING_PLAY,
-                    TournamentMatchStatusEnum.PENDING_CONFIRM);
-
     private final TournamentRepository tournamentRepository;
-    private final TournamentEntryRepository entryRepository;
     private final TournamentMatchRepository matchRepository;
     private final TournamentEntryPersistence entryPersistence;
     private final UnmatchedEntryEliminationService eliminationService;
 
-    /**
-     * 候选判定、最新事实复核和全部 C11 条件更新在同一事务中完成。
-     */
+    /** A1-A6 在同一事务中锁定、判定并仅更新目标报名。 */
     @Transactional(rollbackFor = Exception.class)
-    public void execute(String tournamentId) {
+    public void execute(String tournamentId, String userId) {
         try {
-            // A1：固定本次决策使用的赛制和当前轮次。
+            // A1：确认赛事存在、已激活且已设置当前轮次。
             TournamentData tournament = requireEligibleTournament(tournamentId);
-            Snapshot initial = loadSnapshot(tournamentId);
 
-            // A2-A3：单双打完整性、状态、轮次和在途占用规则只在领域服务内判定。
-            UnmatchedEntryEliminationResult decision = eliminationService.evaluate(
-                    tournament.getMatchType(),
-                    tournament.getCurrentRound(),
-                    initial.entries(),
-                    initial.activeParticipants());
-            requireAccepted(decision);
-            if (decision.getCandidateEntryNos().isEmpty()) {
-                return;
+            // A2：只按赛事+用户自然键锁定目标报名，不扩展至搭档。
+            TournamentEntryState entry = entryPersistence
+                    .findByTournamentAndUserForUpdate(tournamentId, userId);
+            if (entry == null) {
+                throw new BusinessException(BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
             }
 
-            // A4：复核决策上下文和全量最新快照；任一原候选失效均是并发冲突。
-            verifyLatestDecision(tournamentId, tournament, decision);
-            eliminateCandidates(
-                    tournamentId,
+            // A3：只查询目标用户在本赛事的进行中比赛参与事实。
+            boolean inActiveMatch = matchRepository
+                    .existsActiveMatchByTournamentAndUser(tournamentId, userId);
+
+            // A4：使用单人领域契约分档判定，不传递 entryNo 或搭档事实。
+            SingleEntryEliminationDecision decision = eliminationService.evaluate(
                     tournament.getCurrentRound(),
-                    decision.getCandidateEntryNos(),
-                    initial.entries());
-            // A5：事务正常提交，不返回数量或名单。
+                    toSnapshot(entry),
+                    inActiveMatch);
+            requireEligible(decision);
+
+            // A5：保存前再次复核在赛关系，C11 再条件守护状态与轮次。
+            if (matchRepository.existsActiveMatchByTournamentAndUser(
+                    tournamentId, userId)) {
+                throw new BusinessException(BizErrorCode.TOURNAMENT_ENTRY_IN_ACTIVE_MATCH);
+            }
+            TournamentEntry.restore(entry).eliminateUnmatched(
+                    TournamentEntryRound.valueOf(tournament.getCurrentRound().name()),
+                    entryPersistence);
+            // A6：事务提交后无业务数据返回。
         } catch (BusinessException exception) {
             throw exception;
         } catch (TournamentEntryDomainException exception) {
@@ -95,108 +80,31 @@ public class EliminateUnmatchedEntryUnitsActivity {
         if (tournament == null) {
             throw new BusinessException(BizErrorCode.TOURNAMENT_NOT_FOUND);
         }
-        if (tournament.getStatus() != TournamentStatusEnum.ACTIVE) {
-            throw new BusinessException(BizErrorCode.TOURNAMENT_STATUS_ILLEGAL);
-        }
-        if (tournament.getCurrentRound() == null) {
-            throw new BusinessException(BizErrorCode.PARAM_ERROR, "赛事当前轮次不能为空");
+        if (tournament.getStatus() != TournamentStatusEnum.ACTIVE
+                || tournament.getCurrentRound() == null) {
+            throw new BusinessException(BizErrorCode.TOURNAMENT_STATUS_INVALID);
         }
         return tournament;
     }
 
-    private Snapshot loadSnapshot(String tournamentId) {
-        List<UnmatchedEntrySnapshot> entries = entryRepository
-                .findByTournamentId(tournamentId)
-                .stream()
-                .map(this::toEntrySnapshot)
-                .toList();
-        List<String> activeMatchIds = matchRepository
-                .findByTournamentId(tournamentId)
-                .stream()
-                .filter(match -> match != null
-                        && IN_PROGRESS_STATUSES.contains(match.getStatus()))
-                .map(TournamentMatchData::getBizId)
-                .filter(matchId -> matchId != null && !matchId.isBlank())
-                .distinct()
-                .toList();
-        List<ActiveParticipantSnapshot> activeParticipants = matchRepository
-                .findParticipantsByMatchIds(activeMatchIds)
-                .stream()
-                .map(this::toActiveParticipantSnapshot)
-                .toList();
-        return new Snapshot(entries, activeParticipants);
+    private SingleEntrySnapshot toSnapshot(TournamentEntryState entry) {
+        return new SingleEntrySnapshot(
+                entry.userId(),
+                TournamentEntryStatusEnum.valueOf(entry.status().name()),
+                TournamentRoundEnum.valueOf(entry.currentRound().name()));
     }
 
-    private void verifyLatestDecision(
-            String tournamentId,
-            TournamentData expectedTournament,
-            UnmatchedEntryEliminationResult expectedDecision) {
-        TournamentData latestTournament = tournamentRepository.findByBizId(tournamentId);
-        if (latestTournament == null
-                || latestTournament.getStatus() != TournamentStatusEnum.ACTIVE
-                || latestTournament.getCurrentRound() != expectedTournament.getCurrentRound()
-                || latestTournament.getMatchType() != expectedTournament.getMatchType()) {
-            throw versionConflict("赛事状态、赛制或当前轮次已变更");
+    private void requireEligible(SingleEntryEliminationDecision decision) {
+        if (decision == SingleEntryEliminationDecision.ELIGIBLE) {
+            return;
         }
-
-        Snapshot latest = loadSnapshot(tournamentId);
-        UnmatchedEntryEliminationResult latestDecision = eliminationService.evaluate(
-                expectedTournament.getMatchType(),
-                expectedTournament.getCurrentRound(),
-                latest.entries(),
-                latest.activeParticipants());
-        requireAccepted(latestDecision);
-        if (!latestDecision.getCandidateEntryNos()
-                .containsAll(expectedDecision.getCandidateEntryNos())) {
-            throw versionConflict("候选报名或在途比赛关系已变更");
+        if (decision == SingleEntryEliminationDecision.ENTRY_STATUS_OR_ROUND_INVALID) {
+            throw new BusinessException(BizErrorCode.TOURNAMENT_ENTRY_STATUS_INVALID);
         }
-    }
-
-    private void eliminateCandidates(
-            String tournamentId,
-            com.rally.domain.tournament.enums.TournamentRoundEnum expectedRound,
-            List<Integer> candidateEntryNos,
-            List<UnmatchedEntrySnapshot> initialEntries) {
-        Map<Integer, List<UnmatchedEntrySnapshot>> entriesByNo = initialEntries.stream()
-                .filter(entry -> entry != null && entry.entryNo() != null)
-                .collect(Collectors.groupingBy(UnmatchedEntrySnapshot::entryNo));
-        TournamentEntryRound aggregateRound = TournamentEntryRound.valueOf(expectedRound.name());
-
-        for (Integer entryNo : candidateEntryNos) {
-            List<UnmatchedEntrySnapshot> members = entriesByNo.getOrDefault(entryNo, List.of());
-            for (UnmatchedEntrySnapshot member : members) {
-                TournamentEntryState current = entryPersistence.findByTournamentAndUser(
-                        tournamentId, member.userId());
-                if (current == null || current.entryNo() != entryNo) {
-                    throw versionConflict("候选报名不存在或参赛编号已变更");
-                }
-                TournamentEntry.restore(current)
-                        .eliminateUnmatched(aggregateRound, entryPersistence);
-            }
+        if (decision == SingleEntryEliminationDecision.IN_ACTIVE_MATCH) {
+            throw new BusinessException(BizErrorCode.TOURNAMENT_ENTRY_IN_ACTIVE_MATCH);
         }
-    }
-
-    private void requireAccepted(UnmatchedEntryEliminationResult result) {
-        if (result == null
-                || result.getDecision()
-                != UnmatchedEntryEliminationDecision.ACCEPTED) {
-            throw new BusinessException(BizErrorCode.OPERATION_FAILED, "未入赛报名判定上下文无效");
-        }
-    }
-
-    private UnmatchedEntrySnapshot toEntrySnapshot(TournamentEntryData entry) {
-        return new UnmatchedEntrySnapshot(
-                entry.getEntryNo(),
-                entry.getUserId(),
-                entry.getPartnerId(),
-                entry.getStatus(),
-                entry.getCurrentRound());
-    }
-
-    private ActiveParticipantSnapshot toActiveParticipantSnapshot(
-            MatchParticipantData participant) {
-        return new ActiveParticipantSnapshot(
-                participant.getEntryNo(), participant.getUserId());
+        throw new BusinessException(BizErrorCode.OPERATION_FAILED, "未入赛报名判定上下文无效");
     }
 
     private BusinessException toBusinessException(
@@ -208,14 +116,5 @@ public class EliminateUnmatchedEntryUnitsActivity {
                     exception.getMessage());
         }
         return new BusinessException(BizErrorCode.OPERATION_FAILED, exception.getMessage());
-    }
-
-    private BusinessException versionConflict(String message) {
-        return new BusinessException(BizErrorCode.TOURNAMENT_ENTRY_VERSION_CONFLICT, message);
-    }
-
-    private record Snapshot(
-            List<UnmatchedEntrySnapshot> entries,
-            List<ActiveParticipantSnapshot> activeParticipants) {
     }
 }

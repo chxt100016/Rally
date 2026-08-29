@@ -28,7 +28,18 @@ public interface TournamentMatchPersistence {
     boolean deleteUnsubmittedWithVersion(String bizId, int expectedVersion);
 
     /**
-     * C10 仅在根仍存在且状态不是 COMPLETED 时，同一事务物理删除根及全部参与者。
+     * C10 以 bizId、expectedVersion 和非 COMPLETED/REJECTED 状态为条件，
+     * 只写根的 status 与 version；参与者及其余根字段保持不变。
      */
+    boolean terminateByAdminWithVersion(
+            TournamentMatchState state,
+            int expectedVersion);
+
+    /**
+     * 兼容旧调用的未完成比赛物理删除端口；C10 不再调用此方法。
+     *
+     * @deprecated 指定比赛运营终止应使用 {@link #terminateByAdminWithVersion}。
+     */
+    @Deprecated
     boolean deleteNotCompletedWithParticipants(String bizId);
 }

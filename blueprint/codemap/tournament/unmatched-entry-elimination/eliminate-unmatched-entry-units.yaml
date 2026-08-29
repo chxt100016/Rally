@@ -1,22 +1,38 @@
 id: tournament.unmatched-entry-elimination.activity.eliminate-unmatched-entry-units
 files:
   - path: rally-adapter/src/main/java/com/rally/web/tournament/TournamentAdminController.java
-    role: 接收并校验运营指定的赛事编号，返回统一无数据成功响应
+    role: 接收并校验运营指定的赛事与用户编号，返回统一无数据响应
     symbols: [TournamentAdminController.eliminateUnmatchedEntries]
-    covers: [A1, A5]
+    covers: [A1, A6]
   - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
-    role: 以与现有赛事匹配入口共享的 bean monitor 串行调用未入赛淘汰活动
+    role: 以与赛事匹配入口共享的 bean monitor 串行调用单人淘汰活动
     symbols: [TournamentAdminAppService.eliminateUnmatchedEntries]
-    covers: [A1, A5]
+    covers: [A1, A6]
   - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentUnmatchedEntryEliminationCmd.java
-    role: 声明未入赛淘汰的赛事编号非空请求约束
+    role: 声明单人未入赛淘汰的赛事与用户编号非空约束
     symbols: [TournamentUnmatchedEntryEliminationCmd]
     covers: [A1]
   - path: rally-app/src/main/java/com/rally/tournament/unmatchedentryelimination/activity/EliminateUnmatchedEntryUnitsActivity.java
-    role: 校验激活赛事并编排全量快照判定、最新事实复核和整组条件淘汰
+    role: 编排单个目标报名锁定、在赛查询、领域判定与 C11 条件淘汰
     symbols: [EliminateUnmatchedEntryUnitsActivity]
-    covers: [A1, A2, A3, A4, A5]
+    covers: [A1, A2, A3, A4, A5, A6]
   - path: rally-domain/src/main/java/com/rally/domain/auth/enums/BizErrorCode.java
-    role: 对外提供报名并发变更的稳定业务错误码
-    symbols: [BizErrorCode.TOURNAMENT_ENTRY_VERSION_CONFLICT]
-    covers: [A4]
+    role: 对外提供赛事、报名、在赛及并发变更的稳定错误码
+    symbols: [BizErrorCode.TOURNAMENT_STATUS_INVALID, BizErrorCode.TOURNAMENT_ENTRY_STATUS_INVALID, BizErrorCode.TOURNAMENT_ENTRY_IN_ACTIVE_MATCH, BizErrorCode.TOURNAMENT_ENTRY_VERSION_CONFLICT]
+    covers: [A1, A4, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryPersistence.java
+    role: 声明按赛事与用户自然键锁定目标报名的写端口
+    symbols: [TournamentEntryPersistence.findByTournamentAndUserForUpdate]
+    covers: [A2]
+  - path: rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentEntryPersistenceAdapter.java
+    role: 使用自然键 FOR UPDATE 锁定目标报名并执行 C11 条件更新
+    symbols: [TournamentEntryPersistenceAdapter.findByTournamentAndUserForUpdate, TournamentEntryPersistenceAdapter.eliminateUnmatchedByBizId]
+    covers: [A2, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/gateway/TournamentMatchRepository.java
+    role: 声明指定用户在指定赛事的进行中比赛存在性查询
+    symbols: [TournamentMatchRepository.existsActiveMatchByTournamentAndUser]
+    covers: [A3, A5]
+  - path: rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentMatchRepositoryImpl.java
+    role: 仅按目标用户参与关系与五种进行中比赛状态返回存在事实
+    symbols: [TournamentMatchRepositoryImpl.existsActiveMatchByTournamentAndUser]
+    covers: [A3, A5]

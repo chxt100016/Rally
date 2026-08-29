@@ -96,6 +96,20 @@ public class TournamentMatchRepositoryImpl implements TournamentMatchRepository 
     }
 
     @Override
+    public TournamentMatch findByBizIdWithParticipantsForUpdate(String matchId) {
+        TournamentMatchPO match = tournamentMatchService.lambdaQuery()
+                .eq(TournamentMatchPO::getBizId, matchId)
+                .last("FOR UPDATE")
+                .one();
+        if (match == null) {
+            return null;
+        }
+        List<MatchParticipantData> participants = findParticipantsByMatchId(matchId);
+        return new TournamentMatch(
+                MATCH_MAPPER.toTournamentMatchData(match), participants);
+    }
+
+    @Override
     public List<MatchParticipantData> findParticipantsByMatchId(String matchId) {
         List<MatchParticipantPO> pos = matchParticipantService.lambdaQuery().eq(MatchParticipantPO::getMatchId, matchId).list();
         return pos.stream().map(PARTICIPANT_MAPPER::toMatchParticipantData).collect(Collectors.toList());
@@ -189,6 +203,33 @@ public class TournamentMatchRepositoryImpl implements TournamentMatchRepository 
         TournamentMatchData data = MATCH_MAPPER.toTournamentMatchData(activePo);
         List<MatchParticipantData> participants = findParticipantsByMatchId(activePo.getBizId());
         return new TournamentMatch(data, participants);
+    }
+
+    @Override
+    public boolean existsActiveMatchByTournamentAndUser(
+            String tournamentId,
+            String userId) {
+        List<String> matchIds = matchParticipantService.lambdaQuery()
+                .select(MatchParticipantPO::getMatchId)
+                .eq(MatchParticipantPO::getTournamentId, tournamentId)
+                .eq(MatchParticipantPO::getUserId, userId)
+                .list()
+                .stream()
+                .map(MatchParticipantPO::getMatchId)
+                .distinct()
+                .toList();
+        if (matchIds.isEmpty()) {
+            return false;
+        }
+        return tournamentMatchService.lambdaQuery()
+                .in(TournamentMatchPO::getBizId, matchIds)
+                .in(TournamentMatchPO::getStatus,
+                        TournamentMatchStatusEnum.MATCHED.name(),
+                        TournamentMatchStatusEnum.BOOKING.name(),
+                        TournamentMatchStatusEnum.SCHEDULED.name(),
+                        TournamentMatchStatusEnum.PENDING_PLAY.name(),
+                        TournamentMatchStatusEnum.PENDING_CONFIRM.name())
+                .count() > 0;
     }
 
 }

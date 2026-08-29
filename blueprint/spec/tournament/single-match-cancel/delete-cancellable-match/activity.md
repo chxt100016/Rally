@@ -6,7 +6,7 @@ reads: []
 
 ## 概要
 
-物理删除指定未完成比赛并交付联动快照。
+终止指定未完成比赛并交付联动快照。
 
 ## 时序图
 
@@ -20,16 +20,18 @@ sequenceDiagram
     A->>T: 确认赛事存在
     A->>M: 锁定并加载比赛及参与者
     alt 已完成
-        M-->>A: 拒绝取消
-    else 未完成
-        A->>M: 物理删除根及参与者
-        A-->>O: 取消快照
+        M-->>A: 拒绝终止
+    else 已拒绝
+        M-->>A: 幂等返回联动快照
+    else 其他未完成状态
+        A->>M: 状态更新为 REJECTED
+        M-->>A: 返回联动快照
     end
 ```
 
 ## 触发条件
 
-运营流程已完成请求字段校验，要取消由 `tournamentId+matchNo` 唯一指定的一场比赛时执行；允许状态为除 `COMPLETED` 外的全部状态。
+运营流程已完成请求字段校验，要终止由 `tournamentId+matchNo` 唯一指定的一场比赛时执行；除 `COMPLETED` 外均可处理，`REJECTED` 按幂等成功处理。
 
 ## 活动契约
 
@@ -44,11 +46,11 @@ sequenceDiagram
 
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---|---|
-| `tournamentId` | 字符串 | 是 | 被取消比赛所属赛事。 |
-| `matchId` | 字符串 | 是 | 被物理删除比赛的业务编号。 |
-| `matchNo` | 整数 | 是 | 被取消比赛的赛事内序号。 |
-| `meetupId` | 字符串 | 否 | 删除前关联的赛约编号。 |
-| `participants` | 参与者快照列表 | 是 | 删除前全部参与者的 `userId` 与 `entryNo`。 |
+| `tournamentId` | 字符串 | 是 | 被终止比赛所属赛事。 |
+| `matchId` | 字符串 | 是 | 保留比赛的业务编号。 |
+| `matchNo` | 整数 | 是 | 被终止比赛的赛事内序号。 |
+| `meetupId` | 字符串 | 否 | 当前关联赛约编号。 |
+| `participants` | 参与者快照列表 | 是 | 当前全部参与者的 `userId` 与 `entryNo`。 |
 
 ## 异常分支
 
@@ -57,8 +59,8 @@ sequenceDiagram
 | `TOURNAMENT_NOT_FOUND` | 指定赛事不存在 | cancel-single-match 流程 `TOURNAMENT_NOT_FOUND` 一行 |
 | `TOURNAMENT_MATCH_NOT_FOUND` | 首次按赛事和比赛序号查不到目标 | cancel-single-match 流程 `TOURNAMENT_MATCH_NOT_FOUND` 一行 |
 | `TOURNAMENT_MATCH_CANCEL_FORBIDDEN` | 锁定后的最新比赛状态为 `COMPLETED` | cancel-single-match 流程 `TOURNAMENT_MATCH_CANCEL_FORBIDDEN` 一行 |
-| `TOURNAMENT_MATCH_VERSION_CONFLICT` | 已加载目标在条件删除时不再存在或已经完成 | cancel-single-match 流程 `TOURNAMENT_MATCH_VERSION_CONFLICT` 一行 |
-| `OPERATION_FAILED` | 比赛根或参与关系未完整删除 | cancel-single-match 流程 `OPERATION_FAILED` 一行 |
+| `TOURNAMENT_MATCH_VERSION_CONFLICT` | 首次终止的版本或状态条件未命中 | cancel-single-match 流程 `TOURNAMENT_MATCH_VERSION_CONFLICT` 一行 |
+| `OPERATION_FAILED` | 比赛终止状态未完整保存 | cancel-single-match 流程 `OPERATION_FAILED` 一行 |
 
 ## 领域依赖
 
@@ -69,31 +71,31 @@ sequenceDiagram
 
 ### @tournament.match
 
-- 输入：赛事编号、比赛序号与运营物理取消意图
-- 输出：最新状态未完成时返回包含联动字段的取消快照并删除根及参与者；目标缺失、已完成或条件删除冲突时返回失败结论
+- 输入：赛事编号、比赛序号与运营终止意图
+- 输出：非完成比赛保留根和参与者并进入 `REJECTED`，返回包含联动字段的快照；目标缺失、已完成或条件更新冲突时返回失败结论
 
 ## 业务动作
 
 A1 确认指定赛事存在
 A2 按赛事编号和比赛序号锁定并加载最新比赛聚合
-A3 请求比赛聚合判定运营取消并生成取消快照
-A4 按最新状态非完成条件物理删除比赛根及全部参与者
-A5 返回取消快照供后续活动联动
+A3 请求比赛聚合判定运营终止并生成当前联动快照
+A4 对首次终止按版本和状态条件把比赛根更新为 `REJECTED`
+A5 返回保留比赛的联动快照供后续活动处理
 
 ## 详细流程
 
-1. `A1` 只确认赛事身份存在，不要求赛事状态或当前轮次。
-2. `A2` 按自然键取得比赛根与全部参与者；首次无结果报比赛不存在。锁定等待结束后使用最新记录，不沿用锁前旧快照。
-3. `A3` 由比赛聚合拒绝 `COMPLETED`；`MATCHED/BOOKING/SCHEDULED/PENDING_PLAY/PENDING_CONFIRM/REJECTED` 均生成包含关联赛约和全部参与者的取消快照。
-4. `A4` 在状态仍非 `COMPLETED` 的条件下删除根与全部参与者；条件未命中作为并发冲突，活动不返回快照。
-5. `A5` 仅在根与参与者均完成删除后返回快照；本活动与后续赛约关闭、报名释放共享一个外层事务。
+1. `A1` 只确认赛事身份存在，不要求赛事状态、当前轮次或比赛所属轮次。
+2. `A2` 按自然键取得比赛根与全部参与者；首次无结果报比赛不存在，锁定等待结束后使用最新记录。
+3. `A3` 由比赛聚合拒绝 `COMPLETED`；`REJECTED` 不再写根，直接从当前记录生成快照；其他状态生成同样的当前快照并进入首次终止。
+4. `A4` 仅首次终止执行，以业务编号、当前版本及状态非 `COMPLETED/REJECTED` 为条件把状态更新为 `REJECTED`、版本递增一；拒绝、订场、确认、重订、赛果与参与者字段保持原值，条件未命中报并发冲突。
+5. `A5` 在首次条件更新成功或已为 `REJECTED` 时返回快照；本活动与后续赛约关闭、报名释放共享一个外层事务。
 
 ## 边界情况
 
-- `REJECTED` 属于可取消状态，删除后其拒绝历史不再保留。
-- 参与者列表为空时仍允许删除异常比赛，返回空列表供后续活动正常完成。
-- `meetupId` 为空不影响比赛删除。
-- 初次查询缺失与已加载后并发删除分档处理，重复请求不幂等成功。
+- `REJECTED` 重复请求幂等成功，不递增比赛版本，但仍返回当前参与者和赛约快照供联动重试。
+- 参与者列表为空时仍允许终止历史异常比赛，返回空列表供后续活动正常完成。
+- `meetupId` 为空不影响比赛状态终止。
+- 比赛根和参与者均不删除；`completedTime`、拒绝审计和其他比赛字段保持原值。
 
 ## 实现提示
 

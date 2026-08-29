@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-/** 运营取消指定赛事中一场未完成的比赛。 */
+/** 运营终止指定赛事中一场未完成的比赛。 */
 @Data
 public class TournamentSingleMatchCancelCmd {
 

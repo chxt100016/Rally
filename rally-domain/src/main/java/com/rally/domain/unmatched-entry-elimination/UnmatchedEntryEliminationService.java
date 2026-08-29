@@ -1,6 +1,5 @@
 package com.rally.domain.tournament.unmatchedentryelimination;
 
-import com.rally.domain.meetup.enums.MatchTypeEnum;
 import com.rally.domain.tournament.enums.TournamentEntryStatusEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import org.springframework.stereotype.Service;
@@ -15,10 +14,10 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * Pure evaluator for finding complete entry units that are not in an active match.
+ * Pure evaluator for deciding whether one tournament entry may be eliminated.
  *
  * <p>The result is only a preflight decision. This service does not read or write
- * persistence and does not mutate any supplied snapshot.</p>
+ * persistence, mutate the supplied snapshot, or inspect linked entries.</p>
  */
 @Service
 public class UnmatchedEntryEliminationService {
@@ -27,8 +26,40 @@ public class UnmatchedEntryEliminationService {
             TournamentEntryStatusEnum.WAITING,
             TournamentEntryStatusEnum.FROZEN);
 
+    public SingleEntryEliminationDecision evaluate(
+            TournamentRoundEnum tournamentCurrentRound,
+            SingleEntrySnapshot entry,
+            Boolean inActiveMatch) {
+        // R1-R2: reject incomplete context before inspecting business state.
+        if (tournamentCurrentRound == null
+                || entry == null
+                || inActiveMatch == null
+                || entry.userId() == null
+                || entry.userId().isBlank()) {
+            return SingleEntryEliminationDecision.INPUT_INVALID;
+        }
+
+        // R3: the target must still be an eligible entry in the tournament round.
+        if (entry.currentRound() != tournamentCurrentRound
+                || !ELIGIBLE_STATUSES.contains(entry.status())) {
+            return SingleEntryEliminationDecision.ENTRY_STATUS_OR_ROUND_INVALID;
+        }
+
+        // R4: an active participation fact takes precedence over eligibility.
+        if (inActiveMatch) {
+            return SingleEntryEliminationDecision.IN_ACTIVE_MATCH;
+        }
+        // R5-R6: pure, side-effect-free accepted decision.
+        return SingleEntryEliminationDecision.ELIGIBLE;
+    }
+
+    /**
+     * @deprecated Compatibility bridge for the retired batch-entry contract.
+     * New callers must use the single-entry overload.
+     */
+    @Deprecated
     public UnmatchedEntryEliminationResult evaluate(
-            MatchTypeEnum matchType,
+            com.rally.domain.meetup.enums.MatchTypeEnum matchType,
             TournamentRoundEnum currentRound,
             List<UnmatchedEntrySnapshot> entries,
             List<ActiveParticipantSnapshot> activeParticipants) {
@@ -38,7 +69,6 @@ public class UnmatchedEntryEliminationService {
                 || activeParticipants == null) {
             return UnmatchedEntryEliminationResult.rejectedInputInvalid();
         }
-
         if (entries.isEmpty()) {
             return UnmatchedEntryEliminationResult.accepted(List.of(), List.of());
         }
@@ -66,8 +96,9 @@ public class UnmatchedEntryEliminationService {
         return UnmatchedEntryEliminationResult.accepted(candidates, excluded);
     }
 
-    private boolean isSupported(MatchTypeEnum matchType) {
-        return matchType == MatchTypeEnum.SINGLE || matchType == MatchTypeEnum.DOUBLE;
+    private boolean isSupported(com.rally.domain.meetup.enums.MatchTypeEnum matchType) {
+        return matchType == com.rally.domain.meetup.enums.MatchTypeEnum.SINGLE
+                || matchType == com.rally.domain.meetup.enums.MatchTypeEnum.DOUBLE;
     }
 
     private Map<Integer, List<UnmatchedEntrySnapshot>> groupEntries(
@@ -114,15 +145,14 @@ public class UnmatchedEntryEliminationService {
     }
 
     private boolean hasValidStructure(
-            MatchTypeEnum matchType,
+            com.rally.domain.meetup.enums.MatchTypeEnum matchType,
             List<UnmatchedEntrySnapshot> members) {
-        if (matchType == MatchTypeEnum.SINGLE) {
+        if (matchType == com.rally.domain.meetup.enums.MatchTypeEnum.SINGLE) {
             return members.size() == 1 && hasText(members.get(0).userId());
         }
         if (members.size() != 2) {
             return false;
         }
-
         UnmatchedEntrySnapshot first = members.get(0);
         UnmatchedEntrySnapshot second = members.get(1);
         return hasText(first.userId())

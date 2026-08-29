@@ -6,7 +6,7 @@ reads: []
 
 ## 概要
 
-判定当前轮次未入赛单元并整组淘汰报名。
+校验并淘汰一个指定未入赛报名。
 
 ## 时序图
 
@@ -17,19 +17,22 @@ sequenceDiagram
     participant T as @tournament.tournament
     participant D as @tournament.unmatched-entry-elimination
     participant E as @tournament.entry
-    O->>A: tournamentId
-    A->>T: 校验 ACTIVE 并取得赛制与当前轮次
-    A->>D: 报名与在途比赛快照
-    D-->>A: 可淘汰完整参赛单元
-    loop 每个候选单元
-        A->>E: 条件整组淘汰
+    O->>A: tournamentId + userId
+    A->>T: 校验 ACTIVE 并取得当前轮次
+    A->>E: 锁定指定用户报名
+    A->>D: 报名快照 + 是否存在进行中比赛
+    alt 不可淘汰
+        D-->>A: 轮次/状态/在赛拒绝结论
+    else 可淘汰
+        D-->>A: 允许单人淘汰
+        A->>E: 条件更新目标报名为 ELIMINATED
+        A-->>O: 完成
     end
-    A-->>O: 完成
 ```
 
 ## 触发条件
 
-运营要收口一个激活赛事当前轮次中尚未进入比赛的 `WAITING/FROZEN` 参赛单元时执行。
+运营要淘汰一个激活赛事当前轮次中的指定用户时执行；请求已提供非空 `tournamentId+userId`，目标报名必须为 `WAITING/FROZEN` 且用户不在进行中比赛。
 
 ## 活动契约
 
@@ -38,6 +41,7 @@ sequenceDiagram
 | 字段 | 类型 | 必填 | 约束 |
 |---|---|---|---|
 | `tournamentId` | 字符串 | 是 | 已通过非空校验。 |
+| `userId` | 字符串 | 是 | 已通过非空校验，只处理该用户。 |
 
 ### 成功返回
 
@@ -48,51 +52,53 @@ sequenceDiagram
 | 错误标识 | 触发条件 | 来源 |
 |---|---|---|
 | `TOURNAMENT_NOT_FOUND` | 指定赛事不存在 | eliminate-unmatched-entries 流程 `TOURNAMENT_NOT_FOUND` 一行 |
-| `TOURNAMENT_STATUS_ILLEGAL` | 赛事最新状态不是 `ACTIVE` | eliminate-unmatched-entries 流程 `TOURNAMENT_STATUS_ILLEGAL` 一行 |
-| `PARAM_ERROR` | 赛事当前轮次为空 | eliminate-unmatched-entries 流程 `PARAM_ERROR` 一行 |
-| `TOURNAMENT_ENTRY_VERSION_CONFLICT` | 决策后赛事轮次、候选报名状态或在途比赛关系发生变化 | eliminate-unmatched-entries 流程 `TOURNAMENT_ENTRY_VERSION_CONFLICT` 一行 |
-| `OPERATION_FAILED` | 任一候选参赛单元未能整组保存 | eliminate-unmatched-entries 流程 `OPERATION_FAILED` 一行 |
+| `TOURNAMENT_STATUS_INVALID` | 赛事最新状态不是 `ACTIVE` 或当前轮次为空 | eliminate-unmatched-entries 流程 `TOURNAMENT_STATUS_INVALID` 一行 |
+| `TOURNAMENT_ENTRY_NOT_FOUND` | 指定赛事下不存在该用户报名 | eliminate-unmatched-entries 流程 `TOURNAMENT_ENTRY_NOT_FOUND` 一行 |
+| `TOURNAMENT_ENTRY_STATUS_INVALID` | 报名轮次不等于赛事当前轮次，或状态不是 `WAITING/FROZEN` | eliminate-unmatched-entries 流程 `TOURNAMENT_ENTRY_STATUS_INVALID` 一行 |
+| `TOURNAMENT_ENTRY_IN_ACTIVE_MATCH` | 目标用户参与本赛事任一进行中比赛 | eliminate-unmatched-entries 流程 `TOURNAMENT_ENTRY_IN_ACTIVE_MATCH` 一行 |
+| `TOURNAMENT_ENTRY_VERSION_CONFLICT` | 决策后目标报名状态或轮次发生变化 | eliminate-unmatched-entries 流程 `TOURNAMENT_ENTRY_VERSION_CONFLICT` 一行 |
 
 ## 领域依赖
 
 ### @tournament.tournament
 
 - 输入：赛事编号与执行当前轮次运营淘汰的意图
-- 输出：赛事为 `ACTIVE` 且当前轮次存在时返回比赛类型和当前轮次；赛事缺失、状态不允许或轮次缺失时返回失败结论
+- 输出：赛事为 `ACTIVE` 且当前轮次存在时返回当前轮次；赛事缺失、状态不允许或轮次缺失时返回失败结论
 
 ### @tournament.unmatched-entry-elimination
 
-- 输入：赛事比赛类型、当前轮次、赛事全部报名快照、全部在途比赛及参与者快照
-- 输出：返回成员完整、全员为当前轮次 `WAITING/FROZEN` 且无人参加在途比赛的参赛单元集合；异常或不符合条件的单元作为排除结果
+- 输入：赛事当前轮次、指定用户报名的状态与轮次快照、该用户是否参与本赛事进行中比赛
+- 输出：返回允许淘汰、报名状态/轮次不允许或仍在进行中比赛的单人判定结论
 
 ### @tournament.entry
 
-- 输入：候选参赛单元下的报名、预期轮次、预期来源状态与运营淘汰意图
-- 输出：条件仍满足时整组报名迁移为 `ELIMINATED`；任一成员条件变化时返回冲突结论
+- 输入：指定用户报名、预期赛事当前轮次与运营淘汰意图
+- 输出：条件仍满足时只将该报名迁移为 `ELIMINATED`；状态或轮次变化时返回冲突结论
 
 ## 业务动作
 
-A1 校验赛事激活状态并取得比赛类型和当前轮次
-A2 加载赛事报名与在途比赛参与快照
-A3 请求领域服务判定完整的未入赛候选单元
-A4 复核赛事轮次与候选单元并条件整组淘汰
-A5 完成本批淘汰
+A1 校验赛事激活状态并取得当前轮次
+A2 按赛事编号和用户编号锁定目标报名
+A3 查询目标用户是否参与本赛事进行中比赛
+A4 请求领域服务判定指定报名是否允许淘汰
+A5 按预期轮次和允许状态条件淘汰目标报名
+A6 完成单人淘汰
 
 ## 详细流程
 
-1. `A1` 加载赛事；缺失、非 `ACTIVE` 或当前轮次为空分别拒绝，成功时保留 `matchType+currentRound` 快照。
-2. `A2` 加载赛事全部报名，以及状态为 `MATCHED/BOOKING/SCHEDULED/PENDING_PLAY/PENDING_CONFIRM` 的全部比赛参与者；已完成、已终止和已删除比赛不算在途。
-3. `A3` 按 `entryNo` 分组。单打只接受恰好一人；双打只接受恰好两人、共享编号且互为搭档。完整单元还必须全员轮次等于赛事当前轮次、状态为 `WAITING/FROZEN`，且没有成员出现在在途参与快照中。
-4. 无候选时直接进入 `A5`。有候选时，`A4` 先确认赛事仍为原当前轮次，再对每个单元验证全部成员仍处于预期轮次与 `WAITING/FROZEN`，且没有并发在途比赛，然后调用报名淘汰命令并整组保存。
-5. `A4` 任一复核或条件保存失败均报并发冲突，本批已经发生的报名变化全部回滚；所有单元成功后 `A5` 返回无数据。
+1. `A1` 加载赛事；缺失、非 `ACTIVE` 或当前轮次为空时分别拒绝，成功时保留当前轮次快照。
+2. `A2` 按 `tournamentId+userId` 锁定一条报名；不存在时拒绝，不按 entryNo 加载或扩展到搭档。
+3. `A3` 只查询目标 userId 在本赛事状态为 `MATCHED/BOOKING/SCHEDULED/PENDING_PLAY/PENDING_CONFIRM` 的比赛参与关系；`COMPLETED/REJECTED` 不算在赛。
+4. `A4` 使用报名状态、报名轮次、赛事当前轮次和在赛事实判定；轮次或状态不允许与仍在比赛中分档失败。
+5. `A5` 仅在允许时调用报名淘汰命令，以业务编号、预期轮次和 `WAITING/FROZEN` 为条件更新为 `ELIMINATED`；条件未命中报并发冲突。
+6. `A6` 只在目标报名成功更新后返回；`A1-A5` 在同一事务内，且应用服务与匹配入口共享同步边界。
 
 ## 边界情况
 
-- `IN_MATCH` 但没有在途比赛的报名作为异常数据排除，不借本活动直接淘汰。
-- `WAITING/FROZEN` 仍出现在在途参与关系时，以比赛关系为准排除整个单元。
-- 其他轮次、`PAYING/CHAMPION/ELIMINATED/WITHDRAWN` 报名全部排除。
-- 成员缺失、双打搭档不对称、共享编号异常或同编号人数超出赛制要求时整组排除。
-- 没有候选是幂等成功，不返回数量或名单。
+- 双打只淘汰指定 userId，搭档报名、partnerId 和共享 entryNo 均不修改。
+- `WAITING/FROZEN` 报名只要目标 userId 仍出现在进行中比赛就拒绝，以比赛关系保护异常状态数据。
+- `IN_MATCH/PAYING/CHAMPION/ELIMINATED/WITHDRAWN` 以及非当前轮次报名均拒绝，不借本活动纠正异常状态。
+- 查询范围只覆盖一条报名和目标用户的比赛参与关系，不扫描其他报名或计算候选集合。
 
 ## 实现提示
 

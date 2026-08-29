@@ -1,6 +1,14 @@
 id: tournament.booking-submit.activity.save-booking
 files:
   - path: rally-app/src/main/java/com/rally/tournament/booking-submit/activity/SaveBookingActivity.java
-    role: 赛约新建或更新、比赛确认推进与提交后通知的事务编排
+    role: 先锁定目标比赛，再编排赛约新建或更新、比赛确认推进与提交后通知
     symbols: [SaveBookingActivity]
     covers: [A1, A2, A3, A4, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/gateway/TournamentMatchRepository.java
+    role: 为赛约提交活动提供当前事务内锁定比赛并加载参与者的网关能力
+    symbols: [TournamentMatchRepository.findByBizIdWithParticipantsForUpdate]
+    covers: [A1, A3, A4]
+  - path: rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentMatchRepositoryImpl.java
+    role: 使用 FOR UPDATE 先锁定比赛根，再加载参与者，保证赛约读写晚于比赛锁
+    symbols: [TournamentMatchRepositoryImpl.findByBizIdWithParticipantsForUpdate]
+    covers: [A1, A3, A4]

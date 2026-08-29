@@ -5,15 +5,15 @@ files:
     symbols: [TournamentMatch]
     covers: [I1, I2, I3, I4, I5, I6, I7, I8, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10]
   - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchState.java
-    role: rally_tournament_match 单行不可变根状态与版本递增
+    role: rally_tournament_match 单行不可变根状态、版本递增及 C10 保留历史字段的运营终止候选
     symbols: [TournamentMatchState]
-    covers: [I1, I2, I3, I5, I6, C1, C2, C3, C4, C5, C6, C7, C8]
+    covers: [I1, I2, I3, I5, I6, I8, C1, C2, C3, C4, C5, C6, C7, C8, C10]
   - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchParticipant.java
     role: rally_tournament_match_participant 不可变实体及两条确认链变更
     symbols: [TournamentMatchParticipant]
     covers: [I2, I4, I5, I6, C1, C3, C4, C5, C6, C7, C8]
   - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchPersistence.java
-    role: 根与全部参与者的原子插入、版本保存、自然键锁定及条件删除端口
+    role: 根与参与者原子保存、C9 条件删除及 C10 自然键锁定和状态版本条件更新端口
     symbols: [TournamentMatchPersistence]
     covers: [I1, I2, I3, I4, I5, I6, I8, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10]
   - path: rally-domain/src/main/java/com/rally/domain/match/CancelTournamentMatchCommand.java
@@ -21,15 +21,15 @@ files:
     symbols: [CancelTournamentMatchCommand]
     covers: [I8, C10]
   - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchCancellationTarget.java
-    role: C10 自然键锁定后的最新根与全部参与者不可变加载结果
+    role: C10 自然键锁定后的最新根与全部参与者不可变终止目标
     symbols: [TournamentMatchCancellationTarget]
     covers: [I8, C10]
   - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchCancellationParticipant.java
-    role: C10 删除前固化的参与者用户与报名编号身份
+    role: C10 软终止前固化的参与者用户与报名编号身份
     symbols: [TournamentMatchCancellationParticipant]
     covers: [I8, C10]
   - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchCancellationSnapshot.java
-    role: C10 物理删除前供赛约与报名联动的不可变取消快照
+    role: C10 软终止前供赛约与报名联动的不可变取消快照
     symbols: [TournamentMatchCancellationSnapshot]
     covers: [I8, C10]
   - path: rally-domain/src/main/java/com/rally/domain/match/CreateTournamentMatchCommand.java
@@ -80,3 +80,7 @@ files:
     role: 聚合拒绝命令时的稳定错误标识载体
     symbols: [TournamentMatchDomainException]
     covers: [I1, I2, I3, I4, I5, I6, I7, I8, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10]
+  - path: rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentMatchPersistenceAdapter.java
+    role: C10 锁定加载完整比赛，并以业务 id、预期版本和非终态状态为条件仅更新 REJECTED 与新版本
+    symbols: [TournamentMatchPersistenceAdapter.findLatestByTournamentIdAndMatchNoForUpdate, TournamentMatchPersistenceAdapter.terminateByAdminWithVersion]
+    covers: [I6, I8, C10]

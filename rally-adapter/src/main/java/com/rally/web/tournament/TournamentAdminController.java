@@ -84,7 +84,7 @@ public class TournamentAdminController {
         return Result.ok();
     }
 
-    /** 取消指定赛事中指定序号的一场未完成比赛。 */
+    /** 终止指定赛事中指定序号的一场未完成比赛。 */
     @PostMapping("/match/cancel/single")
     public Result<Void> cancelSingleTournamentMatch(
             @Valid @RequestBody TournamentSingleMatchCancelCmd cmd) {
@@ -92,7 +92,7 @@ public class TournamentAdminController {
         return Result.ok();
     }
 
-    /** 整组淘汰指定赛事当前轮次中未进入比赛的参赛者。 */
+    /** 淘汰指定赛事当前轮次中未进入比赛的单个用户。 */
     @PostMapping("/entry/eliminate-unmatched")
     public Result<Void> eliminateUnmatchedEntries(
             @Valid @RequestBody TournamentUnmatchedEntryEliminationCmd cmd) {

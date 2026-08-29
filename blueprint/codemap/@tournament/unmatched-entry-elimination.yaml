@@ -1,22 +1,30 @@
 id: "@tournament.unmatched-entry-elimination"
 files:
   - path: rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/UnmatchedEntryEliminationService.java
-    role: 纯计算主实现，完成输入拒绝、编号聚合、结构状态轮次校验、跨单元重复用户和在途占用排除
+    role: 纯计算主实现，按规则顺序判定单个目标报名的当前轮次、状态与在赛事实
     symbols: [UnmatchedEntryEliminationService]
-    covers: [R1, R2, R3, R4, R5, R6, R7, R8]
+    covers: [R1, R2, R3, R4, R5, R6]
+  - path: rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/SingleEntrySnapshot.java
+    role: 指定用户、报名状态与当前轮次的最小只读输入快照
+    symbols: [SingleEntrySnapshot]
+    covers: [R1, R2, R3, R6]
+  - path: rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/SingleEntryEliminationDecision.java
+    role: 可淘汰、报名进度非法、仍在赛与输入非法的稳定判定枚举
+    symbols: [SingleEntryEliminationDecision]
+    covers: [R1, R3, R4, R5]
   - path: rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/UnmatchedEntrySnapshot.java
-    role: 报名编号、成员搭档、状态与轮次的只读输入快照
+    role: 已废弃批量 API 的源码兼容报名快照
     symbols: [UnmatchedEntrySnapshot]
-    covers: [R2, R3, R4, R6, R8]
+    covers: []
   - path: rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/ActiveParticipantSnapshot.java
-    role: 在途比赛参赛编号与用户身份的只读输入快照
+    role: 已废弃批量 API 的源码兼容在途参与快照
     symbols: [ActiveParticipantSnapshot]
-    covers: [R5, R8]
+    covers: []
   - path: rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/UnmatchedEntryEliminationResult.java
-    role: 输入判定以及不可变的候选和排除编号列表
+    role: 已废弃批量 API 的源码兼容结果对象
     symbols: [UnmatchedEntryEliminationResult]
-    covers: [R1, R2, R7, R8]
+    covers: []
   - path: rally-domain/src/main/java/com/rally/domain/unmatched-entry-elimination/UnmatchedEntryEliminationDecision.java
-    role: 接受计算与输入非法拒绝的稳定判定枚举
+    role: 已废弃批量 API 的源码兼容判定枚举
     symbols: [UnmatchedEntryEliminationDecision]
-    covers: [R1]
+    covers: []

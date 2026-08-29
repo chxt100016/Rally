@@ -23,3 +23,15 @@
 - [Q4] 候选与排除结果是否按 entryNo 升序稳定输出？
   > 是。候选和排除 entryNo 均去重并按升序稳定输出。
   → 落入规则与实现提示：结果去重并按 entryNo 升序。
+
+- [Q5] 单人判定的输入是否只需要赛事当前轮次、目标报名 userId/status/currentRound，以及该用户是否存在进行中比赛参与事实？
+  > 是。只输入赛事当前轮次、目标报名的 userId/status/currentRound，以及该用户是否参与赛事进行中比赛的布尔事实；不扫描其他报名。
+  → 落入契约输入与规则 R1-R4：以单个目标报名和 inActiveMatch 事实判定。
+
+- [Q6] 领域服务输出是否分为 ELIGIBLE、ENTRY_STATUS_OR_ROUND_INVALID、IN_ACTIVE_MATCH、INPUT_INVALID 四档，不再返回 entryNo 候选集合？
+  > 是。输出仅保留 ELIGIBLE、ENTRY_STATUS_OR_ROUND_INVALID、IN_ACTIVE_MATCH、INPUT_INVALID 四档，不再返回任何 entryNo 候选或排除集合。
+  → 落入契约输出与规则 R1-R5：改为单目标判定结果。
+
+- [Q7] 双打 partnerId、entryNo 和搭档状态是否完全不参与单人淘汰判定？
+  > 是。partnerId、entryNo 和搭档状态完全不参与单人淘汰判定；只淘汰请求 userId 对应报名，搭档保持原状态。
+  → 落入职责边界、契约与边界情况：明确搭档不参与判定且不联动。

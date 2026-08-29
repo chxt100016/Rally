@@ -47,3 +47,15 @@
 - [Q10] C10 成功是否在物理删除前产出 meetupId 与全部参与者 userId/entryNo 的取消快照？
   > 是。删除前返回包含 tournamentId、matchId、matchNo、可选 meetupId 及全部参与者 userId/entryNo 的不可变快照。
   → 落入不变量、命令和边界情况：删除前生成联动快照。
+
+- [Q11] C10 是否复用现有 REJECTED 终态，且 REJECTED 重复调用幂等返回当前快照而不递增 version？
+  > 是。C10 复用 REJECTED；最新状态已为 REJECTED 时幂等返回当前联动快照，不写根、不递增 version。
+  → 落入状态、C10 和幂等边界。
+
+- [Q12] C10 首次终止是否只改变 status 和 version，保留参与者及全部订场、确认、拒绝、重订和赛果字段？
+  > 是。首次终止只把 status 改为 REJECTED 并令 version+1；参与者和所有其他比赛字段保持原值，completedTime 不填写。
+  → 落入 I8、C10 和实现提示。
+
+- [Q13] C10 条件更新未命中是否统一视为版本冲突，而 COMPLETED 必须在命令判定阶段返回终止禁止？
+  > 是。COMPLETED 在聚合判定阶段返回终止禁止；首次终止条件更新未命中统一返回版本冲突。
+  → 落入 I8、C10 拒绝情形和并发边界。

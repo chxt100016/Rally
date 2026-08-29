@@ -80,7 +80,8 @@ public class SaveBookingActivity {
     }
 
     private String saveBooking(SubmitBookingCmd command, String operatorId) {
-        TournamentMatch match = matchRepository.findByBizIdWithParticipants(
+        // A1：先锁定比赛根，再读取或保存关联赛约，与后台终止串行。
+        TournamentMatch match = matchRepository.findByBizIdWithParticipantsForUpdate(
                 command.getMatchId());
         Assert.notNull(match, BizErrorCode.TOURNAMENT_ENTRY_NOT_FOUND);
         CourtData court = resolveCourt(command.getCourtSelectMode(), command.getCourtId());

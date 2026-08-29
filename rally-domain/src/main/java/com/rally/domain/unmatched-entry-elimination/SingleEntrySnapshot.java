@@ -3,14 +3,9 @@ package com.rally.domain.tournament.unmatchedentryelimination;
 import com.rally.domain.tournament.enums.TournamentEntryStatusEnum;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
 
-/**
- * @deprecated Compatibility snapshot for the retired batch-entry API.
- */
-@Deprecated
-public record UnmatchedEntrySnapshot(
-        Integer entryNo,
+/** Minimal read-only facts of the single target entry. */
+public record SingleEntrySnapshot(
         String userId,
-        String partnerId,
         TournamentEntryStatusEnum status,
         TournamentRoundEnum currentRound) {
 }

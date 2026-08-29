@@ -3,7 +3,10 @@ package com.rally.domain.tournament.unmatchedentryelimination;
 import java.util.List;
 import java.util.Objects;
 
-/** Immutable accepted or rejected elimination decision. */
+/**
+ * @deprecated Compatibility result for the retired batch-entry API.
+ */
+@Deprecated
 public final class UnmatchedEntryEliminationResult {
 
     private final UnmatchedEntryEliminationDecision decision;
