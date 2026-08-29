@@ -1,5 +1,6 @@
 package com.rally.web.config;
 
+import com.rally.config.AccessBlockInterceptor;
 import com.rally.config.AuthInterceptor;
 import com.rally.config.ClientChannelInterceptor;
 import com.rally.config.LogInterceptor;
@@ -16,6 +17,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private AuthInterceptor authInterceptor;
 
     @Resource
+    private AccessBlockInterceptor accessBlockInterceptor;
+
+    @Resource
     private LogInterceptor logInterceptor;
 
     @Resource
@@ -29,9 +33,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(clientChannelInterceptor)
-                .addPathPatterns("/**");
         registry.addInterceptor(userBehaviorInterceptor)
+                .addPathPatterns("/**");
+        registry.addInterceptor(accessBlockInterceptor)
+                .addPathPatterns("/**");
+        registry.addInterceptor(clientChannelInterceptor)
                 .addPathPatterns("/**");
         registry.addInterceptor(adminApiKeyInterceptor)
                 .addPathPatterns(

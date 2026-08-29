@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * 业务活动 publish-global-config：发布一项 global 配置并重建当前 JVM 缓存。
+ * 业务活动 publish-global-config：发布 global 配置并重建当前 JVM 缓存。
  */
 @Component
 @RequiredArgsConstructor
@@ -173,6 +173,9 @@ public class PublishGlobalConfigActivity {
             if (key == SystemConfigKey.HOME_PAGE_CONFIG) {
                 return validateAndNormalizeHomePage(value);
             }
+            if (isAccessBlockConfig(key)) {
+                return validateAndNormalizeAccessBlock(key, value);
+            }
             validateScalar(key, value);
             return value;
         } catch (BusinessException exception) {
@@ -180,6 +183,36 @@ public class PublishGlobalConfigActivity {
         } catch (Exception exception) {
             throw new BusinessException(BizErrorCode.PARAM_ERROR, "配置格式无效");
         }
+    }
+
+    private static String validateAndNormalizeAccessBlock(SystemConfigKey key, String value) {
+        Object parsed = JSON.parse(value);
+        if (!(parsed instanceof JSONObject root)) {
+            throw new BusinessException(BizErrorCode.PARAM_ERROR, key.getDesc() + "必须是 JSON 对象");
+        }
+        for (var entry : root.entrySet()) {
+            if (StringUtils.isBlank(entry.getKey())) {
+                throw new BusinessException(BizErrorCode.PARAM_ERROR, "封禁值不能为空");
+            }
+            if (!(entry.getValue() instanceof JSONObject item)) {
+                throw new BusinessException(
+                        BizErrorCode.PARAM_ERROR,
+                        "封禁值 " + entry.getKey() + " 的配置必须是 JSON 对象");
+            }
+            Object remark = item.get("remark");
+            if (!(remark instanceof String text) || StringUtils.isBlank(text)) {
+                throw new BusinessException(
+                        BizErrorCode.PARAM_ERROR,
+                        "封禁值 " + entry.getKey() + " 必须包含非空 remark");
+            }
+        }
+        return JSON.toJSONString(root);
+    }
+
+    private static boolean isAccessBlockConfig(SystemConfigKey key) {
+        return key == SystemConfigKey.ACCESS_BLOCKED_USER_IDS
+                || key == SystemConfigKey.ACCESS_BLOCKED_CLIENT_IPS
+                || key == SystemConfigKey.ACCESS_BLOCKED_PHONES;
     }
 
     private static String validateAndNormalizeHomePage(String value) {
@@ -266,7 +299,7 @@ public class PublishGlobalConfigActivity {
     }
 
     private static String valueType(SystemConfigKey key) {
-        if (key == SystemConfigKey.HOME_PAGE_CONFIG) {
+        if (key == SystemConfigKey.HOME_PAGE_CONFIG || isAccessBlockConfig(key)) {
             return "json";
         }
         String defaultValue = key.getDefaultValue();

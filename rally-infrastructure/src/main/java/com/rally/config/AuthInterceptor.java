@@ -19,6 +19,9 @@ import java.util.Optional;
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
+    static final String VERIFIED_TOKEN_PAYLOAD_ATTRIBUTE =
+            AuthInterceptor.class.getName() + ".verifiedTokenPayload";
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -36,7 +39,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         String token = authHeader.substring(7);
-        Optional<TokenPayload> payload = TokenUtils.verify(token);
+        Object verifiedPayload = request.getAttribute(VERIFIED_TOKEN_PAYLOAD_ATTRIBUTE);
+        Optional<TokenPayload> payload = verifiedPayload instanceof TokenPayload tokenPayload
+                ? Optional.of(tokenPayload)
+                : TokenUtils.verify(token);
         if (payload.isEmpty()) {
             if (optionalAuth) {
                 return true;

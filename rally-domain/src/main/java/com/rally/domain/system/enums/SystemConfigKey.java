@@ -166,6 +166,12 @@ public enum SystemConfigKey {
 
     // ==================== 系统 ====================
 
+    /** 按用户 ID 拒绝接口访问，格式：{"userId":{"remark":"备注"}} */
+    ACCESS_BLOCKED_USER_IDS("access.blocked.user_ids", "按用户 ID 拒绝接口访问，格式 {\"userId\":{\"remark\":\"备注\"}}", "{}"),
+    /** 按客户端 IP 拒绝接口访问，格式：{"clientIp":{"remark":"备注"}} */
+    ACCESS_BLOCKED_CLIENT_IPS("access.blocked.client_ips", "按客户端 IP 拒绝接口访问，格式 {\"clientIp\":{\"remark\":\"备注\"}}", "{}"),
+    /** 按手机号拒绝接口访问，格式：{"phone":{"remark":"备注"}} */
+    ACCESS_BLOCKED_PHONES("access.blocked.phones", "按手机号拒绝接口访问，格式 {\"phone\":{\"remark\":\"备注\"}}", "{}"),
     /** 群聊二维码（base64） */
     SYSTEM_GROUP_QRCODE("system.group.qrcode", "群聊二维码 base64", ""),
     /** 启动页封面图存储 key */
