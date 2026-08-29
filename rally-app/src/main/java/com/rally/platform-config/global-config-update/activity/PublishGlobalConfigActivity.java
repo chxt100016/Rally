@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * 业务活动 publish-global-config：发布 global 配置并重建当前 JVM 缓存。
+ * 业务活动 publish-global-config：发布一项 global 配置并重建当前 JVM 缓存。
  */
 @Component
 @RequiredArgsConstructor
