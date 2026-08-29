@@ -4,5 +4,6 @@ package com.rally.domain.tournament.entry;
 public enum TournamentEntryReleaseReason {
     MATCH_REJECTED,
     MATCH_TIMEOUT,
-    UNBOOKED_CANCELLED
+    UNBOOKED_CANCELLED,
+    ADMIN_CANCELLED
 }

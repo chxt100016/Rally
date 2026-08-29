@@ -84,6 +84,22 @@ public class TournamentAdminController {
         return Result.ok();
     }
 
+    /** 取消指定赛事中指定序号的一场未完成比赛。 */
+    @PostMapping("/match/cancel/single")
+    public Result<Void> cancelSingleTournamentMatch(
+            @Valid @RequestBody TournamentSingleMatchCancelCmd cmd) {
+        tournamentAdminAppService.cancelSingleTournamentMatch(cmd);
+        return Result.ok();
+    }
+
+    /** 整组淘汰指定赛事当前轮次中未进入比赛的参赛者。 */
+    @PostMapping("/entry/eliminate-unmatched")
+    public Result<Void> eliminateUnmatchedEntries(
+            @Valid @RequestBody TournamentUnmatchedEntryEliminationCmd cmd) {
+        tournamentAdminAppService.eliminateUnmatchedEntries(cmd);
+        return Result.ok();
+    }
+
     /** 将指定用户处于等待匹配状态的赛事报名冻结。 */
     @PostMapping("/entry/freeze")
     public Result<Void> freezeEntry(@Valid @RequestBody TournamentEntryFreezeCmd cmd) {

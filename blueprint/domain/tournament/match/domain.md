@@ -54,11 +54,11 @@ tables:
 |---|---|---|---|
 | `MATCHED` | 已组成对阵，尚未选订场人 | `BOOKING/REJECTED` 或物理删除 | `C2/C8/C9` |
 | `BOOKING` | 已选订场人，等待提交/重订赛约 | `SCHEDULED/REJECTED` 或物理删除 | `C3/C8/C9` |
-| `SCHEDULED` | 赛约已提交，等待全员确认 | `SCHEDULED/BOOKING/PENDING_PLAY/REJECTED` | `C3/C4/C5/C8` |
-| `PENDING_PLAY` | 赛约已确认，等待比赛与结果提交 | `PENDING_CONFIRM/REJECTED` | `C6/C8` |
-| `PENDING_CONFIRM` | 结果已提交，等待全员确认 | `PENDING_CONFIRM/COMPLETED/REJECTED` | `C7/C8` |
+| `SCHEDULED` | 赛约已提交，等待全员确认 | `SCHEDULED/BOOKING/PENDING_PLAY/REJECTED` 或物理删除 | `C3/C4/C5/C8/C10` |
+| `PENDING_PLAY` | 赛约已确认，等待比赛与结果提交 | `PENDING_CONFIRM/REJECTED` 或物理删除 | `C6/C8/C10` |
+| `PENDING_CONFIRM` | 结果已提交，等待全员确认 | `PENDING_CONFIRM/COMPLETED/REJECTED` 或物理删除 | `C7/C8/C10` |
 | `COMPLETED` | 赛果已确认并完成 | `COMPLETED` | 无 |
-| `REJECTED` | 比赛已终止 | `REJECTED` | 无 |
+| `REJECTED` | 比赛已终止 | `REJECTED` 或物理删除 | `C10` |
 
 ## 不变量
 
@@ -71,6 +71,7 @@ tables:
 | I5 | 进入 PENDING_CONFIRM 必须同时记录合法胜方、参与者提交人和提交时间；进入 COMPLETED 必须有胜方及完成时间 | 比赛根、赛果提交、参与者 | 赛果事实与生命周期推进必须原子提交 | `TOURNAMENT_RESULT_WINNER_REQUIRED` |
 | I6 | 改变比赛状态或确认集合的命令先以根 `version` 条件更新，成功后再同事务保存参与者；版本不符不得部分保存。`SCHEDULED` 内只改外部赛约时不修改本聚合，也不比较 version | 比赛根、全部参与者 | 订场认领、确认和超时任务存在并发竞争，根版本作为整条聚合命令的执行权 | `TOURNAMENT_MATCH_VERSION_CONFLICT` |
 | I7 | 关联赛约可读取时，仅当赛约开始时间严格早于当前时刻才拒绝接受确认；meetupId 为空、记录缺失或时间恰等均沿兼容路径继续 | 比赛根、订场委派；时间事实来自 `@meetup.meetup` | 过期检查必须在同一活动事务内先于比赛推进；缺失关联的历史数据不新增阻断 | `MEETUP_EXPIRED` |
+| I8 | 按 `tournamentId+matchNo` 运营取消时必须锁定并使用最新根；`COMPLETED` 不得物理删除，其他状态须将根和全部参与者同成同败删除，并在删除前生成包含根身份、可选 meetupId 与全部参与者身份的不可变快照 | 比赛根、全部参与者、比赛身份 | 后续赛约和报名联动依赖被删除前的同一份参与快照，且完成态保护不能与参与者删除分开判断 | `TOURNAMENT_MATCH_CANCEL_FORBIDDEN` / `TOURNAMENT_MATCH_VERSION_CONFLICT` |
 
 ## 命令
 
@@ -85,6 +86,7 @@ tables:
 | C7 | 确认或自动完成赛果 | `PENDING_CONFIRM` | 确认参与者或超时事实、确认时间、version | 按需更新确认；全员已确认或超时完成时 `COMPLETED` | 缺胜方；非参与者；版本冲突 |
 | C8 | 拒绝比赛或赛果 | 任意非终态 | 可选拒绝阶段、理由、拒绝人、时间、version | `REJECTED`，按场景更新发起人确认 | 场景前置条件/超时/限额不满足；版本冲突 |
 | C9 | 取消未订场比赛 | `MATCHED/BOOKING` | 运营取消意图、version | 条件物理删除根及全部参与者 | 状态已变化；删除条件未命中；版本冲突 |
+| C10 | 运营取消指定未完成比赛 | `MATCHED/BOOKING/SCHEDULED/PENDING_PLAY/PENDING_CONFIRM/REJECTED` | tournamentId、正数 matchNo、运营取消意图 | 按自然键锁定最新根，生成取消快照后条件物理删除根及全部参与者 | 目标不存在；最新状态为 COMPLETED；删除条件未命中 |
 
 ## 边界情况
 
@@ -97,10 +99,11 @@ tables:
 - 提交赛果会清除其他参与者残留的赛果确认；超时自动完成只把仍 PENDING 的确认补为 CONFIRMED。
 - 赛果重复确认在比赛仍为 PENDING_CONFIRM 时刷新本人时间；最后一人确认发现胜方缺失时，本次参与者确认与根状态因事务异常一起回滚。
 - 用户拒绝、超时或退赛可把任意在途比赛终止为 REJECTED；退赛场景允许拒绝审计字段为空。
-- 运营物理取消严格限于 MATCHED/BOOKING，SCHEDULED 及以后禁止删除。
+- C9 未订场取消严格限于 MATCHED/BOOKING；C10 后台指定比赛取消独立允许除 COMPLETED 外的全部状态，包含 REJECTED，不改变 C9 语义。
+- C10 首次按自然键查不到目标与已加载后条件删除未命中分档处理；成功快照包含 tournamentId、matchId、matchNo、可选 meetupId 以及全部参与者 userId/entryNo，参与者为空时返回空列表。
 - 终止或删除后的报名释放、草稿赛约关闭以及完成后的报名结算属于跨聚合应用事务。
 - `round=FINAL` 且进入 `COMPLETED` 后，由跨聚合结算把胜方报名置为 CHAMPION，并以 winnerEntryNo 和 completedTime 结束所属赛事；仅 currentRound=FINAL 不足以产生冠军。
 
 ## 实现提示
 
-两个唯一键分别保护业务 id 和赛事内编号，`uk_match_user` 保护根内参与者唯一。仓储必须整聚合加载并批量保存参与者；所有阶段命令使用 version 条件更新根，受影响行数为 0 即冲突。补齐状态枚举中的 `PENDING_PLAY`，不要只依赖旧数据库列注释。
+两个唯一键分别保护业务 id 和赛事内编号，`uk_match_user` 保护根内参与者唯一。仓储必须整聚合加载并批量保存参与者；所有阶段命令使用 version 条件更新根，受影响行数为 0 即冲突。C10 使用 `tournament_id+match_no` 锁定读取最新根，并以 `status<>COMPLETED` 条件删除；参与者必须先装载进取消快照，再与根同事务删除。补齐状态枚举中的 `PENDING_PLAY`，不要只依赖旧数据库列注释。

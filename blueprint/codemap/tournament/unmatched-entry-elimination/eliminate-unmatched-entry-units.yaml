@@ -1,0 +1,22 @@
+id: tournament.unmatched-entry-elimination.activity.eliminate-unmatched-entry-units
+files:
+  - path: rally-adapter/src/main/java/com/rally/web/tournament/TournamentAdminController.java
+    role: 接收并校验运营指定的赛事编号，返回统一无数据成功响应
+    symbols: [TournamentAdminController.eliminateUnmatchedEntries]
+    covers: [A1, A5]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 以与现有赛事匹配入口共享的 bean monitor 串行调用未入赛淘汰活动
+    symbols: [TournamentAdminAppService.eliminateUnmatchedEntries]
+    covers: [A1, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentUnmatchedEntryEliminationCmd.java
+    role: 声明未入赛淘汰的赛事编号非空请求约束
+    symbols: [TournamentUnmatchedEntryEliminationCmd]
+    covers: [A1]
+  - path: rally-app/src/main/java/com/rally/tournament/unmatchedentryelimination/activity/EliminateUnmatchedEntryUnitsActivity.java
+    role: 校验激活赛事并编排全量快照判定、最新事实复核和整组条件淘汰
+    symbols: [EliminateUnmatchedEntryUnitsActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/auth/enums/BizErrorCode.java
+    role: 对外提供报名并发变更的稳定业务错误码
+    symbols: [BizErrorCode.TOURNAMENT_ENTRY_VERSION_CONFLICT]
+    covers: [A4]

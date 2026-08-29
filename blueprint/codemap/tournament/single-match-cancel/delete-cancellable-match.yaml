@@ -1,0 +1,26 @@
+id: tournament.single-match-cancel.activity.delete-cancellable-match
+files:
+  - path: rally-adapter/src/main/java/com/rally/web/tournament/TournamentAdminController.java
+    role: 接收并校验运营指定的赛事编号和比赛序号，返回统一无数据成功响应
+    symbols: [TournamentAdminController.cancelSingleTournamentMatch]
+    covers: [A1, A5]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 在同一外层事务内依次编排比赛删除、草稿赛约关闭和报名释放
+    symbols: [TournamentAdminAppService.cancelSingleTournamentMatch]
+    covers: [A2, A3, A4, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentSingleMatchCancelCmd.java
+    role: 声明单场取消的赛事编号非空与比赛序号正整数请求约束
+    symbols: [TournamentSingleMatchCancelCmd]
+    covers: [A1]
+  - path: rally-app/src/main/java/com/rally/tournament/singlematchcancel/activity/DeleteCancellableMatchActivity.java
+    role: 确认赛事存在并在外层事务内编排比赛聚合的运营取消命令
+    symbols: [DeleteCancellableMatchActivity, DeleteCancellableMatchActivity.execute]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentMatchPersistenceAdapter.java
+    role: 比赛聚合的自然键锁定读取、状态条件物理删除及持久化适配
+    symbols: [TournamentMatchPersistenceAdapter.findLatestByTournamentIdAndMatchNoForUpdate, TournamentMatchPersistenceAdapter.deleteNotCompletedWithParticipants]
+    covers: [A2, A4]
+  - path: rally-domain/src/main/java/com/rally/domain/auth/enums/BizErrorCode.java
+    role: 提供指定比赛首次不存在的稳定对外错误码
+    symbols: [BizErrorCode.TOURNAMENT_MATCH_NOT_FOUND]
+    covers: [A2]

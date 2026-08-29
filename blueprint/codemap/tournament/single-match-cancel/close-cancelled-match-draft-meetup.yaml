@@ -1,0 +1,10 @@
+id: tournament.single-match-cancel.activity.close-cancelled-match-draft-meetup
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 将删除活动交付的取消快照传入草稿赛约关闭活动并继续透传
+    symbols: [TournamentAdminAppService.cancelSingleTournamentMatch]
+    covers: [A1, A3]
+  - path: rally-app/src/main/java/com/rally/tournament/singlematchcancel/activity/CloseCancelledMatchDraftMeetupActivity.java
+    role: 按取消快照加载完整赛约聚合，仅关闭持久化状态仍为草稿的关联赛约并透传快照
+    symbols: [CloseCancelledMatchDraftMeetupActivity, CloseCancelledMatchDraftMeetupActivity.execute]
+    covers: [A1, A2, A3]

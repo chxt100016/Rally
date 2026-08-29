@@ -153,7 +153,9 @@ public enum BizErrorCode {
     TOURNAMENT_NO_BOOKER_REJECT_FORBIDDEN(46029, "当前不是待选订场人阶段"),
     TOURNAMENT_WAITING_BOOKING_REJECT_FORBIDDEN(46030, "当前不是等待对方订场阶段"),
     TOURNAMENT_WAITING_SCHEDULE_CONFIRM_REJECT_FORBIDDEN(46031, "当前不是等待对方确认阶段"),
-    TOURNAMENT_COMMENT_FORBIDDEN(46032, "只有赛事参与者可以查看或发布评论");
+    TOURNAMENT_COMMENT_FORBIDDEN(46032, "只有赛事参与者可以查看或发布评论"),
+    TOURNAMENT_MATCH_NOT_FOUND(46033, "比赛不存在"),
+    TOURNAMENT_ENTRY_VERSION_CONFLICT(46034, "报名状态已变更，请刷新后重试");
 
     private final int code;
     private final String message;

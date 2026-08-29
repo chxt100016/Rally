@@ -47,8 +47,8 @@ tables:
 
 | 状态 | 含义 | 可迁移到 | 触发命令 |
 |---|---|---|---|
-| `WAITING` | 位于当前轮次匹配池 | `FROZEN/IN_MATCH/ELIMINATED/WITHDRAWN` | `C3/C4/C8/C9` |
-| `FROZEN` | 暂停匹配 | `WAITING/WITHDRAWN` | `C3/C9` |
+| `WAITING` | 位于当前轮次匹配池 | `FROZEN/IN_MATCH/ELIMINATED/WITHDRAWN` | `C3/C4/C8/C9/C11` |
+| `FROZEN` | 暂停匹配 | `WAITING/ELIMINATED/WITHDRAWN` | `C3/C9/C11` |
 | `IN_MATCH` | 已被一场进行中比赛占用 | `WAITING/PAYING/CHAMPION/ELIMINATED/WITHDRAWN` | `C5/C6/C9` |
 | `PAYING` | 资格赛胜出，等待锁定正赛席位 | `WAITING/WITHDRAWN` | `C7/C9` |
 | `CHAMPION` | 已赢得完成的决赛 | `CHAMPION` | 无 |
@@ -68,6 +68,7 @@ tables:
 | I5 | 两类拒绝次数均非负且只在对应赛段拒赛成功时加一；达到赛事配置限额时拒绝整条拒赛命令 | 报名根、拒绝计数 | 次数和比赛拒绝结果必须同成同败，不能超限后再补偿 | `TOURNAMENT_REJECT_LIMIT_REACHED` |
 | I6 | 当前命令不写 qualifiedTime；paidTime 随 PAYING 成功晋级 MAIN 时设置；记录访问直接覆盖 lastVisitTime，不比较旧值 | 报名根、晋级进度、访问时间 | 单次支付或访问命令中的状态与时间必须一起写入；“只保留更晚访问”不是当前保证 | `TOURNAMENT_ENTRY_STATUS_ILLEGAL` |
 | I7 | 只有已完成决赛的胜方才能进入 CHAMPION；冠军保持 currentRound=FINAL，且同 entryNo 的双打成员必须在同一结算事务一起成为冠军 | 报名根、晋级进度 | 冠军必须与决赛胜方和赛事冠军编号一致 | `TOURNAMENT_ENTRY_PROGRESS_INVALID` |
+| I8 | 运营淘汰未入赛报名只接受 `WAITING/FROZEN`，且报名 currentRound 必须等于调用方提供的赛事当前轮次；状态或轮次在保存前变化不得覆盖 | 报名根、晋级进度 | 单根必须原子校验来源状态与轮次后进入不可恢复终态，避免并发匹配、解冻或轮次推进被运营淘汰覆盖 | `TOURNAMENT_ENTRY_VERSION_CONFLICT` |
 
 ## 命令
 
@@ -83,6 +84,7 @@ tables:
 | C8 | 淘汰未晋级报名 | `QUALIFY/WAITING` | 资格赛完成且正赛席位已满事实 | `ELIMINATED` | 条件未满足；非资格等待报名 |
 | C9 | 主动退赛 | 任意非终态 | 当前用户退赛意图 | `WITHDRAWN`，其他字段保留 | 已 `CHAMPION/WITHDRAWN/ELIMINATED`；报名不存在 |
 | C10 | 记录赛事访问 | 任意状态 | 本次访问时间 | 状态不变，lastVisitTime 直接写为本次时间 | 报名不存在时更新无效果；不比较是否早于旧值 |
+| C11 | 运营淘汰未入赛报名 | `WAITING/FROZEN` | 调用方确认的赛事当前轮次、运营淘汰意图 | `ELIMINATED`，其他字段保持不变 | 来源状态不符；报名轮次与预期轮次不一致；条件保存未命中 |
 
 ## 边界情况
 
@@ -99,7 +101,9 @@ tables:
 - 偏好集合自身必须非空，但其中的空白、重复或其他原始元素不在领域边界清洗或拒绝。
 - 详情访问是读取链路中的独立写入，直接覆盖为本次时间；后续详情拼装失败不回滚已记录时间。
 - WAITING 报名的 currentRound 晚于赛事 currentRound 时已经晋级但尚未进入匹配池，详情动作显示“已晋级”；只有两者相等时显示“匹配中”。
+- C11 只守护单条报名的状态与轮次迁移；同 entryNo 成员完整性、全部成员同成同败以及无人参加在途比赛，由 `@tournament.unmatched-entry-elimination` 预检并由调用活动在同一事务中复核协调。
+- `IN_MATCH/PAYING/CHAMPION/ELIMINATED/WITHDRAWN` 均不能通过 C11 被覆盖；`FROZEN→ELIMINATED` 是运营收口当前轮次的专用迁移，不等同于解冻或主动退赛。
 
 ## 实现提示
 
-`uk_tournament_user` 和 `uk_biz_id` 双重保护身份。仓储按 `biz_id` 普通更新或插入，状态保存不带原状态或版本条件；只有匹配释放路径在内存中跳过非 `IN_MATCH` 报名。偏好 JSON 在领域边界整组序列化。支付推进、赛果结算及双打绑定由应用事务协调其他聚合，领域文档不额外声明实现中不存在的并发保护。
+`uk_tournament_user` 和 `uk_biz_id` 双重保护身份。通用仓储按 `biz_id` 普通更新或插入，匹配释放路径在内存中跳过非 `IN_MATCH` 报名；C11 例外使用 `biz_id+current_round+status IN (WAITING,FROZEN)` 条件更新，影响零行即冲突。偏好 JSON 在领域边界整组序列化。支付推进、赛果结算、双打绑定及多报名整组淘汰由应用事务协调其他聚合。

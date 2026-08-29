@@ -1,0 +1,18 @@
+id: tournament.single-match-cancel.activity.release-cancelled-match-entries
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 将赛约联动后的取消快照传入报名释放活动并完成整体事务
+    symbols: [TournamentAdminAppService.cancelSingleTournamentMatch]
+    covers: [A1, A4]
+  - path: rally-app/src/main/java/com/rally/tournament/singlematchcancel/activity/ReleaseCancelledMatchEntriesActivity.java
+    role: 遍历取消快照参与者，按赛事和用户恢复报名聚合并调用不计拒绝次数的运营取消释放命令
+    symbols: [ReleaseCancelledMatchEntriesActivity, ReleaseCancelledMatchEntriesActivity.execute]
+    covers: [A1, A2, A3, A4]
+  - path: rally-infrastructure/src/main/java/com/rally/db/tournament/repository/TournamentEntryPersistenceAdapter.java
+    role: 提供报名聚合自然键读取、普通保存及未入赛淘汰条件保存的统一持久化适配
+    symbols: [TournamentEntryPersistenceAdapter, TournamentEntryPersistenceAdapter.findByTournamentAndUser, TournamentEntryPersistenceAdapter.saveByBizId]
+    covers: [A2, A3]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntryReleaseReason.java
+    role: 标识由后台运营取消比赛触发且不增加拒绝次数的报名释放事实
+    symbols: [TournamentEntryReleaseReason.ADMIN_CANCELLED]
+    covers: [A3]

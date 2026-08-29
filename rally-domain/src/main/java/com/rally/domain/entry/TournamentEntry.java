@@ -5,7 +5,7 @@ import java.util.Objects;
 
 /**
  * 由 {@code biz_id} 标识、以 {@code tournament_id+user_id} 为自然键的赛事报名聚合。
- * rally_tournament_entry 的状态变化只能通过 C1-C10 进入。
+ * rally_tournament_entry 的状态变化只能通过 C1-C11 进入。
  */
 public final class TournamentEntry {
 
@@ -21,6 +21,8 @@ public final class TournamentEntry {
             "TOURNAMENT_REJECT_LIMIT_REACHED";
     public static final String TOURNAMENT_ENTRY_STATUS_ILLEGAL =
             "TOURNAMENT_ENTRY_STATUS_ILLEGAL";
+    public static final String TOURNAMENT_ENTRY_VERSION_CONFLICT =
+            "TOURNAMENT_ENTRY_VERSION_CONFLICT";
 
     private final TournamentEntryIdentity identity;
     private TournamentEntryState state;
@@ -317,6 +319,41 @@ public final class TournamentEntry {
         return true;
     }
 
+    /**
+     * C11：运营淘汰当前轮次未入赛报名。持久化端必须同时限定
+     * bizId、预期轮次与 WAITING/FROZEN 来源状态，防止覆盖并发入赛或轮次推进。
+     */
+    public void eliminateUnmatched(
+            TournamentEntryRound expectedCurrentRound,
+            TournamentEntryPersistence persistence) {
+        require(expectedCurrentRound != null,
+                TOURNAMENT_ENTRY_VERSION_CONFLICT,
+                "运营淘汰必须提供赛事当前轮次");
+        require(state.status() == TournamentEntryStatus.WAITING
+                        || state.status() == TournamentEntryStatus.FROZEN,
+                TOURNAMENT_ENTRY_VERSION_CONFLICT,
+                "只有等待或冻结报名可被运营淘汰");
+        require(state.currentRound() == expectedCurrentRound,
+                TOURNAMENT_ENTRY_VERSION_CONFLICT,
+                "报名轮次与赛事当前轮次不一致");
+        require(persistence != null,
+                TOURNAMENT_ENTRY_VERSION_CONFLICT,
+                "报名持久化端口不能为空");
+
+        TournamentEntryState candidate = progress(
+                state.stage(), TournamentEntryStatus.ELIMINATED,
+                state.currentRound());
+        TournamentEntry checked = new TournamentEntry(identity, candidate);
+        checked.checkInvariants();
+        requirePersistentId();
+        require(persistence.eliminateUnmatchedByBizId(
+                        candidate, expectedCurrentRound),
+                TOURNAMENT_ENTRY_VERSION_CONFLICT,
+                "运营淘汰报名时状态或轮次已变更");
+        state = candidate;
+        checkInvariants();
+    }
+
     public TournamentEntryIdentity identity() {
         return identity;
     }
@@ -325,7 +362,7 @@ public final class TournamentEntry {
         return state;
     }
 
-    /** I1-I7：恢复及每条命令后校验当前状态涉及的全部不变量。 */
+    /** I1-I8：恢复及每条命令后校验当前状态涉及的全部不变量。 */
     private void checkInvariants() {
         require(Objects.equals(identity, state.identity()),
                 TOURNAMENT_ENTRY_IDENTITY_CONFLICT,

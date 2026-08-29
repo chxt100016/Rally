@@ -5,12 +5,16 @@ import com.rally.domain.tournament.model.*;
 import com.rally.tournament.currentroundmatching.activity.RunCurrentRoundMatchingActivity;
 import com.rally.tournament.entryfreeze.activity.FreezeEntryActivity;
 import com.rally.tournament.offlinemeetupcreate.activity.CreateOfflineMeetupActivity;
+import com.rally.tournament.singlematchcancel.activity.CloseCancelledMatchDraftMeetupActivity;
+import com.rally.tournament.singlematchcancel.activity.DeleteCancellableMatchActivity;
+import com.rally.tournament.singlematchcancel.activity.ReleaseCancelledMatchEntriesActivity;
 import com.rally.tournament.tournamentactivate.activity.ActivateTournamentActivity;
 import com.rally.tournament.tournamentabandon.activity.AbandonTournamentActivity;
 import com.rally.tournament.tournamentconfigupdate.activity.UpdateTournamentConfigActivity;
 import com.rally.tournament.tournamentdraftcreate.activity.CreateTournamentDraftActivity;
 import com.rally.tournament.tournamentlist.activity.QueryTournamentAdminListActivity;
 import com.rally.tournament.unbookedmatchcancel.activity.CancelUnbookedMatchesActivity;
+import com.rally.tournament.unmatchedentryelimination.activity.EliminateUnmatchedEntryUnitsActivity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +43,14 @@ public class TournamentAdminAppService {
     private final RunCurrentRoundMatchingActivity runCurrentRoundMatchingActivity;
 
     private final CancelUnbookedMatchesActivity cancelUnbookedMatchesActivity;
+
+    private final DeleteCancellableMatchActivity deleteCancellableMatchActivity;
+
+    private final CloseCancelledMatchDraftMeetupActivity closeCancelledMatchDraftMeetupActivity;
+
+    private final ReleaseCancelledMatchEntriesActivity releaseCancelledMatchEntriesActivity;
+
+    private final EliminateUnmatchedEntryUnitsActivity eliminateUnmatchedEntryUnitsActivity;
 
     private final FreezeEntryActivity freezeEntryActivity;
 
@@ -115,6 +127,21 @@ public class TournamentAdminAppService {
     /** 运营批量取消一个赛事中尚未提交订场信息的比赛，并将参赛者退回当前轮次的匹配池。 */
     public void cancelUnsubmittedTournamentMatches(String tournamentId) {
         cancelUnbookedMatchesActivity.execute(tournamentId);
+    }
+
+    /** 运营取消一场未完成比赛，并在同一事务中完成赛约和报名联动。 */
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelSingleTournamentMatch(TournamentSingleMatchCancelCmd cmd) {
+        var cancellationSnapshot = deleteCancellableMatchActivity.execute(
+                cmd.getTournamentId(), cmd.getMatchNo());
+        cancellationSnapshot = closeCancelledMatchDraftMeetupActivity.execute(cancellationSnapshot);
+        releaseCancelledMatchEntriesActivity.execute(cancellationSnapshot);
+    }
+
+    /** 运营淘汰当前轮次未进入比赛的参赛单元，与匹配入口使用同一实例锁。 */
+    public synchronized void eliminateUnmatchedEntries(
+            TournamentUnmatchedEntryEliminationCmd cmd) {
+        eliminateUnmatchedEntryUnitsActivity.execute(cmd.getTournamentId());
     }
 
     /** 运营将指定用户处于等待匹配状态的报名冻结。 */

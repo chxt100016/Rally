@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * 赛事单场比赛聚合。rally_tournament_match 与其全部参与者的变更只能通过 C1-C9 进入。
+ * 赛事单场比赛聚合。rally_tournament_match 与其全部参与者的变更只能通过 C1-C10 进入。
  */
 public final class TournamentMatch {
 
@@ -27,6 +27,10 @@ public final class TournamentMatch {
     public static final String MEETUP_EXPIRED = "MEETUP_EXPIRED";
     public static final String TOURNAMENT_MATCH_REJECTION_FORBIDDEN =
             "TOURNAMENT_MATCH_REJECTION_FORBIDDEN";
+    public static final String TOURNAMENT_MATCH_NOT_FOUND =
+            "TOURNAMENT_MATCH_NOT_FOUND";
+    public static final String TOURNAMENT_MATCH_CANCEL_FORBIDDEN =
+            "TOURNAMENT_MATCH_CANCEL_FORBIDDEN";
 
     private TournamentMatchState state;
     private List<TournamentMatchParticipant> participants;
@@ -326,12 +330,79 @@ public final class TournamentMatch {
                 "比赛删除条件或版本已变化");
     }
 
+    /**
+     * C10：按赛事内自然键锁定最新比赛，产生联动快照后条件物理删除。
+     *
+     * <p>这一运营清理能力允许参与者列表为空，以便清理历史异常数据；
+     * 不改变常规聚合恢复仍必须满足完整对阵的约束。</p>
+     */
+    public static TournamentMatchCancellationSnapshot cancel(
+            CancelTournamentMatchCommand command,
+            TournamentMatchPersistence persistence) {
+        require(command != null, TOURNAMENT_MATCH_IDENTITY_CONFLICT,
+                "取消比赛命令不能为空");
+        require(persistence != null, TOURNAMENT_MATCH_VERSION_CONFLICT,
+                "比赛持久化端口不能为空");
+        String tournamentId = requiredId(command.tournamentId(), "赛事 id");
+        require(command.matchNo() > 0, TOURNAMENT_MATCH_IDENTITY_CONFLICT,
+                "比赛编号必须为正数");
+
+        TournamentMatchCancellationTarget target =
+                persistence.findLatestByTournamentIdAndMatchNoForUpdate(
+                        tournamentId, command.matchNo());
+        require(target != null, TOURNAMENT_MATCH_NOT_FOUND,
+                "指定比赛不存在");
+        TournamentMatchState latest = target.state();
+        require(latest != null
+                        && Objects.equals(latest.tournamentId(), tournamentId)
+                        && latest.matchNo() == command.matchNo(),
+                TOURNAMENT_MATCH_IDENTITY_CONFLICT,
+                "锁定的比赛与请求自然键不一致");
+        require(latest.status() != null, TOURNAMENT_MATCH_IDENTITY_CONFLICT,
+                "比赛状态不能为空");
+        require(latest.status() != TournamentMatchStatus.COMPLETED,
+                TOURNAMENT_MATCH_CANCEL_FORBIDDEN,
+                "已完成比赛不能取消");
+
+        TournamentMatchCancellationSnapshot snapshot = cancellationSnapshot(target);
+        require(persistence.deleteNotCompletedWithParticipants(latest.bizId()),
+                TOURNAMENT_MATCH_VERSION_CONFLICT,
+                "比赛已被删除或已完成");
+        return snapshot;
+    }
+
     public TournamentMatchState state() {
         return state;
     }
 
     public List<TournamentMatchParticipant> participants() {
         return participants;
+    }
+
+    private static TournamentMatchCancellationSnapshot cancellationSnapshot(
+            TournamentMatchCancellationTarget target) {
+        TournamentMatchState latest = target.state();
+        String matchId = requiredId(latest.bizId(), "比赛业务 id");
+        String tournamentId = requiredId(latest.tournamentId(), "赛事 id");
+        String meetupId = optionalId(latest.meetupId(), "赛约 id");
+        List<TournamentMatchCancellationParticipant> participantSnapshots =
+                target.participants().stream().map(participant -> {
+                    require(participant != null,
+                            TOURNAMENT_MATCH_PARTICIPANT_INVALID,
+                            "比赛参与者不能为空");
+                    require(Objects.equals(participant.matchId(), matchId)
+                                    && Objects.equals(
+                                    participant.tournamentId(), tournamentId)
+                                    && participant.entryNo() > 0,
+                            TOURNAMENT_MATCH_PARTICIPANT_INVALID,
+                            "参与者比赛身份不一致");
+                    return new TournamentMatchCancellationParticipant(
+                            requiredId(participant.userId(), "参与者用户 id"),
+                            participant.entryNo());
+                }).toList();
+        return new TournamentMatchCancellationSnapshot(
+                tournamentId, matchId, latest.matchNo(), meetupId,
+                participantSnapshots);
     }
 
     private void validateUserRejection(RejectTournamentMatchCommand command) {
@@ -359,7 +430,7 @@ public final class TournamentMatch {
         optionalCode(command.reasonCode(), "拒绝理由");
     }
 
-    /** I1-I7：恢复及每个命令后校验涉及的全部不变量。 */
+    /** I1-I8：恢复及每个命令后校验涉及的全部不变量。 */
     private void checkInvariants() {
         require(state != null, TOURNAMENT_MATCH_IDENTITY_CONFLICT,
                 "比赛根状态不能为空");
