@@ -111,12 +111,11 @@ public class TourMatchQueryDomainService {
             dateMap.computeIfAbsent(m.getDate() != null ? m.getDate() : "", k -> new ArrayList<>()).add(m);
         }
 
-        LocalDate base = baseDate(dateMap.keySet());
         List<MatchGroupDTO> dateGroups = new ArrayList<>();
         for (Map.Entry<String, List<MatchQueryVO>> entry : dateMap.entrySet()) {
             MatchGroupDTO dateGroup = new MatchGroupDTO();
             dateGroup.setKey(entry.getKey());
-            dateGroup.setName(dateLabel(entry.getKey(), base));
+            dateGroup.setName(dateLabel(entry.getKey()));
             dateGroup.setChildren(buildCourtGroups(entry.getValue(), tourMap));
             dateGroups.add(dateGroup);
         }
@@ -124,21 +123,13 @@ public class TourMatchQueryDomainService {
         return dateGroups;
     }
 
-    /** 锚点日期：数据中最早日期与今天取较早者，跨天比赛的过去日期据此显示为「今天」 */
-    private LocalDate baseDate(Set<String> dates) {
-        LocalDate base = LocalDate.now();
-        for (String d : dates) {
-            if (StringUtils.isBlank(d)) continue;
-            LocalDate parsed = LocalDate.parse(d, DATE_FMT);
-            if (parsed.isBefore(base)) base = parsed;
-        }
-        return base;
-    }
-
-    private String dateLabel(String date, LocalDate base) {
+    /** 日期文案：以真实今天为锚点，昨天/今天/明天用特殊文案，其余按原日期格式展示 */
+    private String dateLabel(String date) {
         if (StringUtils.isBlank(date)) return date;
-        if (date.equals(base.format(DATE_FMT))) return "今天";
-        if (date.equals(base.plusDays(1).format(DATE_FMT))) return "明天";
+        LocalDate today = LocalDate.now();
+        if (date.equals(today.format(DATE_FMT))) return "今天";
+        if (date.equals(today.minusDays(1).format(DATE_FMT))) return "昨天";
+        if (date.equals(today.plusDays(1).format(DATE_FMT))) return "明天";
         return date;
     }
 
