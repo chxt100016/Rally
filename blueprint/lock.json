@@ -1141,6 +1141,26 @@
         "flows_hash": "sha256:adf2a3bf5297cc0966088f3475003bde6d123a69535e4f253f2e04271165e100",
         "approved_at": "2026-08-29T12:04:32Z"
       }
+    },
+    "tournament.booking-confirm-admin": {
+      "flow": {
+        "product_hash": "sha256:2ef8294a8582a61ccb24a3612d6d2e610a5224a5e9350cb546dd3b459c668177",
+        "approved_at": "2026-08-31T05:26:50Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:bb0bc2e260bf27e530728e4b92cc4369f1ea5f5ad98b34833f766c047e0eb69d",
+        "approved_at": "2026-08-31T05:40:30Z"
+      }
+    },
+    "tournament.result-confirm-admin": {
+      "flow": {
+        "product_hash": "sha256:896d7f34b9ba397a00cb10b7e05dd931b304510228d8913daddb44b5dd871e2f",
+        "approved_at": "2026-08-31T05:33:42Z"
+      },
+      "activity": {
+        "flows_hash": "sha256:289127e40aaa8313645f592057cf8c31444aeee94628ca65f5fa4a9b08603cbb",
+        "approved_at": "2026-08-31T05:42:17Z"
+      }
     }
   },
   "flows": {
@@ -1916,6 +1936,18 @@
       "flow": {
         "flow_hash": "sha256:b98f6764e448a1ab240299c947793293fb1e148e253020f85703481a0a395ed2",
         "approved_at": "2026-08-29T12:01:00Z"
+      }
+    },
+    "tournament.booking-confirm-admin.flow.confirm-booking": {
+      "flow": {
+        "flow_hash": "sha256:c3c70dbaca0c69816e64393763c9412434053770932806b6ed1ac8bfdc591dbd",
+        "approved_at": "2026-08-31T05:26:50Z"
+      }
+    },
+    "tournament.result-confirm-admin.flow.confirm-result": {
+      "flow": {
+        "flow_hash": "sha256:179e65cc35926f6d3de96a817d09e03653f0ff62e3ae666174069a409600120a",
+        "approved_at": "2026-08-31T05:33:42Z"
       }
     }
   },
@@ -5432,6 +5464,70 @@
         ],
         "verified_at": "2026-08-29T12:54:53Z",
         "base_commit": "1389b05a853f87cd0b95303abd5ce0ed6034f823"
+      }
+    },
+    "tournament.booking-confirm-admin.activity.confirm-booking-by-admin": {
+      "spec": {
+        "service": "tournament.booking-confirm-admin",
+        "activity_hash": "sha256:5efd6b21d9296d48e34e72d0e14a75cd7ae95f0e85fb99dafb0360d3d558c21a",
+        "approved_at": "2026-08-31T05:40:30Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:5efd6b21d9296d48e34e72d0e14a75cd7ae95f0e85fb99dafb0360d3d558c21a",
+        "uses_hash": "sha256:fa04e2ccdb676e3b302c217e7e5681ffd94773269651a8d53f67c19b28db63c9",
+        "files": [
+          "rally-app/src/main/java/com/rally/tournament/booking-confirm-admin/activity/ConfirmBookingByAdminActivity.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentMatch.java",
+          "rally-domain/src/main/java/com/rally/domain/meetup/model/Meetup.java",
+          "rally-domain/src/main/java/com/rally/domain/meetup/service/MeetupDomainService.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentBookingConfirmAdminCmd.java",
+          "rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java",
+          "rally-adapter/src/main/java/com/rally/web/tournament/TournamentAdminController.java"
+        ],
+        "verified_at": "2026-08-31T05:51:14Z",
+        "base_commit": "362aa21237432dbf1fcdb7411a4661f851ee0e49"
+      }
+    },
+    "tournament.result-confirm-admin.activity.advance-tournament-progress": {
+      "spec": {
+        "service": "tournament.result-confirm-admin",
+        "activity_hash": "sha256:b2ee2a5857c01eae578ad870bf92222f0e49895bc5b2ff2dd2395628080ec778",
+        "approved_at": "2026-08-31T05:42:17Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:b2ee2a5857c01eae578ad870bf92222f0e49895bc5b2ff2dd2395628080ec778",
+        "uses_hash": "sha256:7e3470c69fa901e86410cae741d00306aa1a01af4e2e58e6f3008368dc239ea6",
+        "files": [
+          "rally-app/src/main/java/com/rally/tournament/result-confirm-admin/activity/AdvanceTournamentProgressActivity.java",
+          "rally-domain/src/main/java/com/rally/domain/round-progress/TournamentRoundProgressDecisionService.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/model/Tournament.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/gateway/TournamentRepository.java",
+          "rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java"
+        ],
+        "verified_at": "2026-08-31T06:00:48Z",
+        "base_commit": "362aa21237432dbf1fcdb7411a4661f851ee0e49"
+      }
+    },
+    "tournament.result-confirm-admin.activity.confirm-result-by-admin": {
+      "spec": {
+        "service": "tournament.result-confirm-admin",
+        "activity_hash": "sha256:683b8a7c33c8c759b86b9fb5ec7a4236fbec2c9cce907e84f5bfa3188a208fd1",
+        "approved_at": "2026-08-31T05:42:17Z"
+      },
+      "impl": {
+        "activity_hash": "sha256:683b8a7c33c8c759b86b9fb5ec7a4236fbec2c9cce907e84f5bfa3188a208fd1",
+        "uses_hash": "sha256:f5e05018b1cc0e932f48a684a66ad9c7b5adb6304dc498094642087a4bb08d07",
+        "files": [
+          "rally-app/src/main/java/com/rally/tournament/result-confirm-admin/activity/ConfirmResultByAdminActivity.java",
+          "rally-app/src/main/java/com/rally/tournament/result-confirm-admin/activity/ConfirmResultByAdminResult.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentMatch.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentEntry.java",
+          "rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentResultConfirmAdminCmd.java",
+          "rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java",
+          "rally-adapter/src/main/java/com/rally/web/tournament/TournamentAdminController.java"
+        ],
+        "verified_at": "2026-08-31T06:00:10Z",
+        "base_commit": "362aa21237432dbf1fcdb7411a4661f851ee0e49"
       }
     }
   },

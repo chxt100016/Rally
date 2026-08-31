@@ -123,4 +123,13 @@ public class TournamentEntry {
         this.data.setStatus(TournamentEntryStatusEnum.WAITING);
         this.data.setCurrentRound(nextRound);
     }
+
+    /**
+     * 比赛落败后结算报名状态。资格赛负方回到等待匹配继续参赛；正赛（含决赛）负方被淘汰。
+     */
+    public void advanceAfterLoss(TournamentRoundEnum completedRound) {
+        this.data.setStatus(completedRound == TournamentRoundEnum.QUALIFIER
+                ? TournamentEntryStatusEnum.WAITING
+                : TournamentEntryStatusEnum.ELIMINATED);
+    }
 }

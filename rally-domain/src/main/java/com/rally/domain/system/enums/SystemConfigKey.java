@@ -163,6 +163,8 @@ public enum SystemConfigKey {
 
     /** 比赛在当前赛约等待阶段达到该时长后，允许参赛者主动拒绝（小时） */
     TOURNAMENT_MATCH_REJECT_TIMEOUT_HOURS("tournament.match.reject_timeout_hours", "赛事比赛允许主动拒绝的等待时长（小时）", "48"),
+    /** 确认赛约时是否校验赛约开始时间不能已过去，默认不校验 */
+    TOURNAMENT_BOOKING_START_TIME_EXPIRE_CHECK("tournament.booking.start_time_expire_check", "确认赛约时是否校验赛约开始时间不能已过去（true=校验）", "false"),
 
     // ==================== 系统 ====================
 

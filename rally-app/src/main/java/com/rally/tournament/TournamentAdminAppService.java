@@ -2,7 +2,11 @@ package com.rally.tournament;
 
 import com.rally.domain.meetup.model.PageDTO;
 import com.rally.domain.tournament.model.*;
+import com.rally.tournament.bookingconfirmadmin.activity.ConfirmBookingByAdminActivity;
 import com.rally.tournament.currentroundmatching.activity.RunCurrentRoundMatchingActivity;
+import com.rally.tournament.resultconfirmadmin.activity.AdvanceTournamentProgressActivity;
+import com.rally.tournament.resultconfirmadmin.activity.ConfirmResultByAdminActivity;
+import com.rally.tournament.resultconfirmadmin.activity.ConfirmResultByAdminResult;
 import com.rally.tournament.entryfreeze.activity.FreezeEntryActivity;
 import com.rally.tournament.offlinemeetupcreate.activity.CreateOfflineMeetupActivity;
 import com.rally.tournament.singlematchcancel.activity.CloseCancelledMatchDraftMeetupActivity;
@@ -45,6 +49,12 @@ public class TournamentAdminAppService {
     private final CancelUnbookedMatchesActivity cancelUnbookedMatchesActivity;
 
     private final DeleteCancellableMatchActivity deleteCancellableMatchActivity;
+
+    private final ConfirmBookingByAdminActivity confirmBookingByAdminActivity;
+
+    private final ConfirmResultByAdminActivity confirmResultByAdminActivity;
+
+    private final AdvanceTournamentProgressActivity advanceTournamentProgressActivity;
 
     private final CloseCancelledMatchDraftMeetupActivity closeCancelledMatchDraftMeetupActivity;
 
@@ -136,6 +146,21 @@ public class TournamentAdminAppService {
                 cmd.getTournamentId(), cmd.getMatchNo());
         terminationSnapshot = closeCancelledMatchDraftMeetupActivity.execute(terminationSnapshot);
         releaseCancelledMatchEntriesActivity.execute(terminationSnapshot);
+    }
+
+    /** 运营按赛事编号和比赛序号一次性代确认全部未确认参与者赛约，推进比赛并开放草稿赛约。 */
+    @Transactional(rollbackFor = Exception.class)
+    public void confirmBookingByAdmin(TournamentBookingConfirmAdminCmd cmd) {
+        confirmBookingByAdminActivity.execute(cmd.getTournamentId(), cmd.getMatchNo());
+    }
+
+    /**
+     * 运营按赛事编号和比赛序号一次性代确认全部待确认参与者赛果，完成比赛并结算胜负方报名。
+     * 轮次推进与赛事终局由 result-confirm-admin.activity.advance-tournament-progress 另行接入，本方法不编排它。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void confirmResultByAdmin(TournamentResultConfirmAdminCmd cmd) {
+        confirmResultByAdminActivity.execute(cmd.getTournamentId(), cmd.getMatchNo());
     }
 
     /** 运营淘汰当前轮次未进入比赛的指定用户，与匹配入口使用同一实例锁。 */

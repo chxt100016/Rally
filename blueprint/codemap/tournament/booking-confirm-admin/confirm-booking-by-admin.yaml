@@ -1,0 +1,30 @@
+id: tournament.booking-confirm-admin.activity.confirm-booking-by-admin
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/booking-confirm-admin/activity/ConfirmBookingByAdminActivity.java
+    role: 主实现，按自然键锁定比赛、批量代确认参与者、统一保存并按需开放草稿赛约
+    symbols: [ConfirmBookingByAdminActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentMatch.java
+    role: 聚合命令，confirmSchedule 逐个覆盖参与者确认状态并在全员确认时推进 PENDING_PLAY；advanceIfAllConfirmed 兜底处理参与者为空或已全部 CONFIRMED 的异常存量数据
+    symbols: [TournamentMatch.confirmSchedule, TournamentMatch.advanceIfAllConfirmed]
+    covers: [A3, A4]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/model/Meetup.java
+    role: 聚合命令，openTournamentDraft 在草稿未过期时开放为 OPEN
+    symbols: [Meetup.openTournamentDraft]
+    covers: [A5]
+  - path: rally-domain/src/main/java/com/rally/domain/meetup/service/MeetupDomainService.java
+    role: 领域服务，openTournamentDraft 调用聚合命令并整体保存
+    symbols: [MeetupDomainService.openTournamentDraft]
+    covers: [A5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentBookingConfirmAdminCmd.java
+    role: 入参校验，运营代确认请求的 tournamentId/matchNo 非空及正整数约束
+    symbols: [TournamentBookingConfirmAdminCmd]
+    covers: [A1, A2]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 应用服务编排，接收 Cmd 并调用本活动
+    symbols: [TournamentAdminAppService.confirmBookingByAdmin]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-adapter/src/main/java/com/rally/web/tournament/TournamentAdminController.java
+    role: 对外接口 POST /tournament/admin/match/booking/confirm
+    symbols: [TournamentAdminController.confirmBookingByAdmin]
+    covers: [A1]

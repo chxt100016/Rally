@@ -92,6 +92,22 @@ public class TournamentAdminController {
         return Result.ok();
     }
 
+    /** 按赛事编号和比赛序号一次性代确认全部未确认参与者赛约。 */
+    @PostMapping("/match/booking/confirm")
+    public Result<Void> confirmBookingByAdmin(
+            @Valid @RequestBody TournamentBookingConfirmAdminCmd cmd) {
+        tournamentAdminAppService.confirmBookingByAdmin(cmd);
+        return Result.ok();
+    }
+
+    /** 按赛事编号和比赛序号一次性代确认全部待确认参与者赛果。 */
+    @PostMapping("/match/result/confirm")
+    public Result<Void> confirmResultByAdmin(
+            @Valid @RequestBody TournamentResultConfirmAdminCmd cmd) {
+        tournamentAdminAppService.confirmResultByAdmin(cmd);
+        return Result.ok();
+    }
+
     /** 淘汰指定赛事当前轮次中未进入比赛的单个用户。 */
     @PostMapping("/entry/eliminate-unmatched")
     public Result<Void> eliminateUnmatchedEntries(

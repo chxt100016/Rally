@@ -1,0 +1,30 @@
+id: tournament.result-confirm-admin.activity.confirm-result-by-admin
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/result-confirm-admin/activity/ConfirmResultByAdminActivity.java
+    role: 主实现，按自然键锁定比赛、批量代确认参与者、统一保存并按需结算胜负方报名
+    symbols: [ConfirmResultByAdminActivity]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-app/src/main/java/com/rally/tournament/result-confirm-admin/activity/ConfirmResultByAdminResult.java
+    role: 活动出参，交付给 advance-tournament-progress 活动的比赛完成结果
+    symbols: [ConfirmResultByAdminResult]
+    covers: [A4]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentMatch.java
+    role: 聚合命令，confirmResult 逐个覆盖参与者赛果确认状态并在全员确认时推进 COMPLETED；advanceIfAllResultConfirmed 兜底幂等推进存量全确认数据
+    symbols: [TournamentMatch.confirmResult, TournamentMatch.advanceIfAllResultConfirmed]
+    covers: [A3, A4]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentEntry.java
+    role: 聚合命令，advanceAfterWin/advanceAfterLoss 分别结算胜方与负方报名状态和轮次
+    symbols: [TournamentEntry.advanceAfterWin, TournamentEntry.advanceAfterLoss]
+    covers: [A5]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentResultConfirmAdminCmd.java
+    role: 入参校验，运营代确认请求的 tournamentId/matchNo 非空及正整数约束
+    symbols: [TournamentResultConfirmAdminCmd]
+    covers: [A1, A2]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 应用服务编排，接收 Cmd 并调用本活动
+    symbols: [TournamentAdminAppService.confirmResultByAdmin]
+    covers: [A1, A2, A3, A4, A5]
+  - path: rally-adapter/src/main/java/com/rally/web/tournament/TournamentAdminController.java
+    role: 对外接口 POST /tournament/admin/match/result/confirm
+    symbols: [TournamentAdminController.confirmResultByAdmin]
+    covers: [A1]

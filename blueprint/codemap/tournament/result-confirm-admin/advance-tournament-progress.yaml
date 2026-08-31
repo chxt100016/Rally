@@ -1,0 +1,22 @@
+id: tournament.result-confirm-admin.activity.advance-tournament-progress
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/result-confirm-admin/activity/AdvanceTournamentProgressActivity.java
+    role: 主实现，决赛完成时结束赛事并记录冠军，非决赛时按完赛进度评估并推进赛事当前轮次
+    symbols: [AdvanceTournamentProgressActivity]
+    covers: [A1, A2, A3, A4]
+  - path: rally-domain/src/main/java/com/rally/domain/round-progress/TournamentRoundProgressDecisionService.java
+    role: 领域服务，evaluate 按完赛场数与锁位进度给出推进决策
+    symbols: [TournamentRoundProgressDecisionService.evaluate]
+    covers: [A3]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/Tournament.java
+    role: 聚合命令，finish 完成赛事并记录冠军与结束时间
+    symbols: [Tournament.finish]
+    covers: [A2]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/gateway/TournamentRepository.java
+    role: 仓储接口，advanceCurrentRoundIfLater 以只向后条件推进当前轮次
+    symbols: [TournamentRepository.advanceCurrentRoundIfLater]
+    covers: [A4]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 应用服务编排，confirmResultByAdmin 在比赛完成时转交本活动
+    symbols: [TournamentAdminAppService.confirmResultByAdmin]
+    covers: [A1]

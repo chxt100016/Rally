@@ -14,6 +14,8 @@ import com.rally.domain.tournament.model.MatchParticipantData;
 import com.rally.domain.tournament.model.TournamentData;
 import com.rally.domain.tournament.model.TournamentEntryData;
 import com.rally.domain.tournament.model.TournamentMatch;
+import com.rally.domain.system.SystemConfig;
+import com.rally.domain.system.enums.SystemConfigKey;
 import com.rally.domain.utils.Assert;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -50,6 +52,7 @@ public class ConfirmBookingActivity {
         /*
          * A2：保持 main 的确认分支读取顺序和历史兼容。只有已处于 SCHEDULED
          * 且关联记录可读时才检查；严格早于本次冻结时间才过期，恰等继续。
+         * 是否执行该过期校验由系统配置开关控制，默认不校验。
          */
         if (match.getData().getStatus() == TournamentMatchStatusEnum.SCHEDULED) {
             assertLinkedMeetupNotExpired(match.getData().getMeetupId(), confirmTime);
@@ -94,6 +97,10 @@ public class ConfirmBookingActivity {
     private void assertLinkedMeetupNotExpired(
             String meetupId,
             LocalDateTime confirmTime) {
+        // 开关默认关闭，只有显式开启才校验赛约开始时间不能已过去。
+        if (!SystemConfig.getBoolean(SystemConfigKey.TOURNAMENT_BOOKING_START_TIME_EXPIRE_CHECK.getKey())) {
+            return;
+        }
         if (meetupId == null) {
             return;
         }

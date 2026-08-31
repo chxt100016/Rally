@@ -242,6 +242,22 @@ public class TournamentMatch {
         }
     }
 
+    /**
+     * 参与者为空或已全部 CONFIRMED 但比赛仍停留在 SCHEDULED 的异常存量数据，直接推进为待比赛。
+     * 供批量代确认场景在逐个调用 confirmSchedule 之后兜底调用；正常情况下最后一次
+     * confirmSchedule 已完成该推进，此处为幂等空操作。
+     */
+    public void advanceIfAllConfirmed() {
+        if (data.getStatus() != TournamentMatchStatusEnum.SCHEDULED) {
+            return;
+        }
+        boolean allConfirmed = participants.isEmpty()
+                || participants.stream().allMatch(p -> p.getConfirmStatus() == ConfirmStatusEnum.CONFIRMED);
+        if (allConfirmed) {
+            data.setStatus(TournamentMatchStatusEnum.PENDING_PLAY);
+        }
+    }
+
     public void submitResult(String userId, Integer winnerEntryNo) {
         Assert.eq(data.getStatus(), TournamentMatchStatusEnum.PENDING_PLAY, BizErrorCode.TOURNAMENT_INVALID_RESULT_SUBMIT);
         Assert.notNull(winnerEntryNo, BizErrorCode.TOURNAMENT_RESULT_WINNER_REQUIRED);
@@ -298,6 +314,24 @@ public class TournamentMatch {
                 data.setStatus(TournamentMatchStatusEnum.COMPLETED);
                 data.setCompletedTime(now);
             }
+        }
+    }
+
+    /**
+     * 参与者已全部 CONFIRMED 但比赛仍停留在 PENDING_CONFIRM 的存量数据，直接推进为已完成。
+     * 供批量代确认场景在逐个调用 confirmResult 之后兜底调用；正常情况下最后一次
+     * confirmResult 已完成该推进，此处为幂等空操作。
+     */
+    public void advanceIfAllResultConfirmed() {
+        if (data.getStatus() != TournamentMatchStatusEnum.PENDING_CONFIRM) {
+            return;
+        }
+        boolean allConfirmed = !participants.isEmpty()
+                && participants.stream().allMatch(p -> p.getResultConfirmStatus() == ConfirmStatusEnum.CONFIRMED);
+        if (allConfirmed) {
+            Assert.notNull(data.getWinnerEntryNo(), BizErrorCode.TOURNAMENT_RESULT_WINNER_REQUIRED);
+            data.setStatus(TournamentMatchStatusEnum.COMPLETED);
+            data.setCompletedTime(LocalDateTime.now());
         }
     }
 }
