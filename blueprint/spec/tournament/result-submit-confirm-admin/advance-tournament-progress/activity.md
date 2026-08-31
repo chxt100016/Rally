@@ -1,6 +1,6 @@
 ---
-id: tournament.result-confirm-admin.activity.advance-tournament-progress
-depends_on: [tournament.result-confirm-admin.activity.confirm-result-by-admin]
+id: tournament.result-submit-confirm-admin.activity.advance-tournament-progress
+depends_on: [tournament.result-submit-confirm-admin.activity.submit-confirm-result-by-admin]
 reads: []
 ---
 
@@ -12,7 +12,7 @@ reads: []
 
 ```mermaid
 sequenceDiagram
-    participant C as confirm-result-by-admin 活动
+    participant C as submit-confirm-result-by-admin 活动
     participant A as advance-tournament-progress 活动
     participant R as @tournament.round-progress
     participant T as @tournament.tournament
@@ -31,7 +31,7 @@ sequenceDiagram
 
 ## 触发条件
 
-`confirm-result-by-admin` 完成本场比赛结算且交付 `matchCompleted=true` 时执行；`matchCompleted=false` 时不触发本活动。
+`submit-confirm-result-by-admin` 完成本场比赛结算且交付 `matchCompleted=true` 时执行；`matchCompleted=false` 时不触发本活动。
 
 ## 活动契约
 
@@ -52,7 +52,7 @@ sequenceDiagram
 
 | 错误标识 | 触发条件 | 来源 |
 |---|---|---|
-| `OPERATION_FAILED` | 轮次推进目标缺失，或赛事、轮次推进本次变化未能完整保存 | confirm-result 流程 `OPERATION_FAILED` 一行 |
+| `OPERATION_FAILED` | 轮次推进目标缺失，或赛事、轮次推进本次变化未能完整保存 | submit-confirm-by-admin 流程 `OPERATION_FAILED` 一行 |
 
 ## 领域依赖
 

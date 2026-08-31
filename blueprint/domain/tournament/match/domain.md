@@ -56,7 +56,7 @@ tables:
 | `BOOKING` | 已选订场人，等待提交/重订赛约 | `SCHEDULED/REJECTED` 或物理删除 | `C3/C8/C9/C10` |
 | `SCHEDULED` | 赛约已提交，等待全员确认 | `SCHEDULED/BOOKING/PENDING_PLAY/REJECTED` | `C3/C4/C5/C8/C10` |
 | `PENDING_PLAY` | 赛约已确认，等待比赛与结果提交 | `PENDING_CONFIRM/REJECTED` | `C6/C8/C10` |
-| `PENDING_CONFIRM` | 结果已提交，等待全员确认 | `PENDING_CONFIRM/COMPLETED/REJECTED` | `C7/C8/C10` |
+| `PENDING_CONFIRM` | 结果已提交，等待全员确认 | `PENDING_CONFIRM/COMPLETED/REJECTED` | `C6/C7/C8/C10` |
 | `COMPLETED` | 赛果已确认并完成 | `COMPLETED` | 无 |
 | `REJECTED` | 比赛已终止 | `REJECTED` | `C10` 幂等 |
 
@@ -82,7 +82,7 @@ tables:
 | C3 | 提交或修改赛约 | `BOOKING/SCHEDULED` | 订场人、meetupId、提交时间、version | `BOOKING` 时转 `SCHEDULED`，订场人 `CONFIRMED`、其余 `PENDING` 并走版本保存；`SCHEDULED` 时只由活动更新外部赛约，本聚合不变 | 操作者/赛约不符；阶段非法；仅状态推进分支可能版本冲突 |
 | C4 | 确认赛约 | `SCHEDULED` | 参与者 userId、确认时间、version、可选关联赛约时间 | 本人 `CONFIRMED`；全员确认时 `PENDING_PLAY` | 可读取赛约的开始时间已严格早于当前（`MEETUP_EXPIRED`）；非参与者；阶段非法；版本冲突 |
 | C5 | 请求重订 | `SCHEDULED` | 参与者、重订理由与时间、version | `BOOKING`，记录最新重订并重置全员赛约确认为 PENDING | 非参与者；理由非法；版本冲突 |
-| C6 | 提交赛果 | `PENDING_PLAY` | 参与者提交人、合法 winnerEntryNo、时间、version | `PENDING_CONFIRM`；提交人赛果确认 CONFIRMED，其余重置 PENDING | 非参与者；胜方不在本场；版本冲突 |
+| C6 | 提交赛果 | `PENDING_PLAY/PENDING_CONFIRM` | 参与者提交人、合法 winnerEntryNo、时间、version | `PENDING_CONFIRM`；胜方参赛编号写为本次 winnerEntryNo（原值不同则覆盖）；`submitted_by`/`submitted_time` 更新为本次提交人与时间；提交人赛果确认 CONFIRMED，其余（含此前已 CONFIRMED 的参与者）重置 PENDING | 非参与者；胜方不在本场；阶段非法；版本冲突 |
 | C7 | 确认或自动完成赛果 | `PENDING_CONFIRM` | 确认参与者或超时事实、确认时间、version | 按需更新确认；全员已确认或超时完成时 `COMPLETED` | 缺胜方；非参与者；版本冲突 |
 | C8 | 拒绝比赛或赛果 | 任意非终态 | 可选拒绝阶段、理由、拒绝人、时间、version | `REJECTED`，按场景更新发起人确认 | 场景前置条件/超时/限额不满足；版本冲突 |
 | C9 | 取消未订场比赛 | `MATCHED/BOOKING` | 运营取消意图、version | 条件物理删除根及全部参与者 | 状态已变化；删除条件未命中；版本冲突 |
@@ -97,6 +97,7 @@ tables:
 - 请求重订保留订场人、原 meetupId 和原提交时间，只覆盖最近一次重订记录并重置赛约确认。
 - 赛约重复确认可刷新本人时间；全员确认后即进入表注释遗漏但流程必需的 PENDING_PLAY。关联记录可读时，开始时间恰等于当前时刻仍不算过期。
 - 提交赛果会清除其他参与者残留的赛果确认；超时自动完成只把仍 PENDING 的确认补为 CONFIRMED。
+- `PENDING_CONFIRM` 下重复提交赛果（覆盖场景）：无论 winnerEntryNo 与原值是否相同，均按 C6 重新写入胜方、提交人与提交时间，并把全部参与者（含已 CONFIRMED 的）重置为 PENDING，与首次从 PENDING_PLAY 提交的效果一致；不保留原提交人与原确认时间。
 - 赛果重复确认在比赛仍为 PENDING_CONFIRM 时刷新本人时间；最后一人确认发现胜方缺失时，本次参与者确认与根状态因事务异常一起回滚。
 - 用户拒绝、超时或退赛可把任意在途比赛终止为 REJECTED；退赛场景允许拒绝审计字段为空。
 - C9 未订场取消严格限于 MATCHED/BOOKING 且仍物理删除；C10 后台指定比赛终止独立允许除 COMPLETED 外的全部状态，不改变 C9 语义。

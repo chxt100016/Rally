@@ -158,7 +158,8 @@ public enum BizErrorCode {
     TOURNAMENT_ENTRY_VERSION_CONFLICT(46034, "报名状态已变更，请刷新后重试"),
     TOURNAMENT_STATUS_INVALID(46035, "当前赛事不能淘汰未入赛参赛者"),
     TOURNAMENT_ENTRY_STATUS_INVALID(46036, "当前报名状态或轮次不能淘汰"),
-    TOURNAMENT_ENTRY_IN_ACTIVE_MATCH(46037, "参赛者仍在比赛中，不能淘汰");
+    TOURNAMENT_ENTRY_IN_ACTIVE_MATCH(46037, "参赛者仍在比赛中，不能淘汰"),
+    TOURNAMENT_RESULT_WINNER_INVALID(46038, "获胜方参赛编号不合法");
 
     private final int code;
     private final String message;

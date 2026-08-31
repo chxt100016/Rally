@@ -211,14 +211,21 @@ public final class TournamentMatch {
                 updated, version, persistence);
     }
 
-    /** C6：参与者提交合法胜方，提交人先行确认赛果，其余人重置为待确认。 */
+    /**
+     * C6：参与者提交合法胜方，提交人先行确认赛果，其余人重置为待确认。
+     *
+     * <p>PENDING_PLAY 首次提交或 PENDING_CONFIRM 下覆盖重提均可执行；无论原状态是哪个，
+     * 均统一覆盖 winnerEntryNo、submittedBy/submittedTime，并把全部参与者（含此前已
+     * CONFIRMED 的）重置为 PENDING，仅提交人本次 CONFIRMED。</p>
+     */
     public void submitResult(
             String userId,
             int winnerEntryNo,
             LocalDateTime submittedTime,
             int version,
             TournamentMatchPersistence persistence) {
-        require(state.status() == TournamentMatchStatus.PENDING_PLAY,
+        require(state.status() == TournamentMatchStatus.PENDING_PLAY
+                        || state.status() == TournamentMatchStatus.PENDING_CONFIRM,
                 TOURNAMENT_RESULT_WINNER_REQUIRED,
                 "当前比赛不能提交赛果");
         String normalizedUserId = requiredId(userId, "赛果提交人用户 id");

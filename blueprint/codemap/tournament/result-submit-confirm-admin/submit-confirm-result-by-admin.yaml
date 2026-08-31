@@ -1,0 +1,38 @@
+id: tournament.result-submit-confirm-admin.activity.submit-confirm-result-by-admin
+files:
+  - path: rally-app/src/main/java/com/rally/tournament/result-submit-confirm-admin/activity/SubmitConfirmResultByAdminActivity.java
+    role: 主实现，确认赛事存在、按自然键锁定比赛与参与者、代提交并代确认赛果、全员确认后结算胜负方报名
+    symbols: [SubmitConfirmResultByAdminActivity]
+    covers: [A1, A2, A3, A4, A5, A6]
+  - path: rally-app/src/main/java/com/rally/tournament/result-submit-confirm-admin/activity/SubmitConfirmResultByAdminResult.java
+    role: 活动出参，交付给 advance-tournament-progress 活动的比赛完成结果
+    symbols: [SubmitConfirmResultByAdminResult]
+    covers: [A5]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatch.java
+    role: 聚合命令，submitResult 写入运营指定胜方并重置全员确认，confirmResult 逐个覆盖参与者赛果确认状态并在全员确认时推进 COMPLETED
+    symbols: [TournamentMatch.submitResult, TournamentMatch.confirmResult]
+    covers: [A3, A4, A5]
+  - path: rally-domain/src/main/java/com/rally/domain/match/TournamentMatchPersistence.java
+    role: 仓储接口，findLatestByTournamentIdAndMatchNoForUpdate 按自然键锁定读取最新比赛根及全部参与者
+    symbols: [TournamentMatchPersistence.findLatestByTournamentIdAndMatchNoForUpdate]
+    covers: [A2]
+  - path: rally-domain/src/main/java/com/rally/domain/entry/TournamentEntry.java
+    role: 聚合命令，settleCompletedMatch 按胜负和阶段结算参赛报名状态与轮次
+    symbols: [TournamentEntry.settleCompletedMatch]
+    covers: [A6]
+  - path: rally-domain/src/main/java/com/rally/domain/tournament/model/TournamentResultSubmitConfirmAdminCmd.java
+    role: 入参校验，运营代提交并代确认请求的 tournamentId/matchNo/winnerEntryNo 非空及正整数约束
+    symbols: [TournamentResultSubmitConfirmAdminCmd]
+    covers: [A1, A2]
+  - path: rally-domain/src/main/java/com/rally/domain/auth/enums/BizErrorCode.java
+    role: 新增 TOURNAMENT_RESULT_WINNER_INVALID 异常码，供 winnerEntryNo 不合法时对外返回
+    symbols: [BizErrorCode.TOURNAMENT_RESULT_WINNER_INVALID]
+    covers: [A2]
+  - path: rally-app/src/main/java/com/rally/tournament/TournamentAdminAppService.java
+    role: 应用服务编排，submitConfirmResultByAdmin 接收 Cmd 并调用本活动，返回活动结果供后续轮次推进使用
+    symbols: [TournamentAdminAppService.submitConfirmResultByAdmin]
+    covers: [A1, A2, A3, A4, A5, A6]
+  - path: rally-adapter/src/main/java/com/rally/web/tournament/TournamentAdminController.java
+    role: 对外接口 POST /tournament/admin/match/result/confirm
+    symbols: [TournamentAdminController.submitConfirmResultByAdmin]
+    covers: [A1]

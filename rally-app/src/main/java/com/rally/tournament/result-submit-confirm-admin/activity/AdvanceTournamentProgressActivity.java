@@ -1,9 +1,10 @@
-package com.rally.tournament.resultconfirmadmin.activity;
+package com.rally.tournament.resultsubmitconfirmadmin.activity;
 
 import com.rally.domain.auth.enums.BizErrorCode;
 import com.rally.domain.auth.exception.BusinessException;
 import com.rally.domain.tournament.enums.TournamentRoundEnum;
 import com.rally.domain.tournament.gateway.TournamentRepository;
+import com.rally.domain.tournament.match.TournamentMatchRound;
 import com.rally.domain.tournament.model.Tournament;
 import com.rally.domain.tournament.model.TournamentData;
 import com.rally.domain.tournament.roundprogress.RoundProgressDecision;
@@ -29,9 +30,9 @@ public class AdvanceTournamentProgressActivity {
     private final TournamentRoundProgressDecisionService roundProgressDecisionService;
 
     @Transactional(rollbackFor = Exception.class)
-    public void execute(String tournamentId, TournamentRoundEnum round, Integer winnerEntryNo, LocalDateTime completedTime) {
+    public void execute(String tournamentId, TournamentMatchRound round, Integer winnerEntryNo, LocalDateTime completedTime) {
         // A1-A2：决赛时直接完成赛事并记录冠军，不再执行轮次评估。
-        if (round == TournamentRoundEnum.FINAL) {
+        if (round == TournamentMatchRound.FINAL) {
             TournamentData tournamentData = tournamentRepository.findByBizId(tournamentId);
             Assert.notNull(tournamentData, BizErrorCode.TOURNAMENT_NOT_FOUND);
             Tournament tournament = new Tournament(tournamentData);
@@ -41,14 +42,14 @@ public class AdvanceTournamentProgressActivity {
         }
 
         // A3-A4：非决赛时按完赛进度评估目标轮次，ADVANCE 时单向推进。
-        RoundProgressResult result = roundProgressDecisionService.evaluate(tournamentId);
-        if (!result.isAccepted()) {
-            throw roundProgressRejection(result.getRejection());
+        RoundProgressResult progressResult = roundProgressDecisionService.evaluate(tournamentId);
+        if (!progressResult.isAccepted()) {
+            throw roundProgressRejection(progressResult.getRejection());
         }
-        if (result.getDecision() != RoundProgressDecision.ADVANCE) {
+        if (progressResult.getDecision() != RoundProgressDecision.ADVANCE) {
             return;
         }
-        TournamentRoundEnum targetRound = result.getTargetRound();
+        TournamentRoundEnum targetRound = progressResult.getTargetRound();
         if (targetRound == null) {
             throw new BusinessException(BizErrorCode.OPERATION_FAILED, "轮次推进目标不能为空");
         }

@@ -100,11 +100,11 @@ public class TournamentAdminController {
         return Result.ok();
     }
 
-    /** 按赛事编号和比赛序号一次性代确认全部待确认参与者赛果。 */
+    /** 按赛事编号和比赛序号指定获胜方，一次性代提交并代确认全部参与者赛果，完成比赛并结算胜负方报名。 */
     @PostMapping("/match/result/confirm")
-    public Result<Void> confirmResultByAdmin(
-            @Valid @RequestBody TournamentResultConfirmAdminCmd cmd) {
-        tournamentAdminAppService.confirmResultByAdmin(cmd);
+    public Result<Void> submitConfirmResultByAdmin(
+            @Valid @RequestBody TournamentResultSubmitConfirmAdminCmd cmd) {
+        tournamentAdminAppService.submitConfirmResultByAdmin(cmd);
         return Result.ok();
     }
 
