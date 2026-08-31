@@ -86,10 +86,18 @@ public class TournamentMatchPersistenceAdapter implements TournamentMatchPersist
             TournamentMatchState state,
             List<TournamentMatchParticipant> participants,
             int expectedVersion) {
+        // toMatchPo(state) 携带的是已自增后的新 version；实体自带非空 version 字段会触发
+        // MybatisPlusConfig 里全局注册的 OptimisticLockerInnerInterceptor 自动改写 SET/WHERE，
+        // 与这里手动维护的 expectedVersion 条件相互矛盾导致更新恒为 0 行。置空后改用显式
+        // set() 写入新版本号以绕开拦截器，写法与本类 terminateByAdminWithVersion 一致。
+        TournamentMatchPO candidate = toMatchPo(state);
+        Integer newVersion = candidate.getVersion();
+        candidate.setVersion(null);
         boolean updated = matchService.lambdaUpdate()
                 .eq(TournamentMatchPO::getBizId, state.bizId())
                 .eq(TournamentMatchPO::getVersion, expectedVersion)
-                .update(toMatchPo(state));
+                .set(TournamentMatchPO::getVersion, newVersion)
+                .update(candidate);
         if (!updated) {
             return false;
         }

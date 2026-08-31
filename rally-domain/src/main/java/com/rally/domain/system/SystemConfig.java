@@ -139,6 +139,21 @@ public class SystemConfig {
         return BigDecimal.ZERO;
     }
 
+    /**
+     * 获取布尔型配置值，若 DB 中不存在则使用枚举默认值
+     *
+     * @param key 配置 key
+     * @return 配置值、枚举默认值或 false
+     */
+    public static boolean getBoolean(String key) {
+        String val = getCachedValue(key);
+        if (val != null) {
+            return Boolean.parseBoolean(val);
+        }
+        SystemConfigKey configKey = SystemConfigKey.getByKey(key);
+        return configKey != null && Boolean.parseBoolean(configKey.getDefaultValue());
+    }
+
     private static String getCachedValue(String key) {
         String value = systemConfigMap.get(key);
         return value != null ? value : systemConfigMap.get("global|" + key);
